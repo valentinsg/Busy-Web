@@ -1,0 +1,215 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "products": "Productos",
+    "about": "Nosotros",
+    "blog": "Blog",
+    "contact": "Contacto"
+  },
+  "search": {
+    "placeholder": "Buscar productos..."
+  },
+  "brand": {
+    "aria_home": "Inicio Busy"
+  },
+  "footer": {
+    "brand": {
+      "description": "Ropa urbana premium para el estilo de vida moderno. Artesanía de calidad y diseño contemporáneo."
+    },
+    "newsletter": {
+      "title": "Mantente al día",
+      "placeholder": "Ingresa tu email",
+      "subscribe": "Suscribirse"
+    },
+    "sections": {
+      "shop": {
+        "title": "Tienda",
+        "links": {
+          "all_products": "Todos los productos",
+          "hoodies": "Buzos",
+          "tshirts": "Remeras",
+          "accessories": "Accesorios"
+        }
+      },
+      "brand": {
+        "title": "Marca",
+        "links": {
+          "about_us": "Sobre nosotros",
+          "our_story": "Nuestra historia",
+          "sustainability": "Sustentabilidad",
+          "careers": "Empleos"
+        }
+      },
+      "support": {
+        "title": "Soporte",
+        "links": {
+          "faq": "Preguntas frecuentes",
+          "contact": "Contacto",
+          "size_guide": "Guía de talles",
+          "returns": "Devoluciones"
+        }
+      },
+      "social": {
+        "title": "Redes",
+        "links": {
+          "instagram": "Instagram",
+          "twitter": "Twitter",
+          "tiktok": "TikTok",
+          "youtube": "YouTube"
+        }
+      }
+    },
+    "bottom": {
+      "rights": "Todos los derechos reservados.",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos del Servicio",
+      "cookies": "Política de Cookies"
+    }
+  },
+  "home": {
+    "latest.title": "Novedades",
+    "latest.subtitle": "Descubrí nuestros últimos lanzamientos, con atención al detalle y pensados para el confort diario.",
+    "latest.view_all": "Ver todos los productos",
+    "categories.title": "Comprar por categoría",
+    "categories.subtitle": "Encontrá exactamente lo que buscás",
+    "categories.cta": "Comprar ahora",
+    "about.title": "Sobre Busy",
+    "about.p1": "Nacimos con la idea de que el gran estilo no debe comprometer la comodidad. Busy crea streetwear premium para el individuo moderno.",
+    "about.p2": "Desde nuestros buzos hasta remeras esenciales, priorizamos la calidad y creamos piezas atemporales para tu guardarropa.",
+    "about.cta": "Nuestra historia",
+    "social.title": "Confiado por miles",
+    "social.subtitle": "Sumate a nuestra comunidad de amantes del estilo",
+    "social.items": {
+      "rating.title": "Puntuación 4.8/5",
+      "rating.desc": "Basado en más de 1.000 reseñas",
+      "customers.title": "+50K clientes",
+      "customers.desc": "Comunidad global",
+      "quality.title": "Calidad premium",
+      "quality.desc": "Satisfacción garantizada"
+    },
+    "cta.title": "¿Listo para elevar tu estilo?",
+    "cta.subtitle": "Descubrí indumentaria que combina confort, calidad y diseño contemporáneo. Miles confían en Busy para su estilo diario.",
+    "cta.primary": "Comenzar a comprar",
+    "cta.secondary": "Contactanos"
+  },
+  "about": {
+    "hero.title": "Sobre <span class=\"text-accent-brand\">Busy</span>",
+    "hero.subtitle": "Somos más que una marca de ropa: somos una comunidad que cree que el gran estilo debe ser accesible, cómodo y auténtico.",
+    "story.title": "Nuestra historia",
+    "story.p1": "Busy nació de una observación simple: la persona moderna está siempre en movimiento, equilibrando múltiples responsabilidades sin perder su estilo. Vimos una oportunidad para crear prendas que acompañen ese ritmo.",
+    "story.p2": "Nuestros fundadores, apasionados por la moda y la funcionalidad, crearon piezas que pasan del trabajo al fin de semana, de lo casual a lo elevado, sin esfuerzo. Cada decisión de diseño piensa en la persona ocupada.",
+    "story.p3": "Hoy, Busy es más que ropa: es una mentalidad. Se trata de ser productivo, con propósito y con estilo, sin importar cómo sea tu día.",
+    "story.cta": "Ver colección",
+    "values.title": "Nuestros valores",
+    "values.subtitle": "Estos principios nos guían en todo: desde el diseño hasta la atención al cliente.",
+    "timeline.title": "Nuestro camino",
+    "timeline.subtitle": "De una idea pequeña a una comunidad en crecimiento.",
+    "cta.title": "Sumate a la comunidad Busy",
+    "cta.subtitle": "Sé parte de una comunidad que valora la calidad, el estilo y la autenticidad. Seguinos y enterate de nuestras colecciones e historias.",
+    "cta.primary": "Comprar ahora",
+    "cta.secondary": "Contactanos",
+    "image.alt": "Historia de la marca Busy",
+    "values.items": {
+      "quality": { "title": "Calidad primero", "desc": "Nunca comprometemos la calidad. Cada prenda está hecha con materiales premium y atención al detalle." },
+      "community": { "title": "Impulsados por la comunidad", "desc": "Nuestros diseños se inspiran y crean para nuestra comunidad de amantes del estilo." },
+      "sustainable": { "title": "Sustentable", "desc": "Estamos comprometidos con prácticas sustentables y manufactura ética." },
+      "passion": { "title": "Pasión", "desc": "La moda es nuestra pasión y ponemos el corazón en cada diseño y atención al cliente." }
+    },
+    "timeline.items": {
+      "2020": { "title": "El comienzo", "desc": "Nacimos con la visión de crear streetwear premium sin comprometer comodidad ni estilo." },
+      "2021": { "title": "Primera colección", "desc": "Lanzamos nuestra línea de buzos insignia, reconocida por su calidad y diseño." },
+      "2022": { "title": "Crecimiento de la comunidad", "desc": "Alcanzamos 10.000+ clientes satisfechos y ampliamos nuestro catálogo." },
+      "2023": { "title": "Enfoque en sustentabilidad", "desc": "Implementamos prácticas eco-amigables y abastecimiento sustentable." },
+      "2024": { "title": "Expansión global", "desc": "Expandimos envíos a nivel mundial y abrimos nuestra primera tienda insignia." }
+    }
+  },
+  "products": {
+    "header.title": "Todos los productos",
+    "header.subtitle": "Descubrí nuestra colección completa de streetwear premium",
+    "search.placeholder": "Buscar productos...",
+    "sort.placeholder": "Ordenar por",
+    "sort.newest": "Más nuevos",
+    "sort.price_asc": "Precio: menor a mayor",
+    "sort.price_desc": "Precio: mayor a menor",
+    "sort.rating": "Mejor calificados",
+    "filters.title": "Filtros",
+    "filters.clear": "Limpiar",
+    "filters.category": "Categoría",
+    "filters.color": "Color",
+    "filters.size": "Talle",
+    "filters.price_range": "Rango de precio",
+    "filters.min": "Mín",
+    "filters.max": "Máx",
+    "filters.clear_all": "Limpiar filtros",
+    "empty.title": "No se encontraron productos",
+    "empty.subtitle": "Probá ajustando tu búsqueda o filtros",
+    "empty.clear": "Limpiar filtros",
+    "results.count": "{count} producto(s) encontrado(s)"
+  },
+  "contact": {
+    "header.title": "Contactanos",
+    "header.subtitle": "¿Tenés una consulta, sugerencia o simplemente querés saludar? Nos encantaría leerte.",
+    "info.title": "Información de contacto",
+    "info.address.title": "Dirección",
+    "info.address.line1": "Calle Moda 123",
+    "info.address.line2": "Buenos Aires, AR",
+    "info.phone.title": "Teléfono",
+    "info.phone.value": "+54 11 5555-1234",
+    "info.email.title": "Email",
+    "info.email.value": "support@busy.com",
+    "info.hours.title": "Horarios de atención",
+    "info.hours.weekdays": "Lun - Vie: 9:00 - 18:00",
+    "info.hours.weekend": "Sáb - Dom: 10:00 - 16:00",
+    "links.title": "Enlaces rápidos",
+    "links.faq": "Preguntas frecuentes",
+    "links.size_guide": "Guía de talles",
+    "links.returns": "Devoluciones y cambios",
+    "links.about": "Sobre nosotros",
+    "form.title": "Envianos un mensaje",
+    "form.name": "Nombre",
+    "form.email": "Email",
+    "form.subject": "Asunto",
+    "form.select_placeholder": "Seleccioná un asunto",
+    "form.subject_options": {
+      "general": "Consulta general",
+      "order": "Soporte de pedido",
+      "returns": "Devoluciones y cambios",
+      "product": "Consulta sobre producto",
+      "wholesale": "Mayorista",
+      "press": "Prensa y medios"
+    },
+    "form.message": "Mensaje",
+    "form.message_placeholder": "Contanos cómo podemos ayudarte...",
+    "form.submit": "Enviar mensaje",
+    "form.sending": "Enviando...",
+    "form.privacy": "Al enviar este formulario aceptás nuestra política de privacidad. Nunca compartiremos tu información con terceros.",
+    "toast.success.title": "¡Mensaje enviado!",
+    "toast.success.desc": "Te responderemos dentro de las próximas 24 horas.",
+    "toast.error.title": "Error",
+    "toast.error.desc": "Algo salió mal. Por favor, intentá de nuevo.",
+    "mail.default_subject": "Contacto desde el formulario",
+    "mail.name": "Nombre",
+    "mail.email": "Email",
+    "mail.message": "Mensaje"
+    
+  },
+  "cart": {
+    "open": "Abrir carrito",
+    "title": "Carrito",
+    "clear_all": "Vaciar",
+    "empty.title": "Tu carrito está vacío",
+    "empty.subtitle": "Agregá productos para comenzar",
+    "empty.cta": "Ver productos",
+    "subtotal": "Subtotal",
+    "shipping": "Envío",
+    "shipping_free": "Gratis",
+    "tax": "Impuestos (estimado)",
+    "total": "Total",
+    "checkout": "Ir al checkout",
+    "view_cart": "Ver carrito",
+    "free_shipping_notice": "Agregá {amount} más para envío gratis",
+    "qty.decrease": "Disminuir cantidad",
+    "qty.increase": "Aumentar cantidad",
+    "remove_item": "Quitar artículo"
+  }
+}

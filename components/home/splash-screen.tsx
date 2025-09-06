@@ -59,7 +59,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     >
       <div className="relative w-48 h-48 mb-8">
         <Image
-          src="/logo-busy-black.png"
+          src="/logo-busy-white.png"
           alt="Busy"
           fill
           className="object-contain"

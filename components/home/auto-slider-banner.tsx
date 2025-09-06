@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
+import Image from "next/image"
+import { useEffect, useState } from "react"
 
 const images = [
   "https://64.media.tumblr.com/db8472cfbb89a155148003b053d5f3de/4d6d987e0cee7307-8e/s400x225/158142e8e876044a6191733a02f6ee5ac1643b58.gif",
@@ -28,7 +28,7 @@ export function AutoSliderBanner() {
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div id="hero-banner" className="relative w-full h-screen overflow-hidden">
       {images.map((src, index) => (
         <div
           key={src}
@@ -44,8 +44,13 @@ export function AutoSliderBanner() {
           <Image src="/busy-streetwear.png" alt="Busy Streetwear" width={325} height={325} />
         </motion.div>
         <a href="/contact" className="text-xl text-gray-300 text-center mb-8 font-bold">38°00′S 57°33′O</a>
-        <Button onClick={handleShopClick} size="lg" variant="outline">
-          SHOP  
+        <Button
+          onClick={handleShopClick}
+          size="lg"
+          variant="outline"
+          className="btn-street transition-transform ease-in-out w-36 hover:border-2 hover:border-accent-brand hover:text-accent-brand hover:bg-accent-brand-foreground hover:duration-200 hover:-translate-y-0.5 hover:box-shadow-2 shadow-sm hover:shadow-lg"
+        >
+          SHOP
         </Button>
       </div>
     </div>

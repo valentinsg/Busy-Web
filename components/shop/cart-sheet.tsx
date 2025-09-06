@@ -10,13 +10,15 @@ import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useCart } from "@/hooks/use-cart"
 import { formatPrice, capitalize } from "@/lib/format"
+import { useI18n } from "@/components/i18n-provider"
 
 interface CartSheetProps {
   children: React.ReactNode
 }
 
 export function CartSheet({ children }: CartSheetProps) {
-  const { items, isOpen, closeCart, removeItem, updateQuantity, getTotalItems, getTotalPrice, clearCart } = useCart()
+  const { items, isOpen, openCart, closeCart, removeItem, updateQuantity, getTotalItems, getTotalPrice, clearCart } = useCart()
+  const { t } = useI18n()
 
   const totalItems = getTotalItems()
   const totalPrice = getTotalPrice()
@@ -25,20 +27,23 @@ export function CartSheet({ children }: CartSheetProps) {
   const finalTotal = totalPrice + estimatedShipping + estimatedTax
 
   return (
-    <Sheet open={isOpen} onOpenChange={closeCart}>
+    <Sheet open={isOpen} onOpenChange={(open) => (open ? openCart() : closeCart())}>
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg">
         <SheetHeader>
           <SheetTitle className="flex items-center justify-between">
-            <span>Shopping Cart ({totalItems})</span>
+            <span>{t("cart.title")} ({totalItems})</span>
             {items.length > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearCart}
                 className="text-muted-foreground hover:text-destructive"
+                aria-label={t("cart.clear_all")}
+                title={t("cart.clear_all")}
+                data-label={t("cart.clear_all")}
               >
-                Clear All
+                {t("cart.clear_all")}
               </Button>
             )}
           </SheetTitle>
@@ -48,10 +53,10 @@ export function CartSheet({ children }: CartSheetProps) {
           <div className="flex flex-col items-center justify-center h-full space-y-4">
             <ShoppingBag className="h-16 w-16 text-muted-foreground" />
             <div className="text-center">
-              <h3 className="font-medium mb-2">Your cart is empty</h3>
-              <p className="text-sm text-muted-foreground mb-4">Add some products to get started</p>
-              <Button asChild onClick={closeCart}>
-                <Link href="/products">Continue Shopping</Link>
+              <h3 className="font-medium mb-2">{t("cart.empty.title")}</h3>
+              <p className="text-sm text-muted-foreground mb-4">{t("cart.empty.subtitle")}</p>
+              <Button asChild onClick={closeCart} aria-label={t("cart.empty.cta")} title={t("cart.empty.cta")} data-label={t("cart.empty.cta")}>
+                <Link href="/products">{t("cart.empty.cta")}</Link>
               </Button>
             </div>
           </div>
@@ -90,6 +95,9 @@ export function CartSheet({ children }: CartSheetProps) {
                             onClick={() =>
                               updateQuantity(item.product.id, item.quantity - 1, item.selectedSize, item.selectedColor)
                             }
+                            aria-label={t("cart.qty.decrease")}
+                            title={t("cart.qty.decrease")}
+                            data-label={t("cart.qty.decrease")}
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
@@ -102,6 +110,9 @@ export function CartSheet({ children }: CartSheetProps) {
                               updateQuantity(item.product.id, item.quantity + 1, item.selectedSize, item.selectedColor)
                             }
                             disabled={item.quantity >= item.product.stock}
+                            aria-label={t("cart.qty.increase")}
+                            title={t("cart.qty.increase")}
+                            data-label={t("cart.qty.increase")}
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
@@ -114,6 +125,9 @@ export function CartSheet({ children }: CartSheetProps) {
                       size="icon"
                       className="h-6 w-6 text-muted-foreground hover:text-destructive"
                       onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor)}
+                      aria-label={t("cart.remove_item")}
+                      title={t("cart.remove_item")}
+                      data-label={t("cart.remove_item")}
                     >
                       <X className="h-3 w-3" />
                     </Button>
@@ -126,20 +140,20 @@ export function CartSheet({ children }: CartSheetProps) {
             <div className="space-y-4 pt-4 border-t">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span>Subtotal</span>
+                  <span>{t("cart.subtotal")}</span>
                   <span>{formatPrice(totalPrice)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>{estimatedShipping === 0 ? "Free" : formatPrice(estimatedShipping)}</span>
+                  <span>{t("cart.shipping")}</span>
+                  <span>{estimatedShipping === 0 ? t("cart.shipping_free") : formatPrice(estimatedShipping)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Tax (estimated)</span>
+                  <span>{t("cart.tax")}</span>
                   <span>{formatPrice(estimatedTax)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-medium">
-                  <span>Total</span>
+                  <span>{t("cart.total")}</span>
                   <span>{formatPrice(finalTotal)}</span>
                 </div>
               </div>
@@ -147,13 +161,13 @@ export function CartSheet({ children }: CartSheetProps) {
               {/* Checkout Buttons */}
               <div className="space-y-2">
                 <Button asChild className="w-full" size="lg">
-                  <Link href="/checkout" onClick={closeCart}>
-                    Proceed to Checkout
+                  <Link href="/checkout" onClick={closeCart} aria-label={t("cart.checkout")} title={t("cart.checkout")} data-label={t("cart.checkout")}>
+                    {t("cart.checkout")}
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full bg-transparent">
-                  <Link href="/cart" onClick={closeCart}>
-                    View Cart
+                  <Link href="/cart" onClick={closeCart} aria-label={t("cart.view_cart")} title={t("cart.view_cart")} data-label={t("cart.view_cart")}>
+                    {t("cart.view_cart")}
                   </Link>
                 </Button>
               </div>
@@ -161,7 +175,7 @@ export function CartSheet({ children }: CartSheetProps) {
               {/* Free Shipping Notice */}
               {totalPrice < 100 && (
                 <div className="text-xs text-center text-muted-foreground">
-                  Add {formatPrice(100 - totalPrice)} more for free shipping
+                  {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100 - totalPrice))}
                 </div>
               )}
             </div>

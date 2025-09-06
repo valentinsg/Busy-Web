@@ -1,75 +1,36 @@
+"use client"
 import Image from "next/image"
 import { Award, Users, Leaf, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
+import { useI18n } from "@/components/i18n-provider"
 
 const values = [
-  {
-    icon: Award,
-    title: "Quality First",
-    description:
-      "We never compromise on quality. Every piece is crafted with premium materials and attention to detail.",
-  },
-  {
-    icon: Users,
-    title: "Community Driven",
-    description: "Our designs are inspired by and created for our community of style enthusiasts worldwide.",
-  },
-  {
-    icon: Leaf,
-    title: "Sustainable",
-    description: "We're committed to sustainable practices and ethical manufacturing processes.",
-  },
-  {
-    icon: Heart,
-    title: "Passion",
-    description: "Fashion is our passion, and we pour our heart into every design and customer interaction.",
-  },
+  { icon: Award, key: "quality" },
+  { icon: Users, key: "community" },
+  { icon: Leaf, key: "sustainable" },
+  { icon: Heart, key: "passion" },
 ]
 
 const timeline = [
-  {
-    year: "2020",
-    title: "The Beginning",
-    description: "Founded with a vision to create premium streetwear that doesn't compromise on comfort or style.",
-  },
-  {
-    year: "2021",
-    title: "First Collection",
-    description: "Launched our signature hoodie line, quickly gaining recognition for quality and design.",
-  },
-  {
-    year: "2022",
-    title: "Community Growth",
-    description: "Reached 10,000+ satisfied customers and expanded our product range.",
-  },
-  {
-    year: "2023",
-    title: "Sustainability Focus",
-    description: "Implemented eco-friendly practices and sustainable material sourcing.",
-  },
-  {
-    year: "2024",
-    title: "Global Expansion",
-    description: "Expanded shipping worldwide and opened our first flagship store.",
-  },
+  { year: "2020" },
+  { year: "2021" },
+  { year: "2022" },
+  { year: "2023" },
+  { year: "2024" },
 ]
 
 export default function AboutPage() {
+  const { t } = useI18n()
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col pt-10">
       {/* Hero Section */}
       <section className="py-16 md:py-24">
         <div className="container px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="font-heading text-4xl md:text-6xl font-bold mb-6">
-              About <span className="text-accent-brand">Busy</span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-              We're more than just a clothing brand. We're a community of individuals who believe that great style
-              should be accessible, comfortable, and authentic to who you are.
-            </p>
+            <h1 className="font-heading text-4xl md:text-6xl font-bold mb-6" dangerouslySetInnerHTML={{ __html: t("about.hero.title") }} />
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">{t("about.hero.subtitle")}</p>
           </div>
         </div>
       </section>
@@ -80,30 +41,19 @@ export default function AboutPage() {
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">Our Story</h2>
+                <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">{t("about.story.title")}</h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
-                  <p>
-                    Busy was born from a simple observation: the modern individual is always on the move, juggling
-                    multiple responsibilities while trying to maintain their personal style. We saw a gap in the market
-                    for clothing that could keep up with this lifestyle.
-                  </p>
-                  <p>
-                    Our founders, passionate about both fashion and functionality, set out to create pieces that would
-                    seamlessly transition from work to weekend, from casual to elevated. Every design decision is made
-                    with the busy individual in mind.
-                  </p>
-                  <p>
-                    Today, Busy represents more than just clothing—it's a mindset. It's about being productive,
-                    purposeful, and stylish, no matter what your day brings.
-                  </p>
+                  <p>{t("about.story.p1")}</p>
+                  <p>{t("about.story.p2")}</p>
+                  <p>{t("about.story.p3")}</p>
                 </div>
                 <Button asChild className="mt-6" size="lg">
-                  <Link href="/products">Shop Our Collection</Link>
+                  <Link href="/products">{t("about.story.cta")}</Link>
                 </Button>
               </div>
               <div className="relative">
                 <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-                  <Image src="/busy-brand-story.jpg" alt="Busy brand story" fill className="object-cover" />
+                  <Image src="/busy-brand-story.jpg" alt={t("about.image.alt")} fill className="object-cover" />
                 </div>
               </div>
             </div>
@@ -116,9 +66,9 @@ export default function AboutPage() {
         <div className="container px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">Our Values</h2>
+              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">{t("about.values.title")}</h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                These core principles guide everything we do, from design to customer service.
+                {t("about.values.subtitle")}
               </p>
             </div>
 
@@ -129,8 +79,8 @@ export default function AboutPage() {
                     <div className="inline-flex items-center justify-center w-12 h-12 bg-accent-brand/10 rounded-full mb-4">
                       <value.icon className="h-6 w-6 text-accent-brand" />
                     </div>
-                    <h3 className="font-heading text-xl font-semibold mb-2">{value.title}</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{value.description}</p>
+                    <h3 className="font-heading text-xl font-semibold mb-2">{t(`about.values.items.${value.key}.title`)}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{t(`about.values.items.${value.key}.desc`)}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -144,10 +94,8 @@ export default function AboutPage() {
         <div className="container px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">Our Journey</h2>
-              <p className="text-muted-foreground text-lg">
-                From a small idea to a growing community of style enthusiasts.
-              </p>
+              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">{t("about.timeline.title")}</h2>
+              <p className="text-muted-foreground text-lg">{t("about.timeline.subtitle")}</p>
             </div>
 
             <div className="space-y-8">
@@ -162,9 +110,9 @@ export default function AboutPage() {
                   <div className="flex-1 pb-8">
                     <div className="flex items-center gap-4 mb-2">
                       <span className="text-sm font-medium text-accent-brand">{item.year}</span>
-                      <h3 className="font-heading text-xl font-semibold">{item.title}</h3>
+                      <h3 className="font-heading text-xl font-semibold">{t(`about.timeline.items.${item.year}.title`)}</h3>
                     </div>
-                    <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                    <p className="text-muted-foreground leading-relaxed">{t(`about.timeline.items.${item.year}.desc`)}</p>
                   </div>
                 </div>
               ))}
@@ -177,17 +125,14 @@ export default function AboutPage() {
       <section className="py-16 md:py-24">
         <div className="container px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">Join the Busy Community</h2>
-            <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-              Be part of a community that values quality, style, and authenticity. Follow us on social media and stay
-              updated with our latest collections and stories.
-            </p>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">{t("about.cta.title")}</h2>
+            <p className="text-muted-foreground text-lg mb-8 leading-relaxed">{t("about.cta.subtitle")}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg">
-                <Link href="/products">Shop Now</Link>
+                <Link href="/products">{t("about.cta.primary")}</Link>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <Link href="/contact">Get in Touch</Link>
+                <Link href="/contact">{t("about.cta.secondary")}</Link>
               </Button>
             </div>
           </div>

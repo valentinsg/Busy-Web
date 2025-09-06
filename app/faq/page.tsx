@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function FAQPage() {
   return (
-    <div className="container px-4 py-8">
+    <div className="container px-4 py-8 pt-20">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

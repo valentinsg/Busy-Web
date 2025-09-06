@@ -6,6 +6,36 @@
   .text-balance {
     text-wrap: balance;
   }
+
+/* Diagonal shimmer sweep keyframes */
+@keyframes sweep {
+  0% { transform: translateX(-130%) rotate(8deg); }
+  100% { transform: translateX(130%) rotate(8deg); }
+}
+
+/* Micro wobble keyframes */
+@keyframes microWobble {
+  0% { transform: translateY(-2px) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(0.35deg); }
+  100% { transform: translateY(-2px) rotate(0deg); }
+}
+
+@layer components {
+  .btn-street::after {
+    content: "";
+    position: absolute;
+    top: -10%;
+    bottom: -10%;
+    left: -10%;
+    background: linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.35) 50%, transparent 70%);
+    filter: blur(2px);
+    transform: translateX(-130%) rotate(8deg);
+    pointer-events: none;
+  }
+
+  .btn-street:hover::after {
+    animation: sweep 900ms ease forwards;
+  }
 }
 
 @layer base {
@@ -139,4 +169,81 @@ html, body, * {
 
 .cursor-click {
   animation: click 0.3s ease-in-out;
+}
+
+/* Streetwear glossy button with animated grain and subtle motion */
+@keyframes grainMove {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 200px 150px, -150px -200px; }
+}
+
+@layer components {
+  .btn-street {
+    position: relative;
+    overflow: hidden;
+    /* Glossy gradient border using double background (inner solid + outer gradient) */
+    border: 1.5px solid transparent;
+    border-color: transparent !important; /* avoid outline variant border-color override */
+    background:
+      linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+      linear-gradient(135deg,
+        rgba(255,255,255,0.65) 0%,
+        rgba(255,255,255,0.15) 28%,
+        rgba(255,255,255,0.55) 52%,
+        rgba(255,255,255,0.12) 70%,
+        rgba(255,255,255,0.35) 100%
+      ) border-box;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.1),
+      inset 0 -2px 6px rgba(255,255,255,0.06),
+      0 0 0 1px rgba(255,255,255,0.12),
+      0 8px 26px rgba(0,0,0,0.45),
+      0 0 22px rgba(255,255,255,0.08);
+    backdrop-filter: saturate(110%);
+    -webkit-backdrop-filter: saturate(110%);
+    transition: transform 180ms ease, box-shadow 220ms ease, background 220ms ease;
+  }
+
+  .btn-street::before {
+    /* Gritty animated grain texture overlay */
+    content: "";
+    position: absolute;
+    inset: -2px;
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+    opacity: 0.26;
+    background-image:
+      radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.7) 0.5px, transparent 0.6px),
+      radial-gradient(1px 1px at 60px 80px, rgba(255,255,255,0.6) 0.5px, transparent 0.6px);
+    background-size: 80px 80px, 100px 100px;
+    animation: grainMove 1.8s linear infinite;
+  }
+
+  .btn-street:hover {
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.14),
+      inset 0 -3px 10px rgba(255,255,255,0.08),
+      0 0 0 1px rgba(255,255,255,0.16),
+      0 12px 32px rgba(0,0,0,0.55),
+      0 0 34px rgba(255,255,255,0.12);
+    background:
+      linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+      linear-gradient(135deg,
+        rgba(255,255,255,0.75) 0%,
+        rgba(255,255,255,0.18) 26%,
+        rgba(255,255,255,0.65) 50%,
+        rgba(255,255,255,0.18) 74%,
+        rgba(255,255,255,0.45) 100%
+      ) border-box;
+    /* micro wobble for gritty motion */
+    animation: microWobble 420ms ease;
+  }
+
+  .btn-street:active {
+    transform: translateY(0.5px) scale(0.995);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      inset 0 -1px 6px rgba(255,255,255,0.04),
+      0 4px 16px rgba(0,0,0,0.35);
+  }
 }

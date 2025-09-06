@@ -44,7 +44,7 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
   const regularPosts = filteredPosts.length > 0 ? filteredPosts.slice(1) : allPosts.slice(1)
 
   return (
-    <div className="container px-4 py-8">
+    <div className="container px-4 py-8 pt-24">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

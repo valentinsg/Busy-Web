@@ -9,6 +9,8 @@ import { Toaster } from '@/components/ui/toaster'
 import { generateSEO } from '@/lib/seo'
 import { SplashGate } from '@/components/home/splash-gate'
 import { CustomCursor } from '@/components/custom-cursor'
+import { I18nProvider } from '@/components/i18n-provider'
+import { HtmlLang } from '@/components/layout/html-lang'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -25,14 +27,13 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   ...generateSEO(),
   metadataBase: new URL(process.env.SITE_URL || 'https://busy.com.ar'),
-  generator: 'v0.app',
 }
 
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Busy',
-  description: 'Premium streetwear for the modern lifestyle',
+  description: 'Streetwear para la vida moderna',
   url: process.env.SITE_URL || 'https://busy.com.ar',
   logo: `${process.env.SITE_URL || 'https://busy.com.ar'}/logo-busy-black.png`,
   sameAs: [
@@ -42,9 +43,9 @@ const jsonLd = {
   ],
   contactPoint: {
     '@type': 'ContactPoint',
-    telephone: '+1-555-123-4567',
+    telephone: '+54 9 11 6262 6262',
     contactType: 'Customer Service',
-    email: 'support@busy.com',
+    email: 'contacto@busy.com.ar',
   },
 }
 
@@ -64,20 +65,23 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${plusJakartaSans.variable} font-sans antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <SplashGate />
-          <div className="relative flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-          <Toaster />
-        </ThemeProvider>
+        <I18nProvider>
+          <HtmlLang />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SplashGate />
+            <div className="relative flex min-h-screen flex-col">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+            <Toaster />
+          </ThemeProvider>
+        </I18nProvider>
       </body>
       <CustomCursor />
 

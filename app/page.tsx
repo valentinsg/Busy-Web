@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ProductCard } from "@/components/shop/product-card"
 import { getProducts } from "@/lib/products"
 import { AutoSliderBanner } from "@/components/home/auto-slider-banner"
+import { useI18n } from "@/components/i18n-provider"
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -22,11 +23,12 @@ const staggerContainer = {
 }
 
 export default function Home() {
+  const { t } = useI18n()
   const featuredProducts = getProducts().slice(0, 4)
   const categories = [
-    { name: "Hoodies", href: "/products?category=hoodies", image: "/cozy-hoodie.png" },
-    { name: "T-Shirts", href: "/products?category=tshirts", image: "/plain-white-tshirt.png" },
-    { name: "Accessories", href: "/products?category=accessories", image: "/baseball-cap-display.png" },
+    { name: t("footer.sections.shop.links.hoodies"), href: "/products?category=hoodies", image: "/cozy-hoodie.png" },
+    { name: t("footer.sections.shop.links.tshirts"), href: "/products?category=tshirts", image: "/plain-white-tshirt.png" },
+    { name: t("footer.sections.shop.links.accessories"), href: "/products?category=accessories", image: "/baseball-cap-display.png" },
   ]
 
   return (
@@ -38,9 +40,9 @@ export default function Home() {
       <section id="product-section" className="py-16 md:py-24">
         <div className="container px-4">
           <motion.div {...fadeInUp} className="text-center mb-12">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">Latest Collection</h2>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">{t("home.latest.title")}</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Discover our newest arrivals, crafted with attention to detail and designed for everyday comfort.
+              {t("home.latest.subtitle")}
             </p>
           </motion.div>
 
@@ -60,7 +62,7 @@ export default function Home() {
 
           <motion.div {...fadeInUp} className="text-center mt-12">
             <Button asChild variant="outline" size="lg">
-              <Link href="/products">View All Products</Link>
+              <Link href="/products">{t("home.latest.view_all")}</Link>
             </Button>
           </motion.div>
         </div>
@@ -70,8 +72,8 @@ export default function Home() {
       <section className="py-16 md:py-24 bg-muted/50">
         <div className="container px-4">
           <motion.div {...fadeInUp} className="text-center mb-12">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">Shop by Category</h2>
-            <p className="text-muted-foreground text-lg">Find exactly what you're looking for</p>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">{t("home.categories.title")}</h2>
+            <p className="text-muted-foreground text-lg">{t("home.categories.subtitle")}</p>
           </motion.div>
 
           <motion.div
@@ -93,7 +95,7 @@ export default function Home() {
                     <div className="absolute bottom-6 left-6 z-20">
                       <h3 className="font-heading text-2xl font-bold text-white mb-2">{category.name}</h3>
                       <Button variant="secondary" size="sm">
-                        Shop Now <ArrowRight className="ml-2 h-4 w-4" />
+                        {t("home.categories.cta")} <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -109,17 +111,15 @@ export default function Home() {
         <div className="container px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div {...fadeInUp}>
-              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">About Busy</h2>
+              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">{t("home.about.title")}</h2>
               <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
-                Founded on the principle that great style shouldn't compromise comfort, Busy creates premium streetwear
-                for the modern individual. Every piece is thoughtfully designed and crafted with the finest materials.
+                {t("home.about.p1")}
               </p>
               <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-                From our signature hoodies to essential tees, we believe in quality over quantity, creating timeless
-                pieces that become staples in your wardrobe.
+                {t("home.about.p2")}
               </p>
               <Button asChild variant="outline" size="lg">
-                <Link href="/about">Our Story</Link>
+                <Link href="/about">{t("home.about.cta")}</Link>
               </Button>
             </motion.div>
 
@@ -139,8 +139,8 @@ export default function Home() {
       <section className="py-16 md:py-24 bg-muted/50">
         <div className="container px-4">
           <motion.div {...fadeInUp} className="text-center mb-12">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">Trusted by Thousands</h2>
-            <p className="text-muted-foreground text-lg">Join our community of style enthusiasts</p>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">{t("home.social.title")}</h2>
+            <p className="text-muted-foreground text-lg">{t("home.social.subtitle")}</p>
           </motion.div>
 
           <motion.div
@@ -151,9 +151,9 @@ export default function Home() {
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {[
-              { icon: Star, title: "4.8/5 Rating", description: "From over 1,000 reviews" },
-              { icon: Users, title: "50K+ Customers", description: "Worldwide community" },
-              { icon: Award, title: "Premium Quality", description: "Guaranteed satisfaction" },
+              { icon: Star, title: t("home.social.items.rating.title"), description: t("home.social.items.rating.desc") },
+              { icon: Users, title: t("home.social.items.customers.title"), description: t("home.social.items.customers.desc") },
+              { icon: Award, title: t("home.social.items.quality.title"), description: t("home.social.items.quality.desc") },
             ].map((item, index) => (
               <motion.div key={index} variants={fadeInUp} className="text-center">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-brand/10 rounded-full mb-4">
@@ -171,19 +171,18 @@ export default function Home() {
       <section className="py-16 md:py-24">
         <div className="container px-4">
           <motion.div {...fadeInUp} className="text-center max-w-3xl mx-auto">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">Ready to Elevate Your Style?</h2>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">{t("home.cta.title")}</h2>
             <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-              Discover premium streetwear that combines comfort, quality, and contemporary design. Join thousands of
-              satisfied customers who trust Busy for their everyday style.
+              {t("home.cta.subtitle")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="text-lg px-8">
                 <Link href="/products">
-                  Start Shopping <ArrowRight className="ml-2 h-5 w-5" />
+                  {t("home.cta.primary")} <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="text-lg px-8 bg-transparent">
-                <Link href="/contact">Get in Touch</Link>
+                <Link href="/contact">{t("home.cta.secondary")}</Link>
               </Button>
             </div>
           </motion.div>

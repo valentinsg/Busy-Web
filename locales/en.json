@@ -1,0 +1,214 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "about": "About",
+    "blog": "Blog",
+    "contact": "Contact"
+  },
+  "search": {
+    "placeholder": "Search products..."
+  },
+  "brand": {
+    "aria_home": "Busy Home"
+  },
+  "footer": {
+    "brand": {
+      "description": "Premium streetwear for the modern lifestyle. Quality craftsmanship meets contemporary design."
+    },
+    "newsletter": {
+      "title": "Stay Updated",
+      "placeholder": "Enter your email",
+      "subscribe": "Subscribe"
+    },
+    "sections": {
+      "shop": {
+        "title": "Shop",
+        "links": {
+          "all_products": "All Products",
+          "hoodies": "Hoodies",
+          "tshirts": "T-Shirts",
+          "accessories": "Accessories"
+        }
+      },
+      "brand": {
+        "title": "Brand",
+        "links": {
+          "about_us": "About Us",
+          "our_story": "Our Story",
+          "sustainability": "Sustainability",
+          "careers": "Careers"
+        }
+      },
+      "support": {
+        "title": "Support",
+        "links": {
+          "faq": "FAQ",
+          "contact": "Contact",
+          "size_guide": "Size Guide",
+          "returns": "Returns"
+        }
+      },
+      "social": {
+        "title": "Social",
+        "links": {
+          "instagram": "Instagram",
+          "twitter": "Twitter",
+          "tiktok": "TikTok",
+          "youtube": "YouTube"
+        }
+      }
+    },
+    "bottom": {
+      "rights": "All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "cookies": "Cookie Policy"
+    }
+  },
+  "home": {
+    "latest.title": "Latest Arrivals",
+    "latest.subtitle": "Discover our newest arrivals, crafted with attention to detail and designed for everyday comfort.",
+    "latest.view_all": "View All Products",
+    "categories.title": "Shop by Category",
+    "categories.subtitle": "Find exactly what you're looking for",
+    "categories.cta": "Shop Now",
+    "about.title": "About Busy",
+    "about.p1": "Founded on the principle that great style shouldn't compromise comfort, Busy creates premium streetwear for the modern individual.",
+    "about.p2": "From our signature hoodies to essential tees, we believe in quality over quantity, creating timeless pieces that become staples in your wardrobe.",
+    "about.cta": "Our Story",
+    "social.title": "Trusted by Thousands",
+    "social.subtitle": "Join our community of style enthusiasts",
+    "social.items": {
+      "rating.title": "4.8/5 Rating",
+      "rating.desc": "From over 1,000 reviews",
+      "customers.title": "50K+ Customers",
+      "customers.desc": "Worldwide community",
+      "quality.title": "Premium Quality",
+      "quality.desc": "Guaranteed satisfaction"
+    },
+    "cta.title": "Ready to Elevate Your Style?",
+    "cta.subtitle": "Discover premium streetwear that combines comfort, quality, and contemporary design. Join thousands of satisfied customers who trust Busy for their everyday style.",
+    "cta.primary": "Start Shopping",
+    "cta.secondary": "Get in Touch"
+  },
+  "about": {
+    "hero.title": "About <span class=\"text-accent-brand\">Busy</span>",
+    "hero.subtitle": "We're more than just a clothing brand. We're a community of individuals who believe that great style should be accessible, comfortable, and authentic to who you are.",
+    "story.title": "Our Story",
+    "story.p1": "Busy was born from a simple observation: the modern individual is always on the move, juggling multiple responsibilities while trying to maintain their personal style. We saw a gap in the market for clothing that could keep up with this lifestyle.",
+    "story.p2": "Our founders, passionate about both fashion and functionality, set out to create pieces that would seamlessly transition from work to weekend, from casual to elevated. Every design decision is made with the busy individual in mind.",
+    "story.p3": "Today, Busy represents more than just clothing—it's a mindset. It's about being productive, purposeful, and stylish, no matter what your day brings.",
+    "story.cta": "Shop Our Collection",
+    "values.title": "Our Values",
+    "values.subtitle": "These core principles guide everything we do, from design to customer service.",
+    "timeline.title": "Our Journey",
+    "timeline.subtitle": "From a small idea to a growing community of style enthusiasts.",
+    "cta.title": "Join the Busy Community",
+    "cta.subtitle": "Be part of a community that values quality, style, and authenticity. Follow us on social media and stay updated with our latest collections and stories.",
+    "cta.primary": "Shop Now",
+    "cta.secondary": "Get in Touch",
+    "image.alt": "Busy brand story",
+    "values.items": {
+      "quality": { "title": "Quality First", "desc": "We never compromise on quality. Every piece is crafted with premium materials and attention to detail." },
+      "community": { "title": "Community Driven", "desc": "Our designs are inspired by and created for our community of style enthusiasts worldwide." },
+      "sustainable": { "title": "Sustainable", "desc": "We're committed to sustainable practices and ethical manufacturing processes." },
+      "passion": { "title": "Passion", "desc": "Fashion is our passion, and we pour our heart into every design and customer interaction." }
+    },
+    "timeline.items": {
+      "2020": { "title": "The Beginning", "desc": "Founded with a vision to create premium streetwear that doesn't compromise on comfort or style." },
+      "2021": { "title": "First Collection", "desc": "Launched our signature hoodie line, quickly gaining recognition for quality and design." },
+      "2022": { "title": "Community Growth", "desc": "Reached 10,000+ satisfied customers and expanded our product range." },
+      "2023": { "title": "Sustainability Focus", "desc": "Implemented eco-friendly practices and sustainable material sourcing." },
+      "2024": { "title": "Global Expansion", "desc": "Expanded shipping worldwide and opened our first flagship store." }
+    }
+  },
+  "products": {
+    "header.title": "All Products",
+    "header.subtitle": "Discover our complete collection of premium streetwear",
+    "search.placeholder": "Search products...",
+    "sort.placeholder": "Sort by",
+    "sort.newest": "Newest",
+    "sort.price_asc": "Price: Low to High",
+    "sort.price_desc": "Price: High to Low",
+    "sort.rating": "Highest Rated",
+    "filters.title": "Filters",
+    "filters.clear": "Clear",
+    "filters.category": "Category",
+    "filters.color": "Color",
+    "filters.size": "Size",
+    "filters.price_range": "Price Range",
+    "filters.min": "Min",
+    "filters.max": "Max",
+    "filters.clear_all": "Clear All Filters",
+    "empty.title": "No products found",
+    "empty.subtitle": "Try adjusting your search or filters",
+    "empty.clear": "Clear Filters",
+    "results.count": "{count} product(s) found"
+  },
+  "contact": {
+    "header.title": "Get in Touch",
+    "header.subtitle": "Have a question, suggestion, or just want to say hello? We'd love to hear from you.",
+    "info.title": "Contact Information",
+    "info.address.title": "Address",
+    "info.address.line1": "123 Fashion Street",
+    "info.address.line2": "New York, NY 10001",
+    "info.phone.title": "Phone",
+    "info.phone.value": "+1 (555) 123-4567",
+    "info.email.title": "Email",
+    "info.email.value": "support@busy.com",
+    "info.hours.title": "Business Hours",
+    "info.hours.weekdays": "Mon - Fri: 9:00 AM - 6:00 PM",
+    "info.hours.weekend": "Sat - Sun: 10:00 AM - 4:00 PM",
+    "links.title": "Quick Links",
+    "links.faq": "Frequently Asked Questions",
+    "links.size_guide": "Size Guide",
+    "links.returns": "Returns & Exchanges",
+    "links.about": "About Us",
+    "form.title": "Send us a Message",
+    "form.name": "Name",
+    "form.email": "Email",
+    "form.subject": "Subject",
+    "form.select_placeholder": "Select a subject",
+    "form.subject_options": {
+      "general": "General Inquiry",
+      "order": "Order Support",
+      "returns": "Returns & Exchanges",
+      "product": "Product Question",
+      "wholesale": "Wholesale Inquiry",
+      "press": "Press & Media"
+    },
+    "form.message": "Message",
+    "form.message_placeholder": "Tell us how we can help you...",
+    "form.submit": "Send Message",
+    "form.sending": "Sending...",
+    "form.privacy": "By submitting this form, you agree to our privacy policy. We'll never share your information with third parties.",
+    "toast.success.title": "Message sent!",
+    "toast.success.desc": "We'll get back to you within 24 hours.",
+    "toast.error.title": "Error",
+    "toast.error.desc": "Something went wrong. Please try again.",
+    "mail.default_subject": "Contact Form Submission",
+    "mail.name": "Name",
+    "mail.email": "Email",
+    "mail.message": "Message"
+  },
+  "cart": {
+    "open": "Open cart",
+    "title": "Shopping Cart",
+    "clear_all": "Clear All",
+    "empty.title": "Your cart is empty",
+    "empty.subtitle": "Add some products to get started",
+    "empty.cta": "Continue Shopping",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "shipping_free": "Free",
+    "tax": "Tax (estimated)",
+    "total": "Total",
+    "checkout": "Proceed to Checkout",
+    "view_cart": "View Cart",
+    "free_shipping_notice": "Add {amount} more for free shipping",
+    "qty.decrease": "Decrease quantity",
+    "qty.increase": "Increase quantity",
+    "remove_item": "Remove item"
+  }
+}

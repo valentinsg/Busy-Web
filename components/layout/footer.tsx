@@ -1,48 +1,54 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { useI18n } from "@/components/i18n-provider"
 
-const footerSections = {
+const footerSections = (t: (k: string) => string) => ({
   shop: {
-    title: "Shop",
+    title: t("footer.sections.shop.title"),
     links: [
-      { name: "All Products", href: "/products" },
-      { name: "Hoodies", href: "/products?category=hoodies" },
-      { name: "T-Shirts", href: "/products?category=tshirts" },
-      { name: "Accessories", href: "/products?category=accessories" },
+      { name: t("footer.sections.shop.links.all_products"), href: "/products" },
+      { name: t("footer.sections.shop.links.hoodies"), href: "/products?category=hoodies" },
+      { name: t("footer.sections.shop.links.tshirts"), href: "/products?category=tshirts" },
+      { name: t("footer.sections.shop.links.accessories"), href: "/products?category=accessories" },
     ],
   },
   brand: {
-    title: "Brand",
+    title: t("footer.sections.brand.title"),
     links: [
-      { name: "About Us", href: "/about" },
-      { name: "Our Story", href: "/about#story" },
-      { name: "Sustainability", href: "/about#sustainability" },
-      { name: "Careers", href: "/about#careers" },
+      { name: t("footer.sections.brand.links.about_us"), href: "/about" },
+      { name: t("footer.sections.brand.links.our_story"), href: "/about#story" },
+      { name: t("footer.sections.brand.links.sustainability"), href: "/about#sustainability" },
+      { name: t("footer.sections.brand.links.careers"), href: "/about#careers" },
     ],
   },
   support: {
-    title: "Support",
+    title: t("footer.sections.support.title"),
     links: [
-      { name: "FAQ", href: "/faq" },
-      { name: "Contact", href: "/contact" },
-      { name: "Size Guide", href: "/faq#size-guide" },
-      { name: "Returns", href: "/faq#returns" },
+      { name: t("footer.sections.support.links.faq"), href: "/faq" },
+      { name: t("footer.sections.support.links.contact"), href: "/contact" },
+      { name: t("footer.sections.support.links.size_guide"), href: "/faq#size-guide" },
+      { name: t("footer.sections.support.links.returns"), href: "/faq#returns" },
     ],
   },
   social: {
-    title: "Social",
+    title: t("footer.sections.social.title"),
     links: [
-      { name: "Instagram", href: "https://instagram.com" },
-      { name: "Twitter", href: "https://twitter.com" },
-      { name: "TikTok", href: "https://tiktok.com" },
-      { name: "YouTube", href: "https://youtube.com" },
+      { name: t("footer.sections.social.links.instagram"), href: "https://instagram.com" },
+      { name: t("footer.sections.social.links.twitter"), href: "https://twitter.com" },
+      { name: t("footer.sections.social.links.tiktok"), href: "https://tiktok.com" },
+      { name: t("footer.sections.social.links.youtube"), href: "https://youtube.com" },
     ],
   },
-}
+})
 
 export function Footer() {
+  const { t } = useI18n()
+  const sections = footerSections(t)
+  const year = new Date().getFullYear()
   return (
     <footer className="border-t bg-background">
       <div className="container px-4 py-12">
@@ -52,27 +58,26 @@ export function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-4">
               <div className="relative h-8 w-8">
-                <Image src="/logo-busy-black.png" alt="Busy" fill className="object-contain dark:hidden" />
+                <Image src="/logo-busy-white.png" alt="Busy" fill className="object-contain dark:hidden" />
                 <Image src="/logo-busy-white.png" alt="Busy" fill className="object-contain hidden dark:block" />
               </div>
-              <span className="font-heading text-xl font-bold">Busy</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-4 max-w-xs">
-              Premium streetwear for the modern lifestyle. Quality craftsmanship meets contemporary design.
+              {t("footer.brand.description")}
             </p>
 
             {/* Newsletter */}
             <div className="space-y-2">
-              <h4 className="font-medium">Stay Updated</h4>
+              <h4 className="font-medium">{t("footer.newsletter.title")}</h4>
               <div className="flex space-x-2">
-                <Input type="email" placeholder="Enter your email" className="max-w-[200px]" />
-                <Button size="sm">Subscribe</Button>
+                <Input type="email" placeholder={t("footer.newsletter.placeholder")} className="max-w-[200px]" />
+                <Button size="sm">{t("footer.newsletter.subscribe")}</Button>
               </div>
             </div>
           </div>
 
           {/* Footer Links */}
-          {Object.entries(footerSections).map(([key, section]) => (
+          {Object.entries(sections).map(([key, section]) => (
             <div key={key}>
               <h4 className="font-medium mb-3">{section.title}</h4>
               <ul className="space-y-2">
@@ -93,16 +98,16 @@ export function Footer() {
 
         {/* Bottom Section */}
         <div className="border-t mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-          <p className="text-sm text-muted-foreground">© 2025 Busy. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© {year} Busy. {t("footer.bottom.rights")}</p>
           <div className="flex space-x-4 text-sm text-muted-foreground">
             <Link href="/legal/privacy" className="hover:text-foreground transition-colors">
-              Privacy Policy
+              {t("footer.bottom.privacy")}
             </Link>
             <Link href="/legal/terms" className="hover:text-foreground transition-colors">
-              Terms of Service
+              {t("footer.bottom.terms")}
             </Link>
             <Link href="/legal/cookies" className="hover:text-foreground transition-colors">
-              Cookie Policy
+              {t("footer.bottom.cookies")}
             </Link>
           </div>
         </div>
