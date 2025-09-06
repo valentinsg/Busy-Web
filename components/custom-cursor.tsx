@@ -45,6 +45,7 @@ export function CustomCursor() {
         clearTimeout(dwellTimerRef.current)
         dwellTimerRef.current = null
       }
+      
       setHeartbeat(false)
     }
 
