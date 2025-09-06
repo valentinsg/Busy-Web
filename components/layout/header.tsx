@@ -32,11 +32,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
-          <div className="relative h-8 w-8">
-            <Image src="/logo-busy-black.png" alt="Busy" fill className="object-contain dark:hidden" />
-            <Image src="/logo-busy-white.png" alt="Busy" fill className="object-contain hidden dark:block" />
-          </div>
-          <Image src="/busy-gothic.png" alt="Busy" width={130} height={20} className="object-contain" />
+          <Image src="/busy-gothic.png" alt="Busy" width={80} height={20} className="object-contain" />
         </Link>
 
         {/* Desktop Navigation */}

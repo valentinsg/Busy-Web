@@ -45,7 +45,7 @@ export function AutoSliderBanner() {
         </motion.div>
         <a href="/contact" className="text-xl text-gray-300 text-center mb-8 font-bold">38°00′S 57°33′O</a>
         <Button onClick={handleShopClick} size="lg" variant="outline">
-          SHOP
+          SHOP  
         </Button>
       </div>
     </div>
