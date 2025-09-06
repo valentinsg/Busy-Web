@@ -74,8 +74,9 @@
     "categories.subtitle": "Find exactly what you're looking for",
     "categories.cta": "Shop Now",
     "about.title": "About Busy",
-    "about.p1": "Founded on the principle that great style shouldn't compromise comfort, Busy creates premium streetwear for the modern individual.",
-    "about.p2": "From our signature hoodies to essential tees, we believe in quality over quantity, creating timeless pieces that become staples in your wardrobe.",
+    "about.p1": "Busy was born in Mar del Plata, with the idea of staying focused on what’s important. Two friends produced a batch of basics — t-shirts and hoodies — and realized they didn’t have to be boxed in, deciding to expand the brand.",
+    "about.p2": "The team grew, and so did the vision. Today we are resellers, we run our own podcast, and we organize events, aiming to create a creative ecosystem that brings together streetwear, exclusive branding, and a strong concept.",
+    "about.p3": "We want to build a community that expresses itself through what it wears and how it lives. Because Busy means focusing on what’s truly worth it.",
     "about.cta": "Our Story",
     "social.title": "Trusted by Thousands",
     "social.subtitle": "Join our community of style enthusiasts",
@@ -93,7 +94,7 @@
     "cta.secondary": "Get in Touch"
   },
   "about": {
-    "hero.title": "About <span class=\"text-accent-brand\">Busy</span>",
+    "hero.title": "About Us",
     "hero.subtitle": "We're more than just a clothing brand. We're a community of individuals who believe that great style should be accessible, comfortable, and authentic to who you are.",
     "story.title": "Our Story",
     "story.p1": "Busy was born from a simple observation: the modern individual is always on the move, juggling multiple responsibilities while trying to maintain their personal style. We saw a gap in the market for clothing that could keep up with this lifestyle.",
@@ -210,5 +211,73 @@
     "qty.decrease": "Decrease quantity",
     "qty.increase": "Increase quantity",
     "remove_item": "Remove item"
+  }
+  ,
+  "blog": {
+    "header.title": "Busy Blog",
+    "header.subtitle": "Stories, insights, and inspiration from the world of streetwear and modern lifestyle.",
+    "search.placeholder": "Search articles...",
+    "tags.all": "All Posts",
+    "featured.title": "Featured Article",
+    "featured.cta": "Read Article",
+    "list.latest": "Latest Articles",
+    "list.search_results": "Search Results",
+    "list.count": "{count} article(s) found",
+    "empty.title": "No articles found",
+    "empty.subtitle": "Try adjusting your search or browse all posts",
+    "empty.clear": "Clear Filters",
+    "post.back": "Back to Blog",
+    "post.share": "Share",
+    "post.prev": "Previous Article",
+    "post.next": "Next Article",
+    "post.cta.title": "Ready to Elevate Your Style?",
+    "post.cta.subtitle": "Discover our latest collection of premium streetwear designed for the modern lifestyle.",
+    "post.cta.button": "Shop Collection"
+  },
+  "checkout": {
+    "header.back": "Back to Cart",
+    "header.title": "Checkout",
+    "empty.title": "No items to checkout",
+    "empty.subtitle": "Your cart is empty. Add some products before proceeding to checkout.",
+    "empty.cta": "Continue Shopping",
+    "shipping.title": "Shipping Information",
+    "fields": {
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "city": "City",
+      "state": "State",
+      "zip": "ZIP Code",
+      "country": "Country"
+    },
+    "countries": {
+      "US": "United States",
+      "CA": "Canada",
+      "MX": "Mexico"
+    },
+    "payment.title": "Payment Method",
+    "payment.options": {
+      "card": "Credit Card (Stripe)",
+      "email": "Email Order",
+      "whatsapp": "WhatsApp Order"
+    },
+    "payment.notice": {
+      "mailto": "Your order will be sent via email for processing.",
+      "whatsapp": "Your order will be sent via WhatsApp for processing.",
+      "stripe": "This is a test environment. No real payments will be processed."
+    },
+    "summary.title": "Order Summary",
+    "summary.subtotal_items": "Subtotal ({count} items)",
+    "summary.shipping": "Shipping",
+    "summary.tax": "Tax (estimated)",
+    "summary.total": "Total",
+    "cta.complete": {
+      "mailto": "Complete Order via Email",
+      "whatsapp": "Complete Order via WhatsApp",
+      "stripe": "Complete Order"
+    },
+    "security_notice": "Your information is secure and encrypted"
   }
 }

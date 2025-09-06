@@ -39,20 +39,42 @@ export function AutoSliderBanner() {
           <Image src={src} alt={`Banner ${index + 1}`} fill style={{ objectFit: "cover" }} priority />
         </div>
       ))}
-      <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center">
-        <motion.div >
+      <motion.div
+        className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center"
+        variants={{
+          initial: { opacity: 0, filter: 'blur(6px)' },
+          animate: {
+            opacity: 1,
+            filter: 'blur(0px)',
+            transition: { duration: 4.5, when: 'beforeChildren', staggerChildren: 0.12, delayChildren: 0.05 },
+          },
+        }}
+        initial="initial"
+        animate="animate"
+      >
+        <motion.div variants={{ initial: { opacity: 0, y: 18, scale: 0.98 }, animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6 } } }}>
           <Image src="/busy-streetwear.png" alt="Busy Streetwear" width={325} height={325} />
         </motion.div>
-        <a href="/contact" className="text-xl text-gray-300 text-center mb-8 font-bold">38°00′S 57°33′O</a>
-        <Button
-          onClick={handleShopClick}
-          size="lg"
-          variant="outline"
-          className="btn-street transition-transform ease-in-out w-36 hover:border-2 hover:border-accent-brand hover:text-accent-brand hover:bg-accent-brand-foreground hover:duration-200 hover:-translate-y-0.5 hover:box-shadow-2 shadow-sm hover:shadow-lg"
+        <motion.a
+          href="/contact"
+          className="google-sans-code text-xl tracking-tight text-gray-300 text-center mb-8 font-bold"
+          variants={{ initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
         >
-          SHOP
-        </Button>
-      </div>
+          38°00′S 57°33′O
+        </motion.a>
+        <motion.div variants={{ initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}>
+          <Button
+            onClick={handleShopClick}
+            size="lg"
+            variant="outline"
+            className="btn-street font-heading transition-transform ease-in-out w-36 hover:border-2 hover:border-accent-brand
+            hover:text-accent-brand hover:bg-accent-brand-foreground hover:duration-200 hover:-translate-y-0.5
+            hover:box-shadow-2 shadow-sm hover:shadow-lg"
+          >
+            SHOP
+          </Button>
+        </motion.div>
+      </motion.div>
     </div>
   )
 }

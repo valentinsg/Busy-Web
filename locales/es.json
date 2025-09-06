@@ -93,12 +93,12 @@
     "cta.secondary": "Contactanos"
   },
   "about": {
-    "hero.title": "Sobre <span class=\"text-accent-brand\">Busy</span>",
+    "hero.title": "Sobre Nosotros",
     "hero.subtitle": "Somos más que una marca de ropa: somos una comunidad que cree que el gran estilo debe ser accesible, cómodo y auténtico.",
     "story.title": "Nuestra historia",
-    "story.p1": "Busy nació de una observación simple: la persona moderna está siempre en movimiento, equilibrando múltiples responsabilidades sin perder su estilo. Vimos una oportunidad para crear prendas que acompañen ese ritmo.",
-    "story.p2": "Nuestros fundadores, apasionados por la moda y la funcionalidad, crearon piezas que pasan del trabajo al fin de semana, de lo casual a lo elevado, sin esfuerzo. Cada decisión de diseño piensa en la persona ocupada.",
-    "story.p3": "Hoy, Busy es más que ropa: es una mentalidad. Se trata de ser productivo, con propósito y con estilo, sin importar cómo sea tu día.",
+    "story.p1": "Busy nació en Mar Del Plata, con la idea de estar ocupados en lo importante. Dos amigos que produjeron una tanda de básicos entre remeras y hoodies, fueron entendiendo que no había que encasillarse y decidieron expandir la marca.",
+    "story.p2": "El equipo creció y la idea también. Hoy somos revendedores, tenemos nuestro propio podcast y organizamos eventos, buscando crear un ecosistema creativo que una el streetwear, branding exclusivo y un concepto.",
+    "story.p3": "Queremos construir una comunidad que se expresé através de lo que viste y lo que vive. Ya que Busy es enfocarse en lo que vale la pena.",
     "story.cta": "Ver colección",
     "values.title": "Nuestros valores",
     "values.subtitle": "Estos principios nos guían en todo: desde el diseño hasta la atención al cliente.",
@@ -191,7 +191,7 @@
     "mail.name": "Nombre",
     "mail.email": "Email",
     "mail.message": "Mensaje"
-    
+
   },
   "cart": {
     "open": "Abrir carrito",
@@ -211,5 +211,73 @@
     "qty.decrease": "Disminuir cantidad",
     "qty.increase": "Aumentar cantidad",
     "remove_item": "Quitar artículo"
+  }
+  ,
+  "blog": {
+    "header.title": "Blog de Busy",
+    "header.subtitle": "Historias, ideas e inspiración del mundo del streetwear y el estilo de vida moderno.",
+    "search.placeholder": "Buscar artículos...",
+    "tags.all": "Todos los artículos",
+    "featured.title": "Artículo destacado",
+    "featured.cta": "Leer artículo",
+    "list.latest": "Últimos artículos",
+    "list.search_results": "Resultados de búsqueda",
+    "list.count": "{count} artículo(s) encontrado(s)",
+    "empty.title": "No se encontraron artículos",
+    "empty.subtitle": "Probá ajustando tu búsqueda o navegá todos los posts",
+    "empty.clear": "Limpiar filtros",
+    "post.back": "Volver al Blog",
+    "post.share": "Compartir",
+    "post.prev": "Artículo anterior",
+    "post.next": "Artículo siguiente",
+    "post.cta.title": "¿Listo para elevar tu estilo?",
+    "post.cta.subtitle": "Descubrí nuestra última colección de streetwear premium pensada para la vida moderna.",
+    "post.cta.button": "Ver colección"
+  },
+  "checkout": {
+    "header.back": "Volver al carrito",
+    "header.title": "Checkout",
+    "empty.title": "No hay artículos para pagar",
+    "empty.subtitle": "Tu carrito está vacío. Agregá productos antes de ir al checkout.",
+    "empty.cta": "Ver productos",
+    "shipping.title": "Información de envío",
+    "fields": {
+      "first_name": "Nombre",
+      "last_name": "Apellido",
+      "email": "Email",
+      "phone": "Teléfono",
+      "address": "Dirección",
+      "city": "Ciudad",
+      "state": "Provincia/Estado",
+      "zip": "Código Postal",
+      "country": "País"
+    },
+    "countries": {
+      "US": "Estados Unidos",
+      "CA": "Canadá",
+      "MX": "México"
+    },
+    "payment.title": "Método de pago",
+    "payment.options": {
+      "card": "Tarjeta (Stripe)",
+      "email": "Pedido por Email",
+      "whatsapp": "Pedido por WhatsApp"
+    },
+    "payment.notice": {
+      "mailto": "Tu pedido se enviará por email para su procesamiento.",
+      "whatsapp": "Tu pedido se enviará por WhatsApp para su procesamiento.",
+      "stripe": "Este es un entorno de pruebas. No se procesarán pagos reales."
+    },
+    "summary.title": "Resumen del pedido",
+    "summary.subtotal_items": "Subtotal ({count} artículo/s)",
+    "summary.shipping": "Envío",
+    "summary.tax": "Impuestos (estimado)",
+    "summary.total": "Total",
+    "cta.complete": {
+      "mailto": "Completar pedido por Email",
+      "whatsapp": "Completar pedido por WhatsApp",
+      "stripe": "Completar pedido"
+    },
+    "security_notice": "Tu información está segura y encriptada"
   }
 }

@@ -56,22 +56,21 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center space-x-2 mb-4">
-              <div className="relative h-8 w-8">
-                <Image src="/logo-busy-white.png" alt="Busy" fill className="object-contain dark:hidden" />
-                <Image src="/logo-busy-white.png" alt="Busy" fill className="object-contain hidden dark:block" />
+            <Link href="/" className="flex items-center w-28 ml-16">
+              <div className="relative h-28 w-28">
+                <Image src="/busy-parche.png" alt="Busy" fill className="object-contain hidden dark:block contrast-30" />
               </div>
             </Link>
-            <p className="text-sm text-muted-foreground mb-4 max-w-xs">
+            <p className="font-body text-sm text-muted-foreground mb-4 max-w-xs">
               {t("footer.brand.description")}
             </p>
 
             {/* Newsletter */}
             <div className="space-y-2">
-              <h4 className="font-medium">{t("footer.newsletter.title")}</h4>
+              <h4 className="font-heading font-medium">{t("footer.newsletter.title")}</h4>
               <div className="flex space-x-2">
-                <Input type="email" placeholder={t("footer.newsletter.placeholder")} className="max-w-[200px]" />
-                <Button size="sm">{t("footer.newsletter.subscribe")}</Button>
+                <Input type="email" placeholder={t("footer.newsletter.placeholder")} className="max-w-[200px] text-sm font-heading" />
+                <Button size="sm" className="text-sm font-heading font-semibold">{t("footer.newsletter.subscribe")}</Button>
               </div>
             </div>
           </div>
@@ -79,13 +78,13 @@ export function Footer() {
           {/* Footer Links */}
           {Object.entries(sections).map(([key, section]) => (
             <div key={key}>
-              <h4 className="font-medium mb-3">{section.title}</h4>
+              <h4 className="font-heading font-bold  mb-3">{section.title}</h4>
               <ul className="space-y-2">
                 {section.links.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {link.name}
                     </Link>
@@ -98,15 +97,15 @@ export function Footer() {
 
         {/* Bottom Section */}
         <div className="border-t mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-          <p className="text-sm text-muted-foreground">© {year} Busy. {t("footer.bottom.rights")}</p>
+          <p className="font-body text-sm text-muted-foreground">© {year} Busy. {t("footer.bottom.rights")}</p>
           <div className="flex space-x-4 text-sm text-muted-foreground">
-            <Link href="/legal/privacy" className="hover:text-foreground transition-colors">
+            <Link href="/legal/privacy" className="font-body hover:text-foreground transition-colors">
               {t("footer.bottom.privacy")}
             </Link>
-            <Link href="/legal/terms" className="hover:text-foreground transition-colors">
+            <Link href="/legal/terms" className="font-body hover:text-foreground transition-colors">
               {t("footer.bottom.terms")}
             </Link>
-            <Link href="/legal/cookies" className="hover:text-foreground transition-colors">
+            <Link href="/legal/cookies" className="font-body hover:text-foreground transition-colors">
               {t("footer.bottom.cookies")}
             </Link>
           </div>

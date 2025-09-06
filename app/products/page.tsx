@@ -60,7 +60,7 @@ export default function ProductsPage() {
     return getProducts(filters)
   }, [searchQuery, filters])
 
-  const updateFilter = (key: keyof FilterOptions, value: any) => {
+  const updateFilter = <K extends keyof FilterOptions>(key: K, value: FilterOptions[K] | undefined) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
   }
 
@@ -221,7 +221,7 @@ export default function ProductsPage() {
           <h1 className="font-heading text-3xl font-bold mb-4">
             {t('products.header.title')}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="font-body text-muted-foreground">
             {t('products.header.subtitle')}
           </p>
         </div>
@@ -241,8 +241,8 @@ export default function ProductsPage() {
           <div className="flex gap-2">
             <Select
               value={filters.sortBy || ''}
-              onValueChange={(value) =>
-                updateFilter('sortBy', value || undefined)
+              onValueChange={(value: string) =>
+                updateFilter('sortBy', (value || undefined) as FilterOptions['sortBy'] | undefined)
               }
             >
               <SelectTrigger className="w-[180px]">
@@ -304,7 +304,7 @@ export default function ProductsPage() {
           {/* Products Grid */}
           <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-muted-foreground">
+              <p className="font-body text-sm text-muted-foreground">
                 {t('products.results.count').replace(
                   '{count}',
                   String(filteredProducts.length)
@@ -316,10 +316,10 @@ export default function ProductsPage() {
               <div className="text-center py-12">
                 <div className="text-muted-foreground mb-4">
                   <Filter className="h-12 w-12 mx-auto mb-4" />
-                  <h3 className="font-medium mb-2">
+                  <h3 className="font-heading font-medium mb-2">
                     {t('products.empty.title')}
                   </h3>
-                  <p className="text-sm">{t('products.empty.subtitle')}</p>
+                  <p className="font-body text-sm">{t('products.empty.subtitle')}</p>
                 </div>
                 <Button onClick={clearFilters} variant="outline">
                   {t('products.empty.clear')}

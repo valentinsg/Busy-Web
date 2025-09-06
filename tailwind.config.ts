@@ -20,8 +20,9 @@ const config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-plus-jakarta-sans)", "system-ui", "sans-serif"],
-        heading: ["var(--font-space-grotesk)", "system-ui", "sans-serif"],
+        // Standardized font tokens
+        sans: ["var(--font-primary)", "system-ui", "sans-serif"],
+        heading: ["var(--font-secondary)", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

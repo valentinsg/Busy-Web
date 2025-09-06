@@ -1,6 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { Space_Grotesk, Plus_Jakarta_Sans } from 'next/font/google'
+import { Space_Grotesk, Plus_Jakarta_Sans, Abel, DM_Sans, Libre_Barcode_39_Text, Poppins } from 'next/font/google'
 import type React from 'react'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Header } from '@/components/layout/header'
@@ -11,6 +11,7 @@ import { SplashGate } from '@/components/home/splash-gate'
 import { CustomCursor } from '@/components/custom-cursor'
 import { I18nProvider } from '@/components/i18n-provider'
 import { HtmlLang } from '@/components/layout/html-lang'
+import { PageTransition } from '@/components/layout/page-transition'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -21,6 +22,37 @@ const spaceGrotesk = Space_Grotesk({
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
   variable: '--font-plus-jakarta-sans',
+  display: 'swap',
+})
+
+// Additional fonts migrated from <link> to next/font
+const abel = Abel({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-abel',
+  display: 'swap',
+})
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-dm-sans',
+  display: 'swap',
+})
+
+const libreBarcode39Text = Libre_Barcode_39_Text({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-libre-barcode-39-text',
+  display: 'swap',
+})
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: [
+    '100', '200', '300', '400', '500', '600', '700', '800', '900',
+  ],
+  variable: '--font-poppins',
+  style: ['normal', 'italic'],
   display: 'swap',
 })
 
@@ -63,7 +95,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${spaceGrotesk.variable} ${plusJakartaSans.variable} font-sans antialiased`}
+        className={`${spaceGrotesk.variable} ${plusJakartaSans.variable} ${abel.variable} ${dmSans.variable} ${libreBarcode39Text.variable} ${poppins.variable} font-sans antialiased`}
       >
         <I18nProvider>
           <HtmlLang />
@@ -76,15 +108,17 @@ export default function RootLayout({
             <SplashGate />
             <div className="relative flex min-h-screen flex-col">
               <Header />
-              <main className="flex-1">{children}</main>
+              <PageTransition>
+                <main className="flex-1">{children}</main>
+              </PageTransition>
               <Footer />
             </div>
             <Toaster />
           </ThemeProvider>
         </I18nProvider>
+        {/* Custom cursor should be rendered within <body> to avoid removeChild null errors */}
+        <CustomCursor />
       </body>
-      <CustomCursor />
-
     </html>
   )
 }

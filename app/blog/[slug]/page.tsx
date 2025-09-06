@@ -8,8 +8,12 @@ import { Separator } from "@/components/ui/separator"
 import { Card, CardContent } from "@/components/ui/card"
 import { getPostBySlug, getAllPosts } from "@/lib/blog"
 import { format } from "date-fns"
+import { cookies } from "next/headers"
+import { enUS, es } from "date-fns/locale"
+import { I18nText } from "@/components/blog/i18n-text"
 import { MDXRemote } from "next-mdx-remote/rsc"
 import remarkGfm from "remark-gfm"
+// Note: This page is a server component. Avoid client hooks here.
 
 interface BlogPostPageProps {
   params: {
@@ -48,14 +52,17 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null
   const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null
 
+  const localeCookie = cookies().get("busy_locale")?.value
+  const dfnsLocale = localeCookie === "es" ? es : enUS
+
   return (
-    <div className="container px-4 py-8">
+    <div className="container px-4 py-8 pt-20">
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <Button asChild variant="ghost" className="mb-8">
           <Link href="/blog">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Blog
+            <I18nText k="blog.post.back" />
           </Link>
         </Button>
 
@@ -78,7 +85,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  {format(new Date(post.date), "MMMM dd, yyyy")}
+                  {format(new Date(post.date), "MMMM dd, yyyy", { locale: dfnsLocale })}
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
@@ -86,9 +93,9 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                 </div>
               </div>
 
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" aria-label="Share" title="Share" data-label="Share">
                 <Share2 className="h-4 w-4 mr-2" />
-                Share
+                <I18nText k="blog.post.share" />
               </Button>
             </div>
           </header>
@@ -115,7 +122,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           {prevPost && (
             <Card>
               <CardContent className="p-6">
-                <div className="text-sm text-muted-foreground mb-2">Previous Article</div>
+                <div className="text-sm text-muted-foreground mb-2"><I18nText k="blog.post.prev" /></div>
                 <Link href={`/blog/${prevPost.slug}`} className="group">
                   <h3 className="font-medium group-hover:text-accent-brand transition-colors line-clamp-2">
                     {prevPost.title}
@@ -128,7 +135,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           {nextPost && (
             <Card>
               <CardContent className="p-6">
-                <div className="text-sm text-muted-foreground mb-2">Next Article</div>
+                <div className="text-sm text-muted-foreground mb-2"><I18nText k="blog.post.next" /></div>
                 <Link href={`/blog/${nextPost.slug}`} className="group">
                   <h3 className="font-medium group-hover:text-accent-brand transition-colors line-clamp-2">
                     {nextPost.title}
@@ -143,12 +150,10 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="mt-16 text-center">
           <Card>
             <CardContent className="p-8">
-              <h3 className="font-heading text-2xl font-bold mb-4">Ready to Elevate Your Style?</h3>
-              <p className="text-muted-foreground mb-6">
-                Discover our latest collection of premium streetwear designed for the modern lifestyle.
-              </p>
-              <Button asChild size="lg">
-                <Link href="/products">Shop Collection</Link>
+              <h3 className="font-heading text-2xl font-bold mb-4"><I18nText k="blog.post.cta.title" /></h3>
+              <p className="text-muted-foreground mb-6"><I18nText k="blog.post.cta.subtitle" /></p>
+              <Button asChild size="lg" aria-label="Shop Collection" title="Shop Collection" data-label="Shop Collection">
+                <Link href="/products"><I18nText k="blog.post.cta.button" /></Link>
               </Button>
             </CardContent>
           </Card>

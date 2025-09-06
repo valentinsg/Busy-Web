@@ -17,7 +17,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0)
-  const [isHovered, setIsHovered] = React.useState(false)
+  const [, setIsHovered] = React.useState(false)
 
   const { addItem, openCart } = useCart()
 

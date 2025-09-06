@@ -10,7 +10,7 @@ interface SplashScreenProps {
 
 export function SplashScreen({ onComplete }: SplashScreenProps) {
   const [progress, setProgress] = useState(0)
-  const [matrixText, setMatrixText] = useState("")
+  const [, setMatrixText] = useState("")
   const [isComplete, setIsComplete] = useState(false)
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       clearInterval(interval)
       clearInterval(matrixInterval)
     }
-  }, [])
+  }, [onComplete])
 
   return (
     <div
@@ -57,9 +57,9 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         isComplete ? "opacity-0 pointer-events-none" : "opacity-100",
       )}
     >
-      <div className="relative w-48 h-48 mb-8">
+      <div className="relative w-[528px] h-[528px] ">
         <Image
-          src="/logo-busy-white.png"
+          src="/busy-charge.gif"
           alt="Busy"
           fill
           className="object-contain"
@@ -67,16 +67,12 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         />
       </div>
 
-      {/* Matrix-style loading text */}
-      <div className="font-mono text-white mb-4 h-6">{`LOADING_SYSTEM: ${matrixText}`}</div>
-
       {/* Progress bar container */}
       <div className="w-64 h-1 bg-white/30 rounded-full overflow-hidden">
         <div className="h-full bg-white transition-all duration-100 ease-out" style={{ width: `${progress}%` }} />
       </div>
-
       {/* Progress percentage */}
-      <div className="mt-2 font-mono text-sm text-white">{`${progress}%`}</div>
+      <div className="mt-2 font-mono text-sm text-white">{progress}%</div>
     </div>
   )
 }

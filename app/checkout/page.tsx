@@ -13,11 +13,13 @@ import { Separator } from "@/components/ui/separator"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useCart } from "@/hooks/use-cart"
 import { formatPrice, capitalize } from "@/lib/format"
+import { useI18n } from "@/components/i18n-provider"
 
 const CHECKOUT_MODE = process.env.NEXT_PUBLIC_CHECKOUT_MODE || "mailto"
 
 export default function CheckoutPage() {
   const { items, getTotalItems, getTotalPrice, clearCart } = useCart()
+  const { t } = useI18n()
   const [shippingData, setShippingData] = React.useState({
     firstName: "",
     lastName: "",
@@ -101,12 +103,12 @@ Phone: ${shippingData.phone}
     return (
       <div className="container px-4 py-16">
         <div className="max-w-2xl mx-auto text-center">
-          <h1 className="font-heading text-3xl font-bold mb-4">No items to checkout</h1>
-          <p className="text-muted-foreground mb-8">
-            Your cart is empty. Add some products before proceeding to checkout.
+          <h1 className="font-heading text-3xl font-bold mb-4">{t("checkout.empty.title")}</h1>
+          <p className="font-body text-muted-foreground mb-8">
+            {t("checkout.empty.subtitle")}
           </p>
           <Button asChild size="lg">
-            <Link href="/products">Continue Shopping</Link>
+            <Link href="/products">{t("checkout.empty.cta")}</Link>
           </Button>
         </div>
       </div>
@@ -114,17 +116,17 @@ Phone: ${shippingData.phone}
   }
 
   return (
-    <div className="container px-4 py-8">
+    <div className="container px-4 py-8 pt-20">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <Button asChild variant="ghost" className="mb-4">
             <Link href="/cart">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Cart
+              {t("checkout.header.back")}
             </Link>
           </Button>
-          <h1 className="font-heading text-3xl font-bold">Checkout</h1>
+          <h1 className="font-heading text-3xl font-bold">{t("checkout.header.title")}</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -133,12 +135,12 @@ Phone: ${shippingData.phone}
             {/* Shipping Information */}
             <Card>
               <CardHeader>
-                <CardTitle>Shipping Information</CardTitle>
+                <CardTitle className="font-heading">{t("checkout.shipping.title")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName" className="font-body">{t("checkout.fields.first_name")}</Label>
                     <Input
                       id="firstName"
                       value={shippingData.firstName}
@@ -147,7 +149,7 @@ Phone: ${shippingData.phone}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="lastName" className="font-body">{t("checkout.fields.last_name")}</Label>
                     <Input
                       id="lastName"
                       value={shippingData.lastName}
@@ -158,7 +160,7 @@ Phone: ${shippingData.phone}
                 </div>
 
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="font-body">{t("checkout.fields.email")}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -169,7 +171,7 @@ Phone: ${shippingData.phone}
                 </div>
 
                 <div>
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone" className="font-body">{t("checkout.fields.phone")}</Label>
                   <Input
                     id="phone"
                     type="tel"
@@ -180,7 +182,7 @@ Phone: ${shippingData.phone}
                 </div>
 
                 <div>
-                  <Label htmlFor="address">Address</Label>
+                  <Label htmlFor="address" className="font-body">{t("checkout.fields.address")}</Label>
                   <Input
                     id="address"
                     value={shippingData.address}
@@ -191,7 +193,7 @@ Phone: ${shippingData.phone}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="city">City</Label>
+                    <Label htmlFor="city" className="font-body">{t("checkout.fields.city")}</Label>
                     <Input
                       id="city"
                       value={shippingData.city}
@@ -200,7 +202,7 @@ Phone: ${shippingData.phone}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="state">State</Label>
+                    <Label htmlFor="state" className="font-body">{t("checkout.fields.state")}</Label>
                     <Input
                       id="state"
                       value={shippingData.state}
@@ -212,7 +214,7 @@ Phone: ${shippingData.phone}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="zipCode">ZIP Code</Label>
+                    <Label htmlFor="zipCode" className="font-body">{t("checkout.fields.zip")}</Label>
                     <Input
                       id="zipCode"
                       value={shippingData.zipCode}
@@ -221,15 +223,15 @@ Phone: ${shippingData.phone}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="country">Country</Label>
+                    <Label htmlFor="country" className="font-body">{t("checkout.fields.country")}</Label>
                     <Select value={shippingData.country} onValueChange={(value) => handleInputChange("country", value)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="US">United States</SelectItem>
-                        <SelectItem value="CA">Canada</SelectItem>
-                        <SelectItem value="MX">Mexico</SelectItem>
+                        <SelectItem value="US">{t("checkout.countries.US")}</SelectItem>
+                        <SelectItem value="CA">{t("checkout.countries.CA")}</SelectItem>
+                        <SelectItem value="MX">{t("checkout.countries.MX")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -240,16 +242,16 @@ Phone: ${shippingData.phone}
             {/* Payment Method */}
             <Card>
               <CardHeader>
-                <CardTitle>Payment Method</CardTitle>
+                <CardTitle className="font-heading">{t("checkout.payment.title")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
                   {CHECKOUT_MODE === "stripe-test" && (
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="card" id="card" />
-                      <Label htmlFor="card" className="flex items-center space-x-2">
+                      <Label htmlFor="card" className="font-body flex items-center space-x-2">
                         <CreditCard className="h-4 w-4" />
-                        <span>Credit Card (Stripe)</span>
+                        <span>{t("checkout.payment.options.card")}</span>
                       </Label>
                     </div>
                   )}
@@ -257,9 +259,9 @@ Phone: ${shippingData.phone}
                   {CHECKOUT_MODE === "mailto" && (
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="email" id="email" />
-                      <Label htmlFor="email" className="flex items-center space-x-2">
+                      <Label htmlFor="email" className="font-body flex items-center space-x-2">
                         <Mail className="h-4 w-4" />
-                        <span>Email Order</span>
+                        <span>{t("checkout.payment.options.email")}</span>
                       </Label>
                     </div>
                   )}
@@ -267,18 +269,18 @@ Phone: ${shippingData.phone}
                   {CHECKOUT_MODE === "whatsapp" && (
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="whatsapp" id="whatsapp" />
-                      <Label htmlFor="whatsapp" className="flex items-center space-x-2">
+                      <Label htmlFor="whatsapp" className="font-body flex items-center space-x-2">
                         <MessageCircle className="h-4 w-4" />
-                        <span>WhatsApp Order</span>
+                        <span>{t("checkout.payment.options.whatsapp")}</span>
                       </Label>
                     </div>
                   )}
                 </RadioGroup>
 
-                <div className="mt-4 p-4 bg-muted rounded-lg text-sm text-muted-foreground">
-                  {CHECKOUT_MODE === "mailto" && "Your order will be sent via email for processing."}
-                  {CHECKOUT_MODE === "whatsapp" && "Your order will be sent via WhatsApp for processing."}
-                  {CHECKOUT_MODE === "stripe-test" && "This is a test environment. No real payments will be processed."}
+                <div className="mt-4 p-4 bg-muted rounded-lg text-sm text-muted-foreground font-body">
+                  {CHECKOUT_MODE === "mailto" && t("checkout.payment.notice.mailto")}
+                  {CHECKOUT_MODE === "whatsapp" && t("checkout.payment.notice.whatsapp")}
+                  {CHECKOUT_MODE === "stripe-test" && t("checkout.payment.notice.stripe")}
                 </div>
               </CardContent>
             </Card>
@@ -288,7 +290,7 @@ Phone: ${shippingData.phone}
           <div>
             <Card className="sticky top-24">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle className="font-heading">{t("checkout.summary.title")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Order Items */}
@@ -320,22 +322,22 @@ Phone: ${shippingData.phone}
                 <Separator />
 
                 {/* Pricing Breakdown */}
-                <div className="space-y-2">
+                <div className="space-y-2 font-body">
                   <div className="flex justify-between">
-                    <span>Subtotal ({totalItems} items)</span>
+                    <span>{t("checkout.summary.subtotal_items").replace("{count}", String(totalItems))}</span>
                     <span>{formatPrice(totalPrice)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span>{estimatedShipping === 0 ? "Free" : formatPrice(estimatedShipping)}</span>
+                    <span>{t("checkout.summary.shipping")}</span>
+                    <span>{estimatedShipping === 0 ? t("cart.shipping_free") : formatPrice(estimatedShipping)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Tax (estimated)</span>
+                    <span>{t("checkout.summary.tax")}</span>
                     <span>{formatPrice(estimatedTax)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
-                    <span>Total</span>
+                    <span>{t("checkout.summary.total")}</span>
                     <span>{formatPrice(finalTotal)}</span>
                   </div>
                 </div>
@@ -349,14 +351,14 @@ Phone: ${shippingData.phone}
                     !shippingData.firstName || !shippingData.lastName || !shippingData.email || !shippingData.address
                   }
                 >
-                  {CHECKOUT_MODE === "whatsapp" && "Complete Order via WhatsApp"}
-                  {CHECKOUT_MODE === "mailto" && "Complete Order via Email"}
-                  {CHECKOUT_MODE === "stripe-test" && "Complete Order"}
+                  {CHECKOUT_MODE === "whatsapp" && t("checkout.cta.complete.whatsapp")}
+                  {CHECKOUT_MODE === "mailto" && t("checkout.cta.complete.mailto")}
+                  {CHECKOUT_MODE === "stripe-test" && t("checkout.cta.complete.stripe")}
                 </Button>
 
                 {/* Security Notice */}
-                <div className="text-xs text-center text-muted-foreground">
-                  Your information is secure and encrypted
+                <div className="font-body text-xs text-center text-muted-foreground">
+                  {t("checkout.security_notice")}
                 </div>
               </CardContent>
             </Card>

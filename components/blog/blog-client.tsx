@@ -8,7 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
+import { enUS, es as esLocale } from "date-fns/locale"
 import type { BlogPost } from "@/types/blog"
+import { useI18n } from "@/components/i18n-provider"
 
 interface BlogClientProps {
   allPosts: BlogPost[]
@@ -16,6 +18,8 @@ interface BlogClientProps {
 }
 
 export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
+  const { t, locale } = useI18n() as { t: (k: string) => string; locale: "en" | "es" }
+  const dfnsLocale = locale === "es" ? esLocale : enUS
   const [searchQuery, setSearchQuery] = React.useState("")
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null)
 
@@ -41,17 +45,15 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
   }, [allPosts, searchQuery, selectedTag])
 
   const featuredPost = filteredPosts[0] ?? allPosts[0]
-  const regularPosts = filteredPosts.length > 0 ? filteredPosts.slice(1) : allPosts.slice(1)
+  //const regularPosts = filteredPosts.length > 0 ? filteredPosts.slice(1) : allPosts.slice(1)
 
   return (
     <div className="container px-4 py-8 pt-24">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">Busy Blog</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Stories, insights, and inspiration from the world of streetwear and modern lifestyle.
-          </p>
+          <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">{t("blog.header.title")}</h1>
+          <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">{t("blog.header.subtitle")}</p>
         </div>
 
         {/* Search and Filters */}
@@ -60,7 +62,7 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search articles..."
+                placeholder={t("blog.search.placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -74,8 +76,11 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
               variant={selectedTag === null ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedTag(null)}
+              aria-label={t("blog.tags.all")}
+              title={t("blog.tags.all")}
+              data-label={t("blog.tags.all")}
             >
-              All Posts
+              {t("blog.tags.all")}
             </Button>
             {allTags.map((tag) => (
               <Button
@@ -83,6 +88,9 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
                 variant={selectedTag === tag ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedTag(tag)}
+                aria-label={tag}
+                title={tag}
+                data-label={tag}
               >
                 {tag}
               </Button>
@@ -93,7 +101,7 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
         {/* Featured Post */}
         {!searchQuery && !selectedTag && featuredPost && (
           <div className="mb-16">
-            <h2 className="font-heading text-2xl font-bold mb-6">Featured Article</h2>
+            <h2 className="font-heading text-2xl font-bold mb-6">{t("blog.featured.title")}</h2>
             <Card className="overflow-hidden">
               <CardContent className="p-8">
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -104,19 +112,19 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
                   ))}
                 </div>
                 <h3 className="font-heading text-2xl font-bold mb-4 line-clamp-2">{featuredPost.title}</h3>
-                <p className="text-muted-foreground mb-6 line-clamp-3">{featuredPost.description}</p>
+                <p className="font-body text-muted-foreground mb-6 line-clamp-3">{featuredPost.description}</p>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    {format(new Date(featuredPost.date), "MMM dd, yyyy")}
+                    {format(new Date(featuredPost.date), "MMM dd, yyyy", { locale: dfnsLocale })}
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
                     {featuredPost.readingTime}
                   </div>
                 </div>
-                <Button asChild>
-                  <Link href={`/blog/${featuredPost.slug}`}>Read Article</Link>
+                <Button asChild aria-label={t("blog.featured.cta")} title={t("blog.featured.cta")} data-label={t("blog.featured.cta")}>
+                  <Link href={`/blog/${featuredPost.slug}`}>{t("blog.featured.cta")}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -127,10 +135,10 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-heading text-2xl font-bold">
-              {searchQuery || selectedTag ? "Search Results" : "Latest Articles"}
+              {searchQuery || selectedTag ? t("blog.list.search_results") : t("blog.list.latest")}
             </h2>
-            <p className="text-sm text-muted-foreground">
-              {filteredPosts.length} article{filteredPosts.length !== 1 ? "s" : ""} found
+            <p className="font-body text-sm text-muted-foreground">
+              {t("blog.list.count").replace("{count}", String(filteredPosts.length))}
             </p>
           </div>
 
@@ -138,8 +146,8 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
             <div className="text-center py-12">
               <div className="text-muted-foreground mb-4">
                 <Search className="h-12 w-12 mx-auto mb-4" />
-                <h3 className="font-medium mb-2">No articles found</h3>
-                <p className="text-sm">Try adjusting your search or browse all posts</p>
+                <h3 className="font-heading font-medium mb-2">{t("blog.empty.title")}</h3>
+                <p className="font-body text-sm">{t("blog.empty.subtitle")}</p>
               </div>
               <Button
                 onClick={() => {
@@ -147,8 +155,11 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
                   setSelectedTag(null)
                 }}
                 variant="outline"
+                aria-label={t("blog.empty.clear")}
+                title={t("blog.empty.clear")}
+                data-label={t("blog.empty.clear")}
               >
-                Clear Filters
+                {t("blog.empty.clear")}
               </Button>
             </div>
           ) : (
@@ -167,11 +178,11 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
                       <h3 className="font-heading text-lg font-semibold mb-2 line-clamp-2 group-hover:text-accent-brand transition-colors">
                         {post.title}
                       </h3>
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{post.description}</p>
+                      <p className="font-body text-muted-foreground text-sm mb-4 line-clamp-2">{post.description}</p>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {format(new Date(post.date), "MMM dd")}
+                          {format(new Date(post.date), "MMM dd", { locale: dfnsLocale })}
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />

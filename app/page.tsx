@@ -22,6 +22,27 @@ const staggerContainer = {
   },
 }
 
+// Subtle, immersive entrance for product cards
+const immersiveItem = {
+  initial: { opacity: 0, y: 24, scale: 0.98, filter: "blur(8px)" },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.7 },
+  },
+}
+
+const immersiveContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.16,
+      delayChildren: 0.05,
+    },
+  },
+}
+
 export default function Home() {
   const { t } = useI18n()
   const featuredProducts = getProducts().slice(0, 4)
@@ -41,20 +62,20 @@ export default function Home() {
         <div className="container px-4">
           <motion.div {...fadeInUp} className="text-center mb-12">
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">{t("home.latest.title")}</h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground font-body text-lg max-w-2xl mx-auto">
               {t("home.latest.subtitle")}
             </p>
           </motion.div>
 
           <motion.div
-            variants={staggerContainer}
+            variants={immersiveContainer}
             initial="initial"
             whileInView="animate"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.2 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
             {featuredProducts.map((product) => (
-              <motion.div key={product.id} variants={fadeInUp}>
+              <motion.div key={product.id} variants={immersiveItem} >
                 <ProductCard product={product} />
               </motion.div>
             ))}
@@ -62,7 +83,7 @@ export default function Home() {
 
           <motion.div {...fadeInUp} className="text-center mt-12">
             <Button asChild variant="outline" size="lg">
-              <Link href="/products">{t("home.latest.view_all")}</Link>
+              <Link href="/products" className="font-heading">{t("home.latest.view_all")}</Link>
             </Button>
           </motion.div>
         </div>

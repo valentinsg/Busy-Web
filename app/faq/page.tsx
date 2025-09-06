@@ -47,7 +47,7 @@ export default function FAQPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Can't find what you're looking for? Our customer support team is here to help.
+                Can&apos;t find what you&apos;re looking for? Our customer support team is here to help.
               </p>
               <Button asChild>
                 <Link href="/contact">Contact Support</Link>
@@ -63,7 +63,7 @@ export default function FAQPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-4">Send us an email and we'll get back to you within 24 hours.</p>
+              <p className="text-muted-foreground mb-4">Send us an email and we&apos;ll get back to you within 24 hours.</p>
               <Button asChild variant="outline">
                 <a href="mailto:support@busy.com">support@busy.com</a>
               </Button>

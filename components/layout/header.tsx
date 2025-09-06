@@ -1,7 +1,8 @@
 'use client'
 
-import { ThemeToggle } from '@/components/layout/theme-toggle'
+import { useI18n } from '@/components/i18n-provider'
 import { LanguageToggle } from '@/components/layout/language-toggle'
+import { ThemeToggle } from '@/components/layout/theme-toggle'
 import { CartSheet } from '@/components/shop/cart-sheet'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,7 +14,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
-import { useI18n } from '@/components/i18n-provider'
 
 const navigation = [
   { key: 'home', href: '/' },
@@ -30,8 +30,11 @@ export function Header() {
   const pathname = usePathname()
   const { t } = useI18n()
 
-  const { getTotalItems, openCart } = useCart()
-  const cartCount = getTotalItems()
+  const { getTotalItems } = useCart()
+  // Hydration guard: ensure SSR/CSR render same markup initially
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => setMounted(true), [])
+  const cartCount = mounted ? getTotalItems() : 0
 
   const isHome = pathname === '/'
   const showHeroVariant = isHome && heroInView
@@ -53,11 +56,9 @@ export function Header() {
     // Start transition a bit later (more scroll): 0.7 instead of 0.8
     const ENTER_STANDARD_AT = 0.7
     const RETURN_HERO_AT = 0.9
-    let last = 1
     const observer = new IntersectionObserver(
       ([entry]) => {
         const ratio = entry.intersectionRatio ?? 0
-        last = ratio
         setHeroInView((prev) => {
           if (prev) {
             // currently hero; leave hero only when ratio drops clearly below 0.8
@@ -77,7 +78,7 @@ export function Header() {
   return (
     <header
       className={
-        'fixed top-0 left-0 right-0 z-50 w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
+        'fixed font-heading top-0 left-0 right-0 z-50 w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
         (showHeroVariant
           ? '!border-0 !bg-transparent supports-[backdrop-filter]:!bg-transparent !backdrop-blur-0 !shadow-none'
           : 'border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60')
@@ -140,7 +141,7 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav
           className={
-            'hidden md:flex items-center z-30 space-x-6 transition-opacity duration-500 ease-out transform-gpu will-change-[opacity] ' +
+            'hidden md:flex items-center z-30 space-x-6 font-heading transition-opacity duration-500 ease-out transform-gpu will-change-[opacity] ' +
             (showHeroVariant ? 'opacity-0 pointer-events-none' : 'opacity-100')
           }
         >
@@ -148,7 +149,7 @@ export function Header() {
             <Link
               key={item.key}
               href={item.href}
-              className="text-sm font-medium transition-colors hover:text-accent-brand"
+              className="text-sm transition-colors hover:text-accent-brand"
             >
               {t(`nav.${item.key}`)}
             </Link>
@@ -181,14 +182,16 @@ export function Header() {
           <CartSheet>
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs"
-                >
-                  {cartCount}
-                </Badge>
-              )}
+              <Badge
+                variant="destructive"
+                aria-hidden
+                className={
+                  "absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs transition-transform ease-out duration-150 " +
+                  (cartCount > 0 ? "opacity-100 scale-100" : "opacity-0 scale-0")
+                }
+              >
+                {cartCount > 0 ? String(cartCount) : ""}
+              </Badge>
             </Button>
           </CartSheet>
 
@@ -217,7 +220,7 @@ export function Header() {
                 </div>
 
                 {/* Mobile Navigation */}
-                <nav className="flex flex-col space-y-2">
+                <nav className="flex flex-col space-y-2 font-heading">
                   {navigation.map((item) => (
                     <Link
                       key={item.key}

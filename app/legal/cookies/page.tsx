@@ -5,7 +5,7 @@ export const metadata = {
 
 export default function CookiesPage() {
   return (
-    <div className="container px-4 py-8">
+    <div className="container px-4 py-8 pt-20">
       <div className="max-w-4xl mx-auto prose prose-neutral dark:prose-invert">
         <h1>Cookie Policy</h1>
         <p className="text-muted-foreground">Last updated: January 15, 2025</p>

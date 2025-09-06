@@ -1,16 +1,16 @@
 "use client"
 
-import type * as React from "react"
+import { useI18n } from "@/components/i18n-provider"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { useCart } from "@/hooks/use-cart"
+import { capitalize, formatPrice } from "@/lib/format"
+import { Minus, Plus, ShoppingBag, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { X, Plus, Minus, ShoppingBag } from "lucide-react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useCart } from "@/hooks/use-cart"
-import { formatPrice, capitalize } from "@/lib/format"
-import { useI18n } from "@/components/i18n-provider"
+import { useState, useEffect } from "react"
 
 interface CartSheetProps {
   children: React.ReactNode
@@ -20,20 +20,26 @@ export function CartSheet({ children }: CartSheetProps) {
   const { items, isOpen, openCart, closeCart, removeItem, updateQuantity, getTotalItems, getTotalPrice, clearCart } = useCart()
   const { t } = useI18n()
 
-  const totalItems = getTotalItems()
-  const totalPrice = getTotalPrice()
+  // Hydration guard: ensure initial client render matches SSR
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  // Use safe values before mount to match SSR (which can't see client cart)
+  const totalItems = mounted ? getTotalItems() : 0
+  const totalPrice = mounted ? getTotalPrice() : 0
   const estimatedShipping = totalPrice > 100 ? 0 : 9.99
   const estimatedTax = totalPrice * 0.08 // 8% tax placeholder
   const finalTotal = totalPrice + estimatedShipping + estimatedTax
+  const itemsForRender = mounted ? items : []
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => (open ? openCart() : closeCart())}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg">
+      <SheetContent className="w-full sm:max-w-lg py-14 ">
         <SheetHeader>
-          <SheetTitle className="flex items-center justify-between">
+          <SheetTitle className="font-heading flex items-center justify-between">
             <span>{t("cart.title")} ({totalItems})</span>
-            {items.length > 0 && (
+            {itemsForRender.length > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -49,12 +55,12 @@ export function CartSheet({ children }: CartSheetProps) {
           </SheetTitle>
         </SheetHeader>
 
-        {items.length === 0 ? (
+        {itemsForRender.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full space-y-4">
             <ShoppingBag className="h-16 w-16 text-muted-foreground" />
             <div className="text-center">
-              <h3 className="font-medium mb-2">{t("cart.empty.title")}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{t("cart.empty.subtitle")}</p>
+              <h3 className="font-heading font-medium mb-2">{t("cart.empty.title")}</h3>
+              <p className="font-body text-sm text-muted-foreground mb-4">{t("cart.empty.subtitle")}</p>
               <Button asChild onClick={closeCart} aria-label={t("cart.empty.cta")} title={t("cart.empty.cta")} data-label={t("cart.empty.cta")}>
                 <Link href="/products">{t("cart.empty.cta")}</Link>
               </Button>
@@ -65,7 +71,7 @@ export function CartSheet({ children }: CartSheetProps) {
             {/* Cart Items */}
             <ScrollArea className="flex-1 -mx-6 px-6">
               <div className="space-y-4 py-4">
-                {items.map((item) => (
+                {itemsForRender.map((item) => (
                   <div key={`${item.product.id}-${item.selectedSize}-${item.selectedColor}`} className="flex space-x-4">
                     <div className="relative w-16 h-16 bg-muted rounded-md overflow-hidden">
                       <Image
@@ -78,7 +84,7 @@ export function CartSheet({ children }: CartSheetProps) {
 
                     <div className="flex-1 space-y-1">
                       <h4 className="font-medium text-sm line-clamp-2">{item.product.name}</h4>
-                      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                      <div className="font-body flex items-center space-x-2 text-xs text-muted-foreground">
                         <span>{capitalize(item.selectedColor)}</span>
                         <span>•</span>
                         <span>{item.selectedSize}</span>
@@ -138,7 +144,7 @@ export function CartSheet({ children }: CartSheetProps) {
 
             {/* Cart Summary */}
             <div className="space-y-4 pt-4 border-t">
-              <div className="space-y-2 text-sm">
+              <div className="font-body space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>{t("cart.subtotal")}</span>
                   <span>{formatPrice(totalPrice)}</span>
@@ -174,7 +180,7 @@ export function CartSheet({ children }: CartSheetProps) {
 
               {/* Free Shipping Notice */}
               {totalPrice < 100 && (
-                <div className="text-xs text-center text-muted-foreground">
+                <div className="font-body text-xs text-center text-muted-foreground">
                   {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100 - totalPrice))}
                 </div>
               )}

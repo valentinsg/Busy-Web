@@ -1,4 +1,5 @@
 "use client"
+import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Plus, Minus, X, ShoppingBag } from "lucide-react"
@@ -7,27 +8,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/hooks/use-cart"
 import { formatPrice, capitalize } from "@/lib/format"
+import { useI18n } from "@/components/i18n-provider"
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice, clearCart } = useCart()
+  const { t } = useI18n()
+  // Hydration guard: avoid SSR/CSR mismatch
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => setMounted(true), [])
 
-  const totalItems = getTotalItems()
-  const totalPrice = getTotalPrice()
+  const totalItems = mounted ? getTotalItems() : 0
+  const totalPrice = mounted ? getTotalPrice() : 0
   const estimatedShipping = totalPrice > 100 ? 0 : 9.99
   const estimatedTax = totalPrice * 0.08 // 8% tax placeholder
   const finalTotal = totalPrice + estimatedShipping + estimatedTax
+  const itemsForRender = mounted ? items : []
 
-  if (items.length === 0) {
+  if (itemsForRender.length === 0) {
     return (
       <div className="container px-4 py-16">
         <div className="max-w-2xl mx-auto text-center">
           <ShoppingBag className="h-24 w-24 text-muted-foreground mx-auto mb-6" />
-          <h1 className="font-heading text-3xl font-bold mb-4">Your cart is empty</h1>
-          <p className="text-muted-foreground mb-8">
-            Looks like you haven't added any items to your cart yet. Start shopping to fill it up!
-          </p>
+          <h1 className="font-heading text-3xl font-bold mb-4">{t("cart.empty.title")}</h1>
+          <p className="font-body text-muted-foreground mb-8">{t("cart.empty.subtitle")}</p>
           <Button asChild size="lg">
-            <Link href="/products">Continue Shopping</Link>
+            <Link href="/products">{t("cart.empty.cta")}</Link>
           </Button>
         </div>
       </div>
@@ -35,7 +40,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="container px-4 py-8">
+    <div className="container px-4 py-8 pt-20">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -43,18 +48,18 @@ export default function CartPage() {
             <Button asChild variant="ghost" className="mb-4">
               <Link href="/products">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Continue Shopping
+                {t("cart.empty.cta")}
               </Link>
             </Button>
-            <h1 className="font-heading text-3xl font-bold">Shopping Cart ({totalItems} items)</h1>
+            <h1 className="font-heading text-3xl font-bold">{t("cart.title")} ({totalItems})</h1>
           </div>
-          {items.length > 0 && (
+          {itemsForRender.length > 0 && (
             <Button
               variant="outline"
               onClick={clearCart}
               className="text-destructive hover:text-destructive bg-transparent"
             >
-              Clear Cart
+              {t("cart.clear_all")}
             </Button>
           )}
         </div>
@@ -62,7 +67,7 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (
+            {itemsForRender.map((item) => (
               <Card key={`${item.product.id}-${item.selectedSize}-${item.selectedColor}`}>
                 <CardContent className="p-6">
                   <div className="flex space-x-4">
@@ -125,7 +130,7 @@ export default function CartPage() {
 
                         <div className="text-right">
                           <div className="font-semibold">{formatPrice(item.product.price * item.quantity)}</div>
-                          <div className="text-sm text-muted-foreground">{formatPrice(item.product.price)} each</div>
+                          <div className="font-body text-sm text-muted-foreground">{formatPrice(item.product.price)}</div>
                         </div>
                       </div>
                     </div>
@@ -139,42 +144,42 @@ export default function CartPage() {
           <div className="lg:col-span-1">
             <Card className="sticky top-24">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle className="font-heading">{t("checkout.summary.title")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
+                <div className="font-body space-y-2">
                   <div className="flex justify-between">
-                    <span>Subtotal ({totalItems} items)</span>
+                    <span>{t("checkout.summary.subtotal_items").replace("{count}", String(totalItems))}</span>
                     <span>{formatPrice(totalPrice)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span>{estimatedShipping === 0 ? "Free" : formatPrice(estimatedShipping)}</span>
+                    <span>{t("checkout.summary.shipping")}</span>
+                    <span>{estimatedShipping === 0 ? t("cart.shipping_free") : formatPrice(estimatedShipping)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Tax (estimated)</span>
+                    <span>{t("checkout.summary.tax")}</span>
                     <span>{formatPrice(estimatedTax)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
-                    <span>Total</span>
+                    <span>{t("checkout.summary.total")}</span>
                     <span>{formatPrice(finalTotal)}</span>
                   </div>
                 </div>
 
                 <Button asChild className="w-full" size="lg">
-                  <Link href="/checkout">Proceed to Checkout</Link>
+                  <Link href="/checkout">{t("cart.checkout")}</Link>
                 </Button>
 
                 {/* Free Shipping Notice */}
                 {totalPrice < 100 && (
-                  <div className="text-sm text-center text-muted-foreground p-3 bg-muted rounded-lg">
-                    Add {formatPrice(100 - totalPrice)} more for free shipping
+                  <div className="font-body text-sm text-center text-muted-foreground p-3 bg-muted rounded-lg">
+                    {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100 - totalPrice))}
                   </div>
                 )}
 
                 {/* Security Notice */}
-                <div className="text-xs text-center text-muted-foreground">Secure checkout with SSL encryption</div>
+                <div className="font-body text-xs text-center text-muted-foreground">{t("checkout.security_notice")}</div>
               </CardContent>
             </Card>
           </div>

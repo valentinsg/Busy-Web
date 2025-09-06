@@ -49,7 +49,7 @@ export default function ContactPage() {
       })
 
       setFormData({ name: "", email: "", subject: "", message: "" })
-    } catch (error) {
+    } catch {
       toast({
         title: t("contact.toast.error.title"),
         description: t("contact.toast.error.desc"),
@@ -66,7 +66,7 @@ export default function ContactPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="font-heading text-4xl font-bold mb-4">{t("contact.header.title")}</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t("contact.header.subtitle")}</p>
+          <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">{t("contact.header.subtitle")}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -81,7 +81,7 @@ export default function ContactPage() {
                   <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <div className="font-medium">{t("contact.info.address.title")}</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="font-body text-sm text-muted-foreground">
                       {t("contact.info.address.line1")}
                       <br />
                       {t("contact.info.address.line2")}
@@ -93,7 +93,7 @@ export default function ContactPage() {
                   <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <div className="font-medium">{t("contact.info.phone.title")}</div>
-                    <div className="text-sm text-muted-foreground">{t("contact.info.phone.value")}</div>
+                    <div className="font-body text-sm text-muted-foreground">{t("contact.info.phone.value")}</div>
                   </div>
                 </div>
 
@@ -101,15 +101,15 @@ export default function ContactPage() {
                   <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <div className="font-medium">{t("contact.info.email.title")}</div>
-                    <div className="text-sm text-muted-foreground">{t("contact.info.email.value")}</div>
+                    <div className="font-body text-sm text-muted-foreground">{t("contact.info.email.value")}</div>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3">
+                <div className="font-body flex items-center gap-1">
                   <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <div className="font-medium">{t("contact.info.hours.title")}</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="font-body text-sm text-muted-foreground">
                       {t("contact.info.hours.weekdays")}
                       <br />
                       {t("contact.info.hours.weekend")}
@@ -125,16 +125,16 @@ export default function ContactPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div>
-                  <a href="/faq" className="text-sm text-accent-brand hover:underline">{t("contact.links.faq")}</a>
+                  <a href="/faq" className="font-body text-sm text-accent-brand hover:underline">{t("contact.links.faq")}</a>
                 </div>
                 <div>
-                  <a href="/faq#size-guide" className="text-sm text-accent-brand hover:underline">{t("contact.links.size_guide")}</a>
+                  <a href="/faq#size-guide" className="font-body text-sm text-accent-brand hover:underline">{t("contact.links.size_guide")}</a>
                 </div>
                 <div>
-                  <a href="/faq#returns" className="text-sm text-accent-brand hover:underline">{t("contact.links.returns")}</a>
+                  <a href="/faq#returns" className="font-body text-sm text-accent-brand hover:underline">{t("contact.links.returns")}</a>
                 </div>
                 <div>
-                  <a href="/about" className="text-sm text-accent-brand hover:underline">{t("contact.links.about")}</a>
+                  <a href="/about" className="font-body text-sm text-accent-brand hover:underline">{t("contact.links.about")}</a>
                 </div>
               </CardContent>
             </Card>
@@ -203,7 +203,7 @@ export default function ContactPage() {
                     {isSubmitting ? t("contact.form.sending") : t("contact.form.submit")}
                   </Button>
 
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-body text-xs text-muted-foreground">
                     {t("contact.form.privacy")}
                   </p>
                 </form>

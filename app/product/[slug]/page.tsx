@@ -44,7 +44,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     .slice(0, 4)
 
   return (
-    <div className="container px-4 py-8">
+    <div className="container px-4 py-8 pt-20">
       <ProductDetail product={product} relatedProducts={relatedProducts} />
     </div>
   )
