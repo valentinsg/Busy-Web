@@ -1,0 +1,34 @@
+[
+  {
+    "q": "¿Envían a todo el país?",
+    "a": "Sí, enviamos a todo el país. Los envíos son gratuitos para pedidos superiores a $100. Para pedidos menores, el costo de envío es de $9.99."
+  },
+  {
+    "q": "¿Cuál es la guía de talles?",
+    "a": "Puedes encontrar nuestra guía de talles detallada en cada página de producto. Generalmente, nuestras prendas tienen un ajuste regular. Si tienes dudas, te recomendamos elegir una talla más grande para mayor comodidad."
+  },
+  {
+    "q": "¿Cuál es su política de devoluciones?",
+    "a": "Ofrecemos devoluciones gratuitas dentro de los 30 días posteriores a la compra. Los artículos deben estar en condiciones originales con etiquetas. Procesamos los reembolsos dentro de 5-7 días hábiles."
+  },
+  {
+    "q": "¿Cómo puedo rastrear mi pedido?",
+    "a": "Una vez que tu pedido sea enviado, recibirás un email con el número de seguimiento. Puedes usar este número en el sitio web del transportista para rastrear tu paquete en tiempo real."
+  },
+  {
+    "q": "¿Qué métodos de pago aceptan?",
+    "a": "Aceptamos todas las tarjetas de crédito principales (Visa, MasterCard, American Express), PayPal, y transferencias bancarias. Todos los pagos son procesados de forma segura."
+  },
+  {
+    "q": "¿Cómo debo cuidar mis prendas Busy?",
+    "a": "Para mantener la calidad de tus prendas, recomendamos lavar en agua fría, secar al aire cuando sea posible, y planchar a baja temperatura si es necesario. Evita el uso de blanqueadores."
+  },
+  {
+    "q": "¿Ofrecen descuentos para estudiantes?",
+    "a": "Sí, ofrecemos un 10% de descuento para estudiantes con identificación válida. También tenemos promociones especiales durante el año que puedes encontrar en nuestro newsletter."
+  },
+  {
+    "q": "¿Puedo cambiar o cancelar mi pedido?",
+    "a": "Puedes cambiar o cancelar tu pedido dentro de las primeras 2 horas después de realizarlo. Después de este tiempo, el pedido entra en procesamiento y no puede ser modificado."
+  }
+]

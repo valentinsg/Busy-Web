@@ -1,0 +1,114 @@
+[
+  {
+    "id": "busy-classic-black",
+    "name": "Busy Classic Black",
+    "price": 149.99,
+    "currency": "USD",
+    "images": [
+      "/products/busy-classic-black/1.jpg",
+      "/products/busy-classic-black/2.jpg",
+      "/products/busy-classic-black/3.jpg"
+    ],
+    "colors": ["black"],
+    "sizes": ["S", "M", "L", "XL"],
+    "category": "hoodies",
+    "sku": "BUSY-H-001",
+    "stock": 50,
+    "description": "Our signature hoodie in classic black. Made from premium cotton blend with a comfortable fit and modern streetwear aesthetic.",
+    "tags": ["streetwear", "classic", "premium"],
+    "rating": 4.8,
+    "reviews": 124
+  },
+  {
+    "id": "busy-premium-gray",
+    "name": "Busy Premium Gray",
+    "price": 154.99,
+    "currency": "USD",
+    "images": [
+      "/products/busy-premium-gray/1.jpg",
+      "/products/busy-premium-gray/2.jpg",
+      "/products/busy-premium-gray/3.jpg"
+    ],
+    "colors": ["gray"],
+    "sizes": ["S", "M", "L", "XL"],
+    "category": "hoodies",
+    "sku": "BUSY-H-002",
+    "stock": 35,
+    "description": "Elevated comfort meets contemporary design in this premium gray hoodie. Perfect for everyday wear with superior quality materials.",
+    "tags": ["streetwear", "premium", "comfort"],
+    "rating": 4.9,
+    "reviews": 89
+  },
+  {
+    "id": "busy-signature-navy",
+    "name": "Busy Signature Navy",
+    "price": 159.99,
+    "currency": "USD",
+    "images": [
+      "/products/busy-signature-navy/1.jpg",
+      "/products/busy-signature-navy/2.jpg",
+      "/products/busy-signature-navy/3.jpg"
+    ],
+    "colors": ["navy"],
+    "sizes": ["S", "M", "L", "XL"],
+    "category": "hoodies",
+    "sku": "BUSY-H-003",
+    "stock": 42,
+    "description": "Deep navy blue hoodie with signature Busy branding. Crafted for those who appreciate understated luxury and timeless style.",
+    "tags": ["streetwear", "signature", "luxury"],
+    "rating": 4.7,
+    "reviews": 156
+  },
+  {
+    "id": "busy-limited-white",
+    "name": "Busy Limited White",
+    "price": 199.99,
+    "currency": "USD",
+    "images": [
+      "/products/busy-limited-white/1.jpg",
+      "/products/busy-limited-white/2.jpg",
+      "/products/busy-limited-white/3.jpg"
+    ],
+    "colors": ["white"],
+    "sizes": ["S", "M", "L", "XL"],
+    "category": "hoodies",
+    "sku": "BUSY-H-004",
+    "stock": 15,
+    "description": "Limited edition white hoodie with exclusive design details. Premium materials and construction make this a collector's piece.",
+    "tags": ["streetwear", "limited", "exclusive"],
+    "rating": 5.0,
+    "reviews": 67
+  },
+  {
+    "id": "busy-essential-tee-black",
+    "name": "Busy Essential Tee Black",
+    "price": 49.99,
+    "currency": "USD",
+    "images": ["/products/busy-essential-tee-black/1.jpg", "/products/busy-essential-tee-black/2.jpg"],
+    "colors": ["black"],
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "category": "tshirts",
+    "sku": "BUSY-T-001",
+    "stock": 120,
+    "description": "Essential black t-shirt with minimalist Busy logo. Perfect foundation piece for any streetwear wardrobe.",
+    "tags": ["essential", "basic", "logo"],
+    "rating": 4.6,
+    "reviews": 203
+  },
+  {
+    "id": "busy-cap-black",
+    "name": "Busy Cap Black",
+    "price": 39.99,
+    "currency": "USD",
+    "images": ["/products/busy-cap-black/1.jpg", "/products/busy-cap-black/2.jpg"],
+    "colors": ["black"],
+    "sizes": ["One Size"],
+    "category": "accessories",
+    "sku": "BUSY-A-001",
+    "stock": 75,
+    "description": "Classic black cap with embroidered Busy logo. Adjustable fit with premium construction.",
+    "tags": ["cap", "logo", "adjustable"],
+    "rating": 4.5,
+    "reviews": 91
+  }
+]
