@@ -59,6 +59,15 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   ...generateSEO(),
   metadataBase: new URL(process.env.SITE_URL || 'https://busy.com.ar'),
+  title: {
+    default: 'Busy - Premium Streetwear',
+    template: '%s | Busy',
+  },
+  icons: {
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
+  },
 }
 
 const jsonLd = {

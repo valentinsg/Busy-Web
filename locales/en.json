@@ -201,6 +201,7 @@
     "empty.subtitle": "Add some products to get started",
     "empty.cta": "Continue Shopping",
     "subtotal": "Subtotal",
+    "subtotal_after_discount": "Subtotal after discount",
     "shipping": "Shipping",
     "shipping_free": "Free",
     "tax": "Tax (estimated)",
@@ -210,7 +211,15 @@
     "free_shipping_notice": "Add {amount} more for free shipping",
     "qty.decrease": "Decrease quantity",
     "qty.increase": "Increase quantity",
-    "remove_item": "Remove item"
+    "remove_item": "Remove item",
+    "coupon": {
+      "placeholder": "Enter coupon",
+      "apply": "Apply",
+      "remove": "Remove",
+      "invalid": "Invalid coupon",
+      "applied": "Coupon {code} applied ({percent}% off)",
+      "discount": "Discount"
+    }
   }
   ,
   "blog": {

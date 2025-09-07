@@ -2,6 +2,7 @@
 
 import { useI18n } from "@/components/i18n-provider"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -17,7 +18,7 @@ interface CartSheetProps {
 }
 
 export function CartSheet({ children }: CartSheetProps) {
-  const { items, isOpen, openCart, closeCart, removeItem, updateQuantity, getTotalItems, getTotalPrice, clearCart } = useCart()
+  const { items, isOpen, openCart, closeCart, removeItem, updateQuantity, getTotalItems, getTotalPrice, clearCart, coupon, applyCoupon, removeCoupon, getSubtotal, getDiscount, getSubtotalAfterDiscount } = useCart()
   const { t } = useI18n()
 
   // Hydration guard: ensure initial client render matches SSR
@@ -26,11 +27,14 @@ export function CartSheet({ children }: CartSheetProps) {
 
   // Use safe values before mount to match SSR (which can't see client cart)
   const totalItems = mounted ? getTotalItems() : 0
-  const totalPrice = mounted ? getTotalPrice() : 0
-  const estimatedShipping = totalPrice > 100 ? 0 : 9.99
-  const estimatedTax = totalPrice * 0.08 // 8% tax placeholder
-  const finalTotal = totalPrice + estimatedShipping + estimatedTax
+  const subtotal = mounted ? getSubtotal() : 0
+  const discount = mounted ? getDiscount() : 0
+  const discountedSubtotal = mounted ? getSubtotalAfterDiscount() : 0
+  const estimatedShipping = discountedSubtotal > 100 ? 0 : 9.99
+  const estimatedTax = discountedSubtotal * 0.08 // 8% tax placeholder
+  const finalTotal = discountedSubtotal + estimatedShipping + estimatedTax
   const itemsForRender = mounted ? items : []
+  const [couponCode, setCouponCode] = useState("")
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => (open ? openCart() : closeCart())}>
@@ -142,12 +146,55 @@ export function CartSheet({ children }: CartSheetProps) {
               </div>
             </ScrollArea>
 
+            {/* Coupon */}
+            <div className="space-y-2 pt-4">
+              <div className="flex items-center gap-2">
+                <Input
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder={t("cart.coupon.placeholder")}
+                  aria-label={t("cart.coupon.placeholder")}
+                />
+                {coupon ? (
+                  <Button variant="secondary" onClick={() => removeCoupon()}>
+                    {t("cart.coupon.remove")}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => {
+                      const res = applyCoupon(couponCode)
+                      if (!res.ok) {
+                        alert(t("cart.coupon.invalid"))
+                      }
+                    }}
+                  >
+                    {t("cart.coupon.apply")}
+                  </Button>
+                )}
+              </div>
+              {coupon && (
+                <div className="text-xs text-muted-foreground font-body">
+                  {t("cart.coupon.applied").replace("{code}", coupon.code).replace("{percent}", String(coupon.percent))}
+                </div>
+              )}
+            </div>
+
             {/* Cart Summary */}
             <div className="space-y-4 pt-4 border-t">
               <div className="font-body space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>{t("cart.subtotal")}</span>
-                  <span>{formatPrice(totalPrice)}</span>
+                  <span>{formatPrice(subtotal)}</span>
+                </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-600 dark:text-green-400">
+                    <span>{t("cart.coupon.discount")}</span>
+                    <span>-{formatPrice(discount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span>{t("cart.subtotal_after_discount")}</span>
+                  <span>{formatPrice(discountedSubtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>{t("cart.shipping")}</span>
@@ -179,9 +226,9 @@ export function CartSheet({ children }: CartSheetProps) {
               </div>
 
               {/* Free Shipping Notice */}
-              {totalPrice < 100 && (
+              {discountedSubtotal < 100 && (
                 <div className="font-body text-xs text-center text-muted-foreground">
-                  {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100 - totalPrice))}
+                  {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100 - discountedSubtotal))}
                 </div>
               )}
             </div>

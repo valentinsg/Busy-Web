@@ -30,12 +30,27 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     }
   }
 
+  const base = process.env.SITE_URL || "https://busy.com.ar"
+  const canonical = `${base}/blog/${post.slug}`
+  const image = "/busy-streetwear.png"
+
   return {
     title: `${post.title} - Busy Blog`,
     description: post.description,
     openGraph: {
       title: post.title,
       description: post.description,
+      url: canonical,
+      images: [{ url: image, alt: post.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${post.title} - Busy Blog`,
+      description: post.description,
+      images: [image],
+    },
+    alternates: {
+      canonical,
     },
   }
 }
@@ -58,6 +73,34 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   return (
     <div className="container px-4 py-8 pt-20">
       <div className="max-w-4xl mx-auto">
+        {/* JSON-LD Article */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Article",
+              headline: post.title,
+              description: post.description,
+              datePublished: post.date,
+              dateModified: post.date,
+              url: `${process.env.SITE_URL || "https://busy.com.ar"}/blog/${post.slug}`,
+              image: ["/busy-streetwear.png"],
+              author: {
+                "@type": "Organization",
+                name: "Busy",
+              },
+              publisher: {
+                "@type": "Organization",
+                name: "Busy",
+                logo: {
+                  "@type": "ImageObject",
+                  url: `${process.env.SITE_URL || "https://busy.com.ar"}/logo-busy-black.png`,
+                },
+              },
+            }),
+          }}
+        />
         {/* Back Button */}
         <Button asChild variant="ghost" className="mb-8">
           <Link href="/blog">

@@ -77,10 +77,15 @@ export default function AboutPage() {
                   <Link href="/products">{t('about.story.cta')}</Link>
                 </Button>
               </div>
-              <div className="relative">
-                <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+              <div className="group relative">
+                {/* soft external glow */}
+                <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5" />
+                <div className="aspect-square overflow-hidden rounded-[16px] bg-muted opacity-80 ring-1 ring-white/10 shadow-[0_8px_40px_rgba(25,25,25,0.2)]">
+                  {/* gentle sheen on hover */}
+                  <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-15" />
+
                   <Image
-                    src="/busy-brand-story.jpg"
+                    src="/estacionamiento-chicos.jpg"
                     alt={t('about.image.alt')}
                     fill
                     className="object-cover"

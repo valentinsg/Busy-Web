@@ -5,16 +5,17 @@ interface SEOProps {
   description?: string
   image?: string
   url?: string
-  type?: "website" | "article" | "product"
+  type?: "website" | "article"
 }
 
 export function generateSEO({
   title = "Busy - Premium Streetwear",
   description = "Premium streetwear for the modern lifestyle. Quality craftsmanship meets contemporary design.",
-  image = "/og-image.jpg",
-  url = "https://busy.com",
+  image = "/busy-streetwear.png",
+  url = process.env.SITE_URL || "https://busy.com.ar",
   type = "website",
 }: SEOProps = {}): Metadata {
+  const ogType: "website" | "article" = type === "article" ? "article" : "website"
   return {
     title,
     description,
@@ -23,7 +24,7 @@ export function generateSEO({
       description,
       images: [{ url: image, alt: title }],
       url,
-      type,
+      type: ogType,
       siteName: "Busy",
     },
     twitter: {
@@ -54,7 +55,7 @@ export function generateProductSEO(product: {
     title: `${product.name} - Busy`,
     description: product.description,
     image: product.images[0],
-    type: "product",
+    type: "website",
   })
 }
 

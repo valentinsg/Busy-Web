@@ -96,8 +96,8 @@
     "hero.title": "Sobre Nosotros",
     "hero.subtitle": "Somos más que una marca de ropa: somos una comunidad que cree que el gran estilo debe ser accesible, cómodo y auténtico.",
     "story.title": "Nuestra historia",
-    "story.p1": "Busy nació en Mar Del Plata, con la idea de estar ocupados en lo importante. Dos amigos que produjeron una tanda de básicos entre remeras y hoodies, fueron entendiendo que no había que encasillarse y decidieron expandir la marca.",
-    "story.p2": "El equipo creció y la idea también. Hoy somos revendedores, tenemos nuestro propio podcast y organizamos eventos, buscando crear un ecosistema creativo que una el streetwear, branding exclusivo y un concepto.",
+    "story.p1": "Busy nació en Mar Del Plata, con la idea de estar ocupados en lo importante. Dos amigos que les pinto producir su propia tanda de básicos entre remeras y hoodies. Con el tiempo fuimos entendiendo que no había que encasillarse y que habían que expandir la marca.",
+    "story.p2": "El equipo creció y la idea también. Hoy somos revendedores, tenemos nuestro propio podcast, organizamos eventos y buscamos crear un ecosistema creativo que una el streetwear, branding exclusivo y un concepto.",
     "story.p3": "Queremos construir una comunidad que se expresé através de lo que viste y lo que vive. Ya que Busy es enfocarse en lo que vale la pena.",
     "story.cta": "Ver colección",
     "values.title": "Nuestros valores",
@@ -201,6 +201,7 @@
     "empty.subtitle": "Agregá productos para comenzar",
     "empty.cta": "Ver productos",
     "subtotal": "Subtotal",
+    "subtotal_after_discount": "Subtotal con descuento",
     "shipping": "Envío",
     "shipping_free": "Gratis",
     "tax": "Impuestos (estimado)",
@@ -210,7 +211,15 @@
     "free_shipping_notice": "Agregá {amount} más para envío gratis",
     "qty.decrease": "Disminuir cantidad",
     "qty.increase": "Aumentar cantidad",
-    "remove_item": "Quitar artículo"
+    "remove_item": "Quitar artículo",
+    "coupon": {
+      "placeholder": "Ingresá cupón",
+      "apply": "Aplicar",
+      "remove": "Quitar",
+      "invalid": "Cupón inválido",
+      "applied": "Cupón {code} aplicado ({percent}% OFF)",
+      "discount": "Descuento"
+    }
   }
   ,
   "blog": {

@@ -3,10 +3,12 @@
 import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 import type { Product, CartItem } from "@/lib/types"
+import { validateCoupon, type Coupon } from "@/lib/coupons"
 
 interface CartStore {
   items: CartItem[]
   isOpen: boolean
+  coupon: Coupon | null
 
   // Actions
   addItem: (product: Product, selectedSize?: string, selectedColor?: string, quantity?: number) => void
@@ -15,10 +17,17 @@ interface CartStore {
   clearCart: () => void
   openCart: () => void
   closeCart: () => void
+  applyCoupon: (code: string) => { ok: boolean; error?: string }
+  removeCoupon: () => void
 
   // Computed values
   getTotalItems: () => number
+  // For backward compatibility: subtotal before discount
   getTotalPrice: () => number
+  // New getters
+  getSubtotal: () => number
+  getDiscount: () => number
+  getSubtotalAfterDiscount: () => number
   getItemCount: (productId: string, selectedSize?: string, selectedColor?: string) => number
 }
 
@@ -27,6 +36,7 @@ export const useCart = create<CartStore>()(
     (set, get) => ({
       items: [],
       isOpen: false,
+      coupon: null,
 
       addItem: (product, selectedSize = product.sizes[0], selectedColor = product.colors[0], quantity = 1) => {
         set((state) => {
@@ -86,7 +96,7 @@ export const useCart = create<CartStore>()(
       },
 
       clearCart: () => {
-        set({ items: [] })
+        set({ items: [], coupon: null })
       },
 
       openCart: () => {
@@ -97,12 +107,43 @@ export const useCart = create<CartStore>()(
         set({ isOpen: false })
       },
 
+      applyCoupon: (code: string) => {
+        const result = validateCoupon(code)
+        if (!result) {
+          return { ok: false, error: "INVALID_COUPON" }
+        }
+        set({ coupon: result })
+        return { ok: true }
+      },
+
+      removeCoupon: () => {
+        set({ coupon: null })
+      },
+
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0)
       },
 
       getTotalPrice: () => {
+        // Backward compatibility, same as getSubtotal
         return get().items.reduce((total, item) => total + item.product.price * item.quantity, 0)
+      },
+
+      getSubtotal: () => {
+        return get().items.reduce((total, item) => total + item.product.price * item.quantity, 0)
+      },
+
+      getDiscount: () => {
+        const coupon = get().coupon
+        if (!coupon) return 0
+        const subtotal = get().getSubtotal()
+        const discount = (subtotal * coupon.percent) / 100
+        return Math.max(0, Math.min(discount, subtotal))
+      },
+
+      getSubtotalAfterDiscount: () => {
+        const subtotal = get().getSubtotal()
+        return Math.max(0, subtotal - get().getDiscount())
       },
 
       getItemCount: (productId, selectedSize, selectedColor) => {

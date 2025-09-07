@@ -57,7 +57,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         isComplete ? "opacity-0 pointer-events-none" : "opacity-100",
       )}
     >
-      <div className="relative w-[528px] h-[528px] ">
+      <div className="relative w-[700px] h-[700px] ">
         <Image
           src="/busy-charge.gif"
           alt="Busy"

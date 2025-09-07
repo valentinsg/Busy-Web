@@ -4,6 +4,7 @@ import { useI18n } from '@/components/i18n-provider'
 import { ProductCard } from '@/components/shop/product-card'
 import { Button } from '@/components/ui/button'
 import { getProducts } from '@/lib/products'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { ArrowRight, Award, Star, Users } from 'lucide-react'
 import Link from 'next/link'
@@ -70,7 +71,30 @@ export default function Home() {
       <AutoSliderBanner />
 
       {/* Latest Collection */}
-      <section id="product-section" className="py-16 md:py-24">
+      <section
+        id="product-section"
+        className="py-16 md:py-24 relative overflow-hidden"
+      >
+        {/* right-side decorative background image */}
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, filter: 'blur(12px)' }}
+          whileInView={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute inset-y-0 right-0 w-[650px] -mr-24 pointer-events-none hidden md:block -z-10"
+          aria-hidden
+        >
+          <div className="relative h-full w-full">
+            <Image
+              src="/ciro remera blanca.png"
+              alt="Ciro Remera Blanca"
+              width={650}
+              height={650}
+              className="object-contain object-right brightness-50 contrast-100"
+              priority={false}
+            />
+          </div>
+        </motion.div>
         <div className="container px-4">
           <motion.div {...fadeInUp} className="text-center mb-12">
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
@@ -172,7 +196,9 @@ export default function Home() {
                 {t('home.about.p2')}
               </p>
               <Button asChild variant="outline" size="lg">
-                <Link href="/about" className='font-heading'>{t('home.about.cta')}</Link>
+                <Link href="/about" className="font-heading">
+                  {t('home.about.cta')}
+                </Link>
               </Button>
             </motion.div>
 
@@ -201,7 +227,7 @@ export default function Home() {
                   <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-15 transition-opacity duration-500" />
                   <div
                     className="w-full h-full bg-cover object-contain"
-                    style={{ backgroundImage: "url('/gif-ciro.gif')" }}
+                    style={{ backgroundImage: "url('/ciro-gif.gif')" }}
                   />
                 </div>
               </div>

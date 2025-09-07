@@ -18,7 +18,7 @@ import { useI18n } from "@/components/i18n-provider"
 const CHECKOUT_MODE = process.env.NEXT_PUBLIC_CHECKOUT_MODE || "mailto"
 
 export default function CheckoutPage() {
-  const { items, getTotalItems, getTotalPrice, clearCart } = useCart()
+  const { items, getTotalItems, getSubtotal, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon, clearCart } = useCart()
   const { t } = useI18n()
   const [shippingData, setShippingData] = React.useState({
     firstName: "",
@@ -34,10 +34,13 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = React.useState("card")
 
   const totalItems = getTotalItems()
-  const totalPrice = getTotalPrice()
-  const estimatedShipping = totalPrice > 100 ? 0 : 9.99
-  const estimatedTax = totalPrice * 0.08
-  const finalTotal = totalPrice + estimatedShipping + estimatedTax
+  const subtotal = getSubtotal()
+  const discount = getDiscount()
+  const discountedSubtotal = getSubtotalAfterDiscount()
+  const estimatedShipping = discountedSubtotal > 100 ? 0 : 9.99
+  const estimatedTax = discountedSubtotal * 0.08
+  const finalTotal = discountedSubtotal + estimatedShipping + estimatedTax
+  const [couponCode, setCouponCode] = React.useState("")
 
   const handleInputChange = (field: string, value: string) => {
     setShippingData((prev) => ({ ...prev, [field]: value }))
@@ -55,7 +58,9 @@ export default function CheckoutPage() {
 Order Summary:
 ${orderItems}
 
-Subtotal: ${formatPrice(totalPrice)}
+Subtotal: ${formatPrice(subtotal)}
+${discount > 0 ? `Discount (${coupon?.code ?? ""}): -${formatPrice(discount)}` : ""}
+Subtotal after discount: ${formatPrice(discountedSubtotal)}
 Shipping: ${estimatedShipping === 0 ? "Free" : formatPrice(estimatedShipping)}
 Tax: ${formatPrice(estimatedTax)}
 Total: ${formatPrice(finalTotal)}
@@ -68,7 +73,7 @@ ${shippingData.country}
 
 Email: ${shippingData.email}
 Phone: ${shippingData.phone}
-    `.trim()
+`.trim()
   }
 
   const handleCheckout = () => {
@@ -321,11 +326,52 @@ Phone: ${shippingData.phone}
 
                 <Separator />
 
+                {/* Coupon */}
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      placeholder={t("cart.coupon.placeholder")}
+                      aria-label={t("cart.coupon.placeholder")}
+                    />
+                    {coupon ? (
+                      <Button variant="secondary" onClick={() => removeCoupon()}>
+                        {t("cart.coupon.remove")}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          const res = applyCoupon(couponCode)
+                          if (!res.ok) alert(t("cart.coupon.invalid"))
+                        }}
+                      >
+                        {t("cart.coupon.apply")}
+                      </Button>
+                    )}
+                  </div>
+                  {coupon && (
+                    <div className="text-xs text-muted-foreground font-body">
+                      {t("cart.coupon.applied").replace("{code}", coupon.code).replace("{percent}", String(coupon.percent))}
+                    </div>
+                  )}
+                </div>
+
                 {/* Pricing Breakdown */}
                 <div className="space-y-2 font-body">
                   <div className="flex justify-between">
                     <span>{t("checkout.summary.subtotal_items").replace("{count}", String(totalItems))}</span>
-                    <span>{formatPrice(totalPrice)}</span>
+                    <span>{formatPrice(subtotal)}</span>
+                  </div>
+                  {discount > 0 && (
+                    <div className="flex justify-between text-green-600 dark:text-green-400">
+                      <span>{t("cart.coupon.discount")}</span>
+                      <span>-{formatPrice(discount)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>{t("cart.subtotal_after_discount")}</span>
+                    <span>{formatPrice(discountedSubtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>{t("checkout.summary.shipping")}</span>

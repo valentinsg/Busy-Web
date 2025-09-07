@@ -129,8 +129,9 @@
     font-style: normal;
   }
   .libre-barcode-39-text-regular {
-    font-family: "Libre Barcode 39 Text", system-ui;
-    font-weight: 400;
+    /* Prefer the next/font variable to ensure the exact loaded face is used */
+    font-family: var(--font-libre-barcode-39-text), "Libre Barcode 39 Text", system-ui;
+    font-weight: 600;
     font-style: normal;
     letter-spacing: 0.02em; /* slight tracking to improve legibility */
   }
