@@ -2,6 +2,8 @@ import React from "react"
 import Link from "next/link"
 import AdminLayoutGuard from "@/components/admin/admin-layout-guard"
 
+export const dynamic = "force-dynamic"
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AdminLayoutGuard>
