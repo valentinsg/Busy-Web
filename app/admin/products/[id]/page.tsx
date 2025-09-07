@@ -14,6 +14,8 @@ export default function EditProductPage({ params }: PageProps) {
   const [saving, setSaving] = React.useState(false)
   const [form, setForm] = React.useState<any>({})
   const [stockBySize, setStockBySize] = React.useState<Record<string, number>>({})
+  const [measurementsRaw, setMeasurementsRaw] = React.useState<string>("")
+  const [measurementsErr, setMeasurementsErr] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     let cancelled = false
@@ -37,6 +39,7 @@ export default function EditProductPage({ params }: PageProps) {
               description: p.description ?? "",
             })
             setStockBySize(p.stockBySize || {})
+            setMeasurementsRaw(p.measurementsBySize ? JSON.stringify(p.measurementsBySize, null, 2) : "")
           }
         }
       } catch (e: any) {
@@ -57,6 +60,20 @@ export default function EditProductPage({ params }: PageProps) {
       const { data: session } = await supabase.auth.getSession()
       const token = session.session?.access_token
       if (!token) throw new Error("No auth token")
+      let measurements_by_size: any | undefined
+      setMeasurementsErr(null)
+      if (measurementsRaw.trim()) {
+        try {
+          const parsed = JSON.parse(measurementsRaw)
+          if (typeof parsed !== "object" || Array.isArray(parsed)) {
+            throw new Error("El JSON debe ser un objeto { TALLE: { chest: 50, ... } }")
+          }
+          measurements_by_size = parsed
+        } catch (e: any) {
+          setMeasurementsErr(e?.message || "JSON inválido")
+          throw new Error("JSON de medidas inválido")
+        }
+      }
       const payload = {
         name: form.name,
         price: Number(form.price),
@@ -68,6 +85,7 @@ export default function EditProductPage({ params }: PageProps) {
         sku: form.sku,
         stock: Number(form.stock) || 0,
         description: form.description || "",
+        measurements_by_size,
       }
       const res = await fetch(`/api/admin/products/${params.id}`, {
         method: "PUT",
@@ -159,6 +177,13 @@ export default function EditProductPage({ params }: PageProps) {
               </label>
             ))}
           </div>
+        </div>
+
+        <div className="mt-6">
+          <h3 className="font-heading font-medium mb-2">Medidas por talle (JSON)</h3>
+          <p className="text-xs text-muted-foreground mb-2">Formato ejemplo: {`{"S": { "unit": "cm", "chest": 52, "length": 67, "sleeve": 61 }, "M": { ... }}`}</p>
+          <textarea value={measurementsRaw} onChange={(e)=>setMeasurementsRaw(e.target.value)} rows={10} className="w-full border rounded px-3 py-2 bg-transparent font-mono text-xs" placeholder='{"S": { "unit": "cm", "chest": 52, "length": 67 }}' />
+          {measurementsErr && <p className="text-xs text-red-500 mt-1">{measurementsErr}</p>}
         </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
