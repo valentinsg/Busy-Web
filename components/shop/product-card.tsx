@@ -42,6 +42,35 @@ export function ProductCard({ product }: ProductCardProps) {
     openCart()
   }
 
+  // Detectar "One Size" para mostrar un botón a lo ancho completo
+  const isOneSize = React.useMemo(() => {
+    const onlyOne = product.sizes && product.sizes.length === 1
+    if (!onlyOne) return false
+    const s = product.sizes[0]
+    return /^(one|one size|onesize|único|talle único)$/i.test(String(s))
+  }, [product.sizes])
+
+  const formatSizeTooltip = (size: string) => {
+    const m = (product as any).measurementsBySize?.[size] as Record<string, any> | undefined
+    if (!m) return "Medidas no disponibles"
+    const unit = typeof m.unit === "string" ? m.unit : undefined
+    const numericKeys = Object.keys(m).filter((k) => k !== "unit" && typeof m[k] === "number")
+    if (numericKeys.length === 0) return unit ? `Unidad: ${unit}` : "Medidas no disponibles"
+    const preferredOrder = ["chest", "length", "sleeve", "waist", "hip", "head_circumference_min", "head_circumference_max"]
+    const ordered = preferredOrder.filter((k) => numericKeys.includes(k)).concat(numericKeys.filter((k) => !preferredOrder.includes(k)))
+    const labelMap: Record<string, string> = {
+      chest: "Pecho",
+      length: "Largo",
+      sleeve: "Manga",
+      waist: "Cintura",
+      hip: "Cadera",
+      head_circumference_min: "Cabeza min",
+      head_circumference_max: "Cabeza max",
+    }
+    const parts = ordered.map((k) => `${labelMap[k] ?? k}: ${m[k]}${unit ? unit : ""}`)
+    return parts.join(" · ")
+  }
+
   return (
     <Card className="group overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-300">
       <div
@@ -50,14 +79,10 @@ export function ProductCard({ product }: ProductCardProps) {
         aria-disabled={isHovered}
         className="cursor-pointer"
         onClick={(e) => {
-          const target = e.target as Node
-          if (overlayRef.current && overlayRef.current.contains(target)) {
-            // Click originated within overlay, never navigate
-            e.preventDefault()
-            e.stopPropagation()
-            return
-          }
-          if (isHovered) {
+          const target = e.target as HTMLElement
+          // If the click originated from an interactive control inside the overlay
+          // (e.g., the size buttons), do not navigate.
+          if (target.closest('[data-overlay-control="true"]')) {
             e.preventDefault()
             e.stopPropagation()
             return
@@ -65,13 +90,9 @@ export function ProductCard({ product }: ProductCardProps) {
           router.push(`/product/${product.id}`)
         }}
         onKeyDown={(e) => {
-          if (isHovered) {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault()
-              e.stopPropagation()
-            }
-            return
-          }
+          // Allow keyboard navigation unless focus is on an overlay control
+          const target = e.target as HTMLElement
+          if (target && target.closest('[data-overlay-control="true"]')) return
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault()
             router.push(`/product/${product.id}`)
@@ -92,8 +113,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Stock badge */}
           {product.stock < 10 && (
-            <Badge variant="destructive" className="absolute top-2 left-2">
-              Only {product.stock} left
+            <Badge variant="destructive" className="absolute top-2 left-2 font-body">
+              Quedan solo {product.stock}
             </Badge>
           )}
 
@@ -102,52 +123,92 @@ export function ProductCard({ product }: ProductCardProps) {
             <div
               ref={overlayRef}
               className={`absolute inset-0 z-10 ${isHovered ? "pointer-events-auto cursor-default" : "pointer-events-none"}`}
-              onClick={(e) => {
-                // Stop clicks on the overlay background from bubbling to parent navigations,
-                // but allow clicks on inner controls (buttons) to run first.
-                if (e.target === e.currentTarget) {
-                  e.stopPropagation()
-                }
-              }}
+              // Do not stop propagation on background so clicking the image navigates
               onPointerEnter={() => setIsHovered(true)}
               onPointerLeave={() => setIsHovered(false)}
               onMouseDown={(e) => {
-                if (e.target === e.currentTarget) {
-                  e.stopPropagation()
-                }
+                // Let background clicks bubble; controls will stop via data attribute check in parent
               }}
               onPointerDown={(e) => {
-                if (e.target === e.currentTarget) {
-                  e.stopPropagation()
-                }
+                // Let background pointer down bubble
               }}
               onTouchStart={(e) => {
-                // Prevent accidental background taps from triggering parent navigation on mobile
-                if (e.target === (e.currentTarget as EventTarget)) {
-                  e.stopPropagation()
-                }
+                // Allow background taps to bubble so they can navigate
               }}
             >
               <div className={`absolute inset-x-0 bottom-0 ${isHovered ? "translate-y-0" : "translate-y-full"} transition-transform duration-300`}>
-                <div className="pointer-events-auto mb-2 rounded-xl mx-auto w-3/4 border border-[rgba(255,255,255,0.06)] bg-[rgba(155,155,155,0.06)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-2xl backdrop-saturate-120">
-                  <TooltipProvider disableHoverableContent>
-                    <div className="flex flex-wrap gap-2 items-center justify-center">
-                      {product.sizes.map((size) => (
-                        <Tooltip key={size}>
+                <div className="pointer-events-auto mb-2 rounded-xl mx-auto w-1/2 border border-[rgba(255,255,255,0.06)] bg-[rgba(155,155,155,0.06)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-2xl backdrop-saturate-120">
+                  <TooltipProvider disableHoverableContent delayDuration={0} skipDelayDuration={0}>
+                    <div className="flex flex-wrap items-center justify-center">
+                      {isOneSize ? (
+                        <Tooltip>
                           <TooltipTrigger asChild>
                             <button
                               type="button"
-                              onClick={(e) => handleAddToCartWithSize(e, size)}
-                              className="min-w-8 rounded-md px-2 py-1 text-xs font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                              onClick={(e) => handleAddToCartWithSize(e, String(product.sizes[0]))}
+                              data-overlay-control="true"
+                              className="w-full rounded-md px-3 py-2 text-xs font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                             >
-                              {size}
+                              {String(product.sizes[0])}
                             </button>
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="text-xs">
-                            {"Medidas"} //aca irian las medidas
+                          <TooltipContent
+                            side="top"
+                            align="start"
+                            sideOffset={8}
+                            className="max-w-[340px] text-xs bg-black/85 border-white/10 shadow-xl py-2 px-0"
+                          >
+                            <div className="flex items-start gap-4 pr-3 pl-0">
+                              {/* Hanger icon, pegado a la izquierda */}
+                              <img
+                                src="/icons/checkroom_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+                                alt="Guía de talles"
+                                width={16}
+                                height={16}
+                                className="opacity-95 shrink-0"
+                              />
+                              <div className="leading-snug opacity-90">
+                                {formatSizeTooltip(String(product.sizes[0]))}
+                              </div>
+                            </div>
                           </TooltipContent>
                         </Tooltip>
-                      ))}
+                      ) : (
+                        product.sizes.map((size) => (
+                          <Tooltip key={size}>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={(e) => handleAddToCartWithSize(e, size)}
+                                data-overlay-control="true"
+                                className="min-w-8 rounded-md px-2 py-1 text-xs font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                              >
+                                {size}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              align="start"
+                              sideOffset={8}
+                              className="max-w-[340px] text-xs bg-black/85 border-white/10 shadow-xl py-2 px-0"
+                            >
+                              <div className="flex items-start gap-4 pr-3 pl-0">
+                                {/* Hanger icon, pegado a la izquierda */}
+                                <img
+                                  src="/icons/checkroom_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+                                  alt="Guía de talles"
+                                  width={16}
+                                  height={16}
+                                  className="opacity-95 shrink-0"
+                                />
+                                <div className="leading-snug opacity-90">
+                                  {formatSizeTooltip(size)}
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        ))
+                      )}
                     </div>
                   </TooltipProvider>
                 </div>
@@ -165,14 +226,14 @@ export function ProductCard({ product }: ProductCardProps) {
             <div className="flex items-center space-x-1">
               <div className="flex items-center">
                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                <span className="text-xs text-muted-foreground ml-1">
+                <span className="text-xs text-muted-foreground ml-1 font-body">
                   {formatRating(product.rating)} ({product.reviews})
                 </span>
               </div>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="font-semibold">{formatPrice(product.price, product.currency)}</span>
+              <span className="font-heading font-semibold">{formatPrice(product.price, product.currency)}</span>
 
               {/* Color options */}
               <div className="flex space-x-1">

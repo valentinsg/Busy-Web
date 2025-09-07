@@ -22,14 +22,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { ProductCard } from '@/components/shop/product-card'
-import {
-  getProducts,
-  getCategories,
-  getAvailableColors,
-  getAvailableSizes,
-  searchProducts,
-} from '@/lib/products'
-import type { FilterOptions } from '@/lib/types'
+import { getCategories, getAvailableColors, getAvailableSizes, getProducts, searchProducts } from '@/lib/products'
+import { getProductsAsync, searchProductsAsync, type SortBy } from '@/lib/repo/products'
+import type { FilterOptions, Product } from '@/lib/types'
 import { capitalize } from '@/lib/format'
 import { useI18n } from '@/components/i18n-provider'
 
@@ -38,26 +33,69 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = React.useState('')
   const [filters, setFilters] = React.useState<FilterOptions>({})
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
+  const [asyncProducts, setAsyncProducts] = React.useState<Product[]>([])
+  const [loading, setLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
   const categories = getCategories()
   const colors = getAvailableColors()
   const sizes = getAvailableSizes()
 
-  // Get filtered products
-  const filteredProducts = React.useMemo(() => {
-    if (searchQuery.trim()) {
-      return searchProducts(searchQuery).filter((product) => {
-        if (filters.category && product.category !== filters.category)
-          return false
-        if (filters.color && !product.colors.includes(filters.color))
-          return false
-        if (filters.size && !product.sizes.includes(filters.size)) return false
-        if (filters.minPrice && product.price < filters.minPrice) return false
-        if (filters.maxPrice && product.price > filters.maxPrice) return false
-        return true
-      })
+  // Load products from Supabase with fallback to local JSON
+  React.useEffect(() => {
+    let cancelled = false
+    async function load() {
+      setLoading(true)
+      setError(null)
+      try {
+        const params = {
+          category: filters.category,
+          color: filters.color,
+          size: filters.size,
+          minPrice: filters.minPrice,
+          maxPrice: filters.maxPrice,
+          sortBy: (filters.sortBy as SortBy | undefined) ?? undefined,
+        }
+        if (searchQuery.trim()) {
+          const list = await searchProductsAsync(searchQuery.trim())
+          // apply remaining filters client-side for now
+          const filtered = list.filter((p) => {
+            if (filters.category && p.category !== filters.category) return false
+            if (filters.color && !p.colors.includes(filters.color)) return false
+            if (filters.size && !p.sizes.includes(filters.size)) return false
+            if (filters.minPrice !== undefined && p.price < filters.minPrice) return false
+            if (filters.maxPrice !== undefined && p.price > filters.maxPrice) return false
+            return true
+          })
+          if (!cancelled) setAsyncProducts(filtered)
+        } else {
+          const list = await getProductsAsync(params)
+          if (!cancelled) setAsyncProducts(list)
+        }
+      } catch (e) {
+        // Fallback to local JSON
+        const local = searchQuery.trim()
+          ? searchProducts(searchQuery.trim()).filter((p) => {
+              if (filters.category && p.category !== filters.category) return false
+              if (filters.color && !p.colors.includes(filters.color)) return false
+              if (filters.size && !p.sizes.includes(filters.size)) return false
+              if (filters.minPrice !== undefined && p.price < filters.minPrice) return false
+              if (filters.maxPrice !== undefined && p.price > filters.maxPrice) return false
+              return true
+            })
+          : getProducts(filters)
+        if (!cancelled) {
+          setAsyncProducts(local)
+          setError('offline')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
-    return getProducts(filters)
+    load()
+    return () => {
+      cancelled = true
+    }
   }, [searchQuery, filters])
 
   const updateFilter = <K extends keyof FilterOptions>(key: K, value: FilterOptions[K] | undefined) => {
@@ -73,7 +111,7 @@ export default function ProductsPage() {
     <div className="space-y-6">
       {/* Category Filter */}
       <div>
-        <h3 className="font-medium mb-3">{t('products.filters.category')}</h3>
+        <h3 className="font-heading font-medium mb-3">{t('products.filters.category')}</h3>
         <div className="space-y-2">
           {categories.map((category) => (
             <div key={category} className="flex items-center space-x-2">
@@ -84,7 +122,7 @@ export default function ProductsPage() {
                   updateFilter('category', checked ? category : undefined)
                 }
               />
-              <Label htmlFor={category} className="text-sm">
+              <Label htmlFor={category} className="text-sm font-body">
                 {capitalize(category)}
               </Label>
             </div>
@@ -96,7 +134,7 @@ export default function ProductsPage() {
 
       {/* Color Filter */}
       <div>
-        <h3 className="font-medium mb-3">{t('products.filters.color')}</h3>
+        <h3 className="font-heading font-medium mb-3">{t('products.filters.color')}</h3>
         <div className="space-y-2">
           {colors.map((color) => (
             <div key={color} className="flex items-center space-x-2">
@@ -109,7 +147,7 @@ export default function ProductsPage() {
               />
               <Label
                 htmlFor={color}
-                className="flex items-center space-x-2 text-sm"
+                className="flex items-center space-x-2 text-sm font-body"
               >
                 <div
                   className="w-4 h-4 rounded-full border border-border"
@@ -137,7 +175,7 @@ export default function ProductsPage() {
 
       {/* Size Filter */}
       <div>
-        <h3 className="font-medium mb-3">{t('products.filters.size')}</h3>
+        <h3 className="font-heading font-medium mb-3">{t('products.filters.size')}</h3>
         <div className="space-y-2">
           {sizes.map((size) => (
             <div key={size} className="flex items-center space-x-2">
@@ -148,7 +186,7 @@ export default function ProductsPage() {
                   updateFilter('size', checked ? size : undefined)
                 }
               />
-              <Label htmlFor={size} className="text-sm">
+              <Label htmlFor={size} className="text-sm font-body">
                 {size}
               </Label>
             </div>
@@ -166,7 +204,7 @@ export default function ProductsPage() {
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label htmlFor="minPrice" className="text-xs">
+              <Label htmlFor="minPrice" className="text-xs font-body">
                 {t('products.filters.min')}
               </Label>
               <Input
@@ -183,7 +221,7 @@ export default function ProductsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="maxPrice" className="text-xs">
+              <Label htmlFor="maxPrice" className="text-xs font-body">
                 {t('products.filters.max')}
               </Label>
               <Input
@@ -277,7 +315,7 @@ export default function ProductsPage() {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px]">
                 <SheetHeader>
-                  <SheetTitle>{t('products.filters.title')}</SheetTitle>
+                  <SheetTitle className="font-heading">{t('products.filters.title')}</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6">
                   <FilterContent />
@@ -292,7 +330,7 @@ export default function ProductsPage() {
           <div className="hidden lg:block">
             <div className="sticky top-24">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-medium">{t('products.filters.title')}</h2>
+                <h2 className="font-heading font-medium">{t('products.filters.title')}</h2>
                 <Button variant="ghost" size="sm" onClick={clearFilters}>
                   {t('products.filters.clear')}
                 </Button>
@@ -307,12 +345,14 @@ export default function ProductsPage() {
               <p className="font-body text-sm text-muted-foreground">
                 {t('products.results.count').replace(
                   '{count}',
-                  String(filteredProducts.length)
+                  String(asyncProducts.length)
                 )}
               </p>
             </div>
 
-            {filteredProducts.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-12 text-muted-foreground font-body">Cargando...</div>
+            ) : asyncProducts.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-muted-foreground mb-4">
                   <Filter className="h-12 w-12 mx-auto mb-4" />
@@ -327,7 +367,7 @@ export default function ProductsPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredProducts.map((product) => (
+                {asyncProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>

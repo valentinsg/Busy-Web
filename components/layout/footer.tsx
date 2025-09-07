@@ -5,6 +5,8 @@ import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useI18n } from "@/components/i18n-provider"
+import { usePathname } from "next/navigation"
+import * as React from "react"
 
 const footerSections = (t: (k: string) => string) => ({
   shop: {
@@ -47,6 +49,10 @@ const footerSections = (t: (k: string) => string) => ({
 
 export function Footer() {
   const { t } = useI18n()
+  const pathname = usePathname()
+  const [email, setEmail] = React.useState("")
+  const [submitting, setSubmitting] = React.useState(false)
+  const [message, setMessage] = React.useState<string | null>(null)
   const sections = footerSections(t)
   const year = new Date().getFullYear()
   return (
@@ -69,9 +75,22 @@ export function Footer() {
             <div className="space-y-2">
               <h4 className="font-heading font-medium">{t("footer.newsletter.title")}</h4>
               <div className="flex space-x-2">
-                <Input type="email" placeholder={t("footer.newsletter.placeholder")} className="max-w-[200px] text-sm font-heading" />
-                <Button size="sm" className="text-sm font-heading font-semibold">{t("footer.newsletter.subscribe")}</Button>
+                <Input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder={t("footer.newsletter.placeholder")} className="max-w-[200px] text-sm font-heading" />
+                <Button size="sm" disabled={submitting} onClick={async ()=>{
+                  setSubmitting(true); setMessage(null)
+                  try {
+                    const res = await fetch("/api/newsletter/subscribe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) })
+                    const json = await res.json()
+                    if (!res.ok || !json.ok) throw new Error(json.error || "Error")
+                    setEmail(""); setMessage("¡Gracias por suscribirte!")
+                  } catch (e:any) {
+                    setMessage(e?.message || "No se pudo suscribir")
+                  } finally {
+                    setSubmitting(false)
+                  }
+                }} className="text-sm font-heading font-semibold">{submitting ? "..." : t("footer.newsletter.subscribe")}</Button>
               </div>
+              {message && <p className="text-xs text-muted-foreground">{message}</p>}
             </div>
           </div>
 

@@ -40,6 +40,9 @@ export const useCart = create<CartStore>()(
 
       addItem: (product, selectedSize = product.sizes[0], selectedColor = product.colors[0], quantity = 1) => {
         set((state) => {
+          const sizeStock = product.stockBySize && Object.keys(product.stockBySize).length > 0
+            ? (product.stockBySize[selectedSize] ?? 0)
+            : product.stock
           const existingItemIndex = state.items.findIndex(
             (item) =>
               item.product.id === product.id &&
@@ -50,13 +53,15 @@ export const useCart = create<CartStore>()(
           if (existingItemIndex > -1) {
             // Update existing item quantity
             const updatedItems = [...state.items]
-            updatedItems[existingItemIndex].quantity += quantity
+            const current = updatedItems[existingItemIndex].quantity
+            const next = Math.min(current + quantity, sizeStock)
+            updatedItems[existingItemIndex].quantity = Math.max(1, next)
             return { items: updatedItems }
           } else {
             // Add new item
             const newItem: CartItem = {
               product,
-              quantity,
+              quantity: Math.max(1, Math.min(quantity, sizeStock)),
               selectedSize,
               selectedColor,
             }
@@ -85,13 +90,21 @@ export const useCart = create<CartStore>()(
         }
 
         set((state) => ({
-          items: state.items.map((item) =>
-            item.product.id === productId &&
-            (!selectedSize || item.selectedSize === selectedSize) &&
-            (!selectedColor || item.selectedColor === selectedColor)
-              ? { ...item, quantity }
-              : item,
-          ),
+          items: state.items.map((item) => {
+            if (
+              item.product.id === productId &&
+              (!selectedSize || item.selectedSize === selectedSize) &&
+              (!selectedColor || item.selectedColor === selectedColor)
+            ) {
+              const sizeKey = selectedSize ?? item.selectedSize
+              const sizeStock = item.product.stockBySize && Object.keys(item.product.stockBySize).length > 0
+                ? (item.product.stockBySize[sizeKey] ?? 0)
+                : item.product.stock
+              const clamped = Math.max(1, Math.min(quantity, sizeStock))
+              return { ...item, quantity: clamped }
+            }
+            return item
+          }),
         }))
       },
 

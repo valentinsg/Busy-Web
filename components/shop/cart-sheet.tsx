@@ -2,10 +2,20 @@
 
 import { useI18n } from "@/components/i18n-provider"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useCart } from "@/hooks/use-cart"
 import { capitalize, formatPrice } from "@/lib/format"
 import { Minus, Plus, ShoppingBag, X } from "lucide-react"
@@ -18,7 +28,7 @@ interface CartSheetProps {
 }
 
 export function CartSheet({ children }: CartSheetProps) {
-  const { items, isOpen, openCart, closeCart, removeItem, updateQuantity, getTotalItems, getTotalPrice, clearCart, coupon, applyCoupon, removeCoupon, getSubtotal, getDiscount, getSubtotalAfterDiscount } = useCart()
+  const { items, isOpen, openCart, closeCart, removeItem, updateQuantity, getTotalItems, clearCart, getSubtotal } = useCart()
   const { t } = useI18n()
 
   // Hydration guard: ensure initial client render matches SSR
@@ -28,33 +38,53 @@ export function CartSheet({ children }: CartSheetProps) {
   // Use safe values before mount to match SSR (which can't see client cart)
   const totalItems = mounted ? getTotalItems() : 0
   const subtotal = mounted ? getSubtotal() : 0
-  const discount = mounted ? getDiscount() : 0
-  const discountedSubtotal = mounted ? getSubtotalAfterDiscount() : 0
-  const estimatedShipping = discountedSubtotal > 100 ? 0 : 9.99
-  const estimatedTax = discountedSubtotal * 0.08 // 8% tax placeholder
-  const finalTotal = discountedSubtotal + estimatedShipping + estimatedTax
+  const estimatedShipping = subtotal > 100 ? 0 : 9.99
+  const estimatedTax = subtotal * 0.08 // 8% tax placeholder
+  const finalTotal = subtotal + estimatedShipping + estimatedTax
   const itemsForRender = mounted ? items : []
-  const [couponCode, setCouponCode] = useState("")
+
+  const getSizeStock = (p: typeof itemsForRender[number]) => {
+    const stockBy = p.product.stockBySize
+    if (stockBy && Object.keys(stockBy).length > 0) {
+      return stockBy[p.selectedSize] ?? 0
+    }
+    return p.product.stock
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => (open ? openCart() : closeCart())}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg py-14 ">
+      <SheetContent className="w-full sm:max-w-lg py-14">
         <SheetHeader>
           <SheetTitle className="font-heading flex items-center justify-between">
             <span>{t("cart.title")} ({totalItems})</span>
             {itemsForRender.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearCart}
-                className="text-muted-foreground hover:text-destructive"
-                aria-label={t("cart.clear_all")}
-                title={t("cart.clear_all")}
-                data-label={t("cart.clear_all")}
-              >
-                {t("cart.clear_all")}
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-destructive"
+                    aria-label={t("cart.clear_all")}
+                    title={t("cart.clear_all")}
+                    data-label={t("cart.clear_all")}
+                  >
+                    {t("cart.clear_all")}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("cart.clear_all")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("cart.empty.subtitle")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={clearCart}>Confirmar</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </SheetTitle>
         </SheetHeader>
@@ -119,7 +149,7 @@ export function CartSheet({ children }: CartSheetProps) {
                             onClick={() =>
                               updateQuantity(item.product.id, item.quantity + 1, item.selectedSize, item.selectedColor)
                             }
-                            disabled={item.quantity >= item.product.stock}
+                            disabled={item.quantity >= getSizeStock(item)}
                             aria-label={t("cart.qty.increase")}
                             title={t("cart.qty.increase")}
                             data-label={t("cart.qty.increase")}
@@ -130,54 +160,40 @@ export function CartSheet({ children }: CartSheetProps) {
                       </div>
                     </div>
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                      onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor)}
-                      aria-label={t("cart.remove_item")}
-                      title={t("cart.remove_item")}
-                      data-label={t("cart.remove_item")}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                          aria-label={t("cart.remove_item")}
+                          title={t("cart.remove_item")}
+                          data-label={t("cart.remove_item")}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Eliminar producto</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            ¿Querés eliminar este producto del carrito?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor)}>
+                            Eliminar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 ))}
               </div>
             </ScrollArea>
 
-            {/* Coupon */}
-            <div className="space-y-2 pt-4">
-              <div className="flex items-center gap-2">
-                <Input
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  placeholder={t("cart.coupon.placeholder")}
-                  aria-label={t("cart.coupon.placeholder")}
-                />
-                {coupon ? (
-                  <Button variant="secondary" onClick={() => removeCoupon()}>
-                    {t("cart.coupon.remove")}
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => {
-                      const res = applyCoupon(couponCode)
-                      if (!res.ok) {
-                        alert(t("cart.coupon.invalid"))
-                      }
-                    }}
-                  >
-                    {t("cart.coupon.apply")}
-                  </Button>
-                )}
-              </div>
-              {coupon && (
-                <div className="text-xs text-muted-foreground font-body">
-                  {t("cart.coupon.applied").replace("{code}", coupon.code).replace("{percent}", String(coupon.percent))}
-                </div>
-              )}
-            </div>
+            {/* Coupon removed from sheet for a cleaner UI */}
 
             {/* Cart Summary */}
             <div className="space-y-4 pt-4 border-t">
@@ -185,16 +201,6 @@ export function CartSheet({ children }: CartSheetProps) {
                 <div className="flex justify-between">
                   <span>{t("cart.subtotal")}</span>
                   <span>{formatPrice(subtotal)}</span>
-                </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-green-600 dark:text-green-400">
-                    <span>{t("cart.coupon.discount")}</span>
-                    <span>-{formatPrice(discount)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span>{t("cart.subtotal_after_discount")}</span>
-                  <span>{formatPrice(discountedSubtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>{t("cart.shipping")}</span>
@@ -226,9 +232,9 @@ export function CartSheet({ children }: CartSheetProps) {
               </div>
 
               {/* Free Shipping Notice */}
-              {discountedSubtotal < 100 && (
+              {subtotal < 100 && (
                 <div className="font-body text-xs text-center text-muted-foreground">
-                  {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100 - discountedSubtotal))}
+                  {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100 - subtotal))}
                 </div>
               )}
             </div>

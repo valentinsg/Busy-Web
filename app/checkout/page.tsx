@@ -14,12 +14,26 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useCart } from "@/hooks/use-cart"
 import { formatPrice, capitalize } from "@/lib/format"
 import { useI18n } from "@/components/i18n-provider"
+import { useToast } from "@/hooks/use-toast"
+import { ConfettiBurst } from "@/components/ui/confetti"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const CHECKOUT_MODE = process.env.NEXT_PUBLIC_CHECKOUT_MODE || "mailto"
 
 export default function CheckoutPage() {
   const { items, getTotalItems, getSubtotal, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon, clearCart } = useCart()
   const { t } = useI18n()
+  const { toast } = useToast()
   const [shippingData, setShippingData] = React.useState({
     firstName: "",
     lastName: "",
@@ -32,6 +46,9 @@ export default function CheckoutPage() {
     country: "US",
   })
   const [paymentMethod, setPaymentMethod] = React.useState("card")
+  const [couponCode, setCouponCode] = React.useState("")
+  const [confirmClear, setConfirmClear] = React.useState(false)
+  const [confettiKey, setConfettiKey] = React.useState<number | null>(null)
 
   const totalItems = getTotalItems()
   const subtotal = getSubtotal()
@@ -40,7 +57,6 @@ export default function CheckoutPage() {
   const estimatedShipping = discountedSubtotal > 100 ? 0 : 9.99
   const estimatedTax = discountedSubtotal * 0.08
   const finalTotal = discountedSubtotal + estimatedShipping + estimatedTax
-  const [couponCode, setCouponCode] = React.useState("")
 
   const handleInputChange = (field: string, value: string) => {
     setShippingData((prev) => ({ ...prev, [field]: value }))
@@ -92,16 +108,30 @@ Phone: ${shippingData.phone}
         break
 
       case "stripe-test":
-        // Placeholder for Stripe integration
-        alert("Stripe integration would be implemented here")
+        toast({
+          title: "Stripe (demo)",
+          description: "Aquí iría la integración con Stripe.",
+        })
         break
 
       default:
-        alert("Checkout method not configured")
+        toast({
+          title: "Checkout no configurado",
+          description: "Revisá NEXT_PUBLIC_CHECKOUT_MODE",
+          variant: "destructive",
+        })
     }
 
-    // Clear cart after successful checkout
-    clearCart()
+    // Confirm before clearing cart
+    setConfirmClear(true)
+  }
+
+  const handleApplyCoupon = () => {
+    if (couponCode) {
+      applyCoupon(couponCode)
+        ? toast({ title: "Cupón aplicado", description: "¡Descuento aplicado con éxito!" })
+        : toast({ title: "Cupón inválido", description: "Lo sentimos, el cupón no es válido.", variant: "destructive" })
+    }
   }
 
   if (items.length === 0) {
@@ -336,14 +366,32 @@ Phone: ${shippingData.phone}
                       aria-label={t("cart.coupon.placeholder")}
                     />
                     {coupon ? (
-                      <Button variant="secondary" onClick={() => removeCoupon()}>
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          removeCoupon()
+                          toast({ title: "Cupón removido", description: "Se quitó el descuento." })
+                        }}
+                      >
                         {t("cart.coupon.remove")}
                       </Button>
                     ) : (
                       <Button
                         onClick={() => {
-                          const res = applyCoupon(couponCode)
-                          if (!res.ok) alert(t("cart.coupon.invalid"))
+                          const res = applyCoupon(couponCode.trim())
+                          if (!res.ok) {
+                            toast({
+                              title: "Cupón inválido",
+                              description: "Revisá el código e intentá de nuevo.",
+                              variant: "destructive",
+                            })
+                          } else {
+                            toast({
+                              title: "¡Cupón aplicado! 🎉",
+                              description: `Se aplicó ${couponCode.toUpperCase()}. Disfrutá el descuento.`,
+                            })
+                            setConfettiKey(Date.now())
+                          }
                         }}
                       >
                         {t("cart.coupon.apply")}

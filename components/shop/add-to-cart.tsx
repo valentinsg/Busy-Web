@@ -28,33 +28,55 @@ export function AddToCart({ product, className = "" }: AddToCartProps) {
     openCart()
   }
 
+  const getSizeStock = React.useCallback(
+    (size: string) => {
+      if (product.stockBySize && Object.keys(product.stockBySize).length > 0) {
+        return product.stockBySize[size] ?? 0
+      }
+      return product.stock
+    },
+    [product.stockBySize, product.stock],
+  )
+
+  const sizeStock = getSizeStock(selectedSize)
+
   const incrementQuantity = () => {
-    setQuantity((prev) => Math.min(prev + 1, product.stock))
+    setQuantity((prev) => Math.min(prev + 1, sizeStock))
   }
 
   const decrementQuantity = () => {
     setQuantity((prev) => Math.max(prev - 1, 1))
   }
 
-  const isOutOfStock = product.stock === 0
-  const isLowStock = product.stock < 10 && product.stock > 0
+  const isOutOfStock = sizeStock === 0
+  const isLowStock = sizeStock < 10 && sizeStock > 0
 
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Size Selection */}
-      {product.sizes.length > 1 && (
+      {product.sizes.length > 0 && (
         <div className="space-y-2">
           <label className="text-sm font-medium">Size</label>
-          <Select value={selectedSize} onValueChange={setSelectedSize}>
+          <Select
+            value={selectedSize}
+            onValueChange={(value) => {
+              setSelectedSize(value)
+              setQuantity(1)
+            }}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {product.sizes.map((size) => (
-                <SelectItem key={size} value={size}>
-                  {size}
-                </SelectItem>
-              ))}
+              {product.sizes.map((size) => {
+                const s = getSizeStock(size)
+                const disabled = s === 0
+                return (
+                  <SelectItem key={size} value={size} disabled={disabled}>
+                    {size}
+                  </SelectItem>
+                )
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -105,7 +127,7 @@ export function AddToCart({ product, className = "" }: AddToCartProps) {
             <Minus className="h-4 w-4" />
           </Button>
           <span className="w-12 text-center font-medium">{quantity}</span>
-          <Button variant="outline" size="icon" onClick={incrementQuantity} disabled={quantity >= product.stock}>
+          <Button variant="outline" size="icon" onClick={incrementQuantity} disabled={quantity >= sizeStock}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -114,7 +136,7 @@ export function AddToCart({ product, className = "" }: AddToCartProps) {
       {/* Stock Status */}
       {isLowStock && (
         <Badge variant="destructive" className="w-fit">
-          Only {product.stock} left in stock
+          Only {sizeStock} left in stock
         </Badge>
       )}
 

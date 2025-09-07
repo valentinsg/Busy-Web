@@ -1,0 +1,48 @@
+import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
+import { assertAdmin } from "../../_utils"
+
+const updateSchema = z.object({
+  name: z.string().min(1).optional(),
+  price: z.number().nonnegative().optional(),
+  currency: z.string().optional(),
+  images: z.array(z.string()).optional(),
+  colors: z.array(z.string()).optional(),
+  sizes: z.array(z.string()).optional(),
+  measurements_by_size: z.record(z.any()).optional(),
+  category: z.string().min(1).optional(),
+  sku: z.string().min(1).optional(),
+  stock: z.number().int().nonnegative().optional(),
+  description: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  rating: z.number().optional(),
+  reviews: z.number().optional(),
+})
+
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  const admin = await assertAdmin(req)
+  if (!admin.ok) return admin.res
+  const svc = admin.svc
+  try {
+    const body = await req.json()
+    const patch = updateSchema.parse(body)
+    const { error } = await svc.from("products").update(patch).eq("id", params.id)
+    if (error) throw error
+    return NextResponse.json({ ok: true })
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e?.message ?? String(e) }, { status: 400 })
+  }
+}
+
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  const admin = await assertAdmin(_req)
+  if (!admin.ok) return admin.res
+  const svc = admin.svc
+  try {
+    const { error } = await svc.from("products").delete().eq("id", params.id)
+    if (error) throw error
+    return NextResponse.json({ ok: true })
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e?.message ?? String(e) }, { status: 400 })
+  }
+}

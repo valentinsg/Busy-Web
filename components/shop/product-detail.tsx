@@ -71,7 +71,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
         <Button asChild variant="ghost" className="mb-4">
           <Link href="/products">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Products
+            Volver a productos
           </Link>
         </Button>
       </div>
@@ -86,25 +86,25 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
         <div className="space-y-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary">{product.category}</Badge>
-              {product.stock < 10 && <Badge variant="destructive">Only {product.stock} left</Badge>}
+              <Badge variant="secondary" className="font-body">{product.category}</Badge>
+              {product.stock < 10 && <Badge variant="destructive" className="font-body">Quedan solo {product.stock}</Badge>}
             </div>
             <h1 className="font-heading text-3xl font-bold mb-2">{product.name}</h1>
             <div className="flex items-center space-x-4 mb-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground font-body">
                 <div className="flex items-center">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
                   <span>{avg > 0 ? avg.toFixed(1) : formatRating(product.rating)}</span>
                 </div>
                 <span>·</span>
-                <span>{reviews.length} reviews de la comunidad</span>
+                <span>{reviews.length} reseñas de la comunidad</span>
               </div>
             </div>
-            <div className="text-3xl font-bold mb-6">{formatPrice(product.price, product.currency)}</div>
+            <div className="text-3xl font-bold mb-6 font-heading">{formatPrice(product.price, product.currency)}</div>
           </div>
 
           <div>
-            <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+            <p className="font-body text-muted-foreground leading-relaxed">{product.description}</p>
           </div>
 
           {/* Tags */}
@@ -128,22 +128,22 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
             <div className="flex items-center space-x-3">
               <Truck className="h-5 w-5 text-muted-foreground" />
               <div>
-                <div className="font-medium">Free Shipping</div>
-                <div className="text-sm text-muted-foreground">On orders over $100</div>
+                <div className="font-medium font-heading">Envío gratis</div>
+                <div className="text-sm text-muted-foreground font-body">En compras superiores a $100</div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
               <RotateCcw className="h-5 w-5 text-muted-foreground" />
               <div>
-                <div className="font-medium">Easy Returns</div>
-                <div className="text-sm text-muted-foreground">30-day return policy</div>
+                <div className="font-medium font-heading">Devoluciones fáciles</div>
+                <div className="text-sm text-muted-foreground font-body">Política de 30 días</div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
               <Shield className="h-5 w-5 text-muted-foreground" />
               <div>
-                <div className="font-medium">Quality Guarantee</div>
-                <div className="text-sm text-muted-foreground">Premium materials & craftsmanship</div>
+                <div className="font-medium font-heading">Garantía de calidad</div>
+                <div className="text-sm text-muted-foreground font-body">Materiales premium y excelente confección</div>
               </div>
             </div>
 
@@ -155,95 +155,149 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
       <div className="mb-16">
         <Tabs defaultValue="description" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="description">Description</TabsTrigger>
-            <TabsTrigger value="sizing">Size Guide</TabsTrigger>
-            <TabsTrigger value="care">Care Instructions</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
+            <TabsTrigger value="description">Descripción</TabsTrigger>
+            <TabsTrigger value="sizing">Guía de Talles</TabsTrigger>
+            <TabsTrigger value="care">Cuidados</TabsTrigger>
+            <TabsTrigger value="reviews">Reseñas</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="mt-6">
             <div className="prose prose-neutral dark:prose-invert max-w-none">
-              <p className="leading-relaxed">{product.description}</p>
-              <h3>Features</h3>
+              <p className="leading-relaxed font-body">{product.description}</p>
+              <h3 className="font-heading">Características</h3>
               <ul>
-                <li>Premium cotton blend fabric</li>
-                <li>Modern streetwear fit</li>
-                <li>Durable construction</li>
-                <li>Machine washable</li>
+                <li>Tejido de algodón premium</li>
+                <li>Calce streetwear moderno</li>
+                <li>Construcción duradera</li>
+                <li>Apto para lavar a máquina</li>
               </ul>
               <span className="libre-barcode-39-text-regular text-muted-foreground font-semibold text-xl">SKU: {product.sku}</span>
             </div>
           </TabsContent>
           <TabsContent value="sizing" className="mt-6">
             <div className="space-y-4">
-              <h3 className="font-medium">Size Guide</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-border">
-                  <thead>
-                    <tr className="bg-muted">
-                      <th className="border border-border p-2 text-left">Size</th>
-                      <th className="border border-border p-2 text-left">Chest (inches)</th>
-                      <th className="border border-border p-2 text-left">Length (inches)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border border-border p-2">S</td>
-                      <td className="border border-border p-2">36-38</td>
-                      <td className="border border-border p-2">27</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-border p-2">M</td>
-                      <td className="border border-border p-2">40-42</td>
-                      <td className="border border-border p-2">28</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-border p-2">L</td>
-                      <td className="border border-border p-2">44-46</td>
-                      <td className="border border-border p-2">29</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-border p-2">XL</td>
-                      <td className="border border-border p-2">48-50</td>
-                      <td className="border border-border p-2">30</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <h3 className="font-medium font-heading">Guía de Talles</h3>
+              {product.measurementsBySize ? (
+                <div className="overflow-x-auto">
+                  {(() => {
+                    const sizes = product.sizes && product.sizes.length ? product.sizes : Object.keys(product.measurementsBySize!)
+                    const allKeys = Array.from(new Set(
+                      sizes.flatMap((s) => {
+                        const m = (product.measurementsBySize as any)?.[s]
+                        return m ? Object.keys(m).filter((k) => k !== 'unit') : []
+                      })
+                    ))
+                    const preferred = ["chest", "length", "sleeve", "waist", "hip", "head_circumference_min", "head_circumference_max"]
+                    const orderedKeys = preferred.filter((k) => allKeys.includes(k)).concat(allKeys.filter((k) => !preferred.includes(k)))
+                    const labelMap: Record<string, string> = {
+                      chest: "Pecho",
+                      length: "Largo",
+                      sleeve: "Manga",
+                      waist: "Cintura",
+                      hip: "Cadera",
+                      head_circumference_min: "Cabeza mín.",
+                      head_circumference_max: "Cabeza máx.",
+                    }
+                    return (
+                      <table className="w-full border-collapse border border-border">
+                        <thead>
+                          <tr className="bg-muted">
+                            <th className="border border-border p-2 text-left">Talle</th>
+                            {orderedKeys.map((k) => (
+                              <th key={k} className="border border-border p-2 text-left">
+                                {labelMap[k] ?? k} (cm)
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sizes.map((s) => {
+                            const m = (product.measurementsBySize as any)?.[s]
+                            return (
+                              <tr key={s}>
+                                <td className="border border-border p-2">{s}</td>
+                                {orderedKeys.map((k) => (
+                                  <td key={k} className="border border-border p-2">
+                                    {m && (typeof m[k] === 'number' || typeof m[k] === 'string') ? m[k] : '-'}
+                                  </td>
+                                ))}
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    )
+                  })()}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-border">
+                    <thead>
+                      <tr className="bg-muted">
+                        <th className="border border-border p-2 text-left">Talle</th>
+                        <th className="border border-border p-2 text-left">Pecho (cm)</th>
+                        <th className="border border-border p-2 text-left">Largo (cm)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-border p-2">S</td>
+                        <td className="border border-border p-2">-</td>
+                        <td className="border border-border p-2">-</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-border p-2">M</td>
+                        <td className="border border-border p-2">-</td>
+                        <td className="border border-border p-2">-</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-border p-2">L</td>
+                        <td className="border border-border p-2">-</td>
+                        <td className="border border-border p-2">-</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-border p-2">XL</td>
+                        <td className="border border-border p-2">-</td>
+                        <td className="border border-border p-2">-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </TabsContent>
           <TabsContent value="care" className="mt-6">
             <div className="space-y-4">
-              <h3 className="font-medium">Care Instructions</h3>
-              <ul className="space-y-2 text-muted-foreground">
-                <li>• Machine wash cold with like colors</li>
-                <li>• Use mild detergent</li>
-                <li>• Tumble dry low heat</li>
-                <li>• Do not bleach</li>
-                <li>• Iron on low heat if needed</li>
-                <li>• Do not dry clean</li>
+              <h3 className="font-medium font-heading">Instrucciones de cuidado</h3>
+              <ul className="space-y-2 text-muted-foreground font-body">
+                <li>• Lavar a máquina con agua fría junto a colores similares</li>
+                <li>• Usar detergente suave</li>
+                <li>• Secar a baja temperatura</li>
+                <li>• No usar blanqueador</li>
+                <li>• Planchar a baja temperatura si es necesario</li>
+                <li>• No lavar en seco</li>
               </ul>
             </div>
           </TabsContent>
           <TabsContent value="reviews" className="mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-4">
-                <h3 className="font-medium">Reseñas</h3>
+                <h3 className="font-medium font-heading">Reseñas</h3>
                 {reviews.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Aún no hay reseñas. ¡Sé el primero en opinar!</p>
+                  <p className="text-sm text-muted-foreground font-body">Aún no hay reseñas. ¡Sé el primero en opinar!</p>
                 ) : (
                   <ul className="space-y-4">
                     {reviews.map((r) => (
                       <li key={r.id} className="rounded-lg border border-border p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <div className="font-medium">{r.name}</div>
+                          <div className="font-medium font-heading">{r.name}</div>
                           <div className="flex items-center text-yellow-500">
                             {Array.from({ length: 5 }).map((_, i) => (
                               <Star key={i} className={`h-4 w-4 ${i < r.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`} />
                             ))}
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground whitespace-pre-line">{r.comment}</p>
-                        <div className="mt-2 text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground whitespace-pre-line font-body">{r.comment}</p>
+                        <div className="mt-2 text-xs text-muted-foreground font-body">
                           {new Date(r.createdAt).toLocaleDateString()}
                         </div>
                       </li>
@@ -252,14 +306,14 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                 )}
               </div>
               <div>
-                <h3 className="font-medium mb-3">Dejar una reseña</h3>
+                <h3 className="font-medium mb-3 font-heading">Dejar una reseña</h3>
                 <form onSubmit={onSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nombre</Label>
+                    <Label htmlFor="name" className="font-body">Nombre</Label>
                     <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="rating">Rating</Label>
+                    <Label htmlFor="rating" className="font-body">Rating</Label>
                     <Select value={rating} onValueChange={setRating}>
                       <SelectTrigger id="rating">
                         <SelectValue placeholder="Selecciona" />
@@ -272,10 +326,10 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="comment">Comentario</Label>
+                    <Label htmlFor="comment" className="font-body">Comentario</Label>
                     <Textarea id="comment" value={comment} onChange={(e) => setComment(e.target.value)} rows={5} placeholder="¿Qué te pareció el producto?" />
                   </div>
-                  <Button type="submit" disabled={submitting} className="w-full">
+                  <Button type="submit" disabled={submitting} className="w-full font-heading">
                     {submitting ? "Enviando..." : "Enviar reseña"}
                   </Button>
                 </form>
@@ -288,7 +342,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
         <div>
-          <h2 className="font-heading text-2xl font-bold mb-8">You Might Also Like</h2>
+          <h2 className="font-heading text-2xl font-bold mb-8">También te puede interesar</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {relatedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />

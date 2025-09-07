@@ -30,6 +30,7 @@ export function Header() {
   const pathname = usePathname()
   const { t } = useI18n()
 
+
   const { getTotalItems } = useCart()
   // Hydration guard: ensure SSR/CSR render same markup initially
   const [mounted, setMounted] = React.useState(false)
@@ -181,23 +182,37 @@ export function Header() {
           {/* Cart */}
           <CartSheet>
             <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              <Badge
-                variant="destructive"
+              <span className="sr-only">Abrir carrito</span>
+              <Image
+                src="/icons/shopping_bag_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+                alt="Carrito"
+                width={22}
+                height={22}
+                className="opacity-90"
+              />
+              <span
                 aria-hidden
                 className={
-                  "absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs transition-transform ease-out duration-150 " +
-                  (cartCount > 0 ? "opacity-100 scale-100" : "opacity-0 scale-0")
+                  "absolute -top-2 -right-2 grid place-items-center rounded-full border border-white/20 bg-red-600 text-white text-[10px] leading-none font-semibold tabular-nums shadow-sm transition-all duration-200 ease-out " +
+                  (cartCount > 0
+                    ? "min-w-[18px] h-[18px] px-[4px] opacity-100 scale-100 animate-[pulse_2s_ease-in-out_infinite]"
+                    : "min-w-[18px] h-[18px] px-[4px] opacity-0 scale-0")
                 }
               >
                 {cartCount > 0 ? String(cartCount) : ""}
-              </Badge>
+              </span>
+              <style jsx>{`
+                @keyframes pulse {
+                  0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.6); }
+                  50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+                }
+              `}</style>
             </Button>
           </CartSheet>
 
           <LanguageToggle />
 
-          <ThemeToggle />
+          {/*<ThemeToggle />*/}
 
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>

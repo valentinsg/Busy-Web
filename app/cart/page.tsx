@@ -9,10 +9,20 @@ import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/hooks/use-cart"
 import { formatPrice, capitalize } from "@/lib/format"
 import { useI18n } from "@/components/i18n-provider"
-import { Input } from "@/components/ui/input"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, getTotalItems, getSubtotal, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon, clearCart } = useCart()
+  const { items, removeItem, updateQuantity, getTotalItems, getSubtotal, clearCart } = useCart()
   const { t } = useI18n()
   // Hydration guard: avoid SSR/CSR mismatch
   const [mounted, setMounted] = React.useState(false)
@@ -20,13 +30,18 @@ export default function CartPage() {
 
   const totalItems = mounted ? getTotalItems() : 0
   const subtotal = mounted ? getSubtotal() : 0
-  const discount = mounted ? getDiscount() : 0
-  const discountedSubtotal = mounted ? getSubtotalAfterDiscount() : 0
-  const estimatedShipping = discountedSubtotal > 100 ? 0 : 9.99
-  const estimatedTax = discountedSubtotal * 0.08 // 8% tax placeholder
-  const finalTotal = discountedSubtotal + estimatedShipping + estimatedTax
+  const estimatedShipping = subtotal > 100 ? 0 : 9.99
+  const estimatedTax = subtotal * 0.08 // 8% tax placeholder
+  const finalTotal = subtotal + estimatedShipping + estimatedTax
   const itemsForRender = mounted ? items : []
-  const [couponCode, setCouponCode] = React.useState("")
+
+  const getSizeStock = (p: typeof itemsForRender[number]) => {
+    const stockBy = p.product.stockBySize
+    if (stockBy && Object.keys(stockBy).length > 0) {
+      return stockBy[p.selectedSize] ?? 0
+    }
+    return p.product.stock
+  }
 
   if (itemsForRender.length === 0) {
     return (
@@ -58,13 +73,28 @@ export default function CartPage() {
             <h1 className="font-heading text-3xl font-bold">{t("cart.title")} ({totalItems})</h1>
           </div>
           {itemsForRender.length > 0 && (
-            <Button
-              variant="outline"
-              onClick={clearCart}
-              className="text-destructive hover:text-destructive bg-transparent"
-            >
-              {t("cart.clear_all")}
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="text-destructive hover:text-destructive bg-transparent"
+                >
+                  {t("cart.clear_all")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("cart.clear_all")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("cart.empty.subtitle")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={clearCart}>Confirmar</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
 
@@ -96,14 +126,31 @@ export default function CartPage() {
                             <span>SKU: {item.product.sku}</span>
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-destructive"
-                          onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Eliminar producto</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                ¿Querés eliminar este producto del carrito?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor)}>
+                                Eliminar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
 
                       <div className="flex items-center justify-between">
@@ -126,7 +173,7 @@ export default function CartPage() {
                             onClick={() =>
                               updateQuantity(item.product.id, item.quantity + 1, item.selectedSize, item.selectedColor)
                             }
-                            disabled={item.quantity >= item.product.stock}
+                            disabled={item.quantity >= getSizeStock(item)}
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
@@ -151,51 +198,10 @@ export default function CartPage() {
                 <CardTitle className="font-heading">{t("checkout.summary.title")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Coupon */}
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Input
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      placeholder={t("cart.coupon.placeholder")}
-                      aria-label={t("cart.coupon.placeholder")}
-                    />
-                    {coupon ? (
-                      <Button variant="secondary" onClick={() => removeCoupon()}>
-                        {t("cart.coupon.remove")}
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={() => {
-                          const res = applyCoupon(couponCode)
-                          if (!res.ok) alert(t("cart.coupon.invalid"))
-                        }}
-                      >
-                        {t("cart.coupon.apply")}
-                      </Button>
-                    )}
-                  </div>
-                  {coupon && (
-                    <div className="text-xs text-muted-foreground font-body">
-                      {t("cart.coupon.applied").replace("{code}", coupon.code).replace("{percent}", String(coupon.percent))}
-                    </div>
-                  )}
-                </div>
-
                 <div className="font-body space-y-2">
                   <div className="flex justify-between">
                     <span>{t("checkout.summary.subtotal_items").replace("{count}", String(totalItems))}</span>
                     <span>{formatPrice(subtotal)}</span>
-                  </div>
-                  {discount > 0 && (
-                    <div className="flex justify-between text-green-600 dark:text-green-400">
-                      <span>{t("cart.coupon.discount")}</span>
-                      <span>-{formatPrice(discount)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span>{t("cart.subtotal_after_discount")}</span>
-                    <span>{formatPrice(discountedSubtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>{t("checkout.summary.shipping")}</span>
@@ -212,16 +218,16 @@ export default function CartPage() {
                   </div>
                 </div>
 
+                {subtotal < 100 && (
+                  <div className="font-body text-sm text-center text-muted-foreground p-3 bg-muted rounded-lg">
+                    {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100 - subtotal))}
+                  </div>
+                )}
+
                 <Button asChild className="w-full" size="lg">
                   <Link href="/checkout">{t("cart.checkout")}</Link>
                 </Button>
 
-                {/* Free Shipping Notice */}
-                {discountedSubtotal < 100 && (
-                  <div className="font-body text-sm text-center text-muted-foreground p-3 bg-muted rounded-lg">
-                    {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100 - discountedSubtotal))}
-                  </div>
-                )}
 
                 {/* Security Notice */}
                 <div className="font-body text-xs text-center text-muted-foreground">{t("checkout.security_notice")}</div>
