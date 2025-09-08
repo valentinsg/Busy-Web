@@ -1,9 +1,12 @@
 'use client'
+import { useEffect, useState } from 'react'
 import { AutoSliderBanner } from '@/components/home/auto-slider-banner'
 import { useI18n } from '@/components/i18n-provider'
 import { ProductCard } from '@/components/shop/product-card'
 import { Button } from '@/components/ui/button'
 import { getProducts } from '@/lib/products'
+import { getProductsAsync } from '@/lib/repo/products'
+import type { Product } from '@/lib/types'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { ArrowRight, Award, Star, Users } from 'lucide-react'
@@ -46,7 +49,24 @@ const immersiveContainer = {
 
 export default function Home() {
   const { t } = useI18n()
-  const featuredProducts = getProducts().slice(0, 4)
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>(() => getProducts().slice(0, 4))
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const fromSb = await getProductsAsync()
+        if (mounted && fromSb && fromSb.length) {
+          setFeaturedProducts(fromSb.slice(0, 4))
+        }
+      } catch {
+        // silent fallback to local data already set
+      }
+    })()
+    return () => {
+      mounted = false
+    }
+  }, [])
   const categories = [
     {
       name: t('footer.sections.shop.links.hoodies'),
@@ -75,26 +95,6 @@ export default function Home() {
         id="product-section"
         className="py-16 md:py-24 relative overflow-hidden"
       >
-        {/* right-side decorative background image */}
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0, filter: 'blur(12px)' }}
-          whileInView={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute inset-y-0 right-0 w-[650px] -mr-24 pointer-events-none hidden md:block -z-10"
-          aria-hidden
-        >
-          <div className="relative h-full w-full">
-            <Image
-              src="/ciro remera blanca.png"
-              alt="Ciro Remera Blanca"
-              width={650}
-              height={650}
-              className="object-contain object-right brightness-50 contrast-100"
-              priority={false}
-            />
-          </div>
-        </motion.div>
         <div className="container px-4">
           <motion.div {...fadeInUp} className="text-center mb-12">
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
@@ -130,7 +130,10 @@ export default function Home() {
       </section>
 
       {/* Categories Grid */}
-      <section className="py-16 md:py-24 bg-muted/50">
+      <section
+        className="relative py-16 md:py-24 bg-cover bg-center h-[100vh] "
+        style={{ backgroundImage: "url('/category-container.jpg')" }}
+      >
         <div className="container px-4">
           <motion.div {...fadeInUp} className="text-center mb-12">
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">

@@ -19,6 +19,18 @@ export default function NewProductPage() {
     sizes: "",
     images: [] as string[],
   })
+  // Dynamic size rows for per-size stock and measurements
+  const [sizeRows, setSizeRows] = React.useState<
+    Array<{
+      size: string
+      chest?: number
+      length?: number
+      sleeve?: number
+      waist?: number
+      hip?: number
+      stock?: number
+    }>
+  >([])
   const [uploading, setUploading] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -62,6 +74,30 @@ export default function NewProductPage() {
       const { data: session } = await supabase.auth.getSession()
       const token = session.session?.access_token
       if (!token) throw new Error("No auth token")
+      // Build sizes, measurements_by_size and stockBySize from table if provided
+      const tableSizes = sizeRows.map((r) => r.size).filter(Boolean)
+      const uniqueSizes = Array.from(new Set((tableSizes.length ? tableSizes : form.sizes.split(",")).map((s) => s.trim()).filter(Boolean)))
+      const measurements_by_size = sizeRows.length
+        ? Object.fromEntries(
+            sizeRows
+              .filter((r) => r.size)
+              .map((r) => [
+                r.size,
+                {
+                  unit: "cm",
+                  ...(typeof r.chest === 'number' ? { chest: r.chest } : {}),
+                  ...(typeof r.length === 'number' ? { length: r.length } : {}),
+                  ...(typeof r.sleeve === 'number' ? { sleeve: r.sleeve } : {}),
+                  ...(typeof r.waist === 'number' ? { waist: r.waist } : {}),
+                  ...(typeof r.hip === 'number' ? { hip: r.hip } : {}),
+                },
+              ])
+          )
+        : undefined
+      const stockBySize = sizeRows.length
+        ? Object.fromEntries(sizeRows.filter((r) => r.size && typeof r.stock === 'number').map((r) => [r.size, Number(r.stock)]))
+        : undefined
+
       const payload = {
         id: form.id,
         name: form.name,
@@ -69,12 +105,14 @@ export default function NewProductPage() {
         currency: form.currency,
         images: form.images,
         colors: form.colors.split(",").map((s) => s.trim()).filter(Boolean),
-        sizes: form.sizes.split(",").map((s) => s.trim()).filter(Boolean),
+        sizes: uniqueSizes,
+        measurements_by_size,
         category: form.category,
         sku: form.sku,
         stock: Number(form.stock) || 0,
         description: form.description || "",
         tags: [],
+        stockBySize,
       }
       const res = await fetch("/api/admin/products", {
         method: "POST",
@@ -129,6 +167,93 @@ export default function NewProductPage() {
           <label className="text-sm">Talles (coma)
             <input value={form.sizes} onChange={(e)=>setForm({...form, sizes: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>
+          <div className="md:col-span-2">
+            <h3 className="font-heading font-medium mb-2">Talles, stock y medidas</h3>
+            <div className="overflow-x-auto border rounded">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-muted">
+                    <th className="p-2 text-left">Talle</th>
+                    <th className="p-2 text-left">Stock</th>
+                    <th className="p-2 text-left">Pecho (cm)</th>
+                    <th className="p-2 text-left">Largo (cm)</th>
+                    <th className="p-2 text-left">Manga (cm)</th>
+                    <th className="p-2 text-left">Cintura (cm)</th>
+                    <th className="p-2 text-left">Cadera (cm)</th>
+                    <th className="p-2"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sizeRows.map((row, idx) => (
+                    <tr key={idx} className="border-t border-border">
+                      <td className="p-2">
+                        <input
+                          value={row.size}
+                          onChange={(e)=>{
+                            const v = e.target.value
+                            setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, size: v }: r))
+                          }}
+                          className="w-24 border rounded px-2 py-1 bg-transparent"
+                          placeholder="S"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input type="number" value={row.stock ?? 0} onChange={(e)=>{
+                          const v = Number(e.target.value)
+                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, stock: v }: r))
+                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                      </td>
+                      <td className="p-2">
+                        <input type="number" value={row.chest ?? ''} onChange={(e)=>{
+                          const v = e.target.value === '' ? undefined : Number(e.target.value)
+                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, chest: v }: r))
+                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                      </td>
+                      <td className="p-2">
+                        <input type="number" value={row.length ?? ''} onChange={(e)=>{
+                          const v = e.target.value === '' ? undefined : Number(e.target.value)
+                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, length: v }: r))
+                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                      </td>
+                      <td className="p-2">
+                        <input type="number" value={row.sleeve ?? ''} onChange={(e)=>{
+                          const v = e.target.value === '' ? undefined : Number(e.target.value)
+                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, sleeve: v }: r))
+                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                      </td>
+                      <td className="p-2">
+                        <input type="number" value={row.waist ?? ''} onChange={(e)=>{
+                          const v = e.target.value === '' ? undefined : Number(e.target.value)
+                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, waist: v }: r))
+                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                      </td>
+                      <td className="p-2">
+                        <input type="number" value={row.hip ?? ''} onChange={(e)=>{
+                          const v = e.target.value === '' ? undefined : Number(e.target.value)
+                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, hip: v }: r))
+                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                      </td>
+                      <td className="p-2">
+                        <button type="button" className="text-sm underline" onClick={()=>setSizeRows(rows=>rows.filter((_,i)=>i!==idx))}>Quitar</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-2 flex gap-2">
+              <button type="button" className="rounded px-3 py-1 border" onClick={()=>setSizeRows(rows=>[...rows, { size: "" }])}>Agregar fila</button>
+              <button type="button" className="rounded px-3 py-1 border" onClick={()=>{
+                // Prefill typical S-XL
+                setSizeRows([
+                  { size: 'S' },
+                  { size: 'M' },
+                  { size: 'L' },
+                  { size: 'XL' },
+                ])
+              }}>Prefill S-XL</button>
+            </div>
+          </div>
           <div className="md:col-span-2">
             <label className="text-sm">Imágenes
               <input type="file" accept="image/*" multiple onChange={onFileChange} className="block mt-1" />

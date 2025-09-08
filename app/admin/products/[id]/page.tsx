@@ -2,20 +2,33 @@
 
 import * as React from "react"
 import { supabase } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 import { getProductByIdAsync } from "@/lib/repo/products"
 import type { Product } from "@/lib/types"
 
 interface PageProps { params: { id: string } }
 
 export default function EditProductPage({ params }: PageProps) {
+  const { toast } = useToast()
+  const router = useRouter()
   const [product, setProduct] = React.useState<Product | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [saving, setSaving] = React.useState(false)
   const [form, setForm] = React.useState<any>({})
   const [stockBySize, setStockBySize] = React.useState<Record<string, number>>({})
-  const [measurementsRaw, setMeasurementsRaw] = React.useState<string>("")
-  const [measurementsErr, setMeasurementsErr] = React.useState<string | null>(null)
+  const [sizeRows, setSizeRows] = React.useState<
+    Array<{
+      size: string
+      chest?: number
+      length?: number
+      sleeve?: number
+      waist?: number
+      hip?: number
+      stock?: number
+    }>
+  >([])
 
   React.useEffect(() => {
     let cancelled = false
@@ -39,7 +52,20 @@ export default function EditProductPage({ params }: PageProps) {
               description: p.description ?? "",
             })
             setStockBySize(p.stockBySize || {})
-            setMeasurementsRaw(p.measurementsBySize ? JSON.stringify(p.measurementsBySize, null, 2) : "")
+            const sizes = p.sizes || []
+            const rows = sizes.map((s) => {
+              const m: any = (p as any).measurementsBySize?.[s] || {}
+              return {
+                size: s,
+                chest: typeof m.chest === 'number' ? m.chest : undefined,
+                length: typeof m.length === 'number' ? m.length : undefined,
+                sleeve: typeof m.sleeve === 'number' ? m.sleeve : undefined,
+                waist: typeof m.waist === 'number' ? m.waist : undefined,
+                hip: typeof m.hip === 'number' ? m.hip : undefined,
+                stock: (p.stockBySize || {})[s] ?? undefined,
+              }
+            })
+            setSizeRows(rows)
           }
         }
       } catch (e: any) {
@@ -60,32 +86,40 @@ export default function EditProductPage({ params }: PageProps) {
       const { data: session } = await supabase.auth.getSession()
       const token = session.session?.access_token
       if (!token) throw new Error("No auth token")
-      let measurements_by_size: any | undefined
-      setMeasurementsErr(null)
-      if (measurementsRaw.trim()) {
-        try {
-          const parsed = JSON.parse(measurementsRaw)
-          if (typeof parsed !== "object" || Array.isArray(parsed)) {
-            throw new Error("El JSON debe ser un objeto { TALLE: { chest: 50, ... } }")
-          }
-          measurements_by_size = parsed
-        } catch (e: any) {
-          setMeasurementsErr(e?.message || "JSON inválido")
-          throw new Error("JSON de medidas inválido")
-        }
-      }
+      // Build sizes/measurements from table rows
+      const uniqueSizes = Array.from(new Set((String(form.sizes||"").split(",").map((s:string)=>s.trim()).filter(Boolean).length ? String(form.sizes||"").split(",") : sizeRows.map(r=>r.size)).map((s:string)=>s.trim()).filter(Boolean)))
+      const measurements_by_size = sizeRows.length
+        ? Object.fromEntries(
+            sizeRows
+              .filter((r) => r.size)
+              .map((r) => [
+                r.size,
+                {
+                  unit: 'cm',
+                  ...(typeof r.chest === 'number' ? { chest: r.chest } : {}),
+                  ...(typeof r.length === 'number' ? { length: r.length } : {}),
+                  ...(typeof r.sleeve === 'number' ? { sleeve: r.sleeve } : {}),
+                  ...(typeof r.waist === 'number' ? { waist: r.waist } : {}),
+                  ...(typeof r.hip === 'number' ? { hip: r.hip } : {}),
+                },
+              ])
+          )
+        : undefined
+      const stockMap = sizeRows.length
+        ? Object.fromEntries(sizeRows.filter((r)=>r.size && typeof r.stock === 'number').map((r)=>[r.size, Number(r.stock)]))
+        : stockBySize
       const payload = {
         name: form.name,
         price: Number(form.price),
         currency: form.currency,
         images: form.images,
         colors: String(form.colors).split(",").map((s)=>s.trim()).filter(Boolean),
-        sizes: String(form.sizes).split(",").map((s)=>s.trim()).filter(Boolean),
+        sizes: uniqueSizes,
+        measurements_by_size,
         category: form.category,
         sku: form.sku,
         stock: Number(form.stock) || 0,
         description: form.description || "",
-        measurements_by_size,
       }
       const res = await fetch(`/api/admin/products/${params.id}`, {
         method: "PUT",
@@ -98,12 +132,15 @@ export default function EditProductPage({ params }: PageProps) {
       const res2 = await fetch(`/api/admin/stock/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ stockBySize }),
+        body: JSON.stringify({ stockBySize: stockMap }),
       })
       const json2 = await res2.json()
       if (!res2.ok || !json2.ok) throw new Error(json2.error || "Error al guardar stock por talle")
+      toast({ title: "Cambios guardados", description: "El producto fue actualizado correctamente." })
     } catch (e: any) {
-      setError(e?.message || String(e))
+      const message = e?.message || String(e)
+      setError(message)
+      toast({ title: "Error al guardar", description: message })
     } finally {
       setSaving(false)
     }
@@ -121,9 +158,16 @@ export default function EditProductPage({ params }: PageProps) {
       })
       const json = await res.json()
       if (!res.ok || !json.ok) throw new Error(json.error || "Error al eliminar")
-      window.history.back()
+      toast({ title: "Producto eliminado", description: "Se actualizó el listado." })
+      router.replace("/admin/products")
+      // Fuerza recarga del listado para evitar HTML en caché del history.back()
+      setTimeout(() => {
+        window.location.reload()
+      }, 50)
     } catch (e: any) {
-      setError(e?.message || String(e))
+      const message = e?.message || String(e)
+      setError(message)
+      toast({ title: "Error al eliminar", description: message })
     }
   }
 
@@ -169,21 +213,84 @@ export default function EditProductPage({ params }: PageProps) {
 
         <div className="mt-4">
           <h3 className="font-heading font-medium mb-2">Stock por talle</h3>
-          <div className="flex flex-wrap gap-2">
-            {String(form.sizes||"").split(",").map((s)=>s.trim()).filter(Boolean).map((size)=> (
-              <label key={size} className="text-sm">
-                {size}
-                <input type="number" value={stockBySize[size]||0} onChange={(e)=>setStockBySize({...stockBySize, [size]: Number(e.target.value)})} className="ml-2 w-24 border rounded px-2 py-1 bg-transparent" />
-              </label>
-            ))}
+          <div className="overflow-x-auto border rounded">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="p-2 text-left">Talle</th>
+                  <th className="p-2 text-left">Stock</th>
+                  <th className="p-2 text-left">Pecho (cm)</th>
+                  <th className="p-2 text-left">Largo (cm)</th>
+                  <th className="p-2 text-left">Manga (cm)</th>
+                  <th className="p-2 text-left">Cintura (cm)</th>
+                  <th className="p-2 text-left">Cadera (cm)</th>
+                  <th className="p-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {sizeRows.map((row, idx) => (
+                  <tr key={idx} className="border-t border-border">
+                    <td className="p-2">
+                      <input value={row.size} onChange={(e)=>{
+                        const v = e.target.value
+                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, size: v }: r))
+                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                    </td>
+                    <td className="p-2">
+                      <input type="number" value={row.stock ?? 0} onChange={(e)=>{
+                        const v = Number(e.target.value)
+                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, stock: v }: r))
+                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                    </td>
+                    <td className="p-2">
+                      <input type="number" value={row.chest ?? ''} onChange={(e)=>{
+                        const v = e.target.value === '' ? undefined : Number(e.target.value)
+                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, chest: v }: r))
+                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                    </td>
+                    <td className="p-2">
+                      <input type="number" value={row.length ?? ''} onChange={(e)=>{
+                        const v = e.target.value === '' ? undefined : Number(e.target.value)
+                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, length: v }: r))
+                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                    </td>
+                    <td className="p-2">
+                      <input type="number" value={row.sleeve ?? ''} onChange={(e)=>{
+                        const v = e.target.value === '' ? undefined : Number(e.target.value)
+                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, sleeve: v }: r))
+                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                    </td>
+                    <td className="p-2">
+                      <input type="number" value={row.waist ?? ''} onChange={(e)=>{
+                        const v = e.target.value === '' ? undefined : Number(e.target.value)
+                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, waist: v }: r))
+                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                    </td>
+                    <td className="p-2">
+                      <input type="number" value={row.hip ?? ''} onChange={(e)=>{
+                        const v = e.target.value === '' ? undefined : Number(e.target.value)
+                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, hip: v }: r))
+                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
+                    </td>
+                    <td className="p-2">
+                      <button type="button" className="text-sm underline" onClick={()=>setSizeRows(rows=>rows.filter((_,i)=>i!==idx))}>Quitar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
-
-        <div className="mt-6">
-          <h3 className="font-heading font-medium mb-2">Medidas por talle (JSON)</h3>
-          <p className="text-xs text-muted-foreground mb-2">Formato ejemplo: {`{"S": { "unit": "cm", "chest": 52, "length": 67, "sleeve": 61 }, "M": { ... }}`}</p>
-          <textarea value={measurementsRaw} onChange={(e)=>setMeasurementsRaw(e.target.value)} rows={10} className="w-full border rounded px-3 py-2 bg-transparent font-mono text-xs" placeholder='{"S": { "unit": "cm", "chest": 52, "length": 67 }}' />
-          {measurementsErr && <p className="text-xs text-red-500 mt-1">{measurementsErr}</p>}
+          <div className="mt-2 flex gap-2">
+            <button type="button" className="rounded px-3 py-1 border" onClick={()=>setSizeRows(rows=>[...rows, { size: '' }])}>Agregar fila</button>
+            <button type="button" className="rounded px-3 py-1 border" onClick={()=>{
+              setSizeRows([
+                { size: 'S' },
+                { size: 'M' },
+                { size: 'L' },
+                { size: 'XL' },
+              ])
+            }}>Prefill S-XL</button>
+          </div>
         </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}

@@ -52,10 +52,13 @@ export async function getProductsAsync(params?: {
         query = query.order("rating", { ascending: false })
         break
       case "newest":
-        // no created_at column yet; fallback to name desc for stability
-        query = query.order("name", { ascending: false })
+        // Prefer created_at desc if available
+        query = query.order("created_at", { ascending: false })
         break
     }
+  } else {
+    // Default: show newest first
+    query = query.order("created_at", { ascending: false })
   }
 
   const { data, error } = await query

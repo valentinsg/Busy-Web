@@ -5,8 +5,6 @@ import { getProductById, getProductsByCategory } from "@/lib/products"
 import { getProductByIdAsync, getProductsAsync } from "@/lib/repo/products"
 import type { Product } from "@/lib/types"
 
-export const dynamic = "force-dynamic"
-
 interface ProductPageProps {
   params: {
     slug: string

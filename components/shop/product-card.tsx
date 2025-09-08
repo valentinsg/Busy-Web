@@ -13,9 +13,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 interface ProductCardProps {
   product: Product
+  /** When provided, clicking the card navigates to this admin edit URL instead of the public product page. */
+  adminEditHref?: string
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, adminEditHref }: ProductCardProps) {
+
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0)
   const [isHovered, setIsHovered] = React.useState(false)
 
@@ -87,7 +90,12 @@ export function ProductCard({ product }: ProductCardProps) {
             e.stopPropagation()
             return
           }
-          router.push(`/product/${product.id}`)
+          // Admin mode: navigate to edit page
+          if (adminEditHref) {
+            router.push(adminEditHref)
+          } else {
+            router.push(`/product/${product.id}`)
+          }
         }}
         onKeyDown={(e) => {
           // Allow keyboard navigation unless focus is on an overlay control
@@ -95,7 +103,11 @@ export function ProductCard({ product }: ProductCardProps) {
           if (target && target.closest('[data-overlay-control="true"]')) return
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault()
-            router.push(`/product/${product.id}`)
+            if (adminEditHref) {
+              router.push(adminEditHref)
+            } else {
+              router.push(`/product/${product.id}`)
+            }
           }
         }}
       >
@@ -118,8 +130,19 @@ export function ProductCard({ product }: ProductCardProps) {
             </Badge>
           )}
 
-          {/* Sizes overlay on hover (blocks link clicks) */}
-          {product.sizes?.length > 0 && (
+          {/* Admin preview badge/button */}
+          {adminEditHref && (
+            <a
+              href={`/product/${product.id}`}
+              onClick={(e)=>e.stopPropagation()}
+              className="absolute top-2 right-2 z-20 text-[11px] underline bg-black/50 rounded px-2 py-1"
+            >
+              Ver en web
+            </a>
+          )}
+
+          {/* Sizes overlay on hover (hidden in admin cards) */}
+          {(!adminEditHref) && product.sizes?.length > 0 && (
             <div
               ref={overlayRef}
               className={`absolute inset-0 z-10 ${isHovered ? "pointer-events-auto cursor-default" : "pointer-events-none"}`}
@@ -147,7 +170,7 @@ export function ProductCard({ product }: ProductCardProps) {
                               type="button"
                               onClick={(e) => handleAddToCartWithSize(e, String(product.sizes[0]))}
                               data-overlay-control="true"
-                              className="w-full rounded-md px-3 py-2 text-xs font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                              className="w-full rounded-md px-3 py-2 text-sm font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                             >
                               {String(product.sizes[0])}
                             </button>
@@ -156,7 +179,7 @@ export function ProductCard({ product }: ProductCardProps) {
                             side="top"
                             align="start"
                             sideOffset={8}
-                            className="max-w-[340px] text-xs bg-black/85 border-white/10 shadow-xl py-2 px-0"
+                            className="max-w-[340px] text-sm bg-black/85 border-white/10 shadow-xl py-2 px-0"
                           >
                             <div className="flex items-start gap-4 pr-3 pl-0">
                               {/* Hanger icon, pegado a la izquierda */}
@@ -167,7 +190,7 @@ export function ProductCard({ product }: ProductCardProps) {
                                 height={16}
                                 className="opacity-95 shrink-0"
                               />
-                              <div className="leading-snug opacity-90">
+                              <div className="leading-snug opacity-90 text-sm">
                                 {formatSizeTooltip(String(product.sizes[0]))}
                               </div>
                             </div>
@@ -181,7 +204,7 @@ export function ProductCard({ product }: ProductCardProps) {
                                 type="button"
                                 onClick={(e) => handleAddToCartWithSize(e, size)}
                                 data-overlay-control="true"
-                                className="min-w-8 rounded-md px-2 py-1 text-xs font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                                className="min-w-8 rounded-md px-2 py-1 text-sm font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                               >
                                 {size}
                               </button>
@@ -190,7 +213,7 @@ export function ProductCard({ product }: ProductCardProps) {
                               side="top"
                               align="start"
                               sideOffset={8}
-                              className="max-w-[340px] text-xs bg-black/85 border-white/10 shadow-xl py-2 px-0"
+                              className="max-w-[340px] text-sm bg-black/85 border-white/10 shadow-xl py-2 px-0"
                             >
                               <div className="flex items-start gap-4 pr-3 pl-0">
                                 {/* Hanger icon, pegado a la izquierda */}
@@ -201,7 +224,7 @@ export function ProductCard({ product }: ProductCardProps) {
                                   height={16}
                                   className="opacity-95 shrink-0"
                                 />
-                                <div className="leading-snug opacity-90">
+                                <div className="leading-snug opacity-90 text-sm">
                                   {formatSizeTooltip(size)}
                                 </div>
                               </div>
