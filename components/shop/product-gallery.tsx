@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import Image from "next/image"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import * as React from 'react'
+import Image from 'next/image'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface ProductGalleryProps {
   images: string[]
@@ -24,6 +24,12 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   if (images.length === 0) {
     return (
       <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
+        <Image
+          src={'/product-bg.jpg'}
+          alt={'Busy Pattern white, diseñado por @agus.mxlina'}
+          fill
+          className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+        />
         <span className="text-muted-foreground">No image available</span>
       </div>
     )
@@ -34,7 +40,22 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
       {/* Main Image */}
       <div className="relative aspect-square bg-muted rounded-lg overflow-hidden group">
         <Image
-          src={images[currentImage] || "/placeholder.svg?height=600&width=600&query=product"}
+          src={'/product-bg.jpg'}
+          alt={'Busy Pattern white, diseñado por @agus.mxlina'}
+          fill
+          className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+        />
+        <Image
+          src={'/product-bg.jpg'}
+          alt={productName}
+          fill
+          className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+        />
+        <Image
+          src={
+            images[currentImage] ||
+            '/placeholder.svg?height=600&width=600&query=product'
+          }
           alt={`${productName} - Image ${currentImage + 1}`}
           fill
           className="object-cover"
@@ -78,11 +99,21 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               key={index}
               onClick={() => setCurrentImage(index)}
               className={`relative aspect-square bg-muted rounded-md overflow-hidden border-2 transition-colors ${
-                currentImage === index ? "border-accent-brand" : "border-transparent hover:border-border"
+                currentImage === index
+                  ? 'border-accent-brand'
+                  : 'border-transparent hover:border-border'
               }`}
             >
               <Image
-                src={image || "/placeholder.svg?height=150&width=150&query=product"}
+                src={'/product-bg.jpg'}
+                alt={"Busy Pattern white, diseñado por @agus.mxlina"}
+                fill
+                className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+              />
+              <Image
+                src={
+                  image || '/placeholder.svg?height=150&width=150&query=product'
+                }
                 alt={`${productName} - Thumbnail ${index + 1}`}
                 fill
                 className="object-cover"

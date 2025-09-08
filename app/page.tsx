@@ -1,16 +1,14 @@
 'use client'
-import { useEffect, useState } from 'react'
 import { AutoSliderBanner } from '@/components/home/auto-slider-banner'
 import { useI18n } from '@/components/i18n-provider'
 import { ProductCard } from '@/components/shop/product-card'
 import { Button } from '@/components/ui/button'
-import { getProducts } from '@/lib/products'
 import { getProductsAsync } from '@/lib/repo/products'
 import type { Product } from '@/lib/types'
-import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { ArrowRight, Award, Star, Users } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -49,7 +47,7 @@ const immersiveContainer = {
 
 export default function Home() {
   const { t } = useI18n()
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>(() => getProducts().slice(0, 4))
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
 
   useEffect(() => {
     let mounted = true
@@ -60,7 +58,8 @@ export default function Home() {
           setFeaturedProducts(fromSb.slice(0, 4))
         }
       } catch {
-        // silent fallback to local data already set
+        // Do not fallback to local JSON to avoid stale/fake data on Home
+        setFeaturedProducts([])
       }
     })()
     return () => {
@@ -71,17 +70,17 @@ export default function Home() {
     {
       name: t('footer.sections.shop.links.hoodies'),
       href: '/products?category=hoodies',
-      image: '/cozy-hoodie.png',
+      image: '/hoodies-background.png',
     },
     {
       name: t('footer.sections.shop.links.tshirts'),
       href: '/products?category=tshirts',
-      image: '/plain-white-tshirt.png',
+      image: '/t-shirts-background.png',
     },
     {
-      name: t('footer.sections.shop.links.accessories'),
-      href: '/products?category=accessories',
-      image: '/baseball-cap-display.png',
+      name: t('footer.sections.shop.links.pants'),
+      href: '/products?category=pants',
+      image: '/pants-background.png',
     },
   ]
 
@@ -139,7 +138,7 @@ export default function Home() {
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
               {t('home.categories.title')}
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className="font-body text-muted-foreground text-lg">
               {t('home.categories.subtitle')}
             </p>
           </motion.div>
@@ -154,20 +153,48 @@ export default function Home() {
             {categories.map((category) => (
               <motion.div key={category.name} variants={fadeInUp}>
                 <Link href={category.href} className="group block">
-                  <div className="relative aspect-square overflow-hidden rounded-lg bg-background">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                    <div
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
-                      style={{ backgroundImage: `url('${category.image}')` }}
-                    />
-                    <div className="absolute bottom-6 left-6 z-20">
-                      <h3 className="font-heading text-2xl font-bold text-white mb-2">
-                        {category.name}
-                      </h3>
-                      <Button variant="secondary" size="sm">
-                        {t('home.categories.cta')}{' '}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
+                  {/* Glow frame wrapper */}
+                  <div className="group relative rounded-2xl p-[4px] bg-gradient-to-br from-white/45 via-white/20 to-transparent shadow-[0_0_50px_rgba(35,35,35,0.3)] ring-2 ring-white/30">
+                    {/* soft external glow */}
+                    <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5" />
+
+                    {/* subtle inner border */}
+                    <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/15" />
+
+                    {/* corner accents */}
+                    <span className="pointer-events-none absolute top-3 left-3 h-px w-8 bg-white/40" />
+                    <span className="pointer-events-none absolute top-3 left-3 h-8 w-px bg-white/40" />
+                    <span className="pointer-events-none absolute top-3 right-3 h-px w-8 bg-white/40" />
+                    <span className="pointer-events-none absolute top-3 right-3 h-8 w-px bg-white/40" />
+                    <span className="pointer-events-none absolute bottom-3 left-3 h-px w-8 bg-white/30" />
+                    <span className="pointer-events-none absolute bottom-3 left-3 h-8 w-px bg-white/30" />
+                    <span className="pointer-events-none absolute bottom-3 right-3 h-px w-8 bg-white/30" />
+                    <span className="pointer-events-none absolute bottom-3 right-3 h-8 w-px bg-white/30" />
+
+                    {/* content card */}
+                    <div className="relative aspect-square overflow-hidden rounded-[16px] bg-background ring-1 ring-white/10 shadow-[0_8px_40px_rgba(25,25,25,0.2)]">
+                      {/* gentle sheen on hover */}
+                      <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-15 transition-opacity duration-500" />
+
+                      <div
+                        className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
+                        style={{ backgroundImage: `url('${category.image}')` }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+
+                      <div className="absolute bottom-6 left-6 z-20">
+                        <h3 className="font-heading text-2xl font-bold text-white mb-2">
+                          {category.name}
+                        </h3>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="font-body"
+                        >
+                          {t('home.categories.cta')}{' '}
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -207,7 +234,7 @@ export default function Home() {
 
             <motion.div {...fadeInUp} className="relative ml-auto">
               {/* Creative border frame with subtle white glow */}
-              <div className="group relative h-[760px] w-[440px] rounded-2xl p-[2px] bg-gradient-to-br from-white/25 via-white/10 to-transparent shadow-[0_0_50px_rgba(35,35,35,0.3)] ring-1 ring-white/10">
+              <div className="group relative h-[760px] w-[440px] rounded-2xl p-[4px] bg-gradient-to-br from-white/45 via-white/20 to-transparent shadow-[0_0_50px_rgba(35,35,35,0.3)] ring-2 ring-white/30">
                 {/* soft external glow */}
                 <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5" />
 
@@ -246,7 +273,7 @@ export default function Home() {
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
               {t('home.social.title')}
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className="font-body text-muted-foreground text-lg">
               {t('home.social.subtitle')}
             </p>
           </motion.div>
@@ -286,7 +313,9 @@ export default function Home() {
                 <h3 className="font-heading text-xl font-semibold mb-2">
                   {item.title}
                 </h3>
-                <p className="text-muted-foreground">{item.description}</p>
+                <p className="font-body text-muted-foreground">
+                  {item.description}
+                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -300,12 +329,12 @@ export default function Home() {
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">
               {t('home.cta.title')}
             </h2>
-            <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
+            <p className="font-body text-muted-foreground text-lg mb-8 leading-relaxed">
               {t('home.cta.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="text-lg px-8">
-                <Link href="/products">
+              <Button asChild size="lg" className="text-lg px-8 font-heading">
+                <Link href="/products" className="font-heading">
                   {t('home.cta.primary')}{' '}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -314,9 +343,11 @@ export default function Home() {
                 asChild
                 variant="outline"
                 size="lg"
-                className="text-lg px-8 bg-transparent"
+                className="text-lg px-8 bg-transparent font-heading"
               >
-                <Link href="/contact">{t('home.cta.secondary')}</Link>
+                <Link href="/contact" className="font-heading">
+                  {t('home.cta.secondary')}
+                </Link>
               </Button>
             </div>
           </motion.div>

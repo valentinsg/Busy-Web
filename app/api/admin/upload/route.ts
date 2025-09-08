@@ -16,6 +16,23 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer()
     const path = `${Date.now()}-${file.name}`
 
+    // Ensure bucket exists and is public
+    try {
+      // getBucket is available; if not, list and check
+      const { data: bInfo } = await (svc.storage as any).getBucket?.(bucket)
+      if (!bInfo) {
+        const { data: list } = await (svc.storage as any).listBuckets?.()
+        const exists = Array.isArray(list) && list.some((b: any) => b.name === bucket)
+        if (!exists) {
+          await (svc.storage as any).createBucket?.(bucket, { public: true })
+        }
+      }
+      // Try to set public if not already
+      await (svc.storage as any).updateBucket?.(bucket, { public: true })
+    } catch {
+      // best-effort; continue
+    }
+
     const { error } = await svc.storage.from(bucket).upload(path, new Uint8Array(bytes), {
       contentType: file.type || "application/octet-stream",
       upsert: false,

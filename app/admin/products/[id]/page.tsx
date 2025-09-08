@@ -18,6 +18,7 @@ export default function EditProductPage({ params }: PageProps) {
   const [saving, setSaving] = React.useState(false)
   const [form, setForm] = React.useState<any>({})
   const [stockBySize, setStockBySize] = React.useState<Record<string, number>>({})
+  const [uploading, setUploading] = React.useState(false)
   const [sizeRows, setSizeRows] = React.useState<
     Array<{
       size: string
@@ -29,6 +30,40 @@ export default function EditProductPage({ params }: PageProps) {
       stock?: number
     }>
   >([])
+
+  // File upload handler for images input (top-level)
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || !files.length) return
+    setUploading(true)
+    setError(null)
+    try {
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      if (!token) throw new Error("No auth token")
+      const uploaded: string[] = []
+      for (const file of Array.from(files)) {
+        const fd = new FormData()
+        fd.append("file", file)
+        const res = await fetch("/api/admin/upload", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd,
+        })
+        const json = await res.json()
+        if (!res.ok || !json.ok) throw new Error(json.error || "Upload failed")
+        uploaded.push(json.url as string)
+      }
+      setForm((f: any) => ({ ...f, images: [...(f.images || []), ...uploaded] }))
+      toast({ title: "Imágenes subidas", description: `${uploaded.length} archivo(s) agregado(s)` })
+    } catch (e: any) {
+      const message = e?.message || String(e)
+      setError(message)
+      toast({ title: "Error al subir", description: message })
+    } finally {
+      setUploading(false)
+    }
+  }
 
   React.useEffect(() => {
     let cancelled = false
@@ -209,6 +244,20 @@ export default function EditProductPage({ params }: PageProps) {
           <label className="text-sm">Talles (coma)
             <input value={form.sizes||""} onChange={(e)=>setForm({...form, sizes: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>
+          <div className="md:col-span-2">
+            <label className="text-sm">Imágenes
+              <input type="file" accept="image/*" multiple onChange={onFileChange} className="block mt-1" />
+            </label>
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {(form.images||[]).map((url: string) => (
+                <div key={url} className="relative group">
+                  <img src={url} alt="img" className="w-full h-24 object-cover rounded" />
+                  <button type="button" onClick={() => setForm((f:any)=>({ ...f, images: (f.images||[]).filter((u:string)=>u!==url) }))} className="absolute top-1 right-1 text-[11px] underline bg-black/60 rounded px-1 py-0.5 opacity-0 group-hover:opacity-100">Quitar</button>
+                </div>
+              ))}
+            </div>
+            {uploading && <p className="text-sm text-muted-foreground mt-1">Subiendo...</p>}
+          </div>
         </div>
 
         <div className="mt-4">

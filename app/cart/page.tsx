@@ -3,6 +3,7 @@ import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Plus, Minus, X, ShoppingBag } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -24,6 +25,7 @@ import {
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalItems, getSubtotal, clearCart } = useCart()
   const { t } = useI18n()
+  const router = useRouter()
   // Hydration guard: avoid SSR/CSR mismatch
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => setMounted(true), [])
@@ -35,6 +37,14 @@ export default function CartPage() {
   const finalTotal = subtotal + estimatedShipping + estimatedTax
   const itemsForRender = mounted ? items : []
 
+  // If the cart is empty, redirect to products after 3 seconds
+  React.useEffect(() => {
+    if (mounted && itemsForRender.length === 0) {
+      const id = setTimeout(() => router.push('/products'), 3000)
+      return () => clearTimeout(id)
+    }
+  }, [mounted, itemsForRender.length, router])
+
   const getSizeStock = (p: typeof itemsForRender[number]) => {
     const stockBy = p.product.stockBySize
     if (stockBy && Object.keys(stockBy).length > 0) {
@@ -45,7 +55,7 @@ export default function CartPage() {
 
   if (itemsForRender.length === 0) {
     return (
-      <div className="container px-4 py-16">
+      <div className="container px-4 min-h-[60vh] flex items-center justify-center">
         <div className="max-w-2xl mx-auto text-center">
           <ShoppingBag className="h-24 w-24 text-muted-foreground mx-auto mb-6" />
           <h1 className="font-heading text-3xl font-bold mb-4">{t("cart.empty.title")}</h1>

@@ -41,7 +41,7 @@ export default function ProductsPage() {
   const colors = getAvailableColors()
   const sizes = getAvailableSizes()
 
-  // Load products from Supabase with fallback to local JSON
+  // Load products from Supabase (sin fallback a JSON para evitar datos viejos)
   React.useEffect(() => {
     let cancelled = false
     async function load() {
@@ -73,19 +73,8 @@ export default function ProductsPage() {
           if (!cancelled) setAsyncProducts(list)
         }
       } catch (e) {
-        // Fallback to local JSON
-        const local = searchQuery.trim()
-          ? searchProducts(searchQuery.trim()).filter((p) => {
-              if (filters.category && p.category !== filters.category) return false
-              if (filters.color && !p.colors.includes(filters.color)) return false
-              if (filters.size && !p.sizes.includes(filters.size)) return false
-              if (filters.minPrice !== undefined && p.price < filters.minPrice) return false
-              if (filters.maxPrice !== undefined && p.price > filters.maxPrice) return false
-              return true
-            })
-          : getProducts(filters)
         if (!cancelled) {
-          setAsyncProducts(local)
+          setAsyncProducts([])
           setError('offline')
         }
       } finally {
@@ -359,11 +348,19 @@ export default function ProductsPage() {
                   <h3 className="font-heading font-medium mb-2">
                     {t('products.empty.title')}
                   </h3>
-                  <p className="font-body text-sm">{t('products.empty.subtitle')}</p>
+                  <p className="font-body text-sm">{error === 'offline' ? 'No se pudo cargar desde el servidor. Reintenta.' : t('products.empty.subtitle')}</p>
                 </div>
-                <Button onClick={clearFilters} variant="outline">
-                  {t('products.empty.clear')}
-                </Button>
+                <div className="flex items-center justify-center gap-2">
+                  <Button onClick={clearFilters} variant="outline">
+                    {t('products.empty.clear')}
+                  </Button>
+                  <Button onClick={() => {
+                    // reintentar
+                    setFilters({ ...filters })
+                  }} variant="outline" className="bg-transparent">
+                    Reintentar
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
