@@ -2,6 +2,8 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Space_Grotesk, Plus_Jakarta_Sans, Abel, DM_Sans, Libre_Barcode_39_Text, Poppins } from 'next/font/google'
 import type React from 'react'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -127,6 +129,10 @@ export default function RootLayout({
         </I18nProvider>
         {/* Custom cursor should be rendered within <body> to avoid removeChild null errors */}
         <CustomCursor />
+        {/* Vercel Web Analytics - only sends events in production */}
+        <Analytics />
+        {/* Vercel Speed Insights - Web Vitals reporting */}
+        <SpeedInsights />
       </body>
     </html>
   )

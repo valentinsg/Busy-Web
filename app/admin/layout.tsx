@@ -1,6 +1,7 @@
 import React from "react"
 import Link from "next/link"
 import AdminLayoutGuard from "@/components/admin/admin-layout-guard"
+import QuickNewMenu from "@/components/admin/quick-new-menu"
 
 export const dynamic = "force-dynamic"
 
@@ -14,8 +15,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <nav className="flex gap-4 text-sm font-body text-muted-foreground">
               <Link href="/admin">Dashboard</Link>
               <Link href="/admin/products">Productos</Link>
-              <Link href="/admin/products/new">Nuevo</Link>
+              <Link href="/admin/stock">Stock</Link>
+              <Link href="/admin/media">Media</Link>
+              <QuickNewMenu />
               <Link href="/admin/newsletter">Newsletter</Link>
+              <Link href="/admin/newsletter/campaigns">Campañas</Link>
+              <Link href="/admin/blog">Blog</Link>
+              <Link href="/admin/coupons">Cupones</Link>
             </nav>
           </header>
           {children}
@@ -24,3 +30,4 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </AdminLayoutGuard>
   )
 }
+

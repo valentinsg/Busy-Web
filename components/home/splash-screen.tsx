@@ -25,7 +25,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       setMatrixText(randomText)
     }, 50)
 
-    // Progress bar animation
+    // Progress bar animation - adjusted for 3 seconds total
     const interval: ReturnType<typeof setInterval> = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -33,16 +33,15 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           clearInterval(matrixInterval)
           setTimeout(() => {
             setIsComplete(true)
-            // give time for fade-out transition, then notify parent
             setTimeout(() => {
               onComplete?.()
             }, 200)
-          }, 500) // Delay before hiding splash screen
+          }, 300)
           return 100
         }
-        return prev + 1
+        return prev + 6.66 // Increment by ~3.33 to complete in 3 seconds (100/30)
       })
-    }, 30)
+    }, 100) // Increased interval to 100ms
 
     return () => {
       clearInterval(interval)
@@ -72,7 +71,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         <div className="h-full bg-white transition-all duration-100 ease-out" style={{ width: `${progress}%` }} />
       </div>
       {/* Progress percentage */}
-      <div className="mt-2 font-mono text-sm text-white">{progress}%</div>
+      <div className="mt-2 font-mono text-sm text-white">{progress.toFixed(0)}%</div>
     </div>
   )
 }

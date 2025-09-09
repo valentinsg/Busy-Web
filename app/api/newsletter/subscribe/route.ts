@@ -9,9 +9,19 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { email } = schema.parse(body)
     const svc = getServiceClient()
-    const { error } = await svc.from("newsletter_subscribers").upsert({ email })
+    // Generate token for opt-in
+    const token = crypto.randomUUID()
+    // Determine base URL (env or request origin)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${req.nextUrl.protocol}//${req.headers.get("host")}`
+    const confirmUrl = `${siteUrl}/api/newsletter/confirm?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`
+    const { error } = await svc.from("newsletter_subscribers").upsert({
+      email,
+      status: "pending",
+      token,
+    })
     if (error) throw error
-    return NextResponse.json({ ok: true })
+    // TODO: send email with confirmUrl via provider (Resend, Sendgrid, etc.)
+    return NextResponse.json({ ok: true, confirmUrl })
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e?.message ?? String(e) }, { status: 400 })
   }
