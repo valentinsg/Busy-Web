@@ -9,6 +9,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Award, Star, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+ 
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -120,7 +121,7 @@ export default function Home() {
 
           <motion.div {...fadeInUp} className="text-center mt-12">
             <Button asChild variant="outline" size="lg">
-              <Link href="/products" className="font-heading">
+              <Link href="/products" prefetch={false} className="font-heading">
                 {t('home.latest.view_all')}
               </Link>
             </Button>
@@ -152,7 +153,7 @@ export default function Home() {
           >
             {categories.map((category) => (
               <motion.div key={category.name} variants={fadeInUp}>
-                <Link href={category.href} className="group block">
+                <Link href={category.href} prefetch={false} className="group block">
                   {/* Glow frame wrapper */}
                   <div className="group relative rounded-2xl p-[4px] bg-gradient-to-br from-white/45 via-white/20 to-transparent shadow-[0_0_50px_rgba(35,35,35,0.3)] ring-2 ring-white/30">
                     {/* soft external glow */}
@@ -333,8 +334,8 @@ export default function Home() {
               {t('home.cta.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="text-lg px-8 font-heading">
-                <Link href="/products" className="font-heading">
+              <Button asChild size="lg" className="text-lg px=8 font-heading">
+                <Link href="/products" prefetch={false} className="font-heading">
                   {t('home.cta.primary')}{' '}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -345,7 +346,7 @@ export default function Home() {
                 size="lg"
                 className="text-lg px-8 bg-transparent font-heading"
               >
-                <Link href="/contact" className="font-heading">
+                <Link href="/contact" prefetch={false} className="font-heading">
                   {t('home.cta.secondary')}
                 </Link>
               </Button>

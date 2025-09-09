@@ -124,7 +124,7 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
                   </div>
                 </div>
                 <Button asChild aria-label={t("blog.featured.cta")} title={t("blog.featured.cta")} data-label={t("blog.featured.cta")}>
-                  <Link href={`/blog/${featuredPost.slug}`}>{t("blog.featured.cta")}</Link>
+                  <Link href={`/blog/${featuredPost.slug}`} prefetch={false}>{t("blog.featured.cta")}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -166,7 +166,7 @@ export default function BlogClient({ allPosts, allTags }: BlogClientProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post) => (
                 <Card key={post.slug} className="overflow-hidden group hover:shadow-lg transition-shadow">
-                  <Link href={`/blog/${post.slug}`}>
+                  <Link href={`/blog/${post.slug}`} prefetch={false}>
                     <CardContent className="p-6">
                       <div className="flex flex-wrap gap-2 mb-3">
                         {post.tags.slice(0, 2).map((tag: string) => (

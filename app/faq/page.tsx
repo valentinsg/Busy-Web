@@ -4,11 +4,15 @@ import { Button } from "@/components/ui/button"
 import { MessageCircle, Mail } from "lucide-react"
 import Link from "next/link"
 import faqsData from "@/content/faqs.json"
+import type { Metadata } from "next"
+import { generateSEO } from "@/lib/seo"
 
-export const metadata = {
+export const metadata: Metadata = generateSEO({
   title: "Frequently Asked Questions - Busy",
-  description: "Find answers to common questions about Busy products, shipping, returns, and more.",
-}
+  description:
+    "Find answers to common questions about Busy products, shipping, returns, and more.",
+  url: `${process.env.SITE_URL || "https://busy.com.ar"}/faq`,
+})
 
 export default function FAQPage() {
   return (

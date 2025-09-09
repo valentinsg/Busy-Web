@@ -150,6 +150,7 @@ export function Header() {
             <Link
               key={item.key}
               href={item.href}
+              prefetch={false}
               className="text-sm transition-colors hover:text-accent-brand"
             >
               {t(`nav.${item.key}`)}
@@ -240,6 +241,7 @@ export function Header() {
                     <Link
                       key={item.key}
                       href={item.href}
+                      prefetch={false}
                       onClick={() => setIsOpen(false)}
                       className="text-sm font-medium py-2 px-2 rounded-md hover:bg-accent transition-colors"
                     >

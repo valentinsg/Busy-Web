@@ -62,7 +62,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center w-28 ml-16">
+            <Link href="/" prefetch={false} className="flex items-center w-28 ml-16">
               <div className="relative h-28 w-28">
                 <Image src="/busy-parche.png" alt="Busy" fill className="object-contain hidden dark:block contrast-30" />
               </div>
@@ -103,6 +103,7 @@ export function Footer() {
                   <li key={link.name}>
                     <Link
                       href={link.href}
+                      prefetch={false}
                       className="font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {link.name}
@@ -118,13 +119,13 @@ export function Footer() {
         <div className="border-t mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
           <p className="font-body text-sm text-muted-foreground">© {year} Busy. {t("footer.bottom.rights")}</p>
           <div className="flex space-x-4 text-sm text-muted-foreground">
-            <Link href="/legal/privacy" className="font-body hover:text-foreground transition-colors">
+            <Link href="/legal/privacy" prefetch={false} className="font-body hover:text-foreground transition-colors">
               {t("footer.bottom.privacy")}
             </Link>
-            <Link href="/legal/terms" className="font-body hover:text-foreground transition-colors">
+            <Link href="/legal/terms" prefetch={false} className="font-body hover:text-foreground transition-colors">
               {t("footer.bottom.terms")}
             </Link>
-            <Link href="/legal/cookies" className="font-body hover:text-foreground transition-colors">
+            <Link href="/legal/cookies" prefetch={false} className="font-body hover:text-foreground transition-colors">
               {t("footer.bottom.cookies")}
             </Link>
           </div>

@@ -36,7 +36,14 @@ export function AutoSliderBanner() {
             index === currentIndex ? "opacity-100" : "opacity-0"
           }`}
         >
-          <Image src={src} alt={`Banner ${index + 1}`} fill style={{ objectFit: "cover" }} priority />
+          <Image
+            src={src}
+            alt={`Banner ${index + 1}`}
+            fill
+            style={{ objectFit: "cover" }}
+            sizes="100vw"
+            priority={index === 0}
+          />
         </div>
       ))}
       <motion.div

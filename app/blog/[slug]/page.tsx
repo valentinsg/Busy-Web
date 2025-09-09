@@ -13,6 +13,7 @@ import { enUS, es } from "date-fns/locale"
 import { I18nText } from "@/components/blog/i18n-text"
 import { MDXRemote } from "next-mdx-remote/rsc"
 import remarkGfm from "remark-gfm"
+export const revalidate = 3600
 // Note: This page is a server component. Avoid client hooks here.
 
 interface BlogPostPageProps {
@@ -103,7 +104,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         />
         {/* Back Button */}
         <Button asChild variant="ghost" className="mb-8">
-          <Link href="/blog">
+          <Link href="/blog" prefetch={false}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             <I18nText k="blog.post.back" />
           </Link>
@@ -166,7 +167,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             <Card>
               <CardContent className="p-6">
                 <div className="text-sm text-muted-foreground mb-2"><I18nText k="blog.post.prev" /></div>
-                <Link href={`/blog/${prevPost.slug}`} className="group">
+                <Link href={`/blog/${prevPost.slug}`} className="group" prefetch={false}>
                   <h3 className="font-medium group-hover:text-accent-brand transition-colors line-clamp-2">
                     {prevPost.title}
                   </h3>
@@ -179,7 +180,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             <Card>
               <CardContent className="p-6">
                 <div className="text-sm text-muted-foreground mb-2"><I18nText k="blog.post.next" /></div>
-                <Link href={`/blog/${nextPost.slug}`} className="group">
+                <Link href={`/blog/${nextPost.slug}`} className="group" prefetch={false}>
                   <h3 className="font-medium group-hover:text-accent-brand transition-colors line-clamp-2">
                     {nextPost.title}
                   </h3>
@@ -196,7 +197,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               <h3 className="font-heading text-2xl font-bold mb-4"><I18nText k="blog.post.cta.title" /></h3>
               <p className="text-muted-foreground mb-6"><I18nText k="blog.post.cta.subtitle" /></p>
               <Button asChild size="lg" aria-label="Shop Collection" title="Shop Collection" data-label="Shop Collection">
-                <Link href="/products"><I18nText k="blog.post.cta.button" /></Link>
+                <Link href="/products" prefetch={false}><I18nText k="blog.post.cta.button" /></Link>
               </Button>
             </CardContent>
           </Card>
