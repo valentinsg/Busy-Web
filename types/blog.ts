@@ -6,4 +6,6 @@ export interface BlogPost {
   tags: string[]
   content: string
   readingTime: string
+  cover?: string
+  author?: string
 }

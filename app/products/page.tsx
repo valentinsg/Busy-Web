@@ -242,6 +242,36 @@ export default function ProductsPage() {
 
   return (
     <div className="container px-4 py-8 pt-20">
+      {/* JSON-LD: CollectionPage + BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: filters.category ? `Productos - ${capitalize(filters.category)}` : 'Productos',
+            url: `${process.env.SITE_URL || 'https://busy.com.ar'}/products${filters.category ? `?category=${filters.category}` : ''}`,
+            about: filters.category || 'coleccion',
+            inLanguage: 'es-AR',
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Inicio", item: process.env.SITE_URL || 'https://busy.com.ar' },
+              { "@type": "ListItem", position: 2, name: "Productos", item: `${process.env.SITE_URL || 'https://busy.com.ar'}/products` },
+              ...(filters.category
+                ? [{ "@type": "ListItem", position: 3, name: capitalize(filters.category), item: `${process.env.SITE_URL || 'https://busy.com.ar'}/products?category=${filters.category}` }]
+                : []),
+            ],
+          }),
+        }}
+      />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

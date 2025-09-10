@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { generateSEO } from "@/lib/seo"
 
 export const metadata: Metadata = generateSEO({
-  title: "Busy Blog",
+  title: "Blog de Busy",
   description: "Consejos de estilo, sostenibilidad y novedades de Busy.",
   url: `${process.env.SITE_URL || "https://busy.com.ar"}/blog`,
   image: "/busy-streetwear.png",
@@ -15,5 +15,22 @@ export default async function BlogPage() {
   const allPosts = getAllPosts()
   const allTags = getAllTags()
 
-  return <BlogClient allPosts={allPosts} allTags={allTags} />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            name: "Blog de Busy",
+            url: `${process.env.SITE_URL || "https://busy.com.ar"}/blog`,
+            inLanguage: "es-AR",
+            description: "Consejos de estilo, sostenibilidad y novedades de Busy.",
+          }),
+        }}
+      />
+      <BlogClient allPosts={allPosts} allTags={allTags} />
+    </>
+  )
 }

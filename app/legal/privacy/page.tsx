@@ -1,47 +1,60 @@
-export const metadata = {
-  title: "Privacy Policy - Busy",
-  description: "Learn how Busy collects, uses, and protects your personal information.",
-}
+import type { Metadata } from "next"
+import { generateSEO } from "@/lib/seo"
+
+export const metadata: Metadata = generateSEO({
+  title: "Política de Privacidad - Busy",
+  description:
+    "Cómo Busy recopila, utiliza y protege tu información personal. Transparencia y control para nuestros usuarios.",
+  url: `${process.env.SITE_URL || "https://busy.com.ar"}/legal/privacy`,
+})
 
 export default function PrivacyPage() {
+  const lastUpdated = new Date().toLocaleDateString("es-AR", { year: "numeric", month: "long", day: "2-digit" })
   return (
     <div className="container px-4 py-8 pt-20">
       <div className="max-w-4xl mx-auto prose prose-neutral dark:prose-invert">
-        <h1>Privacy Policy</h1>
-        <p className="text-muted-foreground">Last updated: January 15, 2025</p>
+        <h1>Política de Privacidad</h1>
+        <p className="text-muted-foreground">Última actualización: {lastUpdated}</p>
 
-        <h2>Information We Collect</h2>
+        <h2>Información que recopilamos</h2>
         <p>
-          We collect information you provide directly to us, such as when you create an account, make a purchase, or
-          contact us for support.
+          Recopilamos la información que nos brindás directamente (por ejemplo, cuando hacés una compra o nos
+          contactás) y datos técnicos de uso del sitio (por ejemplo, cookies y analíticas).
         </p>
 
-        <h2>How We Use Your Information</h2>
-        <p>We use the information we collect to:</p>
+        <h2>Cómo usamos tu información</h2>
+        <p>Utilizamos la información para:</p>
         <ul>
-          <li>Process and fulfill your orders</li>
-          <li>Communicate with you about your account or transactions</li>
-          <li>Provide customer support</li>
-          <li>Send you marketing communications (with your consent)</li>
-          <li>Improve our products and services</li>
+          <li>Procesar y despachar tus pedidos.</li>
+          <li>Comunicarnos sobre tu cuenta o transacciones.</li>
+          <li>Brindar soporte al cliente.</li>
+          <li>Enviar comunicaciones de marketing (con tu consentimiento).</li>
+          <li>Mejorar nuestros productos, servicios y experiencia del sitio.</li>
         </ul>
 
-        <h2>Information Sharing</h2>
+        <h2>Compartir información</h2>
         <p>
-          We do not sell, trade, or otherwise transfer your personal information to third parties without your consent,
-          except as described in this policy.
+          No vendemos ni compartimos tu información personal con terceros sin tu consentimiento, salvo proveedores que
+          nos ayudan a operar el sitio (por ejemplo, plataformas de pago y logística) y solo para los fines indicados.
         </p>
 
-        <h2>Data Security</h2>
+        <h2>Seguridad de los datos</h2>
         <p>
-          We implement appropriate security measures to protect your personal information against unauthorized access,
-          alteration, disclosure, or destruction.
+          Implementamos medidas razonables para proteger tu información contra accesos no autorizados, alteración o
+          divulgación.
         </p>
 
-        <h2>Contact Us</h2>
+        <h2>Tus derechos</h2>
+        <ul>
+          <li>Acceder, corregir o eliminar tus datos personales.</li>
+          <li>Retirar el consentimiento para comunicaciones de marketing.</li>
+          <li>Configurar tus preferencias de cookies en tu navegador.</li>
+        </ul>
+
+        <h2>Contacto</h2>
         <p>
-          If you have any questions about this Privacy Policy, please contact us at{" "}
-          <a href="mailto:privacy@busy.com">privacy@busy.com</a>.
+          Si tenés dudas sobre esta política, escribinos a {" "}
+          <a href="mailto:contacto@busy.com.ar">contacto@busy.com.ar</a>.
         </p>
       </div>
     </div>

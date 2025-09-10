@@ -1,5 +1,5 @@
 import './globals.css'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Space_Grotesk, Plus_Jakarta_Sans, Abel, DM_Sans, Libre_Barcode_39_Text, Poppins } from 'next/font/google'
 import type React from 'react'
 import { Analytics } from '@vercel/analytics/react'
@@ -14,6 +14,13 @@ import { CustomCursor } from '@/components/custom-cursor'
 import { I18nProvider } from '@/components/i18n-provider'
 import { HtmlLang } from '@/components/layout/html-lang'
 import { PageTransition } from '@/components/layout/page-transition'
+import SitePopover from '@/components/site-popover'
+import { cookies } from 'next/headers'
+import dynamic from 'next/dynamic';
+
+const AdminQuickFAB = dynamic(() => import('@/components/admin/admin-quick-fab'), {
+  ssr: false,
+});
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -62,43 +69,75 @@ export const metadata: Metadata = {
   ...generateSEO(),
   metadataBase: new URL(process.env.SITE_URL || 'https://busy.com.ar'),
   title: {
-    default: 'Busy - Premium Streetwear',
+    default: 'Busy - Streetwear premium',
     template: '%s | Busy',
   },
   icons: {
-    icon: '/logo.svg',
-    shortcut: '/logo.svg',
-    apple: '/logo.svg',
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
+  alternates: {
+    canonical: '/',
+    languages: {
+      'es-AR': '/',
+      'x-default': '/',
+    },
   },
 }
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: 'Busy',
-  description: 'Streetwear para la vida moderna',
-  url: process.env.SITE_URL || 'https://busy.com.ar',
-  logo: `${process.env.SITE_URL || 'https://busy.com.ar'}/logo-busy-black.png`,
-  sameAs: [
-    'https://instagram.com/busy',
-    'https://twitter.com/busy',
-    'https://facebook.com/busy',
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
   ],
-  contactPoint: {
-    '@type': 'ContactPoint',
-    telephone: '+54 9 11 6262 6262',
-    contactType: 'Customer Service',
-    email: 'contacto@busy.com.ar',
-  },
 }
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Busy Streetwear',
+    description: 'Streetwear para la vida moderna',
+    url: process.env.SITE_URL || 'https://busy.com.ar',
+    logo: `${process.env.SITE_URL || 'https://busy.com.ar'}/logo-busy-black.png`,
+    sameAs: [
+      'https://instagram.com/busy.streetwear',
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+54 9 22 3668 0041',
+      contactType: 'Customer Service',
+      email: 'contacto@busy.com.ar',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Busy',
+    url: process.env.SITE_URL || 'https://busy.com.ar',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${process.env.SITE_URL || 'https://busy.com.ar'}/products?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+    inLanguage: 'es-AR',
+  },
+]
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const cookieStore = cookies()
+  const cookieLocale = cookieStore.get('busy_locale')?.value
+  const htmlLang = cookieLocale === 'es' || cookieLocale === 'en' ? cookieLocale : 'es'
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={htmlLang} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
@@ -119,8 +158,12 @@ export default function RootLayout({
             <SplashGate />
             <div className="relative flex min-h-screen flex-col">
               <Header />
+              {/* Site-wide promotional popover */}
+              <SitePopover />
               <PageTransition>
-                <main className="flex-1">{children}</main>
+                <main className="flex-1">
+                  {children}
+                </main>
               </PageTransition>
               <Footer />
             </div>
@@ -133,6 +176,8 @@ export default function RootLayout({
         <Analytics />
         {/* Vercel Speed Insights - Web Vitals reporting */}
         <SpeedInsights />
+        <AdminQuickFAB />
+
       </body>
     </html>
   )

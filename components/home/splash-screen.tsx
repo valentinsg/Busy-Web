@@ -39,7 +39,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           }, 300)
           return 100
         }
-        return prev + 6.66 // Increment by ~3.33 to complete in 3 seconds (100/30)
+        return prev + 6.33 // Increment by ~3.33 to complete in 3 seconds (100/30)
       })
     }, 100) // Increased interval to 100ms
 

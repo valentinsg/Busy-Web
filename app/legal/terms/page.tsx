@@ -1,48 +1,54 @@
-export const metadata = {
-  title: "Terms of Service - Busy",
-  description: "Read our terms of service and conditions for using Busy products and services.",
-}
+import type { Metadata } from "next"
+import { generateSEO } from "@/lib/seo"
+
+export const metadata: Metadata = generateSEO({
+  title: "Términos y Condiciones - Busy",
+  description: "Condiciones para el uso del sitio y la compra de productos Busy.",
+  url: `${process.env.SITE_URL || "https://busy.com.ar"}/legal/terms`,
+})
 
 export default function TermsPage() {
+  const lastUpdated = new Date().toLocaleDateString("es-AR", { year: "numeric", month: "long", day: "2-digit" })
   return (
     <div className="container px-4 py-8 pt-20">
       <div className="max-w-4xl mx-auto prose prose-neutral dark:prose-invert">
-        <h1>Terms of Service</h1>
-        <p className="text-muted-foreground">Last updated: January 15, 2025</p>
+        <h1>Términos y Condiciones</h1>
+        <p className="text-muted-foreground">Última actualización: {lastUpdated}</p>
 
-        <h2>Acceptance of Terms</h2>
+        <h2>Aceptación de los términos</h2>
         <p>
-          By accessing and using this website, you accept and agree to be bound by the terms and provision of this
-          agreement.
+          Al acceder y usar este sitio, aceptás estos términos y condiciones. Si no estás de acuerdo, por favor no
+          utilices el sitio.
         </p>
 
-        <h2>Products and Services</h2>
+        <h2>Productos y disponibilidad</h2>
         <p>
-          All products and services are subject to availability. We reserve the right to discontinue any product at any
-          time.
+          Todos los productos están sujetos a disponibilidad. Podemos discontinuar productos o modificar detalles sin
+          previo aviso.
         </p>
 
-        <h2>Pricing and Payment</h2>
+        <h2>Precios y pagos</h2>
         <p>
-          All prices are subject to change without notice. Payment must be received in full before products are shipped.
+          Los precios pueden cambiar sin previo aviso. El pago debe realizarse en su totalidad antes del despacho del
+          pedido.
         </p>
 
-        <h2>Shipping and Returns</h2>
+        <h2>Envíos y devoluciones</h2>
         <p>
-          Shipping times and costs vary by location. Returns are accepted within 30 days of purchase in original
-          condition.
+          Los tiempos y costos de envío varían según la ubicación. Las devoluciones se aceptan dentro de los 30 días de
+          la compra en su estado original, de acuerdo a nuestra política de cambios y devoluciones.
         </p>
 
-        <h2>Limitation of Liability</h2>
+        <h2>Limitación de responsabilidad</h2>
         <p>
-          Busy shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting
-          from your use of our products or services.
+          Busy no será responsable por daños indirectos, incidentales, especiales, consecuentes o punitivos derivados
+          del uso de nuestros productos o servicios.
         </p>
 
-        <h2>Contact Information</h2>
+        <h2>Contacto</h2>
         <p>
-          Questions about the Terms of Service should be sent to us at{" "}
-          <a href="mailto:legal@busy.com">legal@busy.com</a>.
+          Para consultas sobre estos términos, escribinos a {" "}
+          <a href="mailto:legal@busy.com.ar">legal@busy.com.ar</a>.
         </p>
       </div>
     </div>

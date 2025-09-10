@@ -9,19 +9,38 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { email } = schema.parse(body)
     const svc = getServiceClient()
-    // Generate token for opt-in
-    const token = crypto.randomUUID()
-    // Determine base URL (env or request origin)
+    // Determine base URL (env or request origin) for potential future use
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${req.nextUrl.protocol}//${req.headers.get("host")}`
-    const confirmUrl = `${siteUrl}/api/newsletter/confirm?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`
-    const { error } = await svc.from("newsletter_subscribers").upsert({
+
+    // Check if subscriber exists
+    const { data: existing, error: fetchErr } = await svc
+      .from("newsletter_subscribers")
+      .select("email, status")
+      .eq("email", email)
+      .maybeSingle()
+    if (fetchErr) throw fetchErr
+
+    if (existing) {
+      if (existing.status === "subscribed") {
+        return NextResponse.json({ ok: true, already: true })
+      }
+      // If pending or unsubscribed, set to subscribed
+      const { error: updErr } = await svc
+        .from("newsletter_subscribers")
+        .update({ status: "subscribed", token: null })
+        .eq("email", email)
+      if (updErr) throw updErr
+      return NextResponse.json({ ok: true, upgraded: true })
+    }
+
+    // Create new subscriber as subscribed by default
+    const { error } = await svc.from("newsletter_subscribers").insert({
       email,
-      status: "pending",
-      token,
+      status: "subscribed",
+      token: null,
     })
     if (error) throw error
-    // TODO: send email with confirmUrl via provider (Resend, Sendgrid, etc.)
-    return NextResponse.json({ ok: true, confirmUrl })
+    return NextResponse.json({ ok: true })
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e?.message ?? String(e) }, { status: 400 })
   }

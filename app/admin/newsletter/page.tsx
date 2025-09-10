@@ -215,10 +215,24 @@ export default function NewsletterAdminPage() {
 
 function Row({ s, onRemove }: { s: any; onRemove: (email:string)=>void }) {
   const { toast } = useToast()
+  // Editable values
   const [status, setStatus] = React.useState<string>(s.status || "pending")
   const [tags, setTags] = React.useState<string>((s.tags||[]).join(", "))
+  // Baseline values to compute dirtiness; update after successful save
+  const [baseStatus, setBaseStatus] = React.useState<string>(s.status || "pending")
+  const [baseTags, setBaseTags] = React.useState<string>((s.tags||[]).join(", "))
   const [saving, setSaving] = React.useState(false)
-  const dirty = status !== (s.status||"pending") || tags !== (s.tags||[]).join(", ")
+  const dirty = status !== baseStatus || tags !== baseTags
+
+  // Keep local state in sync if parent updates the row (e.g., pagination reload)
+  React.useEffect(() => {
+    const nextStatus = s.status || "pending"
+    const nextTags = (s.tags||[]).join(", ")
+    setStatus(nextStatus)
+    setTags(nextTags)
+    setBaseStatus(nextStatus)
+    setBaseTags(nextTags)
+  }, [s.email, s.status, Array.isArray(s.tags)? s.tags.join(",") : s.tags])
 
   const save = async () => {
     setSaving(true)
@@ -235,6 +249,9 @@ function Row({ s, onRemove }: { s: any; onRemove: (email:string)=>void }) {
       const json = await res.json()
       if (!res.ok || !json.ok) throw new Error(json.error || "Error al guardar")
       toast({ title: "Guardado", description: "Suscriptor actualizado" })
+      // Update baseline so the Save button hides
+      setBaseStatus(status)
+      setBaseTags(tags)
     } catch (e:any) {
       toast({ title: "Error", description: e?.message || String(e) })
     } finally {

@@ -16,7 +16,7 @@ type I18nContextType = {
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
 
 const SUPPORTED_LOCALES: Locale[] = ["en", "es"]
-const DEFAULT_LOCALE: Locale = "en"
+const DEFAULT_LOCALE: Locale = "es"
 
 function flattenMessages(messages: Messages, prefix = ""): Record<string, string> {
   const out: Record<string, string> = {}

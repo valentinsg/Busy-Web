@@ -25,6 +25,8 @@ export function getAllPosts(): BlogPost[] {
           description: data.description || "",
           date: data.date || "",
           tags: data.tags || [],
+          cover: data.cover || undefined,
+          author: data.author || undefined,
           content,
           readingTime: readTime.text,
         }
@@ -49,6 +51,8 @@ export function getPostBySlug(slug: string): BlogPost | null {
       description: data.description || "",
       date: data.date || "",
       tags: data.tags || [],
+      cover: data.cover || undefined,
+      author: data.author || undefined,
       content,
       readingTime: readTime.text,
     }

@@ -1,49 +1,55 @@
-export const metadata = {
-  title: "Cookie Policy - Busy",
-  description: "Learn about how Busy uses cookies and similar technologies on our website.",
-}
+import type { Metadata } from "next"
+import { generateSEO } from "@/lib/seo"
+
+export const metadata: Metadata = generateSEO({
+  title: "Política de Cookies - Busy",
+  description: "Cómo usamos cookies y tecnologías similares para mejorar tu experiencia en el sitio.",
+  url: `${process.env.SITE_URL || "https://busy.com.ar"}/legal/cookies`,
+})
 
 export default function CookiesPage() {
+  const lastUpdated = new Date().toLocaleDateString("es-AR", { year: "numeric", month: "long", day: "2-digit" })
   return (
     <div className="container px-4 py-8 pt-20">
       <div className="max-w-4xl mx-auto prose prose-neutral dark:prose-invert">
-        <h1>Cookie Policy</h1>
-        <p className="text-muted-foreground">Last updated: January 15, 2025</p>
+        <h1>Política de Cookies</h1>
+        <p className="text-muted-foreground">Última actualización: {lastUpdated}</p>
 
-        <h2>What Are Cookies</h2>
+        <h2>¿Qué son las cookies?</h2>
         <p>
-          Cookies are small text files that are placed on your computer or mobile device when you visit our website.
+          Las cookies son archivos de texto pequeños que se guardan en tu dispositivo cuando navegás nuestro sitio. Se
+          usan para recordar tus preferencias y mejorar tu experiencia.
         </p>
 
-        <h2>How We Use Cookies</h2>
-        <p>We use cookies to:</p>
+        <h2>Cómo usamos las cookies</h2>
+        <p>Utilizamos cookies para:</p>
         <ul>
-          <li>Remember your preferences and settings</li>
-          <li>Keep you signed in to your account</li>
-          <li>Analyze how you use our website</li>
-          <li>Provide personalized content and advertisements</li>
+          <li>Recordar tus preferencias (idioma, carrito, sesión).</li>
+          <li>Mantener tu sesión iniciada.</li>
+          <li>Analizar el uso del sitio para mejorarlo.</li>
+          <li>Mostrar contenido y ofertas relevantes.</li>
         </ul>
 
-        <h2>Types of Cookies We Use</h2>
-        <h3>Essential Cookies</h3>
-        <p>These cookies are necessary for the website to function properly.</p>
+        <h2>Tipos de cookies</h2>
+        <h3>Esenciales</h3>
+        <p>Necesarias para que el sitio funcione (por ejemplo, inicio de sesión y carrito).</p>
 
-        <h3>Analytics Cookies</h3>
-        <p>These cookies help us understand how visitors interact with our website.</p>
+        <h3>Analíticas</h3>
+        <p>Nos ayudan a entender cómo navegás el sitio (de forma agregada y anónima).</p>
 
-        <h3>Marketing Cookies</h3>
-        <p>These cookies are used to deliver relevant advertisements to you.</p>
+        <h3>Marketing</h3>
+        <p>Permiten personalizar contenidos y medir campañas.</p>
 
-        <h2>Managing Cookies</h2>
+        <h2>Gestión de cookies</h2>
         <p>
-          You can control and/or delete cookies as you wish. You can delete all cookies that are already on your
-          computer and you can set most browsers to prevent them from being placed.
+          Podés controlar y/o eliminar cookies desde la configuración de tu navegador. Tené en cuenta que bloquear
+          algunas cookies puede afectar el funcionamiento del sitio.
         </p>
 
-        <h2>Contact Us</h2>
+        <h2>Contacto</h2>
         <p>
-          If you have any questions about our use of cookies, please contact us at{" "}
-          <a href="mailto:privacy@busy.com">privacy@busy.com</a>.
+          Si tenés preguntas sobre esta política, escribinos a {" "}
+          <a href="mailto:contacto@busy.com.ar">contacto@busy.com.ar</a>.
         </p>
       </div>
     </div>

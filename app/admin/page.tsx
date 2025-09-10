@@ -51,6 +51,10 @@ export default function AdminHomePage() {
             <h3 className="font-heading font-medium mb-1">Campañas</h3>
             <p className="font-body text-sm text-muted-foreground">Crear y gestionar campañas.</p>
           </Link>
+          <Link href="/admin/popovers" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
+            <h3 className="font-heading font-medium mb-1">Popovers</h3>
+            <p className="font-body text-sm text-muted-foreground">Configurar popovers y descuentos.</p>
+          </Link>
           <Link href="/admin/coupons" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
             <h3 className="font-heading font-medium mb-1">Cupones</h3>
             <p className="font-body text-sm text-muted-foreground">Crear y validar cupones.</p>
@@ -90,15 +94,7 @@ export default function AdminHomePage() {
         </div>
       </details>
 
-      <details className="rounded-lg border p-4">
-        <summary className="font-heading font-medium cursor-pointer select-none">Atajos</summary>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
-          <Link href="/admin/new" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Nuevo</h3>
-            <p className="font-body text-sm text-muted-foreground">Atajos rápidos para crear.</p>
-          </Link>
-        </div>
-      </details>
+      {null}
     </div>
   )
 }

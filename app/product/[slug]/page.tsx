@@ -100,11 +100,41 @@ export default async function ProductPage({ params }: ProductPageProps) {
             },
             offers: {
               "@type": "Offer",
-              priceCurrency: "USD",
+              priceCurrency: "ARS",
               price: currentProduct.price,
               availability: "https://schema.org/InStock",
               url: `${process.env.SITE_URL || "https://busy.com.ar"}/product/${currentProduct.id}`,
             },
+          }),
+        }}
+      />
+      {/* JSON-LD Breadcrumbs */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Inicio",
+                item: process.env.SITE_URL || "https://busy.com.ar",
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Productos",
+                item: `${process.env.SITE_URL || "https://busy.com.ar"}/products`,
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: currentProduct.name,
+                item: `${process.env.SITE_URL || "https://busy.com.ar"}/product/${currentProduct.id}`,
+              },
+            ],
           }),
         }}
       />

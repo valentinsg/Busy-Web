@@ -9,8 +9,8 @@ interface SEOProps {
 }
 
 export function generateSEO({
-  title = "Busy - Premium Streetwear",
-  description = "Premium streetwear for the modern lifestyle. Quality craftsmanship meets contemporary design.",
+  title = "Busy - Streetwear premium",
+  description = "Streetwear premium para la vida moderna. Calidad y diseño contemporáneo en cada prenda.",
   image = "/busy-streetwear.png",
   url = process.env.SITE_URL || "https://busy.com.ar",
   type = "website",
@@ -19,6 +19,17 @@ export function generateSEO({
   return {
     title,
     description,
+    keywords: [
+      "Busy",
+      "Streetwear",
+      "Ropa urbana",
+      "Moda",
+      "Hoodies",
+      "Remeras",
+      "Pantalones",
+      "Argentina",
+      "Indumentaria",
+    ],
     openGraph: {
       title,
       description,
@@ -26,6 +37,8 @@ export function generateSEO({
       url,
       type: ogType,
       siteName: "Busy",
+      locale: "es_AR",
+      alternateLocale: ["en_US"],
     },
     twitter: {
       card: "summary_large_image",
@@ -36,6 +49,15 @@ export function generateSEO({
     robots: {
       index: true,
       follow: true,
+      nocache: false,
+      googleBot: {
+        index: true,
+        follow: true,
+        noimageindex: false,
+        'max-snippet': -1,
+        'max-image-preview': 'large',
+        'max-video-preview': -1,
+      },
     },
     alternates: {
       canonical: url,
@@ -66,7 +88,7 @@ export function generateBlogSEO(post: {
   date: string
 }) {
   return generateSEO({
-    title: `${post.title} - Busy Blog`,
+    title: `${post.title} - Blog de Busy`,
     description: post.description,
     image: post.cover,
     type: "article",

@@ -8,9 +8,9 @@ import type { Metadata } from "next"
 import { generateSEO } from "@/lib/seo"
 
 export const metadata: Metadata = generateSEO({
-  title: "Frequently Asked Questions - Busy",
+  title: "Preguntas frecuentes - Busy",
   description:
-    "Find answers to common questions about Busy products, shipping, returns, and more.",
+    "Respuestas a las preguntas más comunes sobre productos, envíos, cambios y políticas.",
   url: `${process.env.SITE_URL || "https://busy.com.ar"}/faq`,
 })
 
@@ -18,11 +18,27 @@ export default function FAQPage() {
   return (
     <div className="container px-4 py-8 pt-20">
       <div className="max-w-4xl mx-auto">
+        {/* FAQPage JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: faqsData.map((faq) => ({
+                "@type": "Question",
+                name: faq.q,
+                acceptedAnswer: { "@type": "Answer", text: faq.a },
+              })),
+            }),
+          }}
+        />
+
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="font-heading text-4xl font-bold mb-4">Frequently Asked Questions</h1>
+          <h1 className="font-heading text-4xl font-bold mb-4">Preguntas frecuentes</h1>
           <p className="text-lg text-muted-foreground">
-            Find answers to the most common questions about our products and services.
+            Encontrá respuestas rápidas sobre productos, envíos, cambios y más.
           </p>
         </div>
 
@@ -46,15 +62,15 @@ export default function FAQPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
-                Still Have Questions?
+                ¿Todavía tenés dudas?
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Can&apos;t find what you&apos;re looking for? Our customer support team is here to help.
+                ¿No encontrás lo que buscás? Nuestro equipo de soporte está para ayudarte.
               </p>
               <Button asChild>
-                <Link href="/contact">Contact Support</Link>
+                <Link href="/contact">Contactar soporte</Link>
               </Button>
             </CardContent>
           </Card>
@@ -63,13 +79,13 @@ export default function FAQPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5" />
-                Email Us Directly
+                Escribinos por mail
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-4">Send us an email and we&apos;ll get back to you within 24 hours.</p>
+              <p className="text-muted-foreground mb-4">Escribinos y te respondemos dentro de las 24 horas.</p>
               <Button asChild variant="outline">
-                <a href="mailto:support@busy.com">support@busy.com</a>
+                <a href="mailto:contacto@busy.com.ar">contacto@busy.com.ar</a>
               </Button>
             </CardContent>
           </Card>

@@ -29,7 +29,8 @@
           "hoodies": "Buzos",
           "tshirts": "Remeras",
           "accessories": "Accesorios",
-          "pants": "Pantalones"
+          "pants": "Pantalones",
+          "care_guide": "Cuidá tus prendas"
         }
       },
       "brand": {
@@ -38,7 +39,8 @@
           "about_us": "Sobre nosotros",
           "our_story": "Nuestra historia",
           "sustainability": "Sustentabilidad",
-          "careers": "Empleos"
+          "careers": "Empleos",
+          "blog": "Blog"
         }
       },
       "support": {
@@ -47,16 +49,17 @@
           "faq": "Preguntas frecuentes",
           "contact": "Contacto",
           "size_guide": "Guía de talles",
-          "returns": "Devoluciones"
+          "returns": "Devoluciones",
+          "whatsapp": "Soporte por WhatsApp"
         }
       },
       "social": {
         "title": "Redes",
         "links": {
           "instagram": "Instagram",
-          "twitter": "Twitter",
           "tiktok": "TikTok",
-          "youtube": "YouTube"
+          "facebook": "Facebook",
+          "pinterest": "Pinterest"
         }
       }
     },

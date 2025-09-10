@@ -33,11 +33,12 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
   const base = process.env.SITE_URL || "https://busy.com.ar"
   const canonical = `${base}/blog/${post.slug}`
-  const image = "/busy-streetwear.png"
+  const image = post.cover || "/busy-streetwear.png"
 
   return {
-    title: `${post.title} - Busy Blog`,
+    title: `${post.title} - Blog de Busy`,
     description: post.description,
+    keywords: post.tags,
     openGraph: {
       title: post.title,
       description: post.description,
@@ -46,7 +47,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     },
     twitter: {
       card: "summary_large_image",
-      title: `${post.title} - Busy Blog`,
+      title: `${post.title} - Blog de Busy`,
       description: post.description,
       images: [image],
     },
@@ -86,11 +87,11 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               datePublished: post.date,
               dateModified: post.date,
               url: `${process.env.SITE_URL || "https://busy.com.ar"}/blog/${post.slug}`,
-              image: ["/busy-streetwear.png"],
-              author: {
-                "@type": "Organization",
-                name: "Busy",
-              },
+              image: [post.cover || "/busy-streetwear.png"],
+              keywords: post.tags,
+              author: post.author
+                ? { "@type": "Person", name: post.author }
+                : { "@type": "Organization", name: "Busy" },
               publisher: {
                 "@type": "Organization",
                 name: "Busy",

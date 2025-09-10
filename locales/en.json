@@ -29,7 +29,8 @@
           "hoodies": "Hoodies",
           "tshirts": "T-Shirts",
           "accessories": "Accessories",
-          "pants": "Pants"
+          "pants": "Pants",
+          "care_guide": "Care for your garments"
         }
       },
       "brand": {
@@ -38,7 +39,8 @@
           "about_us": "About Us",
           "our_story": "Our Story",
           "sustainability": "Sustainability",
-          "careers": "Careers"
+          "careers": "Careers",
+          "blog": "Blog"
         }
       },
       "support": {
@@ -47,16 +49,17 @@
           "faq": "FAQ",
           "contact": "Contact",
           "size_guide": "Size Guide",
-          "returns": "Returns"
+          "returns": "Returns",
+          "whatsapp": "WhatsApp Support"
         }
       },
       "social": {
         "title": "Social",
         "links": {
           "instagram": "Instagram",
-          "twitter": "Twitter",
           "tiktok": "TikTok",
-          "youtube": "YouTube"
+          "facebook": "Facebook",
+          "pinterest": "Pinterest"
         }
       }
     },
