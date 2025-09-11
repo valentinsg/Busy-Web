@@ -52,7 +52,14 @@ export default function NewCouponPage() {
             setExpiresAt("")
             setMessage("Cupón creado correctamente. Redirigiendo...")
             setRedirecting(true)
-            setTimeout(() => router.push("/admin/coupons"), 800)
+            // If opened within modal (intercepting route), close it with back; otherwise navigate.
+            const hasModal = typeof window !== 'undefined' && document.getElementById('admin-modal-root')
+            if (hasModal) {
+              router.back()
+              setTimeout(() => router.refresh(), 0)
+            } else {
+              setTimeout(() => router.push("/admin/coupons"), 400)
+            }
           } catch (err: any) {
             setMessage(err.message)
           } finally {
