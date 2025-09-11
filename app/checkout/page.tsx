@@ -41,6 +41,7 @@ export default function CheckoutPage() {
     lastName: "",
     email: "",
     phone: "",
+    dni: "",
     address: "",
     city: "",
     state: "",
@@ -215,6 +216,17 @@ Phone: ${shippingData.phone}
                     type="tel"
                     value={shippingData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="dni" className="font-body">DNI</Label>
+                  <Input
+                    id="dni"
+                    inputMode="numeric"
+                    value={shippingData.dni}
+                    onChange={(e) => handleInputChange("dni", e.target.value)}
                     required
                   />
                 </div>
@@ -447,6 +459,7 @@ Phone: ${shippingData.phone}
                     last_name: shippingData.lastName,
                     email: shippingData.email,
                     phone: shippingData.phone,
+                    dni: shippingData.dni,
                     address: shippingData.address,
                     city: shippingData.city,
                     state: shippingData.state,

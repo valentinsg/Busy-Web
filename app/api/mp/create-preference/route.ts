@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
         last_name?: string | null
         email?: string | null
         phone?: string | null
+        dni?: string | null
         address?: string | null
         city?: string | null
         state?: string | null
@@ -94,6 +95,12 @@ export async function POST(req: NextRequest) {
             ? {
                 area_code: undefined,
                 number: customer.phone,
+              }
+            : undefined,
+          identification: customer.dni
+            ? {
+                type: "DNI",
+                number: customer.dni,
               }
             : undefined,
           address:

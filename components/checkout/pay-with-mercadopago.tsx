@@ -12,6 +12,7 @@ export default function PayWithMercadoPago(props: {
     last_name?: string | null
     email?: string | null
     phone?: string | null
+    dni?: string | null
     address?: string | null
     city?: string | null
     state?: string | null
