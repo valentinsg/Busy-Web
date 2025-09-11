@@ -44,6 +44,9 @@ export async function POST(req: NextRequest) {
     const payment = await payments.get({ id: String(paymentId) })
     const p: any = payment as any
     const status: string = p?.status ?? p?.body?.status ?? p?.response?.status ?? ""
+    const status_detail: string | undefined = p?.status_detail ?? p?.body?.status_detail ?? p?.response?.status_detail
+    const payment_method_id: string | undefined = p?.payment_method_id ?? p?.body?.payment_method_id ?? p?.response?.payment_method_id
+    const payment_type_id: string | undefined = p?.payment_type_id ?? p?.body?.payment_type_id ?? p?.response?.payment_type_id
     const external_reference: string | undefined = p?.external_reference ?? p?.body?.external_reference ?? p?.response?.external_reference
     const metadata: any = p?.metadata ?? p?.body?.metadata ?? p?.response?.metadata
 
@@ -54,7 +57,7 @@ export async function POST(req: NextRequest) {
     else mapped = "pending"
 
     if (!external_reference) {
-      logError("Payment missing external_reference", { paymentId })
+      logError("Payment missing external_reference", { paymentId, status, status_detail, payment_method_id, payment_type_id })
       return ok()
     }
 
@@ -169,7 +172,7 @@ export async function POST(req: NextRequest) {
       }
     } else if (mapped === "rejected" || mapped === "pending" || mapped === "in_process") {
       // Do nothing: we only create order/customer on approved as requested
-      logInfo("Non-approved payment received", { session_id, paymentId, status: mapped })
+      logInfo("Non-approved payment received", { session_id, paymentId, status: mapped, status_detail, payment_method_id, payment_type_id })
     }
   } catch (err: any) {
     logError("webhook processing error", { error: String(err?.message || err) })

@@ -83,6 +83,33 @@ export async function POST(req: NextRequest) {
 
     // Create Mercado Pago preference
     const pref = getPreferenceClient()
+    // Build payer from provided customer data to improve risk assessment
+    const customer = body.customer ?? null
+    const payer = customer
+      ? {
+          email: customer.email ?? undefined,
+          name: customer.first_name ?? undefined,
+          surname: customer.last_name ?? undefined,
+          phone: customer.phone
+            ? {
+                area_code: undefined,
+                number: customer.phone,
+              }
+            : undefined,
+          address:
+            customer.address || customer.city || customer.state || customer.zip
+              ? {
+                  street_name: customer.address ?? undefined,
+                  zip_code: customer.zip ?? undefined,
+                  city: customer.city ?? undefined,
+                  state: customer.state ?? undefined,
+                }
+              : undefined,
+        }
+      : undefined
+
+    const binaryMode = String(process.env.MP_BINARY_MODE ?? "true").toLowerCase() !== "false"
+
     const preference = await pref.create({
       body: {
         items: itemsDetailed.map((i) => ({
@@ -93,20 +120,9 @@ export async function POST(req: NextRequest) {
           currency_id: CURRENCY,
           picture_url: i.picture_url,
         })),
-        // Enviar datos del comprador ayuda a reducir rechazos por riesgo
-        payer: {
-          email: body.customer?.email ?? undefined,
-          name: body.customer?.first_name ?? undefined,
-          surname: body.customer?.last_name ?? undefined,
-          phone: body.customer?.phone ? { number: body.customer.phone } : undefined,
-          address: body.customer?.address || body.customer?.zip
-            ? {
-                street_name: body.customer?.address ?? undefined,
-                zip_code: body.customer?.zip ?? undefined,
-              }
-            : undefined,
-        },
-        binary_mode: true,
+        // If binary_mode is true, MP will reject payments that need manual review.
+        // Allow configuring it via env to reduce security rejections in production.
+        binary_mode: binaryMode,
         auto_return: "approved",
         external_reference: session_id,
         back_urls: {
@@ -115,8 +131,7 @@ export async function POST(req: NextRequest) {
           pending: `${BASE_URL}/checkout/pending`,
         },
         notification_url: `${BASE_URL}/api/mp/webhook?token=${encodeURIComponent(process.env.MP_WEBHOOK_SECRET_TOKEN || "")}`,
-        // Descriptor del resumen de tarjeta (máx 22 chars). Configurable por env.
-        statement_descriptor: (process.env.MP_STATEMENT_DESCRIPTOR || undefined),
+        payer,
         metadata: {
           session_id,
           items: itemsDetailed.map((i) => ({ product_id: i.product_id, quantity: i.quantity, variant_size: i.variant_size })),
