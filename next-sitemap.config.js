@@ -3,7 +3,7 @@ module.exports = {
   siteUrl: process.env.SITE_URL || "https://busy.com.ar",
   generateRobotsTxt: true,
   exclude: ["/api/*", "/admin/*"],
-  generateIndexSitemap: false,
+  generateIndexSitemap: true,
   robotsTxtOptions: {
     policies: [
       {

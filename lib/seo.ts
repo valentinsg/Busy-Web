@@ -59,9 +59,7 @@ export function generateSEO({
         'max-video-preview': -1,
       },
     },
-    alternates: {
-      canonical: url,
-    },
+    // Note: do NOT set a default canonical globally; set it per page via generateMetadata when needed.
   }
 }
 

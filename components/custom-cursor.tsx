@@ -10,6 +10,7 @@ export function CustomCursor() {
   const [variant, setVariant] = useState<"default" | "pointer" | "text">("default")
   const [label, setLabel] = useState<string>("")
   const [heartbeat, setHeartbeat] = useState(false)
+  const [enabled, setEnabled] = useState(false)
   const dwellTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -18,6 +19,47 @@ export function CustomCursor() {
     try {
       setPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
     } catch {}
+
+    // Function to compute whether the custom cursor should be enabled
+    const computeEnabled = () => {
+      try {
+        if (typeof window === "undefined") return false
+        const width = window.innerWidth
+        if (width <= 1024) return false
+        const supportsFineHover = window.matchMedia
+          ? window.matchMedia("(hover: hover) and (pointer: fine)").matches
+          : false
+        const maxTouch = (navigator as any)?.maxTouchPoints ?? 0
+        const ua = (navigator?.userAgent || navigator?.vendor || "").toLowerCase()
+        const isMobileUA = /android|iphone|ipad|ipod|mobile|tablet|windows phone/.test(ua)
+        // Enable only on true desktop pointer/hover with no touch and non-mobile UA
+        return supportsFineHover && maxTouch === 0 && !isMobileUA
+      } catch {
+        return false
+      }
+    }
+
+    // Initial compute
+    setEnabled(computeEnabled())
+
+    // Re-compute on resize/orientation changes
+    const onResize = () => setEnabled(computeEnabled())
+    try {
+      window.addEventListener("resize", onResize)
+      window.addEventListener("orientationchange", onResize as any)
+    } catch {}
+
+    return () => {
+      try {
+        window.removeEventListener("resize", onResize)
+        window.removeEventListener("orientationchange", onResize as any)
+      } catch {}
+    }
+  }, [])
+
+  // Manage mouse listeners strictly when enabled
+  useEffect(() => {
+    if (!enabled) return
 
     const getClickableLabel = (el: Element): string => {
       const clickableRoot = el.closest(
@@ -108,10 +150,10 @@ export function CustomCursor() {
         dwellTimerRef.current = null
       }
     }
-  }, [])
+  }, [enabled])
 
   // Ensure we are in browser before using portal
-  if (!mounted || typeof window === "undefined" || typeof document === "undefined") return null
+  if (!mounted || !enabled || typeof window === "undefined" || typeof document === "undefined") return null
 
   return createPortal(
     <div
@@ -146,3 +188,4 @@ export function CustomCursor() {
     document.body,
   )
 }
+

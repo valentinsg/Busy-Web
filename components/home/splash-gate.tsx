@@ -6,28 +6,27 @@ import { SplashScreen } from "@/components/home/splash-screen"
 
 /**
  * SplashGate
- * - Appears immediately on homepage ("/") before any content (no flash).
- * - Shows on every visit to the homepage, not just first session.
- * - Hidden on all other routes.
+ * - Solo se muestra en la pantalla de inicio de sesión de admin ("/admin/sign-in").
+ * - Oculto en el resto del sitio para no impactar FCP.
  */
 export function SplashGate() {
   const pathname = usePathname()
-  const isHome = pathname === "/"
-  const disabled = process.env.NEXT_PUBLIC_DISABLE_SPLASH === "1"
+  const isAuth = pathname === "/admin/sign-in"
+  const disabled = process.env.NEXT_PUBLIC_DISABLE_SPLASH === "1" && !isAuth
 
-  // Start as visible on homepage to avoid initial content flash, unless disabled via env
-  const [shouldShow, setShouldShow] = useState<boolean>(isHome && !disabled)
+  // Visible solo en /admin/sign-in (a menos que esté deshabilitado globalmente)
+  const [shouldShow, setShouldShow] = useState<boolean>(isAuth && !disabled)
 
   // Reset visibility whenever the route changes
   useEffect(() => {
-    setShouldShow(isHome && !disabled)
-  }, [isHome, disabled])
+    setShouldShow(isAuth && !disabled)
+  }, [isAuth, disabled])
 
   const handleComplete = () => {
     setShouldShow(false)
   }
 
-  if (disabled || !isHome || !shouldShow) return null
+  if (disabled || !isAuth || !shouldShow) return null
 
   return <SplashScreen onComplete={handleComplete} />
 }

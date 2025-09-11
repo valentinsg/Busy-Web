@@ -304,9 +304,18 @@ html {
   100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.7; }
 }
 
-/* Force-hide native cursor globally so only the custom cursor is visible */
-html, body, * {
-  cursor: none !important;
+/* Force-hide native cursor only on devices with fine pointer and hover */
+@media (hover: hover) and (pointer: fine) {
+  html, body, * {
+    cursor: none !important;
+  }
+}
+
+/* Safety: never show the custom cursor on touch/coarse or small screens */
+@media (hover: none), (pointer: coarse), (max-width: 1024px) {
+  .custom-cursor {
+    display: none !important;
+  }
 }
 
 /* Inverse text selection */

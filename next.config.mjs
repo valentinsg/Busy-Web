@@ -17,6 +17,19 @@ const nextConfig = {
     unoptimized: true,
   },
   productionBrowserSourceMaps: false,
+  async redirects() {
+    return [
+      // Force non-www (www.busy.com.ar -> busy.com.ar)
+      {
+        source: '/:path*',
+        has: [
+          { type: 'host', value: 'www.busy.com.ar' },
+        ],
+        destination: 'https://busy.com.ar/:path*',
+        permanent: true,
+      },
+    ]
+  },
   async headers() {
     return [
       {
