@@ -42,7 +42,10 @@ export default function PayWithMercadoPago(props: {
         const data = await res.json().catch(() => ({}))
         throw new Error(data?.error || "Error creando preferencia")
       }
-      const data = (await res.json()) as { init_point: string }
+      const data = (await res.json()) as { init_point: string; order_id?: string }
+      if (data.order_id) {
+        try { window.sessionStorage.setItem("mp_session_id", data.order_id) } catch {}
+      }
       if (data.init_point) {
         window.location.href = data.init_point
       } else {

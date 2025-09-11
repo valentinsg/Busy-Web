@@ -8,6 +8,7 @@ import crypto from "node:crypto"
 
 const BASE_URL = process.env.BASE_URL || process.env.SITE_URL
 const CURRENCY = "ARS"
+const IS_PROD = process.env.NODE_ENV === "production"
 
 function badRequest(message: string, meta?: Record<string, any>) {
   logError(message, meta)
@@ -115,7 +116,9 @@ export async function POST(req: NextRequest) {
         }
       : undefined
 
-    const binaryMode = String(process.env.MP_BINARY_MODE ?? "true").toLowerCase() !== "false"
+    // In production, force binary_mode = false (let payments go to review instead of auto-reject)
+    // In dev, allow configuring via MP_BINARY_MODE (default true)
+    const binaryMode = IS_PROD ? false : String(process.env.MP_BINARY_MODE ?? "true").toLowerCase() !== "false"
 
     const preference = await pref.create({
       body: {
@@ -133,9 +136,9 @@ export async function POST(req: NextRequest) {
         auto_return: "approved",
         external_reference: session_id,
         back_urls: {
-          success: `${BASE_URL}/checkout/success`,
-          failure: `${BASE_URL}/checkout/failure`,
-          pending: `${BASE_URL}/checkout/pending`,
+          success: `${BASE_URL}/order?session_id=${session_id}`,
+          failure: `${BASE_URL}/order?session_id=${session_id}`,
+          pending: `${BASE_URL}/order?session_id=${session_id}`,
         },
         notification_url: `${BASE_URL}/api/mp/webhook?token=${encodeURIComponent(process.env.MP_WEBHOOK_SECRET_TOKEN || "")}`,
         payer,
@@ -151,7 +154,8 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    const init_point = (preference as any)?.init_point || (preference as any)?.sandbox_init_point || (preference as any)?.body?.init_point || (preference as any)?.body?.sandbox_init_point
+    // Only use production init_point; avoid sandbox fallback
+    const init_point = (preference as any)?.init_point || (preference as any)?.body?.init_point
     const preference_id = (preference as any)?.id || (preference as any)?.body?.id
     if (!init_point || !preference_id) throw new Error("Failed to create preference")
 

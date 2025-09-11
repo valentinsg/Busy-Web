@@ -49,6 +49,8 @@ export async function POST(req: NextRequest) {
     const payment_type_id: string | undefined = p?.payment_type_id ?? p?.body?.payment_type_id ?? p?.response?.payment_type_id
     const external_reference: string | undefined = p?.external_reference ?? p?.body?.external_reference ?? p?.response?.external_reference
     const metadata: any = p?.metadata ?? p?.body?.metadata ?? p?.response?.metadata
+    const preference_id: string | undefined = p?.preference_id ?? p?.body?.preference_id ?? p?.response?.preference_id
+    const merchant_order_id: string | undefined = p?.order?.id ?? p?.body?.order?.id ?? p?.response?.order?.id
 
     let mapped: "approved" | "rejected" | "in_process" | "pending"
     if (status === "approved") mapped = "approved"
@@ -62,6 +64,21 @@ export async function POST(req: NextRequest) {
     }
 
     const session_id = external_reference
+
+    // Snapshot into orders_tmp for order-status endpoint
+    try {
+      await supabase.from("orders_tmp").insert({
+        session_id,
+        payment_id: String(paymentId),
+        status,
+        status_detail: status_detail ?? null,
+        preference_id: preference_id ?? null,
+        merchant_order_id: merchant_order_id ?? null,
+        raw: p?.body ?? p ?? null,
+      })
+    } catch (e: any) {
+      logError("orders_tmp insert error", { error: String(e?.message || e), session_id, paymentId })
+    }
 
     if (mapped === "approved") {
       // Build order on-the-fly from metadata
