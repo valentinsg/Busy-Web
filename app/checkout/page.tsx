@@ -16,6 +16,8 @@ import { formatPrice, capitalize } from "@/lib/format"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/hooks/use-toast"
 import { ConfettiBurst } from "@/components/ui/confetti"
+import PayWithMercadoPago from "@/components/checkout/pay-with-mercadopago"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,8 +45,9 @@ export default function CheckoutPage() {
     city: "",
     state: "",
     zipCode: "",
-    country: "US",
+    country: "AR", // default Argentina
   })
+  const [newsletterOptIn, setNewsletterOptIn] = React.useState<boolean>(false)
   const [paymentMethod, setPaymentMethod] = React.useState("card")
   const [couponCode, setCouponCode] = React.useState("")
   const [confirmClear, setConfirmClear] = React.useState(false)
@@ -257,18 +260,10 @@ Phone: ${shippingData.phone}
                       required
                     />
                   </div>
-                  <div>
+                  {/* Country removed: default to Argentina */}
+                  <div className="hidden">
                     <Label htmlFor="country" className="font-body">{t("checkout.fields.country")}</Label>
-                    <Select value={shippingData.country} onValueChange={(value) => handleInputChange("country", value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="US">{t("checkout.countries.US")}</SelectItem>
-                        <SelectItem value="CA">{t("checkout.countries.CA")}</SelectItem>
-                        <SelectItem value="MX">{t("checkout.countries.MX")}</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input id="country" value={shippingData.country} readOnly />
                   </div>
                 </div>
               </CardContent>
@@ -436,19 +431,30 @@ Phone: ${shippingData.phone}
                   </div>
                 </div>
 
-                {/* Checkout Button */}
-                <Button
-                  onClick={handleCheckout}
-                  className="w-full"
-                  size="lg"
-                  disabled={
-                    !shippingData.firstName || !shippingData.lastName || !shippingData.email || !shippingData.address
-                  }
-                >
-                  {CHECKOUT_MODE === "whatsapp" && t("checkout.cta.complete.whatsapp")}
-                  {CHECKOUT_MODE === "mailto" && t("checkout.cta.complete.mailto")}
-                  {CHECKOUT_MODE === "stripe-test" && t("checkout.cta.complete.stripe")}
-                </Button>
+                {/* Newsletter opt-in */}
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="newsletter" checked={newsletterOptIn} onCheckedChange={(v) => setNewsletterOptIn(Boolean(v))} />
+                  <Label htmlFor="newsletter" className="font-body">Quiero recibir novedades por email</Label>
+                </div>
+
+                {/* Mercado Pago Pay Button */}
+                <PayWithMercadoPago
+                  items={items.map((it) => ({ product_id: it.product.id, quantity: it.quantity, variant_size: it.selectedSize }))}
+                  couponCode={coupon?.code ?? null}
+                  shippingCost={estimatedShipping}
+                  customer={{
+                    first_name: shippingData.firstName,
+                    last_name: shippingData.lastName,
+                    email: shippingData.email,
+                    phone: shippingData.phone,
+                    address: shippingData.address,
+                    city: shippingData.city,
+                    state: shippingData.state,
+                    zip: shippingData.zipCode,
+                  }}
+                  newsletterOptIn={newsletterOptIn}
+                  buttonText="Pagar con Mercado Pago"
+                />
 
                 {/* Security Notice */}
                 <div className="font-body text-xs text-center text-muted-foreground">
