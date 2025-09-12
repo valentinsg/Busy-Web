@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/hooks/use-cart"
 import { formatPrice, capitalize } from "@/lib/format"
+import { computeShipping, computeTax } from "@/lib/checkout/totals"
 import { useI18n } from "@/components/i18n-provider"
 import {
   AlertDialog,
@@ -32,8 +33,8 @@ export default function CartPage() {
 
   const totalItems = mounted ? getTotalItems() : 0
   const subtotal = mounted ? getSubtotal() : 0
-  const estimatedShipping = subtotal > 100 ? 0 : 9.99
-  const estimatedTax = subtotal * 0.08 // 8% tax placeholder
+  const estimatedShipping = computeShipping(subtotal)
+  const estimatedTax = computeTax(Number((subtotal + estimatedShipping).toFixed(2)))
   const finalTotal = subtotal + estimatedShipping + estimatedTax
   const itemsForRender = mounted ? items : []
 
@@ -228,9 +229,9 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                {subtotal < 100 && (
+                {subtotal < 80000 && (
                   <div className="font-body text-sm text-center text-muted-foreground p-3 bg-muted rounded-lg">
-                    {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100 - subtotal))}
+                    {t("cart.free_shipping_notice").replace("{amount}", formatPrice(80000 - subtotal))}
                   </div>
                 )}
 

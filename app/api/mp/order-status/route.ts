@@ -36,6 +36,15 @@ export async function GET(req: NextRequest) {
         const preference_id: string | undefined = p?.preference_id ?? p?.body?.preference_id ?? p?.response?.preference_id ?? tmp?.preference_id
         const merchant_order_id: string | undefined = p?.order?.id ?? p?.body?.order?.id ?? p?.response?.order?.id ?? tmp?.merchant_order_id
 
+        // Try to find the created order stored by the webhook
+        const { data: order } = await supabase
+          .from("orders")
+          .select("id,total,tax,shipping,discount,currency,placed_at")
+          .eq("payment_id", String(tmp.payment_id))
+          .order("placed_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
         const payload = {
           session_id,
           payment_id: String(tmp.payment_id),
@@ -43,6 +52,7 @@ export async function GET(req: NextRequest) {
           status_detail: status_detail ?? null,
           merchant_order_id: merchant_order_id ?? null,
           preference_id: preference_id ?? null,
+          order: order ?? null,
         }
 
         logInfo("order-status from MP", payload)

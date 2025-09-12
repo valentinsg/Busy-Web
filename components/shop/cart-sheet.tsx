@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useCart } from "@/hooks/use-cart"
 import { capitalize, formatPrice } from "@/lib/format"
+import { computeShipping, computeTax } from "@/lib/checkout/totals"
 import { Minus, Plus, ShoppingBag, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -38,8 +39,8 @@ export function CartSheet({ children }: CartSheetProps) {
   // Use safe values before mount to match SSR (which can't see client cart)
   const totalItems = mounted ? getTotalItems() : 0
   const subtotal = mounted ? getSubtotal() : 0
-  const estimatedShipping = subtotal > 100 ? 0 : 9.99
-  const estimatedTax = subtotal * 0.08 // 8% tax placeholder
+  const estimatedShipping = computeShipping(subtotal)
+  const estimatedTax = computeTax(Number((subtotal + estimatedShipping).toFixed(2)))
   const finalTotal = subtotal + estimatedShipping + estimatedTax
   const itemsForRender = mounted ? items : []
 
@@ -232,9 +233,9 @@ export function CartSheet({ children }: CartSheetProps) {
               </div>
 
               {/* Free Shipping Notice */}
-              {subtotal < 100 && (
+              {subtotal < 80000 && (
                 <div className="font-body text-xs text-center text-muted-foreground">
-                  {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100 - subtotal))}
+                  {t("cart.free_shipping_notice").replace("{amount}", formatPrice(80000 - subtotal))}
                 </div>
               )}
             </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { formatPrice } from "@/lib/format"
 
 export default function OrderStatusPage() {
   const [sessionId, setSessionId] = React.useState<string | null>(null)
@@ -36,18 +37,36 @@ export default function OrderStatusPage() {
   function renderStatus() {
     const status = (data?.status || "unknown") as string
     if (status === "approved") {
+      const order = data?.order
       return (
-        <div className="space-y-2">
+        <div className="space-y-4">
           <div className="text-green-600 text-xl">✅ Pago aprobado</div>
-          <pre className="bg-muted p-3 rounded text-sm overflow-auto">
-            {JSON.stringify({
-              payment_id: data?.payment_id,
-              status: data?.status,
-              status_detail: data?.status_detail,
-              preference_id: data?.preference_id,
-              merchant_order_id: data?.merchant_order_id,
-            }, null, 2)}
-          </pre>
+          {order ? (
+            <div className="rounded border p-4 bg-background">
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="text-muted-foreground">N° de pedido</div>
+                <div className="text-right font-medium">{order.id}</div>
+                <div className="text-muted-foreground">Fecha</div>
+                <div className="text-right">{new Date(order.placed_at).toLocaleString()}</div>
+                <div className="text-muted-foreground">Envío</div>
+                <div className="text-right">{formatPrice(order.shipping)}</div>
+                <div className="text-muted-foreground">Impuesto (10%)</div>
+                <div className="text-right">{formatPrice(order.tax)}</div>
+                {order.discount > 0 && <>
+                  <div className="text-muted-foreground">Descuento</div>
+                  <div className="text-right">-{formatPrice(order.discount)}</div>
+                </>}
+                <div className="col-span-2 border-t my-1" />
+                <div className="text-muted-foreground">Total</div>
+                <div className="text-right text-lg font-semibold">{formatPrice(order.total)}</div>
+              </div>
+              <div className="mt-3 text-xs text-muted-foreground">
+                ID de pago: {data?.payment_id}
+              </div>
+            </div>
+          ) : (
+            <div className="rounded border p-3 text-sm">Estamos finalizando tu orden. Este estado se refrescará cuando llegue la confirmación.</div>
+          )}
         </div>
       )
     }

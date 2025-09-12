@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import getServiceClient from "@/lib/supabase/server"
 import { getPreferenceClient } from "@/lib/mp/client"
 import { calcOrderTotals } from "@/lib/checkout/totals"
+import { getSettingsServer } from "@/lib/repo/settings"
 import { validateCouponPercent } from "@/lib/checkout/coupons"
 import { logError, logInfo } from "@/lib/checkout/logger"
 import crypto from "node:crypto"
@@ -72,11 +73,18 @@ export async function POST(req: NextRequest) {
     // Coupon validation
     const discount_percent = await validateCouponPercent(body.coupon_code)
 
+    // Load store settings (shipping)
+    const settings = await getSettingsServer().catch(() => ({ shipping_flat_rate: 20000, shipping_free_threshold: 80000 }))
+
     // Totals
     const totals = calcOrderTotals({
       items: itemsDetailed.map((i) => ({ unit_price: i.unit_price, quantity: i.quantity })),
       // If client didn't provide shipping, let server rule compute it
       shipping_cost: body.shipping_cost ?? undefined,
+      shipping_rule: {
+        flat_rate: Number(settings.shipping_flat_rate ?? 20000),
+        free_threshold: Number(settings.shipping_free_threshold ?? 80000),
+      },
       discount_percent: discount_percent ?? null,
     })
 

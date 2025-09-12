@@ -1,8 +1,5 @@
 import type { MetadataRoute } from 'next'
 
-export const dynamic = 'force-static'
-export const revalidate = 60 * 60 * 24 // 24 hours
-
 const SITE_URL = process.env.SITE_URL || 'https://busy.com.ar'
 
 export default function robots(): MetadataRoute.Robots {

@@ -129,7 +129,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               <Truck className="h-5 w-5 text-muted-foreground" />
               <div>
                 <div className="font-medium font-heading">Envío gratis</div>
-                <div className="text-sm text-muted-foreground font-body">En compras superiores a $100</div>
+                <div className="text-sm text-muted-foreground font-body">En compras superiores a $80.000</div>
               </div>
             </div>
             <div className="flex items-center space-x-3">

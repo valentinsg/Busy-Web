@@ -4,6 +4,7 @@ import getServiceClient from "@/lib/supabase/server"
 import { validateCouponPercent } from "@/lib/checkout/coupons"
 import { logError, logInfo } from "@/lib/checkout/logger"
 import { computeShipping, computeTax } from "@/lib/checkout/totals"
+import { getSettingsServer } from "@/lib/repo/settings"
 import { sendInvoiceEmail } from "@/lib/email/resend"
 
 function ok() { return NextResponse.json({ ok: true }) }
@@ -111,9 +112,13 @@ export async function POST(req: NextRequest) {
         }
       })
 
-      // Compute totals with authoritative server rules
+      // Compute totals with authoritative server rules (respect store settings)
+      const settings = await getSettingsServer().catch(() => ({ shipping_flat_rate: 20000, shipping_free_threshold: 80000 }))
       const items_total = detailed.reduce((acc, i) => acc + i.unit_price * i.quantity, 0)
-      const shipping_cost = computeShipping(items_total)
+      const shipping_cost = computeShipping(items_total, {
+        flat_rate: Number(settings.shipping_flat_rate ?? 20000),
+        free_threshold: Number(settings.shipping_free_threshold ?? 80000),
+      })
       const coupon_code = (metadata?.coupon_code ?? null) as string | null
       const discount_percent = await validateCouponPercent(coupon_code)
       const discount = discount_percent ? Number(((items_total * discount_percent) / 100).toFixed(2)) : 0

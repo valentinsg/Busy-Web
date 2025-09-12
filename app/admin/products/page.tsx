@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { getProductsAsync } from "@/lib/repo/products"
 import { ProductCard } from "@/components/shop/product-card"
 import type { Product } from "@/lib/types"
@@ -14,7 +13,7 @@ export default async function AdminProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="font-heading text-xl font-semibold">Productos</h2>
-        <Link href="/admin/products/new" className="text-sm underline">Nuevo producto</Link>
+        <a href="/admin/products/new" className="text-sm underline">Nuevo producto</a>
       </div>
 
       {products.length === 0 ? (

@@ -2,10 +2,6 @@ import type { MetadataRoute } from 'next'
 import fs from 'fs'
 import path from 'path'
 
-// Ensure this metadata route is fully static and cacheable at the CDN
-export const dynamic = 'force-static'
-export const revalidate = 60 * 60 * 6 // 6 hours
-
 const SITE_URL = process.env.SITE_URL || 'https://busy.com.ar'
 
 function getStaticRoutes() {
