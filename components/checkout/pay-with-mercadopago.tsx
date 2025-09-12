@@ -33,7 +33,8 @@ export default function PayWithMercadoPago(props: {
         body: JSON.stringify({
           items: props.items,
           coupon_code: props.couponCode ?? null,
-          shipping_cost: props.shippingCost ?? 0,
+          // Let server compute shipping based on authoritative rule
+          shipping_cost: null,
           customer: props.customer ?? null,
           newsletter_opt_in: !!props.newsletterOptIn,
         }),

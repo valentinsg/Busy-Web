@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useCart } from "@/hooks/use-cart"
 import { formatPrice, capitalize } from "@/lib/format"
+import { computeShipping, computeTax } from "@/lib/checkout/totals"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/hooks/use-toast"
 import { ConfettiBurst } from "@/components/ui/confetti"
@@ -58,8 +59,8 @@ export default function CheckoutPage() {
   const subtotal = getSubtotal()
   const discount = getDiscount()
   const discountedSubtotal = getSubtotalAfterDiscount()
-  const estimatedShipping = discountedSubtotal > 100 ? 0 : 9.99
-  const estimatedTax = discountedSubtotal * 0.08
+  const estimatedShipping = computeShipping(discountedSubtotal)
+  const estimatedTax = computeTax(Number((discountedSubtotal + estimatedShipping).toFixed(2)))
   const finalTotal = discountedSubtotal + estimatedShipping + estimatedTax
 
   const handleInputChange = (field: string, value: string) => {
@@ -433,7 +434,7 @@ Phone: ${shippingData.phone}
                     <span>{estimatedShipping === 0 ? t("cart.shipping_free") : formatPrice(estimatedShipping)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>{t("checkout.summary.tax")}</span>
+                    <span>Impuesto online (10%)</span>
                     <span>{formatPrice(estimatedTax)}</span>
                   </div>
                   <Separator />

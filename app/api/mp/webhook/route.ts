@@ -3,6 +3,8 @@ import { getPaymentClient } from "@/lib/mp/client"
 import getServiceClient from "@/lib/supabase/server"
 import { validateCouponPercent } from "@/lib/checkout/coupons"
 import { logError, logInfo } from "@/lib/checkout/logger"
+import { computeShipping, computeTax } from "@/lib/checkout/totals"
+import { sendInvoiceEmail } from "@/lib/email/resend"
 
 function ok() { return NextResponse.json({ ok: true }) }
 
@@ -109,13 +111,15 @@ export async function POST(req: NextRequest) {
         }
       })
 
-      // Compute totals (shipping from metadata or 0) and coupon if any
-      const shipping_cost = Number(metadata?.shipping_cost ?? 0)
+      // Compute totals with authoritative server rules
       const items_total = detailed.reduce((acc, i) => acc + i.unit_price * i.quantity, 0)
+      const shipping_cost = computeShipping(items_total)
       const coupon_code = (metadata?.coupon_code ?? null) as string | null
       const discount_percent = await validateCouponPercent(coupon_code)
       const discount = discount_percent ? Number(((items_total * discount_percent) / 100).toFixed(2)) : 0
-      const order_total = Number((items_total - discount + shipping_cost).toFixed(2))
+      const pre_tax_total = Number((items_total - discount + shipping_cost).toFixed(2))
+      const tax = computeTax(pre_tax_total)
+      const order_total = Number((pre_tax_total + tax).toFixed(2))
 
       // Resolve customer if email provided
       let customer_id: string | null = null
@@ -145,7 +149,7 @@ export async function POST(req: NextRequest) {
           subtotal: items_total,
           discount,
           shipping: shipping_cost,
-          tax: 0,
+          tax,
           total: order_total,
           notes: null,
           placed_at: new Date().toISOString(),
@@ -179,6 +183,23 @@ export async function POST(req: NextRequest) {
         logError("process_order_paid failed", { order_id: order.id, paymentId, error: rpcErr.message })
       } else {
         logInfo("Order created and marked paid", { order_id: order.id, paymentId, session_id })
+        // Send invoice email if possible
+        try {
+          const emailTo = (metadata?.customer?.email ?? null) as string | null
+          if (emailTo) {
+            await sendInvoiceEmail({
+              to: emailTo,
+              order,
+              items: itemsPayload,
+              paymentId: String(paymentId),
+              tax,
+              shipping: shipping_cost,
+              discount,
+            })
+          }
+        } catch (e: any) {
+          logError("sendInvoiceEmail failed", { error: String(e?.message || e), order_id: order.id })
+        }
       }
 
       // Newsletter opt-in (idempotent by PK: email)

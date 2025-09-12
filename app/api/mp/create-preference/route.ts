@@ -75,7 +75,8 @@ export async function POST(req: NextRequest) {
     // Totals
     const totals = calcOrderTotals({
       items: itemsDetailed.map((i) => ({ unit_price: i.unit_price, quantity: i.quantity })),
-      shipping_cost: body.shipping_cost ?? 0,
+      // If client didn't provide shipping, let server rule compute it
+      shipping_cost: body.shipping_cost ?? undefined,
       discount_percent: discount_percent ?? null,
     })
 
@@ -122,14 +123,22 @@ export async function POST(req: NextRequest) {
 
     const preference = await pref.create({
       body: {
-        items: itemsDetailed.map((i) => ({
-          id: i.product_id,
-          title: i.title,
-          quantity: i.quantity,
-          unit_price: Number(i.unit_price.toFixed(2)),
-          currency_id: CURRENCY,
-          picture_url: i.picture_url,
-        })),
+        items: [
+          ...itemsDetailed.map((i) => ({
+            id: i.product_id,
+            title: i.title,
+            quantity: i.quantity,
+            unit_price: Number(i.unit_price.toFixed(2)),
+            currency_id: CURRENCY,
+            picture_url: i.picture_url,
+          })),
+          ...(totals.shipping_cost > 0
+            ? [{ id: "shipping", title: "Envío", quantity: 1, unit_price: Number(totals.shipping_cost.toFixed(2)), currency_id: CURRENCY }]
+            : []),
+          ...(totals.tax > 0
+            ? [{ id: "online_tax", title: "Impuesto online (10%)", quantity: 1, unit_price: Number(totals.tax.toFixed(2)), currency_id: CURRENCY }]
+            : []),
+        ],
         // If binary_mode is true, MP will reject payments that need manual review.
         // Allow configuring it via env to reduce security rejections in production.
         binary_mode: binaryMode,
