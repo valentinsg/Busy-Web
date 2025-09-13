@@ -10,7 +10,10 @@
     "postbuild": ""
   },
   "dependencies": {
+    "@chakra-ui/react": "^3.26.0",
     "@emotion/is-prop-valid": "latest",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^3.9.1",
     "@mdx-js/loader": "latest",
     "@mdx-js/react": "latest",
@@ -67,6 +70,7 @@
     "react-day-picker": "9.8.0",
     "react-dom": "^18",
     "react-hook-form": "^7.54.1",
+    "react-markdown": "^10.1.0",
     "react-resizable-panels": "^2.1.7",
     "reading-time": "latest",
     "recharts": "2.15.0",

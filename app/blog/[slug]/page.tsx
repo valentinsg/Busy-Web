@@ -13,6 +13,7 @@ import { enUS, es } from "date-fns/locale"
 import { I18nText } from "@/components/blog/i18n-text"
 import { MDXRemote } from "next-mdx-remote/rsc"
 import remarkGfm from "remark-gfm"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 export const revalidate = 3600
 // Note: This page is a server component. Avoid client hooks here.
 
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   }
 
   const base = process.env.SITE_URL || "https://busy.com.ar"
-  const canonical = `${base}/blog/${post.slug}`
+  const canonical = post.canonical || `${base}/blog/${post.slug}`
   const image = post.cover || "/busy-streetwear.png"
 
   return {
@@ -71,6 +72,8 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
   const localeCookie = cookies().get("busy_locale")?.value
   const dfnsLocale = localeCookie === "es" ? es : enUS
+  const authorName = post.authorName || post.author || ""
+  const authorAvatar = post.authorAvatar || ""
 
   return (
     <div className="container px-4 py-8 pt-20">
@@ -89,8 +92,8 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               url: `${process.env.SITE_URL || "https://busy.com.ar"}/blog/${post.slug}`,
               image: [post.cover || "/busy-streetwear.png"],
               keywords: post.tags,
-              author: post.author
-                ? { "@type": "Person", name: post.author }
+              author: (post.authorName || post.author)
+                ? { "@type": "Person", name: post.authorName || post.author }
                 : { "@type": "Organization", name: "Busy" },
               publisher: {
                 "@type": "Organization",
@@ -128,6 +131,15 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                {authorName && (
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={authorAvatar} alt={authorName} />
+                      <AvatarFallback>{authorName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span>{authorName}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   {format(new Date(post.date), "MMMM dd, yyyy", { locale: dfnsLocale })}
@@ -159,6 +171,22 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             />
           </div>
         </article>
+
+        <Separator className="my-12" />
+
+        {/* Navigation */}
+        {Array.isArray(post.backlinks) && post.backlinks.length > 0 && (
+          <div className="mb-12">
+            <h3 className="font-heading text-xl font-semibold mb-3"><I18nText k="blog.post.related" /></h3>
+            <ul className="list-disc pl-5 space-y-1">
+              {post.backlinks.map((b, i) => (
+                <li key={i}>
+                  <Link href={b.url} className="text-accent-brand hover:underline">{b.label || b.url}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <Separator className="my-12" />
 

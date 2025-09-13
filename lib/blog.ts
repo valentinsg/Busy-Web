@@ -27,6 +27,10 @@ export function getAllPosts(): BlogPost[] {
           tags: data.tags || [],
           cover: data.cover || undefined,
           author: data.author || undefined,
+          authorName: data.authorName || data.author || undefined,
+          authorAvatar: data.authorAvatar || undefined,
+          canonical: data.canonical || undefined,
+          backlinks: data.backlinks || undefined,
           content,
           readingTime: readTime.text,
         }
@@ -53,6 +57,10 @@ export function getPostBySlug(slug: string): BlogPost | null {
       tags: data.tags || [],
       cover: data.cover || undefined,
       author: data.author || undefined,
+      authorName: data.authorName || data.author || undefined,
+      authorAvatar: data.authorAvatar || undefined,
+      canonical: data.canonical || undefined,
+      backlinks: data.backlinks || undefined,
       content,
       readingTime: readTime.text,
     }

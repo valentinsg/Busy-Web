@@ -1,101 +1,50 @@
 import Link from "next/link"
 import dynamic from "next/dynamic"
+import TopProducts from "@/components/admin/top-products"
+import LatestBlogCard from "@/components/admin/latest-blog"
 
 const DashboardCards = dynamic(() => import("@/components/admin/dashboard-cards"), { ssr: false })
 
 export default function AdminHomePage() {
   return (
-    <div className="space-y-6">
-      <section className="space-y-3">
-        <div className="flex items-end gap-4 flex-wrap">
-          <div>
-            <h2 className="font-heading text-xl font-semibold">Panel</h2>
-            <p className="font-body text-muted-foreground">Gestión de productos, stock, media, newsletter, blog y más.</p>
-          </div>
-          <div className="ml-auto w-full lg:w-auto">
-            <DashboardCards variant="compact" showControls={false} />
-          </div>
+    <div className="space-y-8 font-body">
+      <header className="flex items-end gap-4 flex-wrap">
+        <div>
+          <h2 className="font-heading text-2xl font-semibold">Panel</h2>
+          <p className="text-muted-foreground">Visión general del negocio y accesos rápidos.</p>
+        </div>
+        <div className="ml-auto">
+          <Link href="/" className="rounded-md border px-3 py-2 text-sm hover:bg-accent transition-colors">Ver tienda</Link>
+        </div>
+      </header>
+
+      <section>
+        <DashboardCards variant="full" showControls={true} />
+      </section>
+
+      <section>
+        <h3 className="font-heading text-lg mb-3">Accesos rápidos</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Link href="/admin/products/new" className="rounded-md border p-3 hover:bg-accent transition-colors text-sm">+ Nuevo producto</Link>
+          <Link href="/admin/blog/new" className="rounded-md border p-3 hover:bg-accent transition-colors text-sm">+ Nuevo artículo</Link>
+          <Link href="/admin/newsletter/campaigns/new" className="rounded-md border p-3 hover:bg-accent transition-colors text-sm">+ Nueva campaña</Link>
+          <Link href="/admin/analytics" className="rounded-md border p-3 hover:bg-accent transition-colors text-sm">Ver analíticas</Link>
         </div>
       </section>
-      {/* Secciones colapsables para reducir ruido visual */}
-      <details className="rounded-lg border p-4" open>
-        <summary className="font-heading font-medium cursor-pointer select-none">Productos & Stock</summary>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
-          <Link href="/admin/products" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Productos</h3>
-            <p className="font-body text-sm text-muted-foreground">Crear, editar, eliminar.</p>
-          </Link>
-          <Link href="/admin/stock" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Stock por talle</h3>
-            <p className="font-body text-sm text-muted-foreground">Actualizar disponibilidad por talle.</p>
-          </Link>
-          <Link href="/admin/media" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Media</h3>
-            <p className="font-body text-sm text-muted-foreground">Subir imágenes y videos.</p>
-          </Link>
-        </div>
-      </details>
 
-      <details className="rounded-lg border p-4">
-        <summary className="font-heading font-medium cursor-pointer select-none">Marketing & Contenido</summary>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
-          <Link href="/admin/blog" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Blog</h3>
-            <p className="font-body text-sm text-muted-foreground">Ver y crear artículos.</p>
-          </Link>
-          <Link href="/admin/newsletter" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Newsletter</h3>
-            <p className="font-body text-sm text-muted-foreground">Listas, etiquetas y envíos.</p>
-          </Link>
-          <Link href="/admin/newsletter/campaigns" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Campañas</h3>
-            <p className="font-body text-sm text-muted-foreground">Crear y gestionar campañas.</p>
-          </Link>
-          <Link href="/admin/popovers" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Popovers</h3>
-            <p className="font-body text-sm text-muted-foreground">Configurar popovers y descuentos.</p>
-          </Link>
-          <Link href="/admin/coupons" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Cupones</h3>
-            <p className="font-body text-sm text-muted-foreground">Crear y validar cupones.</p>
-          </Link>
+      <section>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <TopProducts limit={5} />
+          <LatestBlogCard />
         </div>
-      </details>
+      </section>
 
-      <details className="rounded-lg border p-4">
-        <summary className="font-heading font-medium cursor-pointer select-none">Ventas & Clientes</summary>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
-          <Link href="/admin/analytics" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Inteligencia comercial</h3>
-            <p className="font-body text-sm text-muted-foreground">KPIs, series y canales.</p>
-          </Link>
-          <Link href="/admin/sales/manual" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Ventas: Manual</h3>
-            <p className="font-body text-sm text-muted-foreground">Registrar ventas fuera de la web.</p>
-          </Link>
-          <Link href="/admin/customers/ranking" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Clientes: Ranking</h3>
-            <p className="font-body text-sm text-muted-foreground">TOP por gasto, frecuencia o recencia.</p>
-          </Link>
+      <section>
+        <div className="rounded-lg border p-4">
+          <div className="mb-2 font-medium">Stock bajo</div>
+          <div className="text-sm text-muted-foreground">Conectamos este bloque a tu fuente de stock para listar variantes por debajo del umbral.</div>
         </div>
-      </details>
-
-      <details className="rounded-lg border p-4">
-        <summary className="font-heading font-medium cursor-pointer select-none">Operación</summary>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
-          <Link href="/admin/suppliers" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Proveedores</h3>
-            <p className="font-body text-sm text-muted-foreground">Listado y altas de proveedores.</p>
-          </Link>
-          <Link href="/admin/expenses" className="rounded-lg border bg-muted/10 p-4 transition-colors hover:bg-accent hover:text-accent-foreground block">
-            <h3 className="font-heading font-medium mb-1">Gastos</h3>
-            <p className="font-body text-sm text-muted-foreground">Registrar y ver gastos.</p>
-          </Link>
-        </div>
-      </details>
-
-      {null}
+      </section>
     </div>
   )
 }
-

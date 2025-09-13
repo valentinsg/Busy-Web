@@ -5,8 +5,7 @@ import type React from 'react'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { ThemeProvider } from '@/components/theme-provider'
-import { Header } from '@/components/layout/header'
-import { Footer } from '@/components/layout/footer'
+import SiteFrame from '@/components/layout/site-frame'
 import { Toaster } from '@/components/ui/toaster'
 import { generateSEO } from '@/lib/seo'
 import { SplashGate } from '@/components/home/splash-gate'
@@ -17,6 +16,12 @@ import { PageTransition } from '@/components/layout/page-transition'
 import SitePopover from '@/components/site-popover'
 import { cookies } from 'next/headers'
 import dynamic from 'next/dynamic';
+
+// Ensure we always have a valid absolute URL (with scheme) for metadataBase and JSON-LD
+const RAW_SITE_URL = process.env.SITE_URL || ''
+const SITE_URL = /^https?:\/\//.test(RAW_SITE_URL) && RAW_SITE_URL
+  ? RAW_SITE_URL
+  : 'https://busy.com.ar'
 
 const AdminQuickFAB = dynamic(() => import('@/components/admin/admin-quick-fab'), {
   ssr: false,
@@ -67,7 +72,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   ...generateSEO(),
-  metadataBase: new URL(process.env.SITE_URL || 'https://busy.com.ar'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'Busy - Streetwear premium',
     template: '%s | Busy',
@@ -102,8 +107,8 @@ const jsonLd = [
     '@type': 'Organization',
     name: 'Busy Streetwear',
     description: 'Streetwear para la vida moderna',
-    url: process.env.SITE_URL || 'https://busy.com.ar',
-    logo: `${process.env.SITE_URL || 'https://busy.com.ar'}/logo-busy-black.png`,
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo-busy-black.png`,
     sameAs: [
       'https://instagram.com/busy.streetwear',
     ],
@@ -118,10 +123,10 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Busy',
-    url: process.env.SITE_URL || 'https://busy.com.ar',
+    url: SITE_URL,
     potentialAction: {
       '@type': 'SearchAction',
-      target: `${process.env.SITE_URL || 'https://busy.com.ar'}/products?q={search_term_string}`,
+      target: `${SITE_URL}/products?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     },
     inLanguage: 'es-AR',
@@ -156,17 +161,9 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <SplashGate />
-            <div className="relative flex min-h-screen flex-col">
-              <Header />
-              {/* Site-wide promotional popover */}
-              <SitePopover />
-              <PageTransition>
-                <main className="flex-1">
-                  {children}
-                </main>
-              </PageTransition>
-              <Footer />
-            </div>
+            <SiteFrame>
+              {children}
+            </SiteFrame>
             <Toaster />
           </ThemeProvider>
         </I18nProvider>

@@ -3,6 +3,18 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 type Variant = "compact" | "full"
 
@@ -23,6 +35,12 @@ export default function DashboardCards({
   const [loading, setLoading] = useState<boolean>(false)
   const [profit, setProfit] = useState<{ revenue: number; expenses: number; profit: number } | null>(null)
   const [revenueByChannel, setRevenueByChannel] = useState<Array<{ channel: string; orders: number; revenue: number }>>([])
+  const [timeSeries, setTimeSeries] = useState<Array<{ bucket: string; revenue: number; expenses: number; profit: number }>>([])
+  const [kpis, setKpis] = useState<{ orders: number; aov: number; new_customers: number } | null>(null)
+  const [groupBy, setGroupBy] = useState<'day'|'week'|'month'>("day")
+  const [preset, setPreset] = useState<string>("last30")
+  const [rangeOpen, setRangeOpen] = useState(false)
+  const [customRange, setCustomRange] = useState<{ from?: Date; to?: Date }>({})
 
   const load = useMemo(
     () => async (opts?: { quiet?: boolean }) => {
@@ -33,11 +51,14 @@ export default function DashboardCards({
         const effTo = externalTo ?? to
         if (effFrom) params.set("from", effFrom)
         if (effTo) params.set("to", effTo)
+        if (groupBy) params.set("groupBy", groupBy)
         const res = await fetch(`/api/admin/analytics/summary?${params.toString()}`)
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || "Error")
         setProfit(json.profit)
         setRevenueByChannel(json.revenueByChannel || [])
+        setTimeSeries(json.timeSeries || [])
+        setKpis(json.kpis || null)
         if (!opts?.quiet) toast({ title: "Resumen actualizado" })
       } catch (e: any) {
         toast({ title: "Error al cargar resumen", description: e?.message || "", variant: "destructive" })
@@ -45,7 +66,7 @@ export default function DashboardCards({
         setLoading(false)
       }
     },
-    [externalFrom, externalTo, from, to, toast],
+    [externalFrom, externalTo, from, to, groupBy, toast],
   )
 
   useEffect(() => {
@@ -60,6 +81,35 @@ export default function DashboardCards({
       void load({ quiet: true })
     }
   }, [externalFrom, externalTo])
+
+  // Presets handler
+  useEffect(() => {
+    if (!showControls) return
+    const now = new Date()
+    const iso = (d: Date) => d.toISOString().slice(0,10)
+    if (preset === "today") {
+      const d = iso(now)
+      setFrom(d)
+      setTo(d)
+    } else if (preset === "last7") {
+      const d = new Date(now)
+      d.setDate(d.getDate()-6)
+      setFrom(iso(d))
+      setTo(iso(now))
+    } else if (preset === "last30") {
+      const d = new Date(now)
+      d.setDate(d.getDate()-29)
+      setFrom(iso(d))
+      setTo(iso(now))
+    } else if (preset === "ytd") {
+      const d = new Date(Date.UTC(now.getUTCFullYear(),0,1))
+      setFrom(iso(d))
+      setTo(iso(now))
+    } else if (preset === "custom" && customRange.from && customRange.to) {
+      setFrom(iso(customRange.from))
+      setTo(iso(customRange.to))
+    }
+  }, [preset, customRange, showControls])
 
   if (variant === "compact") {
     return (
@@ -100,24 +150,55 @@ export default function DashboardCards({
       {showControls && (
         <div className="flex flex-wrap gap-3 items-end">
           <div className="flex flex-col">
-            <label className="text-xs text-muted-foreground">Desde</label>
-            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="border rounded px-2 py-1 bg-background" />
+            <label className="text-xs text-muted-foreground">Rango</label>
+            <Select value={preset} onValueChange={setPreset}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="today">Hoy</SelectItem>
+                <SelectItem value="last7">Últimos 7 días</SelectItem>
+                <SelectItem value="last30">Últimos 30 días</SelectItem>
+                <SelectItem value="ytd">YTD</SelectItem>
+                <SelectItem value="custom">Personalizado…</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex flex-col">
-            <label className="text-xs text-muted-foreground">Hasta</label>
-            <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="border rounded px-2 py-1 bg-background" />
+            <label className="text-xs text-muted-foreground">Agrupar por</label>
+            <Select value={groupBy} onValueChange={(v: 'day'|'week'|'month') => setGroupBy(v)}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="day">Día</SelectItem>
+                <SelectItem value="week">Semana</SelectItem>
+                <SelectItem value="month">Mes</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <button
-            onClick={() => load()}
-            disabled={loading}
-            className="rounded bg-primary text-primary-foreground px-3 py-1 text-sm disabled:opacity-60"
-          >
+          <Popover open={rangeOpen} onOpenChange={setRangeOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" disabled={preset !== 'custom'}>Elegir fechas</Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2">
+              <div className="grid grid-cols-1 gap-2">
+                <Calendar mode="range" selected={customRange as any} onSelect={(r: any) => setCustomRange(r || {})} numberOfMonths={2} />
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => { setRangeOpen(false) }}>Cerrar</Button>
+                  <Button size="sm" onClick={() => { setRangeOpen(false); load(); }}>Aplicar</Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button onClick={() => load()} disabled={loading}>
             {loading ? "Cargando..." : "Actualizar"}
-          </button>
+          </Button>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* KPI cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="rounded-lg border p-4">
           <div className="text-xs text-muted-foreground">Ingresos</div>
           <div className="text-2xl font-semibold">${" "}{profit ? profit.revenue.toFixed(2) : loading ? "…" : "0.00"}</div>
@@ -130,15 +211,43 @@ export default function DashboardCards({
           <div className="text-xs text-muted-foreground">Beneficio</div>
           <div className={`text-2xl font-semibold ${profit && profit.profit < 0 ? "text-red-600" : ""}`}>${" "}{profit ? profit.profit.toFixed(2) : loading ? "…" : "0.00"}</div>
         </div>
+        <div className="rounded-lg border p-4">
+          <div className="text-xs text-muted-foreground">Ticket promedio</div>
+          <div className="text-2xl font-semibold">${" "}{kpis ? kpis.aov.toFixed(2) : loading ? "…" : "0.00"}</div>
+        </div>
       </div>
 
+      {/* Time series chart */}
+      <div className="rounded-lg border p-4">
+        <div className="mb-2 font-medium">Evolución ingresos y beneficio</div>
+        <ChartContainer
+          config={{ revenue: { label: "Ingresos", color: "hsl(var(--primary))" }, profit: { label: "Beneficio", color: "hsl(var(--accent))" } }}
+          className="w-full h-[260px]"
+        >
+          <AreaChart data={timeSeries} margin={{ left: 8, right: 8, top: 10, bottom: 0 }}>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" />
+            <XAxis dataKey="bucket" tickLine={false} axisLine={false} hide={false} />
+            <YAxis tickLine={false} axisLine={false} width={40} />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Area type="monotone" dataKey="revenue" stroke="var(--color-revenue)" fill="var(--color-revenue)" fillOpacity={0.15} />
+            <Area type="monotone" dataKey="profit" stroke="var(--color-profit)" fill="var(--color-profit)" fillOpacity={0.2} />
+            <ChartLegend content={<ChartLegendContent />} />
+          </AreaChart>
+        </ChartContainer>
+      </div>
+
+      {/* Revenue by channel list */}
       <div className="rounded-lg border p-4">
         <div className="mb-2 font-medium">Ingresos por canal</div>
         <div className="space-y-2">
           {revenueByChannel.length === 0 && <div className="text-sm text-muted-foreground">{loading ? "Cargando..." : "Sin datos"}</div>}
           {revenueByChannel.map((r) => (
             <div key={r.channel} className="flex justify-between text-sm">
-              <div className="text-muted-foreground">{r.channel}</div>
+              <div>
+                <span className="inline-flex items-center rounded border px-2 py-0.5 text-[11px] uppercase tracking-wide text-muted-foreground">
+                  {r.channel}
+                </span>
+              </div>
               <div className="flex gap-3">
                 <span className="tabular-nums">{r.orders} pedidos</span>
                 <span className="font-medium tabular-nums">${" "}{r.revenue.toFixed(2)}</span>

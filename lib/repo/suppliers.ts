@@ -14,6 +14,15 @@ export async function updateSupplier(id: string, patch: {
   contact_email?: string | null
   contact_phone?: string | null
   notes?: string | null
+  category?: string | null
+  product_tags?: string[]
+  reference_price?: string | null
+  minimum_order_quantity?: number | null
+  delivery_time_days?: number | null
+  payment_terms?: string | null
+  tags?: string[]
+  status?: 'active' | 'inactive'
+  reliability_rating?: number | null
 }): Promise<Supplier> {
   const supabase = getServiceClient()
   const { data, error } = await supabase
@@ -24,6 +33,15 @@ export async function updateSupplier(id: string, patch: {
       ...(patch.contact_email !== undefined ? { contact_email: patch.contact_email } : {}),
       ...(patch.contact_phone !== undefined ? { contact_phone: patch.contact_phone } : {}),
       ...(patch.notes !== undefined ? { notes: patch.notes } : {}),
+      ...(patch.category !== undefined ? { category: patch.category } : {}),
+      ...(patch.product_tags !== undefined ? { product_tags: patch.product_tags } : {}),
+      ...(patch.reference_price !== undefined ? { reference_price: patch.reference_price } : {}),
+      ...(patch.minimum_order_quantity !== undefined ? { minimum_order_quantity: patch.minimum_order_quantity } : {}),
+      ...(patch.delivery_time_days !== undefined ? { delivery_time_days: patch.delivery_time_days } : {}),
+      ...(patch.payment_terms !== undefined ? { payment_terms: patch.payment_terms } : {}),
+      ...(patch.tags !== undefined ? { tags: patch.tags } : {}),
+      ...(patch.status !== undefined ? { status: patch.status } : {}),
+      ...(patch.reliability_rating !== undefined ? { reliability_rating: patch.reliability_rating } : {}),
     })
     .eq("id", id)
     .select("*")
@@ -44,6 +62,15 @@ export async function createSupplier(input: {
   contact_email?: string | null
   contact_phone?: string | null
   notes?: string | null
+  category?: string | null
+  product_tags?: string[]
+  reference_price?: string | null
+  minimum_order_quantity?: number | null
+  delivery_time_days?: number | null
+  payment_terms?: string | null
+  tags?: string[]
+  status?: 'active' | 'inactive'
+  reliability_rating?: number | null
 }): Promise<Supplier> {
   const supabase = getServiceClient()
   const { data, error } = await supabase
@@ -54,6 +81,15 @@ export async function createSupplier(input: {
       contact_email: input.contact_email ?? null,
       contact_phone: input.contact_phone ?? null,
       notes: input.notes ?? null,
+      category: input.category ?? null,
+      product_tags: input.product_tags ?? [],
+      reference_price: input.reference_price ?? null,
+      minimum_order_quantity: input.minimum_order_quantity ?? null,
+      delivery_time_days: input.delivery_time_days ?? null,
+      payment_terms: input.payment_terms ?? null,
+      tags: input.tags ?? [],
+      status: input.status ?? 'active',
+      reliability_rating: input.reliability_rating ?? null,
     })
     .select("*")
     .single()

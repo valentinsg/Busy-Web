@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { getAllPosts } from "@/lib/blog"
+import BlogRowActions from "@/components/admin/blog-row-actions"
 
 export const dynamic = "force-dynamic"
 
@@ -23,12 +24,15 @@ export default function AdminBlogPage() {
           <div className="p-4 text-sm text-muted-foreground">No hay artículos aún.</div>
         )}
         {posts.map((p) => (
-          <div key={p.slug} className="p-4 flex items-center justify-between">
+          <div key={p.slug} className="p-4 flex items-center justify-between gap-3">
             <div>
               <div className="font-heading font-medium">{p.title || p.slug}</div>
               <div className="text-xs text-muted-foreground">{p.date} · {p.readingTime}</div>
             </div>
-            <Link href={`/blog/${p.slug}`} className="text-sm text-muted-foreground hover:underline">Ver</Link>
+            <div className="flex items-center gap-2">
+              <Link href={`/blog/${p.slug}`} className="text-sm text-muted-foreground hover:underline">Ver</Link>
+              <BlogRowActions slug={p.slug} />
+            </div>
           </div>
         ))}
       </div>

@@ -5,7 +5,7 @@ import path from "path"
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, slug, description, tags = [], content = "" } = body || {}
+    const { title, slug, description, tags = [], content = "", authorName = "", authorAvatar = "", cover = "", canonical = "", backlinks = [] } = body || {}
 
     if (!title || !(slug && typeof slug === "string")) {
       return NextResponse.json({ error: "title y slug son requeridos" }, { status: 400 })
@@ -27,9 +27,14 @@ export async function POST(request: Request) {
       `description: ${JSON.stringify(description || "")}`,
       `date: ${JSON.stringify(new Date().toISOString().slice(0, 10))}`,
       `tags: ${JSON.stringify(tags)}`,
+      cover ? `cover: ${JSON.stringify(cover)}` : null,
+      canonical ? `canonical: ${JSON.stringify(canonical)}` : null,
+      authorName ? `authorName: ${JSON.stringify(authorName)}` : null,
+      authorAvatar ? `authorAvatar: ${JSON.stringify(authorAvatar)}` : null,
+      Array.isArray(backlinks) && backlinks.length ? `backlinks: ${JSON.stringify(backlinks)}` : null,
       "---",
       "",
-    ].join("\n")
+    ].filter(Boolean).join("\n")
 
     const fileContents = `${frontmatter}${content}\n`
     fs.writeFileSync(filePath, fileContents, "utf8")

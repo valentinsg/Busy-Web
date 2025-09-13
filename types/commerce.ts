@@ -69,6 +69,16 @@ export type Supplier = {
   contact_email: string | null
   contact_phone: string | null
   notes: string | null
+  // New fields
+  category: string | null
+  product_tags: string[]
+  reference_price: string | null
+  minimum_order_quantity: number | null
+  delivery_time_days: number | null
+  payment_terms: string | null
+  tags: string[]
+  status: 'active' | 'inactive'
+  reliability_rating: number | null
   created_at: string
 }
 
