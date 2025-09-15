@@ -1,5 +1,6 @@
 import createMDX from '@next/mdx'
 import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -47,7 +48,8 @@ const nextConfig = {
 
 const withMDX = createMDX({
   options: {
-    remarkPlugins: [remarkGfm],
+    // Global MDX remark plugins
+    remarkPlugins: [remarkGfm, remarkBreaks],
     rehypePlugins: [],
   },
 })

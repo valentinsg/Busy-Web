@@ -31,12 +31,20 @@ export async function PUT(req: Request, { params }: { params: { slug: string } }
       tags = [],
       content = "",
       cover,
+      coverAlt,
       canonical,
       backlinks,
       authorName,
       authorAvatar,
       date,
       slug: newSlug,
+      excerpt,
+      category,
+      readingTime,
+      ogImage,
+      faqs,
+      cta,
+      seoKeywords,
     } = body || {}
 
     const fm: Record<string, any> = {
@@ -45,10 +53,18 @@ export async function PUT(req: Request, { params }: { params: { slug: string } }
       date: date || new Date().toISOString().slice(0, 10),
       tags,
       cover,
+      coverAlt,
       canonical,
       backlinks,
       authorName,
       authorAvatar,
+      excerpt,
+      category,
+      readingTime,
+      ogImage,
+      faqs,
+      cta,
+      seoKeywords,
     }
 
     // clean undefined

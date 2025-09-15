@@ -1,14 +1,15 @@
 "use client"
 
-import { useMemo, useRef, useState, useEffect } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import authors from "@/data/authors.json"
+import { useParams, useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
+import authors from "@/data/authors.json"
 import supabase from "@/lib/supabase/client"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 const MarkdownPreview = dynamic(() => import("@/components/blog/markdown-preview"), {
@@ -25,42 +26,50 @@ function slugify(input: string) {
     .replace(/-+/g, "-")
 }
 
-export default function AdminBlogNewPage() {
+export default function AdminBlogEditPage() {
+  const params = useParams<{ slug: string }>()
+  const currentSlug = params?.slug || ""
+  const router = useRouter()
+
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
   const [title, setTitle] = useState("")
   const [slug, setSlug] = useState("")
   const [description, setDescription] = useState("")
   const [excerpt, setExcerpt] = useState("")
-  const [category, setCategory] = useState("")
   const [tags, setTags] = useState("")
   const [content, setContent] = useState("")
-  const [authorsList, setAuthorsList] = useState<any[]>(authors as any[])
-  const [authorId, setAuthorId] = useState<string>(((authors as any[])?.[0]?.id as string) || "")
   const [cover, setCover] = useState("")
   const [coverAlt, setCoverAlt] = useState("")
   const [canonical, setCanonical] = useState("")
   const [ogImage, setOgImage] = useState("")
+  const [category, setCategory] = useState("")
   const [readingOverride, setReadingOverride] = useState("")
-  const [backlinks, setBacklinks] = useState<string>("")
   const [faqs, setFaqs] = useState<string>("")
   const [ctaText, setCtaText] = useState("")
   const [ctaUrl, setCtaUrl] = useState("")
   const [seoKeywords, setSeoKeywords] = useState("")
+  const [backlinks, setBacklinks] = useState<string>("")
+
+  const [authorsList, setAuthorsList] = useState<any[]>(authors as any[])
+  const [authorId, setAuthorId] = useState<string>(((authors as any[])?.[0]?.id as string) || "")
+  const [authorName, setAuthorName] = useState<string>("")
+  const [authorAvatar, setAuthorAvatar] = useState<string>("")
+
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
-  // Toolbar popovers state
-  const [linkOpen, setLinkOpen] = useState(false)
-  const [linkUrl, setLinkUrl] = useState("")
+  // Upload helpers state
+  const coverInputRef = useRef<HTMLInputElement | null>(null)
+  const [coverUploading, setCoverUploading] = useState(false)
+  const imageInputRef = useRef<HTMLInputElement | null>(null)
+  const [imageUploading, setImageUploading] = useState(false)
   const [imageOpen, setImageOpen] = useState(false)
   const [imageUrl, setImageUrl] = useState("")
   const [imageAlt, setImageAlt] = useState("")
-  const [imageUploading, setImageUploading] = useState(false)
-  const imageInputRef = useRef<HTMLInputElement | null>(null)
-
-  // Cover upload state
-  const coverInputRef = useRef<HTMLInputElement | null>(null)
-  const [coverUploading, setCoverUploading] = useState(false)
 
   const autoSlug = useMemo(() => slugify(title), [title])
 
@@ -68,7 +77,6 @@ export default function AdminBlogNewPage() {
     const fd = new FormData()
     fd.append("file", file)
     fd.append("bucket", bucket)
-    // Adjuntar token de sesión para pasar assertAdmin en el endpoint
     const { data: sessionData } = await supabase.auth.getSession()
     const token = sessionData?.session?.access_token
     const res = await fetch("/api/admin/upload", {
@@ -81,9 +89,9 @@ export default function AdminBlogNewPage() {
     return data.url as string
   }
 
-  // Load authors from Supabase on mount
   useEffect(() => {
     let cancelled = false
+
     async function loadAuthors() {
       try {
         const { data, error } = await supabase
@@ -95,17 +103,51 @@ export default function AdminBlogNewPage() {
         if (!cancelled && Array.isArray(data) && data.length) {
           const mapped = data.map((a) => ({ id: a.id, name: a.name, email: a.email, avatar: a.avatar_url }))
           setAuthorsList(mapped)
-          setAuthorId(mapped[0]?.id || "")
         }
-      } catch (e) {
-        // fallback to local file already in state
+      } catch {}
+    }
+
+    async function loadPost() {
+      setLoading(true)
+      setError(null)
+      try {
+        const res = await fetch(`/api/admin/blog/${encodeURIComponent(currentSlug)}`)
+        if (!res.ok) throw new Error("No se pudo cargar el artículo")
+        const { post } = await res.json()
+        if (!post) throw new Error("Artículo no encontrado")
+
+        setTitle(post.title || "")
+        setSlug(post.slug || currentSlug)
+        setDescription(post.description || "")
+        setExcerpt(post.excerpt || "")
+        setTags(Array.isArray(post.tags) ? post.tags.join(", ") : "")
+        setContent(post.content || "")
+        setCover(post.cover || "")
+        setCoverAlt(post.coverAlt || "")
+        setCanonical(post.canonical || "")
+        setOgImage(post.ogImage || "")
+        setCategory(post.category || "")
+        setReadingOverride(post.readingTime || "")
+        setFaqs(Array.isArray(post.faqs) ? post.faqs.map((f: any) => `${f.question}|${f.answer}`).join("\n") : "")
+        setCtaText(post.cta?.text || "")
+        setCtaUrl(post.cta?.url || "")
+        setSeoKeywords(Array.isArray(post.seoKeywords) ? post.seoKeywords.join(", ") : "")
+        setBacklinks(Array.isArray(post.backlinks) ? post.backlinks.map((b: any) => `${b.label}|${b.url}`).join("\n") : "")
+        setAuthorName(post.authorName || post.author || "")
+        setAuthorAvatar(post.authorAvatar || "")
+      } catch (e: any) {
+        setError(e?.message || "Error al cargar el artículo")
+      } finally {
+        setLoading(false)
       }
     }
+
     loadAuthors()
+    loadPost()
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [currentSlug])
 
   function applyFormat(before: string, after = "") {
     const el = textareaRef.current
@@ -115,7 +157,6 @@ export default function AdminBlogNewPage() {
     const selected = content.slice(start, end) || "texto"
     const newText = content.slice(0, start) + before + selected + after + content.slice(end)
     setContent(newText)
-    // restore focus roughly after inserted text
     requestAnimationFrame(() => {
       el.focus()
       const newPos = start + before.length + selected.length + after.length
@@ -123,72 +164,128 @@ export default function AdminBlogNewPage() {
     })
   }
 
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setSaving(true)
+    setMessage(null)
+    setError(null)
+    try {
+      // Normalize content: enforce a single H1 by demoting subsequent H1s to H2
+      let normalizedContent = content
+      const h1Regex = /^#\s+/gm
+      let match
+      let count = 0
+      normalizedContent = normalizedContent.replace(h1Regex, () => {
+        count += 1
+        return count === 1 ? "# " : "## "
+      })
+
+      const selectedAuthor = (authorsList as any[]).find((a) => a.id === authorId)
+      const finalAuthorName = selectedAuthor?.name || authorName || ""
+      const finalAuthorAvatar = selectedAuthor?.avatar || authorAvatar || ""
+
+      const res = await fetch(`/api/admin/blog/${encodeURIComponent(currentSlug)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          slug: slug || autoSlug,
+          description,
+          excerpt,
+          tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+          content: normalizedContent,
+          cover,
+          coverAlt,
+          ogImage,
+          category,
+          readingTime: readingOverride,
+          canonical,
+          backlinks: backlinks
+            .split("\n")
+            .map((l) => l.trim())
+            .filter(Boolean)
+            .map((line) => {
+              const [label, url] = line.split("|")
+              return { label: (label || url || "").trim(), url: (url || label || "").trim() }
+            }),
+          faqs: faqs
+            .split("\n")
+            .map((l) => l.trim())
+            .filter(Boolean)
+            .map((line) => {
+              const [q, a] = line.split("|")
+              return { question: (q || "").trim(), answer: (a || "").trim() }
+            }),
+          cta: ctaText || ctaUrl ? { text: ctaText, url: ctaUrl } : undefined,
+          seoKeywords: seoKeywords.split(",").map((k) => k.trim()).filter(Boolean),
+          authorName: finalAuthorName,
+          authorAvatar: finalAuthorAvatar,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || "Error al guardar")
+
+      const newSlug = data?.slug || slug || currentSlug
+      setMessage("Cambios guardados")
+      if (newSlug !== currentSlug) {
+        router.replace(`/admin/blog/edit/${encodeURIComponent(newSlug)}`)
+      } else {
+        router.refresh()
+      }
+    } catch (err: any) {
+      setError(err?.message || "Error al guardar")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <section className="flex items-center justify-between">
+          <div>
+            <h2 className="font-heading text-xl font-semibold mb-2">Editar artículo</h2>
+            <p className="font-body text-muted-foreground">Cargando…</p>
+          </div>
+        <div className="grid gap-2">
+          <label className="text-sm">Imagen para redes (Open Graph / Twitter)</label>
+          <Input className="font-body" value={ogImage} onChange={(e) => setOgImage(e.target.value)} placeholder="https://.../og-image.png" />
+        </div>
+        <div className="grid gap-2">
+          <label className="text-sm">Tiempo de lectura (override opcional)</label>
+          <Input className="font-body" value={readingOverride} onChange={(e) => setReadingOverride(e.target.value)} placeholder="3 min read" />
+        </div>
+          <Link href="/admin/blog" className="text-sm text-muted-foreground hover:underline">Volver</Link>
+        </section>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <section className="flex items-center justify-between">
+          <div>
+            <h2 className="font-heading text-xl font-semibold mb-2">Editar artículo</h2>
+            <p className="font-body text-red-500">{error}</p>
+          </div>
+          <Link href="/admin/blog" className="text-sm text-muted-foreground hover:underline">Volver</Link>
+        </section>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <section className="flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-xl font-semibold mb-2">Nuevo artículo</h2>
-          <p className="font-body text-muted-foreground">Completa los campos y guarda el archivo MDX.</p>
+          <h2 className="font-heading text-xl font-semibold mb-2">Editar artículo</h2>
+          <p className="font-body text-muted-foreground">Modificá los campos y guardá el archivo MDX.</p>
         </div>
         <Link href="/admin/blog" className="text-sm text-muted-foreground hover:underline">Volver</Link>
       </section>
 
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault()
-          setSaving(true)
-          setMessage(null)
-          try {
-            const author = (authorsList as any[]).find((a) => a.id === authorId) || (authorsList as any[])?.[0]
-            const res = await fetch("/api/admin/blog/new", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                title,
-                slug: slug || autoSlug,
-                description,
-                excerpt,
-                category,
-                tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-                content,
-                cover,
-                coverAlt,
-                ogImage,
-                readingTime: readingOverride,
-                canonical,
-                backlinks: backlinks
-                  .split("\n")
-                  .map((l) => l.trim())
-                  .filter(Boolean)
-                  .map((line) => {
-                    const [label, url] = line.split("|")
-                    return { label: (label || url || "").trim(), url: (url || label || "").trim() }
-                  }),
-                faqs: faqs
-                  .split("\n")
-                  .map((l) => l.trim())
-                  .filter(Boolean)
-                  .map((line) => {
-                    const [q, a] = line.split("|")
-                    return { question: (q || "").trim(), answer: (a || "").trim() }
-                  }),
-                cta: ctaText || ctaUrl ? { text: ctaText, url: ctaUrl } : undefined,
-                seoKeywords: seoKeywords.split(",").map((k) => k.trim()).filter(Boolean),
-                authorName: author?.name || "",
-                authorAvatar: author?.avatar || "",
-              }),
-            })
-            const data = await res.json()
-            if (!res.ok) throw new Error(data.error || "Error al guardar")
-            setMessage("Artículo creado correctamente")
-          } catch (err: any) {
-            setMessage(err.message)
-          } finally {
-            setSaving(false)
-          }
-        }}
-        className="space-y-4"
-      >
+      <form onSubmit={onSubmit} className="space-y-4">
         <div className="grid gap-2">
           <label className="text-sm">Título</label>
           <Input className="font-body" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -213,43 +310,37 @@ export default function AdminBlogNewPage() {
           <label className="text-sm">Cover (URL o ruta pública)</label>
           <div className="flex items-center gap-2">
             <Input className="font-body" value={cover} onChange={(e) => setCover(e.target.value)} placeholder="/busy-streetwear.png" />
-            <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
-              const file = e.target.files?.[0]
-              if (!file) return
-              try {
-                setCoverUploading(true)
-                const url = await uploadFile(file, "blog")
-                setCover(url)
-              } catch (err) {
-                // eslint-disable-next-line no-console
-                console.error(err)
-              } finally {
-                setCoverUploading(false)
-                if (coverInputRef.current) coverInputRef.current.value = ""
-              }
-            }} />
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                try {
+                  setCoverUploading(true)
+                  const url = await uploadFile(file, "blog")
+                  setCover(url)
+                } catch (err) {
+                  // eslint-disable-next-line no-console
+                  console.error(err)
+                } finally {
+                  setCoverUploading(false)
+                  if (coverInputRef.current) coverInputRef.current.value = ""
+                }
+              }}
+            />
             <Button type="button" size="sm" className="font-heading" onClick={() => coverInputRef.current?.click()} disabled={coverUploading}>
               {coverUploading ? "Subiendo…" : "Subir"}
             </Button>
           </div>
-          {cover && (
-            <div className="text-xs text-muted-foreground">Vista previa:</div>
-          )}
-          {cover && (
-            <img src={cover} alt={coverAlt || "Portada del artículo"} className="h-28 w-auto rounded border" />
-          )}
+          {cover && <div className="text-xs text-muted-foreground">Vista previa:</div>}
+          {cover && <img src={cover} alt={coverAlt || "Portada del artículo"} className="h-28 w-auto rounded border" />}
         </div>
         <div className="grid gap-2">
           <label className="text-sm">Alt de portada</label>
           <Input className="font-body" value={coverAlt} onChange={(e) => setCoverAlt(e.target.value)} placeholder="Texto alternativo descriptivo de la portada" />
-        </div>
-        <div className="grid gap-2">
-          <label className="text-sm">Imagen para redes (Open Graph / Twitter)</label>
-          <Input className="font-body" value={ogImage} onChange={(e) => setOgImage(e.target.value)} placeholder="https://.../og-image.png" />
-        </div>
-        <div className="grid gap-2">
-          <label className="text-sm">Tiempo de lectura (override opcional)</label>
-          <Input className="font-body" value={readingOverride} onChange={(e) => setReadingOverride(e.target.value)} placeholder="3 min read" />
         </div>
         <div className="grid gap-2">
           <label className="text-sm">Canonical (opcional)</label>
@@ -263,7 +354,7 @@ export default function AdminBlogNewPage() {
           <label className="text-sm">Autor</label>
           <Select value={authorId} onValueChange={setAuthorId}>
             <SelectTrigger className="font-body">
-              <SelectValue placeholder="Seleccioná un autor" />
+              <SelectValue placeholder={authorName || "Seleccioná un autor"} />
             </SelectTrigger>
             <SelectContent className="font-body">
               {(authorsList as any[]).map((a) => (
@@ -280,7 +371,6 @@ export default function AdminBlogNewPage() {
             <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("**", "**")}>Bold</Button>
             <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("*", "*")}>Italic</Button>
             <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("<u>", "</u>")}>Underline</Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("# ")}>H1</Button>
             <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("## ")}>H2</Button>
             <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("### ")}>H3</Button>
             <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("\n\n")}>Espacio</Button>

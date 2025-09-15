@@ -79,9 +79,9 @@ export function Header() {
   return (
     <header
       className={
-        'fixed font-heading top-0 left-0 right-0 z-50 w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
+        'fixed font-heading p-2 top-0 left-0 right-0 z-50 w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
         (showHeroVariant
-          ? '!border-0 !bg-transparent supports-[backdrop-filter]:!bg-transparent !backdrop-blur-0 !shadow-none'
+          ? '!border-0 p-2 !bg-transparent supports-[backdrop-filter]:!bg-transparent !backdrop-blur-0 !shadow-none'
           : 'border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60')
       }
     >
@@ -133,7 +133,7 @@ export function Header() {
           <Image
             src="/busy-gothic.png"
             alt="Busy"
-            width={80}
+            width={90}
             height={20}
             className="object-contain"
           />

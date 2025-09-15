@@ -92,13 +92,13 @@
   /* Custom font classes for the design system */
   .font-heading {
     /* Use Abel for headings */
-    font-family: "Abel", sans-serif;
+    font-family: var(--font-plus-jakarta-sans);
     font-weight: 400;
   }
 
   .font-body {
     /* Use DM Sans for body text */
-    font-family: "DM Sans", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-optical-sizing: auto;
     font-weight: 400;
     font-style: normal;

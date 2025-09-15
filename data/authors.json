@@ -1,8 +1,7 @@
 [
-  {
-    "id": "default",
-    "name": "Equipo Busy",
-    "email": "",
-    "avatar": "/busy-gothic.png"
-  }
+  { "id": "default", "name": "Equipo Busy", "email": "", "avatar": "/busy-gothic.png", "instagram": "https://www.instagram.com/busy.streetwear/", "bio": "Equipo de Busy, creadores de la marca y entusiastas de la moda." },
+  { "id": "agus-molina", "name": "Agustín Molina", "email": "", "avatar": "", "instagram": "https://www.instagram.com/agus.mxlina/", "bio": "Co-Founder y Diseñador de Busy, creador de la estética de la marca y entusiasta de la moda." },
+  { "id": "eze-molina", "name": "Ezequiel Molina", "email": "", "avatar": "", "instagram": "https://www.instagram.com/zekee.187/" },
+  { "id": "juampi-pavone", "name": "Juán Pablo Pavone", "email": "", "avatar": "", "instagram": "https://www.instagram.com/juampi.pq/", "bio": "Co-Founder, Director Operativo y Logística de Busy, encargado de conectar y hacer funcionar todas las áreas de la marca." },
+  { "id": "valentin-sg", "name": "Valentín Sánchez Guevara", "email": "", "avatar": "", "instagram": "https://www.instagram.com/valensanchez.g/", "bio": "Co-Founder, Director Técnico y Creativo de Busy, desarrollador de software y creador de la identidad de la marca." }
 ]

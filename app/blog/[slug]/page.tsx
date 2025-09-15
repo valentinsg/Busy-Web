@@ -1,19 +1,46 @@
-import { notFound } from "next/navigation"
-import type { Metadata } from "next"
-import Link from "next/link"
-import { ArrowLeft, Calendar, Clock, Share2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Card, CardContent } from "@/components/ui/card"
-import { getPostBySlug, getAllPosts } from "@/lib/blog"
-import { format } from "date-fns"
-import { cookies } from "next/headers"
-import { enUS, es } from "date-fns/locale"
-import { I18nText } from "@/components/blog/i18n-text"
-import { MDXRemote } from "next-mdx-remote/rsc"
-import remarkGfm from "remark-gfm"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import AuthorCard from '@/components/blog/author-card'
+import { I18nText } from '@/components/blog/i18n-text'
+import LatestPostsSidebar from '@/components/blog/latest-posts-sidebar'
+import SocialLinksInline from '@/components/blog/social-links-inline'
+import MdxRenderer from '@/components/mdx/MdxRenderer'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import authors from '@/data/authors.json'
+import { getAllPosts, getPostBySlug } from '@/lib/blog'
+import { format } from 'date-fns'
+import { enUS, es } from 'date-fns/locale'
+import { Calendar, Clock, Share2, ChevronDown, ArrowUpRight } from 'lucide-react'
+import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
+import { cookies } from 'next/headers'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+
+// Client helpers
+const CopyLinkButton = dynamic(
+  () => import('@/components/blog/copy-link-button'),
+  { ssr: false }
+)
+
+// Table of contents (client)
+const TableOfContents = dynamic(
+  () =>
+    import('@/components/blog/table-of-contents').catch(() => ({
+      default: () => null,
+    })),
+  { ssr: false }
+)
+const NewsletterSignup = dynamic(
+  () => import('@/components/blog/newsletter-signup'),
+  { ssr: false }
+)
+const RatingStars = dynamic(() => import('@/components/blog/rating-stars'), {
+  ssr: false,
+})
+const CommentsForm = dynamic(() => import('@/components/blog/comments-form'), {
+  ssr: false,
+})
 export const revalidate = 3600
 // Note: This page is a server component. Avoid client hooks here.
 
@@ -23,21 +50,23 @@ interface BlogPostPageProps {
   }
 }
 
-export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: BlogPostPageProps): Promise<Metadata> {
   const post = getPostBySlug(params.slug)
 
   if (!post) {
     return {
-      title: "Post Not Found",
+      title: 'Post Not Found',
     }
   }
 
-  const base = process.env.SITE_URL || "https://busy.com.ar"
+  const base = process.env.SITE_URL || 'https://busy.com.ar'
   const canonical = post.canonical || `${base}/blog/${post.slug}`
-  const image = post.cover || "/busy-streetwear.png"
+  const image = post.ogImage || post.cover || '/busy-streetwear.png'
 
   return {
-    title: `${post.title} - Blog de Busy`,
+    title: `▷ ${post.title} - Blog de Busy`,
     description: post.description,
     keywords: post.tags,
     openGraph: {
@@ -47,7 +76,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       images: [{ url: image, alt: post.title }],
     },
     twitter: {
-      card: "summary_large_image",
+      card: 'summary_large_image',
       title: `${post.title} - Blog de Busy`,
       description: post.description,
       images: [image],
@@ -68,168 +97,267 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   const allPosts = getAllPosts()
   const currentIndex = allPosts.findIndex((p) => p.slug === post.slug)
   const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null
-  const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null
+  const nextPost =
+    currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null
+  const related = allPosts
+    .filter(
+      (p) => p.slug !== post.slug && p.category && p.category === post.category
+    )
+    .slice(0, 4)
 
-  const localeCookie = cookies().get("busy_locale")?.value
-  const dfnsLocale = localeCookie === "es" ? es : enUS
-  const authorName = post.authorName || post.author || ""
-  const authorAvatar = post.authorAvatar || ""
+  const localeCookie = cookies().get('busy_locale')?.value
+  const dfnsLocale = localeCookie === 'es' ? es : enUS
+  const authorName = post.authorName || post.author || ''
+
+  // Normalize CRLF to LF only; remark-breaks will handle single newlines as <br>
+  const preparedContent = (post.content || '').replace(/\r\n/g, '\n')
 
   return (
-    <div className="container px-4 py-8 pt-20">
-      <div className="max-w-4xl mx-auto">
+    <div className="container py-8 pt-28 tracking-wide font-body bg-muted/5">
+      <div className="max-w-7xl mx-auto">
         {/* JSON-LD Article */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Article",
+              '@context': 'https://schema.org',
+              '@type': 'Article',
               headline: post.title,
               description: post.description,
               datePublished: post.date,
               dateModified: post.date,
-              url: `${process.env.SITE_URL || "https://busy.com.ar"}/blog/${post.slug}`,
-              image: [post.cover || "/busy-streetwear.png"],
+              url: `${process.env.SITE_URL || 'https://busy.com.ar'}/blog/${
+                post.slug
+              }`,
+              image: [post.ogImage || post.cover || '/busy-streetwear.png'],
               keywords: post.tags,
-              author: (post.authorName || post.author)
-                ? { "@type": "Person", name: post.authorName || post.author }
-                : { "@type": "Organization", name: "Busy" },
+              author:
+                post.authorName || post.author
+                  ? { '@type': 'Person', name: post.authorName || post.author }
+                  : { '@type': 'Organization', name: 'Busy' },
               publisher: {
-                "@type": "Organization",
-                name: "Busy",
+                '@type': 'Organization',
+                name: 'Busy',
                 logo: {
-                  "@type": "ImageObject",
-                  url: `${process.env.SITE_URL || "https://busy.com.ar"}/logo-busy-black.png`,
+                  '@type': 'ImageObject',
+                  url: `${
+                    process.env.SITE_URL || 'https://busy.com.ar'
+                  }/logo-busy-black.png`,
                 },
               },
             }),
           }}
         />
-        {/* Back Button */}
-        <Button asChild variant="ghost" className="mb-8">
-          <Link href="/blog" prefetch={false}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            <I18nText k="blog.post.back" />
-          </Link>
-        </Button>
-
         {/* Article Header */}
         <article>
-          <header className="mb-8">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {post.tags.map((tag) => (
-                <Badge key={tag} variant="secondary">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
+          <header className="mb-6">
+            <h1 className="font-heading text-4xl md:text-5xl font-bold mb-3 text-balance">
+              {post.title}
+            </h1>
 
-            <h1 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-balance">{post.title}</h1>
+            <p className="text-lg md:text-xl text-muted-foreground mb-4 text-pretty font-body">
+              {post.description || post.excerpt}
+            </p>
 
-            <p className="text-lg text-muted-foreground mb-6 text-pretty">{post.description}</p>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                {authorName && (
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={authorAvatar} alt={authorName} />
-                      <AvatarFallback>{authorName.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <span>{authorName}</span>
-                  </div>
-                )}
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-6 text-sm text-muted-foreground flex-wrap">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  {format(new Date(post.date), "MMMM dd, yyyy", { locale: dfnsLocale })}
+                  {format(new Date(post.date), 'MMMM dd, yyyy', {
+                    locale: dfnsLocale,
+                  })}
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   {post.readingTime}
                 </div>
+                {post.category && (
+                  <span className="text-xs inline-block bg-muted px-2 py-1 rounded mr-2">
+                    {post.category}
+                  </span>
+                )}
               </div>
 
-              <Button variant="outline" size="sm" aria-label="Share" title="Share" data-label="Share">
-                <Share2 className="h-4 w-4 mr-2" />
-                <I18nText k="blog.post.share" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <CopyLinkButton />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  aria-label="Share"
+                  title="Share"
+                  data-label="Share"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  <I18nText k="blog.post.share" />
+                </Button>
+              </div>
             </div>
           </header>
 
-          <Separator className="mb-8" />
+          <Separator className="mb-6" />
 
-          {/* Article Content */}
-          <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-heading prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:leading-relaxed prose-a:text-accent-brand prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-accent-brand prose-blockquote:bg-muted prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg">
-            <MDXRemote
-              source={post.content}
-              options={{
-                mdxOptions: {
-                  remarkPlugins: [remarkGfm],
-                },
-              }}
-            />
+          {/* Body with sidebar */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="md:col-span-2">
+              {/* Article Content */}
+              <div
+                id="post-content"
+                className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-body prose-h1:font-heading prose-p:font-body prose-li:font-body md:prose-xl prose-p:text-[18px] md:prose-p:text-[20px] prose-h1:text-5xl prose-h2:text-4xl prose-h3:text-3xl prose-p:leading-relaxed prose-p:my-5 prose-li:my-2 prose-a:text-accent-brand prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-accent-brand prose-blockquote:bg-muted prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2 prose-th:border prose-td:border prose-table:border prose-table:rounded-md whitespace-normal break-words"
+              >
+                <MdxRenderer source={preparedContent} />
+              </div>
+            </div>
+            <aside className="md:col-span-1 space-y-6 md:sticky md:top-24 h-fit">
+              <TableOfContents targetSelector="#post-content" />
+              {/* CTA personalizada al final después de relacionados */}
+              {post.cta?.url && (post.cta.text || post.cta.url) && (
+                <div className="mt-12 mb-12 text-center ">
+                  <Card>
+                    <CardContent className="p-6 bg-muted/20">
+                      <h3 className="font-body text-xl font-bold mb-4">
+                        {post.cta.text || 'Descubrí más'}
+                      </h3>
+                      <Button
+                        asChild
+                        size="lg"
+                        aria-label="CTA"
+                        title="CTA"
+                        data-label="CTA"
+                      >
+                        <Link
+                          href={post.cta.url}
+                          prefetch={false}
+                          className="font-body"
+                        >
+                          {post.cta.text || post.cta.url}
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+              <SocialLinksInline />
+              <LatestPostsSidebar currentSlug={post.slug} />
+            </aside>
           </div>
         </article>
 
-        <Separator className="my-12" />
 
-        {/* Navigation */}
+        {/* FAQs first */}
+        {Array.isArray(post.faqs) && post.faqs.length > 0 && (
+          <div className="my-10 ">
+            <h3 className="font-heading text-2xl font-semibold mb-4">
+              Preguntas resumidas
+            </h3>
+            <div className="space-y-3">
+              {post.faqs.map((f, i) => (
+                <details
+                  key={i}
+                  className="group rounded-lg border bg-transparent px-4 py-3"
+                >
+                  <summary className="list-none cursor-pointer flex items-center justify-between gap-3">
+                    <span className="font-body text-lg md:text-lg font-semibold">
+                      {f.question}
+                    </span>
+                    <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
+                  </summary>
+                  <div className="mt-2 text-md md:text-md text-muted-foreground leading-relaxed">
+                    {f.answer}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        )}
+    {/* Author card */}
+    <div className="mt-10">
+          {(() => {
+            const list = authors as any[]
+            const a = list.find(
+              (x) =>
+                (x.name || '').toLowerCase() ===
+                (authorName || '').toLowerCase()
+            )
+            const authorInfo = {
+              name: authorName || post.author || 'Equipo Busy',
+              avatar: a?.avatar || post.authorAvatar || '/busy-gothic.png',
+              instagram: a?.instagram,
+              bio: a?.bio,
+            }
+            return <AuthorCard author={authorInfo} />
+          })()}
+        </div>
+
+        {/* Minimal navigation links above newsletter */}
+        <div className="my-8 flex justify-between items-end">
+          <div>
+            {prevPost && (
+              <>
+                <div className="text-xs text-muted-foreground mb-1">Artículo previo</div>
+                <Link href={`/blog/${prevPost.slug}`} prefetch={false} className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground">
+                  {prevPost.title}
+                </Link>
+              </>
+            )}
+          </div>
+          <div className="text-right">
+            {nextPost && (
+              <>
+                <div className="text-xs text-muted-foreground mb-1">Artículo siguiente</div>
+                <Link href={`/blog/${nextPost.slug}`} prefetch={false} className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground">
+                  {nextPost.title}
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+
+        <Separator className="my-12" />
+        <NewsletterSignup />
+
+        {/* Backlinks / Related (enhanced) */}
         {Array.isArray(post.backlinks) && post.backlinks.length > 0 && (
           <div className="mb-12">
-            <h3 className="font-heading text-xl font-semibold mb-3"><I18nText k="blog.post.related" /></h3>
-            <ul className="list-disc pl-5 space-y-1">
-              {post.backlinks.map((b, i) => (
-                <li key={i}>
-                  <Link href={b.url} className="text-accent-brand hover:underline">{b.label || b.url}</Link>
-                </li>
-              ))}
-            </ul>
+            <h3 className="font-heading text-2xl font-semibold mb-4">Relacionados</h3>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {post.backlinks.map((b, i) => {
+                const isInternal = b.url?.startsWith('/blog/')
+                let enriched: any = null
+                if (isInternal) {
+                  const slug = (b.url || '').replace(/^\/?blog\//, '').split(/[?#]/)[0]
+                  try { enriched = getPostBySlug(slug) } catch {}
+                }
+                if (enriched) {
+                  return (
+                    <Link key={i} href={b.url} className="group text-white rounded-lg border bg-muted/20 p-3 flex gap-3 items-center hover:border-accent-brand transition-colors">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      {enriched.cover ? (
+                        <img src={enriched.cover} alt={enriched.title} className="h-16 w-24 object-cover rounded border" />
+                      ) : (
+                        <div className="h-16 w-24 rounded border bg-muted" />
+                      )}
+                      <div className="min-w-0">
+                        <div className="font-body font-medium text-white group-hover:text-accent-brand line-clamp-2">{enriched.title}</div>
+                        {enriched.excerpt && <div className="text-xs text-white line-clamp-2 mt-1">{enriched.excerpt}</div>}
+                      </div>
+                    </Link>
+                  )
+                }
+                return (
+                  <Link key={i} href={b.url} className="text-white rounded-lg border bg-muted/20 p-3 flex items-center justify-between hover:border-accent-brand transition-colors">
+                    <span className="font-body text-sm text-accent-brand truncate mr-3">{b.label || b.url}</span>
+                    <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+                  </Link>
+                )
+              })}
+            </div>
           </div>
         )}
 
-        <Separator className="my-12" />
-
-        {/* Navigation */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {prevPost && (
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-sm text-muted-foreground mb-2"><I18nText k="blog.post.prev" /></div>
-                <Link href={`/blog/${prevPost.slug}`} className="group" prefetch={false}>
-                  <h3 className="font-medium group-hover:text-accent-brand transition-colors line-clamp-2">
-                    {prevPost.title}
-                  </h3>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
-
-          {nextPost && (
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-sm text-muted-foreground mb-2"><I18nText k="blog.post.next" /></div>
-                <Link href={`/blog/${nextPost.slug}`} className="group" prefetch={false}>
-                  <h3 className="font-medium group-hover:text-accent-brand transition-colors line-clamp-2">
-                    {nextPost.title}
-                  </h3>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {/* CTA */}
-        <div className="mt-16 text-center">
-          <Card>
-            <CardContent className="p-8">
-              <h3 className="font-heading text-2xl font-bold mb-4"><I18nText k="blog.post.cta.title" /></h3>
-              <p className="text-muted-foreground mb-6"><I18nText k="blog.post.cta.subtitle" /></p>
-              <Button asChild size="lg" aria-label="Shop Collection" title="Shop Collection" data-label="Shop Collection">
-                <Link href="/products" prefetch={false}><I18nText k="blog.post.cta.button" /></Link>
-              </Button>
-            </CardContent>
-          </Card>
+        {/* Newsletter, rating and comments at the very bottom */}
+        <div className="mt-16 space-y-10">
+          <RatingStars />
+          <CommentsForm />
         </div>
       </div>
     </div>

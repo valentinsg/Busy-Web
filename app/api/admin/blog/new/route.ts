@@ -5,7 +5,26 @@ import path from "path"
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, slug, description, tags = [], content = "", authorName = "", authorAvatar = "", cover = "", canonical = "", backlinks = [] } = body || {}
+    const {
+      title,
+      slug,
+      description,
+      tags = [],
+      content = "",
+      authorName = "",
+      authorAvatar = "",
+      cover = "",
+      coverAlt = "",
+      canonical = "",
+      backlinks = [],
+      excerpt = "",
+      category = "",
+      readingTime = "",
+      ogImage = "",
+      faqs = [],
+      cta = undefined,
+      seoKeywords = [],
+    } = body || {}
 
     if (!title || !(slug && typeof slug === "string")) {
       return NextResponse.json({ error: "title y slug son requeridos" }, { status: 400 })
@@ -28,10 +47,18 @@ export async function POST(request: Request) {
       `date: ${JSON.stringify(new Date().toISOString().slice(0, 10))}`,
       `tags: ${JSON.stringify(tags)}`,
       cover ? `cover: ${JSON.stringify(cover)}` : null,
+      coverAlt ? `coverAlt: ${JSON.stringify(coverAlt)}` : null,
       canonical ? `canonical: ${JSON.stringify(canonical)}` : null,
       authorName ? `authorName: ${JSON.stringify(authorName)}` : null,
       authorAvatar ? `authorAvatar: ${JSON.stringify(authorAvatar)}` : null,
       Array.isArray(backlinks) && backlinks.length ? `backlinks: ${JSON.stringify(backlinks)}` : null,
+      excerpt ? `excerpt: ${JSON.stringify(excerpt)}` : null,
+      category ? `category: ${JSON.stringify(category)}` : null,
+      readingTime ? `readingTime: ${JSON.stringify(readingTime)}` : null,
+      ogImage ? `ogImage: ${JSON.stringify(ogImage)}` : null,
+      Array.isArray(faqs) && faqs.length ? `faqs: ${JSON.stringify(faqs)}` : null,
+      cta ? `cta: ${JSON.stringify(cta)}` : null,
+      Array.isArray(seoKeywords) && seoKeywords.length ? `seoKeywords: ${JSON.stringify(seoKeywords)}` : null,
       "---",
       "",
     ].filter(Boolean).join("\n")

@@ -1,5 +1,6 @@
 'use client'
 import { AutoSliderBanner } from '@/components/home/auto-slider-banner'
+import HomeLatestBlog from '@/components/home/latest-blog'
 import { useI18n } from '@/components/i18n-provider'
 import { ProductCard } from '@/components/shop/product-card'
 import { Button } from '@/components/ui/button'
@@ -123,9 +124,11 @@ export default function Home() {
       {ready && (
         <section
           id="product-section"
-          className="py-16 md:py-24 relative overflow-hidden"
+          className="relative overflow-hidden bg-black py-16 md:py-24"
         >
-          <div className="container px-4">
+          {/* Top fade to smoothly connect with hero */}
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-10 h-16 bg-gradient-to-b from-transparent to-black" />
+          <div className="relative container px-4">
             <motion.div {...fadeInUp} className="text-center mb-12">
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
                 {t('home.latest.title')}
@@ -163,8 +166,7 @@ export default function Home() {
       {/* Categories Grid */}
       {ready && (
         <section
-          className="relative py-16 md:py-24 bg-cover bg-center h-[100vh] "
-          style={{ backgroundImage: "url('/category-container.jpg')" }}
+          className="relative py-16 md:py-24 h-[100vh]"
         >
           <div className="container px-4">
             <motion.div {...fadeInUp} className="text-center mb-12">
@@ -304,7 +306,7 @@ export default function Home() {
 
       {/* Social Proof */}
       {ready && (
-      <section className="py-16 md:py-24 bg-muted/50">
+      <section className="py-16 md:py-24">
         <div className="container px-4">
           <motion.div {...fadeInUp} className="text-center mb-12">
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
@@ -360,39 +362,8 @@ export default function Home() {
       </section>
       )}
 
-      {/* CTA Section */}
-      {ready && (
-      <section className="py-16 md:py-24">
-        <div className="container px-4">
-          <motion.div {...fadeInUp} className="text-center max-w-3xl mx-auto">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">
-              {t('home.cta.title')}
-            </h2>
-            <p className="font-body text-muted-foreground text-lg mb-8 leading-relaxed">
-              {t('home.cta.subtitle')}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="text-lg px=8 font-heading">
-                <Link href="/products" prefetch={false} className="font-heading">
-                  {t('home.cta.primary')}{' '}
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="text-lg px-8 bg-transparent font-heading"
-              >
-                <Link href="/contact" prefetch={false} className="font-heading">
-                  {t('home.cta.secondary')}
-                </Link>
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-      )}
+      {/* Latest Blog Section (replaces previous CTA) */}
+      {ready && <HomeLatestBlog />}
     </div>
   )
 }

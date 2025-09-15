@@ -1,9 +1,9 @@
-import { notFound } from "next/navigation"
-import type { Metadata } from "next"
 import { ProductDetail } from "@/components/shop/product-detail"
 import { getProductById, getProductsByCategory } from "@/lib/products"
 import { getProductByIdAsync, getProductsAsync } from "@/lib/repo/products"
 import type { Product } from "@/lib/types"
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
 
 interface ProductPageProps {
   params: {
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const canonical = `${base}/product/${safeProduct.id}`
 
   return {
-    title: `${safeProduct.name} - Busy`,
+    title: `🔥 ${safeProduct.name}`,
     description: safeProduct.description,
     openGraph: {
       title: safeProduct.name,

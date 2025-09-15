@@ -50,7 +50,6 @@ const footerSections = (t: (k: string) => string) => ({
 
 export function Footer() {
   const { t } = useI18n()
-  const pathname = usePathname()
   const [email, setEmail] = React.useState("")
   const [submitting, setSubmitting] = React.useState(false)
   const [message, setMessage] = React.useState<string | null>(null)
@@ -87,7 +86,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="border-t bg-background shadow-md">
+    <footer className="bg-background">
       <div className="container px-4 py-12">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
@@ -130,7 +129,7 @@ export function Footer() {
               <p className="text-xs text-muted-foreground">Soporte por WhatsApp: <Link href="https://wa.me/542236680041" target="_blank" className="underline">223 668 0041</Link></p>
             </div>
           </div>
-          
+
           {/* Footer Links */}
           {Object.entries(sections).map(([key, section]) => (
             <div key={key}>

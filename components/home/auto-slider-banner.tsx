@@ -82,6 +82,11 @@ export function AutoSliderBanner() {
           </Button>
         </motion.div>
       </motion.div>
+      {/* Bottom fade to blend with following black section */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-24 md:h-32 bg-gradient-to-b from-transparent to-black"
+      />
     </div>
   )
 }

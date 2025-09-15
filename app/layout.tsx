@@ -74,8 +74,8 @@ export const metadata: Metadata = {
   ...generateSEO(),
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Busy - Streetwear premium',
-    template: '%s | Busy',
+    default: 'Busy Streetwear',
+    template: '%s - Busy Streetwear',
   },
   icons: {
     icon: '/favicon.ico',
