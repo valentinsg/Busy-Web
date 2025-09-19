@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+package-lock.json
 
 # next.js
 /.next/
@@ -9,6 +10,19 @@
 
 # production
 /build
+/dist
+
+# caches & tooling
+/.turbo
+/.vercel
+/.cache
+/coverage
+/tmp
+/logs
+*.log
+/.vscode
+/.idea
+*.code-workspace
 
 # debug
 npm-debug.log*
@@ -25,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# OS junk
+Thumbs.db
+Desktop.ini
+.DS_Store

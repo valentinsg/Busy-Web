@@ -35,7 +35,8 @@ export function getAllPosts(): BlogPost[] {
           backlinks: data.backlinks || undefined,
           content,
           readingTime: data.readingTime || readTime.text,
-          category: data.category || undefined,
+          // Category comes directly from frontmatter when present
+          category: (data.category as string) || undefined,
           ogImage: data.ogImage || undefined,
           faqs: data.faqs || undefined,
           cta: data.cta || undefined,
@@ -72,7 +73,8 @@ export function getPostBySlug(slug: string): BlogPost | null {
       backlinks: data.backlinks || undefined,
       content,
       readingTime: data.readingTime || readTime.text,
-      category: data.category || undefined,
+      // Category comes directly from frontmatter when present
+      category: (data.category as string) || undefined,
       ogImage: data.ogImage || undefined,
       faqs: data.faqs || undefined,
       cta: data.cta || undefined,

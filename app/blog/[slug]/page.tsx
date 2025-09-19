@@ -10,7 +10,13 @@ import authors from '@/data/authors.json'
 import { getAllPosts, getPostBySlug } from '@/lib/blog'
 import { format } from 'date-fns'
 import { enUS, es } from 'date-fns/locale'
-import { Calendar, Clock, Share2, ChevronDown, ArrowUpRight } from 'lucide-react'
+import {
+  Calendar,
+  Clock,
+  Share2,
+  ChevronDown,
+  ArrowUpRight,
+} from 'lucide-react'
 import type { Metadata } from 'next'
 import dynamic from 'next/dynamic'
 import { cookies } from 'next/headers'
@@ -31,17 +37,22 @@ const TableOfContents = dynamic(
     })),
   { ssr: false }
 )
+
 const NewsletterSignup = dynamic(
   () => import('@/components/blog/newsletter-signup'),
   { ssr: false }
 )
+
 const RatingStars = dynamic(() => import('@/components/blog/rating-stars'), {
   ssr: false,
 })
+
 const CommentsForm = dynamic(() => import('@/components/blog/comments-form'), {
   ssr: false,
 })
+
 export const revalidate = 3600
+
 // Note: This page is a server component. Avoid client hooks here.
 
 interface BlogPostPageProps {
@@ -242,7 +253,6 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         </article>
 
-
         {/* FAQs first */}
         {Array.isArray(post.faqs) && post.faqs.length > 0 && (
           <div className="my-10 ">
@@ -269,8 +279,8 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
           </div>
         )}
-    {/* Author card */}
-    <div className="mt-10">
+        {/* Author card */}
+        <div className="mt-10">
           {(() => {
             const list = authors as any[]
             const a = list.find(
@@ -293,8 +303,14 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           <div>
             {prevPost && (
               <>
-                <div className="text-xs text-muted-foreground mb-1">Artículo previo</div>
-                <Link href={`/blog/${prevPost.slug}`} prefetch={false} className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground">
+                <div className="text-xs text-muted-foreground mb-1">
+                  Artículo previo
+                </div>
+                <Link
+                  href={`/blog/${prevPost.slug}`}
+                  prefetch={false}
+                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground"
+                >
                   {prevPost.title}
                 </Link>
               </>
@@ -303,8 +319,14 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="text-right">
             {nextPost && (
               <>
-                <div className="text-xs text-muted-foreground mb-1">Artículo siguiente</div>
-                <Link href={`/blog/${nextPost.slug}`} prefetch={false} className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground">
+                <div className="text-xs text-muted-foreground mb-1">
+                  Artículo siguiente
+                </div>
+                <Link
+                  href={`/blog/${nextPost.slug}`}
+                  prefetch={false}
+                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground"
+                >
                   {nextPost.title}
                 </Link>
               </>
@@ -318,34 +340,60 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         {/* Backlinks / Related (enhanced) */}
         {Array.isArray(post.backlinks) && post.backlinks.length > 0 && (
           <div className="mb-12">
-            <h3 className="font-heading text-2xl font-semibold mb-4">Relacionados</h3>
+            <h3 className="font-heading text-2xl font-semibold mb-4">
+              Relacionados
+            </h3>
             <div className="grid sm:grid-cols-2 gap-4">
               {post.backlinks.map((b, i) => {
                 const isInternal = b.url?.startsWith('/blog/')
                 let enriched: any = null
                 if (isInternal) {
-                  const slug = (b.url || '').replace(/^\/?blog\//, '').split(/[?#]/)[0]
-                  try { enriched = getPostBySlug(slug) } catch {}
+                  const slug = (b.url || '')
+                    .replace(/^\/?blog\//, '')
+                    .split(/[?#]/)[0]
+                  try {
+                    enriched = getPostBySlug(slug)
+                  } catch {}
                 }
                 if (enriched) {
                   return (
-                    <Link key={i} href={b.url} className="group text-white rounded-lg border bg-muted/20 p-3 flex gap-3 items-center hover:border-accent-brand transition-colors">
+                    <Link
+                      key={i}
+                      href={b.url}
+                      className="group text-white rounded-lg border bg-muted/20 p-3 flex gap-3 items-center hover:border-accent-brand transition-colors"
+                    >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       {enriched.cover ? (
-                        <img src={enriched.cover} alt={enriched.title} className="h-16 w-24 object-cover rounded border" />
+                        <img
+                          src={enriched.cover}
+                          alt={enriched.title}
+                          className="h-16 w-24 object-cover rounded border"
+                        />
                       ) : (
                         <div className="h-16 w-24 rounded border bg-muted" />
                       )}
                       <div className="min-w-0">
-                        <div className="font-body font-medium text-white group-hover:text-accent-brand line-clamp-2">{enriched.title}</div>
-                        {enriched.excerpt && <div className="text-xs text-white line-clamp-2 mt-1">{enriched.excerpt}</div>}
+                        <div className="font-body font-medium text-white group-hover:text-accent-brand line-clamp-2">
+                          {enriched.title}
+                        </div>
+                        {enriched.excerpt && (
+                          <div className="text-xs text-white line-clamp-2 mt-1">
+                            {enriched.excerpt}
+                          </div>
+                        )}
                       </div>
                     </Link>
                   )
                 }
                 return (
-                  <Link key={i} href={b.url} className="text-white rounded-lg border bg-muted/20 p-3 flex items-center justify-between hover:border-accent-brand transition-colors">
-                    <span className="font-body text-sm text-accent-brand truncate mr-3">{b.label || b.url}</span>
+                  <Link
+                    key={i}
+                    href={b.url}
+                    className="text-white rounded-lg border bg-muted/20 p-3 flex items-center justify-between hover:border-accent-brand transition-colors"
+                  >
+                    <span className="font-body text-sm text-accent-brand truncate mr-3">
+                      {b.label || b.url}
+                    </span>
                     <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
                   </Link>
                 )

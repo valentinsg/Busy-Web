@@ -34,6 +34,10 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           setTimeout(() => {
             setIsComplete(true)
             setTimeout(() => {
+              // Inform the app that splash is complete
+              try {
+                window.dispatchEvent(new CustomEvent("busy:splash-complete"))
+              } catch {}
               onComplete?.()
             }, 200)
           }, 300)
@@ -75,3 +79,4 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     </div>
   )
 }
+

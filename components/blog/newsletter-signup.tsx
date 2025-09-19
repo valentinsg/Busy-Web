@@ -42,7 +42,7 @@ export default function NewsletterSignup() {
 
   return (
     <div className="rounded-lg border bg-transparent p-4 md:p-5 my-10">
-      <h3 className="font-heading text-xl font-semibold mb-1">Únete a nuestra newsletter y recibe noticias semanales.</h3>
+      <h3 className="font-heading text-xl font-semibold mb-1">Únite a nuestra newsletter y recibí noticias</h3>
       <form onSubmit={onSubmit} className="grid gap-2 sm:grid-cols-[1fr,auto] mt-4 w-full">
         <Input
           required

@@ -14,7 +14,7 @@
   },
   "footer": {
     "brand": {
-      "description": "Ropa urbana premium para el estilo de vida moderno. Artesanía de calidad y diseño contemporáneo."
+      "description": "La marca de los que hacen. Desde Mar del Plata, Argentina."
     },
     "newsletter": {
       "title": "Mantente al día",
@@ -72,24 +72,24 @@
   },
   "home": {
     "latest.title": "Novedades",
-    "latest.subtitle": "Descubrí nuestros últimos lanzamientos, con atención al detalle y pensados para el confort diario.",
+    "latest.subtitle": "Nuestros últimos ingresos, marcas amigas y nuevos drops.",
     "latest.view_all": "Ver todos los productos",
     "categories.title": "Comprar por categoría",
     "categories.subtitle": "Encontrá exactamente lo que buscás",
     "categories.cta": "Comprar ahora",
     "about.title": "Sobre Busy",
-    "about.p1": "Nacimos con la idea de que el gran estilo no debe comprometer la comodidad. Busy crea streetwear premium para el individuo moderno.",
-    "about.p2": "Desde nuestros buzos hasta remeras esenciales, priorizamos la calidad y creamos piezas atemporales para tu guardarropa.",
+    "about.p1": "Busy es la marca de los que hacen. Nació en Mar Del Plata, con la idea de dos amigos que les pinto producir su propia tanda de básicos entre remeras y hoodies. Con el tiempo fuimos entendiendo que no había que encasillarse y decidimos expandir la marca.",
+    "about.p2": "Enfocándonos en lo que vale la pena y reflejando el mensaje através de nuestros canales, es como creemos que podemos crear una comunidad auténtica que nos represente a muchos.",
     "about.cta": "Nuestra historia",
-    "social.title": "Confiado por miles",
-    "social.subtitle": "Sumate a nuestra comunidad de amantes del estilo",
+    "social.title": "Contracultura",
+    "social.subtitle": "La moda es cultura, y compartirla junto a nuestros gustos y conocimientos es la mejor manera de difundirla.",
     "social.items": {
-      "rating.title": "Puntuación 4.8/5",
-      "rating.desc": "Basado en más de 1.000 reseñas",
-      "customers.title": "+50K clientes",
-      "customers.desc": "Comunidad global",
-      "quality.title": "Calidad premium",
-      "quality.desc": "Satisfacción garantizada"
+      "rating.title": "Contenido",
+      "rating.desc": "Blogs y contenido curado.",
+      "customers.title": "Playlists",
+      "customers.desc": "Nuestros talentos favoritos.",
+      "quality.title": "Marcas amigas",
+      "quality.desc": "Drops propios + reventa."
     },
     "cta.title": "¿Listo para elevar tu estilo?",
     "cta.subtitle": "Descubrí indumentaria que combina confort, calidad y diseño contemporáneo. Miles confían en Busy para su estilo diario.",
@@ -100,9 +100,9 @@
     "hero.title": "Sobre Nosotros",
     "hero.subtitle": "Somos más que una marca de ropa: somos una comunidad que cree que el gran estilo debe ser accesible, cómodo y auténtico.",
     "story.title": "Nuestra historia",
-    "story.p1": "Busy nació en Mar Del Plata, con la idea de estar ocupados en lo importante. Dos amigos que les pinto producir su propia tanda de básicos entre remeras y hoodies. Con el tiempo fuimos entendiendo que no había que encasillarse y que habían que expandir la marca.",
-    "story.p2": "El equipo creció y la idea también. Hoy somos revendedores, tenemos nuestro propio podcast, organizamos eventos y buscamos crear un ecosistema creativo que una el streetwear, branding exclusivo y un concepto.",
-    "story.p3": "Queremos construir una comunidad que se expresé através de lo que viste y lo que vive. Ya que Busy es enfocarse en lo que vale la pena.",
+    "story.p1": "Busy es la marca de los que hacen. Nació en Mar Del Plata, con la idea de dos amigos que les pinto producir su propia tanda de básicos entre remeras y hoodies. Con el tiempo fuimos entendiendo que no había que encasillarse y decidimos expandir la marca.",
+    "story.p2": "Hoy día, el equipo creció y la idea también. Somos revendedores, tenemos nuestro propio blog, podcast y buscamos organizar eventos, mientras creamos un ecosistema creativo, que una el streetwear con nuestra cultura.",
+    "story.p3": "Enfocándonos en lo que vale la pena y reflejando el mensaje através de nuestros canales, es como creemos que podemos crear una comunidad auténtica que nos represente a muchos.",
     "story.cta": "Ver colección",
     "values.title": "Nuestros valores",
     "values.subtitle": "Estos principios nos guían en todo: desde el diseño hasta la atención al cliente.",

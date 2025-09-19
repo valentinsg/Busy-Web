@@ -7,10 +7,9 @@ import { Button } from '@/components/ui/button'
 import { getProductsAsync } from '@/lib/repo/products'
 import type { Product } from '@/lib/types'
 import { motion } from 'framer-motion'
-import { ArrowRight, Award, Star, Users } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -83,7 +82,7 @@ export default function Home() {
     }
 
     // Fallback in case the event isn't received for any reason
-    timeoutId = setTimeout(markReady, 3800)
+    timeoutId = setTimeout(markReady, 3000)
 
     const onSplashComplete = () => markReady()
     try {
@@ -97,6 +96,7 @@ export default function Home() {
       if (timeoutId) clearTimeout(timeoutId)
     }
   }, [])
+
   const categories = [
     {
       name: t('footer.sections.shop.links.hoodies'),
@@ -117,7 +117,6 @@ export default function Home() {
 
   return (
     <div className="flex flex-col">
-      {/* Hero Slider */}
       <AutoSliderBanner />
 
       {/* Latest Collection (render after splash completes for visible animations) */}
@@ -127,13 +126,16 @@ export default function Home() {
           className="relative overflow-hidden bg-black py-16 md:py-24"
         >
           {/* Top fade to smoothly connect with hero */}
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-10 h-16 bg-gradient-to-b from-transparent to-black" />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 -top-10 h-16 bg-gradient-to-b from-transparent to-black"
+          />
           <div className="relative container px-4">
             <motion.div {...fadeInUp} className="text-center mb-12">
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
                 {t('home.latest.title')}
               </h2>
-              <p className="text-muted-foreground font-body text-lg max-w-2xl mx-auto">
+              <p className="font-body text-muted-foreground text-lg md:text-xl">
                 {t('home.latest.subtitle')}
               </p>
             </motion.div>
@@ -154,7 +156,11 @@ export default function Home() {
 
             <motion.div {...fadeInUp} className="text-center mt-12">
               <Button asChild variant="outline" size="lg">
-                <Link href="/products" prefetch={false} className="font-heading">
+                <Link
+                  href="/products"
+                  prefetch={false}
+                  className="font-heading"
+                >
                   {t('home.latest.view_all')}
                 </Link>
               </Button>
@@ -165,15 +171,13 @@ export default function Home() {
 
       {/* Categories Grid */}
       {ready && (
-        <section
-          className="relative py-16 md:py-24 h-[100vh]"
-        >
+        <section className="relative py-16 md:py-24 h-[100vh]">
           <div className="container px-4">
             <motion.div {...fadeInUp} className="text-center mb-12">
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
                 {t('home.categories.title')}
               </h2>
-              <p className="font-body text-muted-foreground text-lg">
+              <p className="font-body text-muted-foreground  text-lg md:text-xl">
                 {t('home.categories.subtitle')}
               </p>
             </motion.div>
@@ -187,7 +191,11 @@ export default function Home() {
             >
               {categories.map((category) => (
                 <motion.div key={category.name} variants={fadeInUp}>
-                  <Link href={category.href} prefetch={false} className="group block">
+                  <Link
+                    href={category.href}
+                    prefetch={false}
+                    className="group block"
+                  >
                     {/* Glow frame wrapper */}
                     <div className="group relative rounded-2xl p-[4px] bg-gradient-to-br from-white/45 via-white/20 to-transparent shadow-[0_0_50px_rgba(35,35,35,0.3)] ring-2 ring-white/30">
                       {/* soft external glow */}
@@ -213,7 +221,9 @@ export default function Home() {
 
                         <div
                           className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
-                          style={{ backgroundImage: `url('${category.image}')` }}
+                          style={{
+                            backgroundImage: `url('${category.image}')`,
+                          }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
 
@@ -242,124 +252,177 @@ export default function Home() {
 
       {/* About Section */}
       {ready && (
-      <section className="relative overflow-hidden ">
-        <div className="container px-4 mx-auto py-16 md:py-24 ">
-          <div
-            className="pointer-events-none absolute inset-0 -z-10 bg-repeat bg-cover opacity-50"
-            style={{
-              backgroundImage: 'url(/pattern.png)',
-              backgroundSize: '90% ',
-            }}
-          />
-          <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center justify-center justify-items-center place-content-center">
-            <motion.div {...fadeInUp} className="w-full max-w-xl mx-auto">
-              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">
-                {t('home.about.title')}
-              </h2>
-              <p className="text-muted-foreground font-body text-lg mb-6 leading-relaxed ">
-                {t('home.about.p1')}
-              </p>
-              <p className="text-muted-foreground font-body text-lg mb-8 leading-relaxed">
-                {t('home.about.p2')}
-              </p>
-              <Button asChild variant="outline" size="lg">
-                <Link href="/about" className="font-heading">
-                  {t('home.about.cta')}
-                </Link>
-              </Button>
-            </motion.div>
+        <section className="relative overflow-hidden ">
+          <div className="container px-4 mx-auto py-16 md:py-24 ">
+            <div
+              className="pointer-events-none absolute inset-0 -z-10 bg-repeat bg-cover opacity-50"
+              style={{
+                backgroundImage: 'url(/pattern.png)',
+                backgroundSize: '90% ',
+              }}
+            />
+            <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center justify-center justify-items-center place-content-center">
+              <motion.div
+                {...fadeInUp}
+                className="w-full max-w-xl mx-auto text-center"
+              >
+                <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
+                  {t('home.about.title')}
+                </h2>
+                <p className="text-muted-foreground font-body text-lg md:text-xl mb-4 leading-relaxed ">
+                  {t('home.about.p1')}
+                </p>
+                <p className="text-muted-foreground font-body text-lg md:text-xl mb-8 leading-relaxed">
+                  {t('home.about.p2')}
+                </p>
+                <Button asChild variant="outline" size="lg">
+                  <Link href="/about" prefetch={false} className="font-heading">
+                    {t('home.about.cta')}
+                  </Link>
+                </Button>
+              </motion.div>
 
-            <motion.div {...fadeInUp} className="relative ml-auto">
-              {/* Creative border frame with subtle white glow */}
-              <div className="group relative h-[760px] w-[440px] rounded-2xl p-[4px] bg-gradient-to-br from-white/45 via-white/20 to-transparent shadow-[0_0_50px_rgba(35,35,35,0.3)] ring-2 ring-white/30">
-                {/* soft external glow */}
-                <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5" />
+              <motion.div {...fadeInUp} className="relative ml-auto">
+                {/* Creative border frame with subtle white glow */}
+                <div className="group relative h-[760px] w-[440px] rounded-2xl p-[4px] bg-gradient-to-br from-white/45 via-white/20 to-transparent shadow-[0_0_50px_rgba(35,35,35,0.3)] ring-2 ring-white/30">
+                  {/* soft external glow */}
+                  <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5" />
 
-                {/* subtle inner border */}
-                <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/15" />
+                  {/* subtle inner border */}
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/15" />
 
-                {/* corner accents */}
-                <span className="pointer-events-none absolute top-3 left-3 h-px w-8 bg-white/40" />
-                <span className="pointer-events-none absolute top-3 left-3 h-8 w-px bg-white/40" />
-                <span className="pointer-events-none absolute top-3 right-3 h-px w-8 bg-white/40" />
-                <span className="pointer-events-none absolute top-3 right-3 h-8 w-px bg-white/40" />
-                <span className="pointer-events-none absolute bottom-3 left-3 h-px w-8 bg-white/30" />
-                <span className="pointer-events-none absolute bottom-3 left-3 h-8 w-px bg-white/30" />
-                <span className="pointer-events-none absolute bottom-3 right-3 h-px w-8 bg-white/30" />
-                <span className="pointer-events-none absolute bottom-3 right-3 h-8 w-px bg-white/30" />
+                  {/* corner accents */}
+                  <span className="pointer-events-none absolute top-3 left-3 h-px w-8 bg-white/40" />
+                  <span className="pointer-events-none absolute top-3 left-3 h-8 w-px bg-white/40" />
+                  <span className="pointer-events-none absolute top-3 right-3 h-px w-8 bg-white/40" />
+                  <span className="pointer-events-none absolute top-3 right-3 h-8 w-px bg-white/40" />
+                  <span className="pointer-events-none absolute bottom-3 left-3 h-px w-8 bg-white/30" />
+                  <span className="pointer-events-none absolute bottom-3 left-3 h-8 w-px bg-white/30" />
+                  <span className="pointer-events-none absolute bottom-3 right-3 h-px w-8 bg-white/30" />
+                  <span className="pointer-events-none absolute bottom-3 right-3 h-8 w-px bg-white/30" />
 
-                {/* content card */}
-                <div className="relative h-full w-full overflow-hidden rounded-[16px] bg-muted opacity-80 ring-1 ring-white/10 shadow-[0_8px_40px_rgba(25,25,25,0.2)]">
-                  {/* gentle sheen on hover */}
-                  <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-15 transition-opacity duration-500" />
-                  <div
-                    className="w-full h-full bg-cover object-contain"
-                    style={{ backgroundImage: "url('/ciro-gif.gif')" }}
-                  />
+                  {/* content card */}
+                  <div className="relative h-full w-full overflow-hidden rounded-[16px] bg-muted opacity-80 ring-1 ring-white/10 shadow-[0_8px_40px_rgba(25,25,25,0.2)]">
+                    {/* gentle sheen on hover */}
+                    <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-15 transition-opacity duration-500" />
+                    <div
+                      className="w-full h-full bg-cover object-contain"
+                      style={{ backgroundImage: "url('/ciro-gif.gif')" }}
+                    />
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
       )}
 
       {/* Social Proof */}
       {ready && (
-      <section className="py-16 md:py-24">
-        <div className="container px-4">
-          <motion.div {...fadeInUp} className="text-center mb-12">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-              {t('home.social.title')}
-            </h2>
-            <p className="font-body text-muted-foreground text-lg">
-              {t('home.social.subtitle')}
-            </p>
-          </motion.div>
+        <section className="py-16 md:py-28">
+          <div className="container px-4">
+            <motion.div {...fadeInUp} className="text-center mb-24">
+              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
+                {t('home.social.title')}
+              </h2>
+              <p className="font-body text-muted-foreground text-lg md:text-xl">
+                {t('home.social.subtitle')}
+              </p>
+            </motion.div>
 
-          <motion.div
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
-          >
-            {[
-              {
-                icon: Star,
-                title: t('home.social.items.rating.title'),
-                description: t('home.social.items.rating.desc'),
-              },
-              {
-                icon: Users,
-                title: t('home.social.items.customers.title'),
-                description: t('home.social.items.customers.desc'),
-              },
-              {
-                icon: Award,
-                title: t('home.social.items.quality.title'),
-                description: t('home.social.items.quality.desc'),
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                variants={fadeInUp}
-                className="text-center"
-              >
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-brand/10 rounded-full mb-4">
-                  <item.icon className="h-8 w-8 text-accent-brand" />
-                </div>
-                <h3 className="font-heading text-xl font-semibold mb-2">
-                  {item.title}
-                </h3>
-                <p className="font-body text-muted-foreground">
-                  {item.description}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            >
+              {[
+                {
+                  iconSrc: '/blog.png',
+                  title: t('home.social.items.rating.title'),
+                  description: t('home.social.items.rating.desc'),
+                  href: '/blog',
+                },
+                {
+                  iconSrc: '/spotify.png',
+                  title: t('home.social.items.customers.title'),
+                  description: t('home.social.items.customers.desc'),
+                  href: 'https://open.spotify.com/',
+                },
+                {
+                  iconSrc: '/drops.png',
+                  title: t('home.social.items.quality.title'),
+                  description: t('home.social.items.quality.desc'),
+                  href: '/products',
+                },
+              ].map(
+                (
+                  item: {
+                    iconSrc: string
+                    title: string
+                    description: string
+                    href: string
+                  },
+                  index
+                ) => (
+                  <motion.div
+                    key={index}
+                    variants={fadeInUp}
+                    className="text-center"
+                  >
+                    {item.href.startsWith('http') ? (
+                      <>
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group inline-block"
+                        >
+                          <div className="inline-flex bg-transparent rounded-full border-4 border-white items-center justify-center mb-3 sm:mb-4">
+                            <img
+                              src={item.iconSrc}
+                              alt=""
+                              className="h-24 w-24 rounded-full  sm:h-28 sm:w-28 md:h-36 md:w-36 lg:h-48 lg:w-48 contrast-150 brightness-25 transition-transform duration-300"
+                            />
+                          </div>
+                          <h3 className="font-heading text-lg sm:text-xl md:text-2xl font-semibold mb-1 sm:mb-2">
+                            {item.title}
+                          </h3>
+                        </a>
+                        <p className="font-body text-muted-foreground text-sm sm:text-base md:text-lg">
+                          {item.description}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href={item.href}
+                          prefetch={false}
+                          className="group inline-block"
+                        >
+                          <div className="inline-flex bg-transparent  rounded-full border-4 border-white items-center justify-center mb-3 sm:mb-4">
+                            <img
+                              src={item.iconSrc}
+                              alt=""
+                              className="h-28 w-28 rounded-full sm:h-28 sm:w-28 md:h-36 md:w-36 lg:h-48 lg:w-48 contrast-150 brightness-25 transition-transform duration-300"
+                            />
+                          </div>
+                          <h3 className="font-heading text-lg sm:text-xl md:text-2xl font-semibold mb-1 sm:mb-2">
+                            {item.title}
+                          </h3>
+                        </Link>
+                        <p className="font-body text-muted-foreground text-sm sm:text-base md:text-lg">
+                          {item.description}
+                        </p>
+                      </>
+                    )}
+                  </motion.div>
+                )
+              )}
+            </motion.div>
+          </div>
+        </section>
       )}
 
       {/* Latest Blog Section (replaces previous CTA) */}
@@ -367,4 +430,3 @@ export default function Home() {
     </div>
   )
 }
-

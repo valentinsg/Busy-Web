@@ -19,7 +19,7 @@ export interface BlogPost {
   authorAvatar?: string
   canonical?: string
   backlinks?: { label: string; url: string }[]
-  /** Optional category for the post */
+  /** Category comes from frontmatter and is free-form; no hardcoded catalog */
   category?: string
   /** Open Graph/Twitter image */
   ogImage?: string

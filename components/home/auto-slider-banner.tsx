@@ -42,7 +42,7 @@ export function AutoSliderBanner() {
             fill
             style={{ objectFit: "cover" }}
             sizes="100vw"
-            priority={index === 0}
+            priority={false}
           />
         </div>
       ))}

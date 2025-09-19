@@ -31,6 +31,8 @@ export async function getProductsAsync(params?: {
   minPrice?: number
   maxPrice?: number
   sortBy?: SortBy
+  tagsContains?: string[]
+  featuredOnly?: boolean
 }): Promise<Product[]> {
   let query = supabase.from("products").select("*")
 
@@ -39,6 +41,8 @@ export async function getProductsAsync(params?: {
   if (params?.size) query = query.contains("sizes", [params.size])
   if (params?.minPrice !== undefined) query = query.gte("price", params.minPrice)
   if (params?.maxPrice !== undefined) query = query.lte("price", params.maxPrice)
+  if (params?.tagsContains && params.tagsContains.length) query = query.contains("tags", params.tagsContains)
+  if (params?.featuredOnly) query = query.contains("tags", ["featured"]) 
 
   if (params?.sortBy) {
     switch (params.sortBy) {

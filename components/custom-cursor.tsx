@@ -100,7 +100,13 @@ export function CustomCursor() {
       setPosition({ x: e.clientX, y: e.clientY })
 
       // Detect hover target to personalize cursor
-      const target = e.target as Element | null
+      const raw = e.target as EventTarget | null
+      // Resolve to a proper Element (Text nodes do not have closest)
+      const target: Element | null =
+        raw && (raw as any).closest
+          ? (raw as Element)
+          : (raw as Node | null)?.parentElement || null
+
       if (target) {
         // Is it a text input/editable?
         const textLike = target.closest(
@@ -114,10 +120,16 @@ export function CustomCursor() {
         }
 
         // Is it clickable (button/link/role/button, or CSS cursor: pointer)?
-        const clickable =
-          target.closest(
-            'button, a[href], [role="button"], [onclick], input[type="button"], input[type="submit"], summary, label',
-          ) || (typeof window !== "undefined" && window.getComputedStyle(target).cursor === "pointer")
+        let clickable: Element | null | boolean = target.closest(
+          'button, a[href], [role="button"], [onclick], input[type="button"], input[type="submit"], summary, label',
+        )
+        if (!clickable) {
+          try {
+            clickable = typeof window !== "undefined" && window.getComputedStyle(target).cursor === "pointer"
+          } catch {
+            clickable = false
+          }
+        }
 
         if (clickable) {
           setVariant("pointer")

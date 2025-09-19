@@ -1,6 +1,7 @@
 import { getProductsAsync } from "@/lib/repo/products"
 import { ProductCard } from "@/components/shop/product-card"
 import type { Product } from "@/lib/types"
+import ProductFeatureToggle from "@/components/admin/product-feature-toggle"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -21,8 +22,12 @@ export default async function AdminProductsPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {products.map((p) => (
-            <div key={p.id} className="relative">
+            <div key={p.id} className="relative space-y-2">
               <ProductCard product={p} adminEditHref={`/admin/products/${p.id}`} />
+              <div className="flex gap-2">
+                <ProductFeatureToggle productId={p.id} initialFeatured={(p.tags || []).includes("featured")} initialTags={p.tags} />
+                <a href={`/admin/products/${p.id}`} className="text-xs underline">Editar</a>
+              </div>
             </div>
           ))}
         </div>

@@ -14,6 +14,7 @@ export const metadata: Metadata = generateSEO({
 export default async function BlogPage() {
   const allPosts = getAllPosts()
   const allTags = getAllTags()
+  const latestPost = allPosts[0]
 
   return (
     <>
@@ -30,7 +31,7 @@ export default async function BlogPage() {
           }),
         }}
       />
-      <BlogClient allPosts={allPosts} allTags={allTags} />
+      <BlogClient allPosts={allPosts} allTags={allTags} latestPost={latestPost} />
     </>
   )
 }
