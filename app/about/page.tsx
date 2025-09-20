@@ -1,30 +1,47 @@
 'use client'
 import { useI18n } from '@/components/i18n-provider'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Award, Heart, Leaf, Users } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-const values = [
-  { icon: Award, key: 'quality' },
-  { icon: Users, key: 'community' },
-  { icon: Leaf, key: 'sustainable' },
-  { icon: Heart, key: 'passion' },
-]
-
+// Timeline compacta con hitos clave
 const timeline = [
-  { year: '2020' },
-  { year: '2021' },
-  { year: '2022' },
-  { year: '2023' },
-  { year: '2024' },
+  {
+    year: '2023',
+    title: 'Nace la idea',
+    desc:
+      'Empezamos a imaginar Busy como un espacio de streetwear auténtico, con una mirada propia y cerca de la comunidad.',
+  },
+  {
+    year: 'Dic 2024',
+    title: 'Primeros básicos',
+    desc:
+      'Creamos la primera tanda de básicos: remeras y hoodies que sentaron la base de nuestra identidad.',
+  },
+  {
+    year: 'Feb 2025',
+    title: 'Sold out',
+    desc:
+      'Algunos productos se agotan en días. Confirmamos que vamos por buen camino y redoblamos la apuesta.',
+  },
+  {
+    year: 'Oct 2025',
+    title: 'Comunidad y marcas amigas',
+    desc:
+      'Sumamos productos de marcas amigas y comenzamos a crear artículos importantes junto a nuestra comunidad.',
+  },
+  {
+    year: '2026',
+    title: 'Próximo paso: showroom',
+    desc:
+      'Nuestro plan es abrir el primer showroom para encontrarnos cara a cara y vivir Busy offline.',
+  },
 ]
 
 export default function AboutPage() {
   const { t } = useI18n()
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col font-body">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Pattern background limited to this hero section */}
@@ -37,7 +54,7 @@ export default function AboutPage() {
             height: '100%',
           }}
         />
-        <div className="container px-4 relative z-10 py-16 md:py-20">
+        <div className="container px-3 sm:px-4 relative z-10 py-16 md:py-20">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex flex-row items-center justify-center gap-3 ">
               <div className="relative h-28 w-28">
@@ -61,7 +78,7 @@ export default function AboutPage() {
 
       {/* Story Section */}
       <section className="py-16 md:py-24 bg-muted/50">
-        <div className="container px-4">
+        <div className="container px-3 sm:px-4">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
@@ -97,35 +114,25 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Values Section */}
+      {/* Showcase Section: dos contenedores grandes tipo panel de marca */}
       <section className="py-16 md:py-24">
-        <div className="container px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-                {t('about.values.title')}
-              </h2>
-              <p className="font-body text-muted-foreground text-lg max-w-2xl mx-auto">
-                {t('about.values.subtitle')}
-              </p>
+        <div className="container px-3 sm:px-4">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            {/* Panel 1 */}
+            <div className="group relative overflow-hidden rounded-2xl ring-1 ring-white/10 shadow-[0_8px_40px_rgba(25,25,25,0.2)]">
+              <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5" />
+              <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] lg:aspect-[16/10]">
+                {/* Reemplaza el src por tu imagen grande */}
+                <Image src="/placeholder-1.jpg" alt="Showcase 1" fill className="object-cover" />
+              </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {values.map((value, index) => (
-                <Card key={index} className="text-center">
-                  <CardContent className="p-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-accent-brand/10 rounded-full mb-4">
-                      <value.icon className="h-6 w-6 text-accent-brand" />
-                    </div>
-                    <h3 className="font-heading text-xl font-semibold mb-2">
-                      {t(`about.values.items.${value.key}.title`)}
-                    </h3>
-                    <p className="font-body text-muted-foreground text-sm leading-relaxed">
-                      {t(`about.values.items.${value.key}.desc`)}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+            {/* Panel 2 */}
+            <div className="group relative overflow-hidden rounded-2xl ring-1 ring-white/10 shadow-[0_8px_40px_rgba(25,25,25,0.2)]">
+              <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5" />
+              <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] lg:aspect-[16/10]">
+                {/* Reemplaza el src por tu imagen grande */}
+                <Image src="/placeholder-2.jpg" alt="Showcase 2" fill className="object-cover" />
+              </div>
             </div>
           </div>
         </div>
@@ -133,14 +140,14 @@ export default function AboutPage() {
 
       {/* Timeline Section */}
       <section className="py-16 md:py-24 bg-muted/50">
-        <div className="container px-4">
+        <div className="container px-3 sm:px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-                {t('about.timeline.title')}
+                Nuestra línea de tiempo
               </h2>
               <p className="font-body text-muted-foreground text-lg">
-                {t('about.timeline.subtitle')}
+                Algunos hitos que marcan nuestro camino.
               </p>
             </div>
 
@@ -149,24 +156,20 @@ export default function AboutPage() {
                 <div key={index} className="flex gap-6">
                   <div className="flex flex-col items-center">
                     <div className="w-12 h-12 bg-accent-brand rounded-full flex items-center justify-center text-white font-bold">
-                      {item.year.slice(-2)}
+                      {item.year.replace(/[^0-9]/g, '').slice(-2) || '—'}
                     </div>
                     {index < timeline.length - 1 && (
                       <div className="w-px h-16 bg-border mt-4" />
                     )}
                   </div>
                   <div className="flex-1 pb-8">
-                    <div className="flex items-center gap-4 mb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
                       <span className="text-sm font-medium text-accent-brand">
                         {item.year}
                       </span>
-                      <h3 className="font-heading text-xl font-semibold">
-                        {t(`about.timeline.items.${item.year}.title`)}
-                      </h3>
+                      <h3 className="font-heading text-xl font-semibold">{item.title}</h3>
                     </div>
-                    <p className="font-body text-muted-foreground leading-relaxed">
-                      {t(`about.timeline.items.${item.year}.desc`)}
-                    </p>
+                    <p className="font-body text-muted-foreground leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -177,7 +180,7 @@ export default function AboutPage() {
 
       {/* CTA Section */}
       <section className="py-16 md:py-24">
-        <div className="container px-4">
+        <div className="container px-3 sm:px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">
               {t('about.cta.title')}

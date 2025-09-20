@@ -19,9 +19,12 @@ const MarkdownPreview = dynamic(() => import("@/components/blog/markdown-preview
 
 function slugify(input: string) {
   return (input || "")
-    .toLowerCase()
+    .toString()
     .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\-\s]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
 }

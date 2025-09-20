@@ -16,7 +16,7 @@ export const metadata: Metadata = generateSEO({
 
 export default function FAQPage() {
   return (
-    <div className="container px-4 py-8 pt-20">
+    <div className="container px-4 py-8 pt-28 font-body">
       <div className="max-w-4xl mx-auto">
         {/* FAQPage JSON-LD */}
         <script

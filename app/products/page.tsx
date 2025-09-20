@@ -241,7 +241,7 @@ export default function ProductsPage() {
   )
 
   return (
-    <div className="container px-4 py-8 pt-20">
+    <div className="container px-4 py-8 pt-28">
       {/* JSON-LD: CollectionPage + BreadcrumbList */}
       <script
         type="application/ld+json"

@@ -77,7 +77,7 @@ export async function generateMetadata({
   const image = post.ogImage || post.cover || '/busy-streetwear.png'
 
   return {
-    title: `▷ ${post.title} - Blog de Busy`,
+    title: `▷ ${post.title}`,
     description: post.description,
     keywords: post.tags,
     openGraph: {

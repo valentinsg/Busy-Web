@@ -10,7 +10,7 @@ export const metadata: Metadata = generateSEO({
 export default function TermsPage() {
   const lastUpdated = new Date().toLocaleDateString("es-AR", { year: "numeric", month: "long", day: "2-digit" })
   return (
-    <div className="container px-4 py-8 pt-20">
+    <div className="container px-4 py-8 pt-28">
       <div className="max-w-4xl mx-auto prose prose-neutral dark:prose-invert">
         <h1>Términos y Condiciones</h1>
         <p className="text-muted-foreground">Última actualización: {lastUpdated}</p>

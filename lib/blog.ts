@@ -7,6 +7,18 @@ import type { BlogPost } from "@/types/blog"
 
 const postsDirectory = path.join(process.cwd(), "content/blog")
 
+function normalizeSlug(input: string) {
+  return (input || "")
+    .toString()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\-\s]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+}
+
 export function getAllPosts(): BlogPost[] {
   try {
     const fileNames = fs.readdirSync(postsDirectory)
@@ -52,13 +64,24 @@ export function getAllPosts(): BlogPost[] {
 
 export function getPostBySlug(slug: string): BlogPost | null {
   try {
-    const fullPath = path.join(postsDirectory, `${slug}.mdx`)
-    const fileContents = fs.readFileSync(fullPath, "utf8")
+    const decoded = (() => { try { return decodeURIComponent(slug) } catch { return slug } })()
+    const candidates = [decoded, normalizeSlug(decoded)]
+    let fileContents: string | null = null
+    let finalSlug = decoded
+    for (const cand of candidates) {
+      try {
+        const fullPath = path.join(postsDirectory, `${cand}.mdx`)
+        fileContents = fs.readFileSync(fullPath, "utf8")
+        finalSlug = cand
+        break
+      } catch {}
+    }
+    if (!fileContents) return null
     const { data, content } = matter(fileContents)
     const readTime = readingTime(content)
 
     return {
-      slug,
+      slug: finalSlug,
       title: data.title || "",
       description: data.description || "",
       excerpt: data.excerpt || undefined,

@@ -10,10 +10,16 @@ export function formatRating(rating: number): string {
 }
 
 export function slugify(text: string): string {
-  return text
+  // Remove accents/diacritics, keep alphanumerics and hyphens, collapse spaces to '-'
+  return (text || "")
+    .toString()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // strip diacritics
     .toLowerCase()
-    .replace(/[^\w ]+/g, "")
-    .replace(/ +/g, "-")
+    .replace(/[^a-z0-9\-\s]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
 }
 
 export function capitalize(text?: string | null): string {

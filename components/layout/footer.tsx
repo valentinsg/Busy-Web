@@ -87,24 +87,24 @@ export function Footer() {
 
   return (
     <footer className="bg-background">
-      <div className="container px-4 py-12">
+      <div className="container px-2 py-16">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2">
           {/* Brand Section */}
           <div className="lg:col-span-2">
-            <Link href="/" prefetch={false} className="flex items-center w-28 ml-16">
+            <Link href="/" prefetch={false} className="flex w-28 -mt-6">
               <div className="relative h-28 w-28">
-                <Image src="/busy-parche.png" alt="Busy" fill className="object-contain hidden dark:block contrast-30" />
+                <Image src="/busy-parche.png" alt="Busy" fill className="object-contain hidden dark:block contrast-40" />
               </div>
             </Link>
-            <p className="font-body text-sm text-muted-foreground mb-4 max-w-xs">
+            <p className="font-body text-sm text-muted-foreground mb-4">
               {t("footer.brand.description")}
             </p>
 
             {/* Newsletter */}
             <div className="space-y-2">
               <h4 className="font-heading font-medium">{tt("footer.newsletter.title", "Mantente al día")}</h4>
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 ">
                 <Input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder={tt("footer.newsletter.placeholder", "Ingresa tu email")} className="max-w-[200px] text-sm font-heading" />
                 <Button size="sm" disabled={submitting} onClick={async ()=>{
                   setSubmitting(true); setMessage(null)
@@ -125,8 +125,8 @@ export function Footer() {
                   }
                 }} className="text-sm font-heading font-semibold">{submitting ? "..." : tt("footer.newsletter.subscribe", "Suscribirse")}</Button>
               </div>
-              {message && <p className="text-xs text-muted-foreground">{message}</p>}
-              <p className="text-xs text-muted-foreground">Soporte por WhatsApp: <Link href="https://wa.me/542236680041" target="_blank" className="underline">223 668 0041</Link></p>
+              {message && <p className="text-xs text-muted-foreground mt-2">{message}</p>}
+              <p className="text-xs text-muted-foreground mt-4 font-body">Soporte por WhatsApp: <Link href="https://wa.me/542236680041" target="_blank" className="underline">223 668 0041</Link></p>
             </div>
           </div>
 

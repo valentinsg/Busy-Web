@@ -87,7 +87,7 @@ export default function OrderStatusPage() {
   }
 
   return (
-    <div className="container px-4 py-16">
+    <div className="container px-4 py-16 font-body">
       <div className="max-w-2xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold font-heading">Estado de tu pedido</h1>
         <div className="font-body text-sm text-muted-foreground">Session ID: {sessionId ?? "-"}</div>

@@ -61,7 +61,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="container px-4 py-8 pt-24">
+    <div className="container px-4 py-8 pt-28 font-body">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

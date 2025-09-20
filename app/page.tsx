@@ -130,7 +130,7 @@ export default function Home() {
             aria-hidden
             className="pointer-events-none absolute inset-x-0 -top-10 h-16 bg-gradient-to-b from-transparent to-black"
           />
-          <div className="relative container px-4">
+          <div className="relative container px-3 sm:px-4">
             <motion.div {...fadeInUp} className="text-center mb-12">
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
                 {t('home.latest.title')}
@@ -145,7 +145,7 @@ export default function Home() {
               variants={immersiveContainer}
               initial="initial"
               animate="animate"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-8"
             >
               {featuredProducts.map((product) => (
                 <motion.div key={product.id} variants={immersiveItem}>
@@ -171,8 +171,8 @@ export default function Home() {
 
       {/* Categories Grid */}
       {ready && (
-        <section className="relative py-16 md:py-24 h-[100vh]">
-          <div className="container px-4">
+        <section className="relative py-14 sm:py-16 md:py-24 lg:py-28">
+          <div className="container px-3 sm:px-4">
             <motion.div {...fadeInUp} className="text-center mb-12">
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
                 {t('home.categories.title')}
@@ -187,7 +187,7 @@ export default function Home() {
               variants={staggerContainer}
               initial="initial"
               animate="animate"
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8"
             >
               {categories.map((category) => (
                 <motion.div key={category.name} variants={fadeInUp}>
@@ -252,13 +252,12 @@ export default function Home() {
 
       {/* About Section */}
       {ready && (
-        <section className="relative overflow-hidden ">
-          <div className="container px-4 mx-auto py-16 md:py-24 ">
+        <section className="relative overflow-hidden bg-black">
+          <div className="relative z-10 container px-3 sm:px-4 mx-auto py-16 md:py-24 ">
             <div
-              className="pointer-events-none absolute inset-0 -z-10 bg-repeat bg-cover opacity-50"
+              className="pointer-events-none absolute inset-0 -z-10 bg-repeat opacity-25"
               style={{
-                backgroundImage: 'url(/pattern.png)',
-                backgroundSize: '90% ',
+                backgroundImage: 'url(/pattern-black.jpg)',
               }}
             />
             <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center justify-center justify-items-center place-content-center">
@@ -282,9 +281,9 @@ export default function Home() {
                 </Button>
               </motion.div>
 
-              <motion.div {...fadeInUp} className="relative ml-auto">
+              <motion.div {...fadeInUp} className="relative ml-auto w-full">
                 {/* Creative border frame with subtle white glow */}
-                <div className="group relative h-[760px] w-[440px] rounded-2xl p-[4px] bg-gradient-to-br from-white/45 via-white/20 to-transparent shadow-[0_0_50px_rgba(35,35,35,0.3)] ring-2 ring-white/30">
+                <div className="group relative w-full max-w-sm sm:max-w-md md:max-w-lg aspect-[11/19] rounded-2xl p-[4px] bg-gradient-to-br from-white/45 via-white/20 to-transparent shadow-[0_0_50px_rgba(35,35,35,0.3)] ring-2 ring-white/30">
                   {/* soft external glow */}
                   <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5" />
 
@@ -314,13 +313,23 @@ export default function Home() {
               </motion.div>
             </div>
           </div>
+          {/* Bottom fade to blend patterned About section with next (Contracultura) section */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-40 md:h-56 bg-gradient-to-b from-transparent via-black/70 to-black"
+          />
         </section>
       )}
 
       {/* Social Proof */}
       {ready && (
-        <section className="py-16 md:py-28">
-          <div className="container px-4">
+        <section className="relative bg-background py-16 md:py-28">
+          {/* Top fade to smoothly connect with About */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 md:h-56 bg-gradient-to-b from-black via-black/70 to-transparent"
+          />
+          <div className="relative z-10 container px-3 sm:px-4">
             <motion.div {...fadeInUp} className="text-center mb-24">
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
                 {t('home.social.title')}
@@ -335,7 +344,7 @@ export default function Home() {
               initial="initial"
               whileInView="animate"
               viewport={{ once: true }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
             >
               {[
                 {
@@ -383,7 +392,7 @@ export default function Home() {
                             <img
                               src={item.iconSrc}
                               alt=""
-                              className="h-24 w-24 rounded-full  sm:h-28 sm:w-28 md:h-36 md:w-36 lg:h-48 lg:w-48 contrast-150 brightness-25 transition-transform duration-300"
+                              className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32 lg:h-40 lg:w-40 rounded-full contrast-150 brightness-25 transition-transform duration-300"
                             />
                           </div>
                           <h3 className="font-heading text-lg sm:text-xl md:text-2xl font-semibold mb-1 sm:mb-2">
@@ -405,7 +414,7 @@ export default function Home() {
                             <img
                               src={item.iconSrc}
                               alt=""
-                              className="h-28 w-28 rounded-full sm:h-28 sm:w-28 md:h-36 md:w-36 lg:h-48 lg:w-48 contrast-150 brightness-25 transition-transform duration-300"
+                              className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32 lg:h-40 lg:w-40 rounded-full contrast-150 brightness-25 transition-transform duration-300"
                             />
                           </div>
                           <h3 className="font-heading text-lg sm:text-xl md:text-2xl font-semibold mb-1 sm:mb-2">
@@ -419,7 +428,8 @@ export default function Home() {
                     )}
                   </motion.div>
                 )
-              )}
+              )
+            }
             </motion.div>
           </div>
         </section>
