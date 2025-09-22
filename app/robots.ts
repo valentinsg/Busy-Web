@@ -13,6 +13,12 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap,
-    host: SITE_URL,
+    host: (() => {
+      try {
+        return new URL(SITE_URL).host
+      } catch {
+        return 'busy.com.ar'
+      }
+    })(),
   }
 }

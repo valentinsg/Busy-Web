@@ -5,7 +5,7 @@ import { generateSEO } from "@/lib/seo"
 
 export const metadata: Metadata = generateSEO({
   title: "Blog",
-  description: "Consejos de estilo, sostenibilidad y novedades de Busy.",
+  description: "Consejos de estilo, sostenibilidad y novedades de Busy. Descubrí guías prácticas para cuidar tus prendas, ideas de looks para todos los días y tendencias del streetwear con foco en calidad, diseño y vida urbana.",
   url: `${process.env.SITE_URL || "https://busy.com.ar"}/blog`,
   image: "/busy-streetwear.png",
   type: "website",

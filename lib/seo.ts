@@ -10,7 +10,7 @@ interface SEOProps {
 
 export function generateSEO({
   title = "Busy - Streetwear premium",
-  description = "Streetwear premium para la vida moderna. Calidad y diseño contemporáneo en cada prenda.",
+  description = "Busy Streetwear ofrece ropa urbana premium con diseño contemporáneo y calidad superior. Hoodies, remeras y básicos hechos para la vida moderna.",
   image = "/busy-streetwear.png",
   url = process.env.SITE_URL || "https://busy.com.ar",
   type = "website",

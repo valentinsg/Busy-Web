@@ -29,11 +29,11 @@ export function CustomCursor() {
         const supportsFineHover = window.matchMedia
           ? window.matchMedia("(hover: hover) and (pointer: fine)").matches
           : false
-        const maxTouch = (navigator as any)?.maxTouchPoints ?? 0
         const ua = (navigator?.userAgent || navigator?.vendor || "").toLowerCase()
         const isMobileUA = /android|iphone|ipad|ipod|mobile|tablet|windows phone/.test(ua)
-        // Enable only on true desktop pointer/hover with no touch and non-mobile UA
-        return supportsFineHover && maxTouch === 0 && !isMobileUA
+        // Enable on devices that support fine hover and are likely desktop (even if touch-capable)
+        // We intentionally do NOT require maxTouchPoints === 0 because many laptops report touch.
+        return supportsFineHover && !isMobileUA
       } catch {
         return false
       }
@@ -161,6 +161,20 @@ export function CustomCursor() {
         clearTimeout(dwellTimerRef.current)
         dwellTimerRef.current = null
       }
+    }
+  }, [enabled])
+
+  // Toggle a class on <html> so CSS only hides the native cursor when our custom cursor is actually active
+  useEffect(() => {
+    if (typeof document === "undefined") return
+    const root = document.documentElement
+    if (enabled) {
+      root.classList.add("has-custom-cursor")
+    } else {
+      root.classList.remove("has-custom-cursor")
+    }
+    return () => {
+      root.classList.remove("has-custom-cursor")
     }
   }, [enabled])
 

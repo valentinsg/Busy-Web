@@ -1,257 +1,47 @@
-'use client'
-
-import * as React from 'react'
-import { Search, Filter, SlidersHorizontal } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
+import type { Metadata } from 'next'
+import ProductsClient from '@/components/products/ProductsClient'
 import { ProductCard } from '@/components/shop/product-card'
-import { getCategories, getAvailableColors, getAvailableSizes, getProducts, searchProducts } from '@/lib/products'
-import { getProductsAsync, searchProductsAsync, type SortBy } from '@/lib/repo/products'
-import type { FilterOptions, Product } from '@/lib/types'
-import { capitalize } from '@/lib/format'
-import { useI18n } from '@/components/i18n-provider'
+import type { Product } from '@/lib/types'
+import getServiceClient from '@/lib/supabase/server'
 
-export default function ProductsPage() {
-  const { t } = useI18n()
-  const [searchQuery, setSearchQuery] = React.useState('')
-  const [filters, setFilters] = React.useState<FilterOptions>({})
-  const [isFilterOpen, setIsFilterOpen] = React.useState(false)
-  const [asyncProducts, setAsyncProducts] = React.useState<Product[]>([])
-  const [loading, setLoading] = React.useState(false)
-  const [error, setError] = React.useState<string | null>(null)
+export const metadata: Metadata = {
+  title: 'Productos - Busy Streetwear',
+  description:
+    'Catálogo Busy: hoodies, remeras y básicos streetwear de alta calidad, diseñados en Mar del Plata para quienes valoran el estilo urbano. Descubrí prendas versátiles con foco en confort, durabilidad y diseño contemporáneo, pensadas para el día a día.',
+  alternates: { canonical: '/products' },
+}
 
-  const categories = getCategories()
-  const colors = getAvailableColors()
-  const sizes = getAvailableSizes()
-
-  // Load products from Supabase (sin fallback a JSON para evitar datos viejos)
-  React.useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setLoading(true)
-      setError(null)
-      try {
-        const params = {
-          category: filters.category,
-          color: filters.color,
-          size: filters.size,
-          minPrice: filters.minPrice,
-          maxPrice: filters.maxPrice,
-          sortBy: (filters.sortBy as SortBy | undefined) ?? undefined,
-        }
-        if (searchQuery.trim()) {
-          const list = await searchProductsAsync(searchQuery.trim())
-          // apply remaining filters client-side for now
-          const filtered = list.filter((p) => {
-            if (filters.category && p.category !== filters.category) return false
-            if (filters.color && !p.colors.includes(filters.color)) return false
-            if (filters.size && !p.sizes.includes(filters.size)) return false
-            if (filters.minPrice !== undefined && p.price < filters.minPrice) return false
-            if (filters.maxPrice !== undefined && p.price > filters.maxPrice) return false
-            return true
-          })
-          if (!cancelled) setAsyncProducts(filtered)
-        } else {
-          const list = await getProductsAsync(params)
-          if (!cancelled) setAsyncProducts(list)
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setAsyncProducts([])
-          setError('offline')
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-    load()
-    return () => {
-      cancelled = true
-    }
-  }, [searchQuery, filters])
-
-  const updateFilter = <K extends keyof FilterOptions>(key: K, value: FilterOptions[K] | undefined) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
+async function getFeaturedSSR(): Promise<Product[]> {
+  try {
+    const sb = getServiceClient()
+    const { data, error } = await sb
+      .from('products')
+      .select('*')
+      .contains('tags', ['featured'])
+      .order('created_at', { ascending: false })
+      .limit(3)
+    if (error || !data) return []
+    return data as unknown as Product[]
+  } catch {
+    return []
   }
+}
 
-  const clearFilters = () => {
-    setFilters({})
-    setSearchQuery('')
-  }
-
-  const FilterContent = () => (
-    <div className="space-y-6">
-      {/* Category Filter */}
-      <div>
-        <h3 className="font-heading font-medium mb-3">{t('products.filters.category')}</h3>
-        <div className="space-y-2">
-          {categories.map((category) => (
-            <div key={category} className="flex items-center space-x-2">
-              <Checkbox
-                id={category}
-                checked={filters.category === category}
-                onCheckedChange={(checked) =>
-                  updateFilter('category', checked ? category : undefined)
-                }
-              />
-              <Label htmlFor={category} className="text-sm font-body">
-                {capitalize(category)}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Color Filter */}
-      <div>
-        <h3 className="font-heading font-medium mb-3">{t('products.filters.color')}</h3>
-        <div className="space-y-2">
-          {colors.map((color) => (
-            <div key={color} className="flex items-center space-x-2">
-              <Checkbox
-                id={color}
-                checked={filters.color === color}
-                onCheckedChange={(checked) =>
-                  updateFilter('color', checked ? color : undefined)
-                }
-              />
-              <Label
-                htmlFor={color}
-                className="flex items-center space-x-2 text-sm font-body"
-              >
-                <div
-                  className="w-4 h-4 rounded-full border border-border"
-                  style={{
-                    backgroundColor:
-                      color === 'black'
-                        ? '#000'
-                        : color === 'white'
-                        ? '#fff'
-                        : color === 'gray'
-                        ? '#6b7280'
-                        : color === 'navy'
-                        ? '#1e3a8a'
-                        : color,
-                  }}
-                />
-                <span>{capitalize(color)}</span>
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Size Filter */}
-      <div>
-        <h3 className="font-heading font-medium mb-3">{t('products.filters.size')}</h3>
-        <div className="space-y-2">
-          {sizes.map((size) => (
-            <div key={size} className="flex items-center space-x-2">
-              <Checkbox
-                id={size}
-                checked={filters.size === size}
-                onCheckedChange={(checked) =>
-                  updateFilter('size', checked ? size : undefined)
-                }
-              />
-              <Label htmlFor={size} className="text-sm font-body">
-                {size}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Price Range */}
-      <div>
-        <h3 className="font-medium mb-3">
-          {t('products.filters.price_range')}
-        </h3>
-        <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label htmlFor="minPrice" className="text-xs font-body">
-                {t('products.filters.min')}
-              </Label>
-              <Input
-                id="minPrice"
-                type="number"
-                placeholder="$0"
-                value={filters.minPrice || ''}
-                onChange={(e) =>
-                  updateFilter(
-                    'minPrice',
-                    e.target.value ? Number(e.target.value) : undefined
-                  )
-                }
-              />
-            </div>
-            <div>
-              <Label htmlFor="maxPrice" className="text-xs font-body">
-                {t('products.filters.max')}
-              </Label>
-              <Input
-                id="maxPrice"
-                type="number"
-                placeholder="$500"
-                value={filters.maxPrice || ''}
-                onChange={(e) =>
-                  updateFilter(
-                    'maxPrice',
-                    e.target.value ? Number(e.target.value) : undefined
-                  )
-                }
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Button
-        onClick={clearFilters}
-        variant="outline"
-        className="w-full bg-transparent"
-      >
-        {t('products.filters.clear_all')}
-      </Button>
-    </div>
-  )
-
+export default async function ProductsPage() {
+  const featured = await getFeaturedSSR()
+  const siteUrl = process.env.SITE_URL || 'https://busy.com.ar'
   return (
     <div className="container px-4 py-8 pt-28">
-      {/* JSON-LD: CollectionPage + BreadcrumbList */}
+      {/* JSON-LD: CollectionPage + BreadcrumbList (static SSR) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "CollectionPage",
-            name: filters.category ? `Productos - ${capitalize(filters.category)}` : 'Productos',
-            url: `${process.env.SITE_URL || 'https://busy.com.ar'}/products${filters.category ? `?category=${filters.category}` : ''}`,
-            about: filters.category || 'coleccion',
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: 'Productos',
+            url: `${siteUrl}/products`,
+            about: 'coleccion',
             inLanguage: 'es-AR',
           }),
         }}
@@ -260,147 +50,41 @@ export default function ProductsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Inicio", item: process.env.SITE_URL || 'https://busy.com.ar' },
-              { "@type": "ListItem", position: 2, name: "Productos", item: `${process.env.SITE_URL || 'https://busy.com.ar'}/products` },
-              ...(filters.category
-                ? [{ "@type": "ListItem", position: 3, name: capitalize(filters.category), item: `${process.env.SITE_URL || 'https://busy.com.ar'}/products?category=${filters.category}` }]
-                : []),
+              { '@type': 'ListItem', position: 1, name: 'Inicio', item: siteUrl },
+              { '@type': 'ListItem', position: 2, name: 'Productos', item: `${siteUrl}/products` },
             ],
           }),
         }}
       />
+
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header SSR with real copy */}
         <div className="mb-8">
           <h1 className="font-heading text-3xl font-bold mb-4">
-            {t('products.header.title')}
+            Productos destacados y básicos premium
           </h1>
           <p className="font-body text-muted-foreground">
-            {t('products.header.subtitle')}
+            En Busy creemos en básicos premium para la vida urbana. Descubrí nuestra selección de prendas con materiales de calidad y diseño contemporáneo: hoodies, remeras y accesorios pensados para acompañarte todos los días.
           </p>
         </div>
 
-        {/* Search and Sort */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={t('products.search.placeholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <Select
-              value={filters.sortBy || ''}
-              onValueChange={(value: string) =>
-                updateFilter('sortBy', (value || undefined) as FilterOptions['sortBy'] | undefined)
-              }
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t('products.sort.placeholder')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">
-                  {t('products.sort.newest')}
-                </SelectItem>
-                <SelectItem value="price-asc">
-                  {t('products.sort.price_asc')}
-                </SelectItem>
-                <SelectItem value="price-desc">
-                  {t('products.sort.price_desc')}
-                </SelectItem>
-                <SelectItem value="rating">
-                  {t('products.sort.rating')}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Mobile Filter Button */}
-            <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="lg:hidden bg-transparent"
-                >
-                  <SlidersHorizontal className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px]">
-                <SheetHeader>
-                  <SheetTitle className="font-heading">{t('products.filters.title')}</SheetTitle>
-                </SheetHeader>
-                <div className="mt-6">
-                  <FilterContent />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Desktop Filters */}
-          <div className="hidden lg:block">
-            <div className="sticky top-24">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-heading font-medium">{t('products.filters.title')}</h2>
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
-                  {t('products.filters.clear')}
-                </Button>
-              </div>
-              <FilterContent />
+        {/* Optional SSR: Featured products to avoid thin HTML */}
+        {featured.length > 0 && (
+          <div className="mb-10">
+            <h2 className="font-heading text-2xl font-semibold mb-4">Destacados</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              {featured.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
             </div>
           </div>
+        )}
 
-          {/* Products Grid */}
-          <div className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-6">
-              <p className="font-body text-sm text-muted-foreground">
-                {t('products.results.count').replace(
-                  '{count}',
-                  String(asyncProducts.length)
-                )}
-              </p>
-            </div>
-
-            {loading ? (
-              <div className="text-center py-12 text-muted-foreground font-body">Cargando...</div>
-            ) : asyncProducts.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-muted-foreground mb-4">
-                  <Filter className="h-12 w-12 mx-auto mb-4" />
-                  <h3 className="font-heading font-medium mb-2">
-                    {t('products.empty.title')}
-                  </h3>
-                  <p className="font-body text-sm">{error === 'offline' ? 'No se pudo cargar desde el servidor. Reintenta.' : t('products.empty.subtitle')}</p>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <Button onClick={clearFilters} variant="outline">
-                    {t('products.empty.clear')}
-                  </Button>
-                  <Button onClick={() => {
-                    // reintentar
-                    setFilters({ ...filters })
-                  }} variant="outline" className="bg-transparent">
-                    Reintentar
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {asyncProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Client filters/search and full listing */}
+        <ProductsClient />
       </div>
     </div>
   )

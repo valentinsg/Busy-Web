@@ -11,11 +11,11 @@ import { getAllPosts, getPostBySlug } from '@/lib/blog'
 import { format } from 'date-fns'
 import { enUS, es } from 'date-fns/locale'
 import {
+  ArrowUpRight,
   Calendar,
+  ChevronDown,
   Clock,
   Share2,
-  ChevronDown,
-  ArrowUpRight,
 } from 'lucide-react'
 import type { Metadata } from 'next'
 import dynamic from 'next/dynamic'
@@ -124,7 +124,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   const preparedContent = (post.content || '').replace(/\r\n/g, '\n')
 
   return (
-    <div className="container py-8 pt-28 tracking-wide font-body bg-muted/5">
+    <div className="container py-8 pt-28 tracking-wide font-body bg-black/90 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto">
         {/* JSON-LD Article */}
         <script
@@ -171,7 +171,12 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             </p>
 
             <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-6 text-sm text-muted-foreground flex-wrap">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                {post.category && (
+                  <span className="text-xs inline-block bg-muted px-2 py-1 rounded mr-2">
+                    {post.category}
+                  </span>
+                )}
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   {format(new Date(post.date), 'MMMM dd, yyyy', {
@@ -182,11 +187,6 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                   <Clock className="h-4 w-4" />
                   {post.readingTime}
                 </div>
-                {post.category && (
-                  <span className="text-xs inline-block bg-muted px-2 py-1 rounded mr-2">
-                    {post.category}
-                  </span>
-                )}
               </div>
 
               <div className="flex items-center gap-2">
@@ -205,7 +205,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
           </header>
 
-          <Separator className="mb-6" />
+          <Separator className="mb-6 bg-muted h-[2px]" />
 
           {/* Body with sidebar */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">

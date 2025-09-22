@@ -12,7 +12,6 @@ import { SplashGate } from '@/components/home/splash-gate'
 import { CustomCursor } from '@/components/custom-cursor'
 import { I18nProvider } from '@/components/i18n-provider'
 import { HtmlLang } from '@/components/layout/html-lang'
-import { PageTransition } from '@/components/layout/page-transition'
 import SitePopover from '@/components/site-popover'
 import { cookies } from 'next/headers'
 import dynamic from 'next/dynamic';
@@ -80,7 +79,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
   alternates: {
     canonical: '/',
@@ -174,7 +173,7 @@ export default function RootLayout({
         {/* Vercel Speed Insights - Web Vitals reporting */}
         <SpeedInsights />
         <AdminQuickFAB />
-
+        <SitePopover />
       </body>
     </html>
   )

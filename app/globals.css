@@ -304,9 +304,9 @@ html {
   100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.7; }
 }
 
-/* Force-hide native cursor only on devices with fine pointer and hover */
+/* Force-hide native cursor only on devices with fine pointer and hover WHEN custom cursor is active */
 @media (hover: hover) and (pointer: fine) {
-  html, body, * {
+  html.has-custom-cursor, html.has-custom-cursor body, html.has-custom-cursor * {
     cursor: none !important;
   }
 }

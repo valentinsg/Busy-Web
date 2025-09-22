@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import fs from 'fs'
 import path from 'path'
+import getServiceClient from '@/lib/supabase/server'
 
 const SITE_URL = process.env.SITE_URL || 'https://busy.com.ar'
 
@@ -46,17 +47,39 @@ function getBlogRoutes() {
   }
 }
 
-function getProductRoutes() {
-  const dataFile = path.join(process.cwd(), 'data', 'products.json')
+async function getProductRoutes() {
   const now = new Date().toISOString()
+  // First try Supabase (production source of truth)
   try {
-    const raw = fs.readFileSync(dataFile, 'utf-8')
-    const items = JSON.parse(raw) as Array<{ slug?: string } | { handle?: string }>
-    return items
-      .map((p: any) => p.slug || p.handle)
+    const sb = getServiceClient()
+    // Only select id for URL; order by created desc
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { data, error } = await sb
+      .from('products')
+      .select('id')
+      .order('created_at', { ascending: false })
+    if (error || !data) return []
+    return data
+      .map((row: any) => row.id)
       .filter(Boolean)
-      .map((slug: string) => ({
-        url: `${SITE_URL}/product/${slug}`,
+      .map((id: string) => ({
+        url: `${SITE_URL}/product/${id}`,
+        lastModified: now,
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      }))
+  } catch {}
+
+  // Fallback to local JSON if available
+  try {
+    const dataFile = path.join(process.cwd(), 'data', 'products.json')
+    const raw = fs.readFileSync(dataFile, 'utf-8')
+    const items = JSON.parse(raw) as Array<{ id?: string; slug?: string; handle?: string }>
+    return items
+      .map((p: any) => p.id || p.slug || p.handle)
+      .filter(Boolean)
+      .map((id: string) => ({
+        url: `${SITE_URL}/product/${id}`,
         lastModified: now,
         changeFrequency: 'weekly' as const,
         priority: 0.8,
@@ -66,11 +89,8 @@ function getProductRoutes() {
   }
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const entries = [
-    ...getStaticRoutes(),
-    ...getBlogRoutes(),
-    ...getProductRoutes(),
-  ]
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [blog, products] = [getBlogRoutes(), await getProductRoutes()]
+  const entries = [...getStaticRoutes(), ...blog, ...products]
   return entries
 }
