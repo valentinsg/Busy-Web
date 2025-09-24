@@ -34,9 +34,9 @@ export default function NewsletterSignup() {
       setStatus("done")
       setMessage("¡Gracias por suscribirte!")
       setEmail("")
-    } catch (e: any) {
+    } catch (e: unknown) {
       setStatus("error")
-      setMessage(e?.message || "Error al suscribirte")
+      setMessage(e?.toString() || "Error al suscribirte")
     }
   }
 

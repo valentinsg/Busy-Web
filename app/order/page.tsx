@@ -3,9 +3,25 @@
 import * as React from "react"
 import { formatPrice } from "@/lib/format"
 
+type OrderSummary = {
+  id: string
+  placed_at: string
+  shipping: number
+  tax: number
+  discount: number
+  total: number
+}
+
+type OrderStatusResponse = {
+  status?: string
+  status_detail?: string
+  payment_id?: string | null
+  order?: OrderSummary | null
+}
+
 export default function OrderStatusPage() {
   const [sessionId, setSessionId] = React.useState<string | null>(null)
-  const [data, setData] = React.useState<any>(null)
+  const [data, setData] = React.useState<OrderStatusResponse | null>(null)
   const [error, setError] = React.useState<string | null>(null)
   const [loading, setLoading] = React.useState(false)
 
@@ -26,9 +42,9 @@ export default function OrderStatusPage() {
     try {
       const res = await fetch(`/api/mp/order-status?session_id=${encodeURIComponent(sid)}`)
       const json = await res.json()
-      setData(json)
-    } catch (err: any) {
-      setError(err?.message || String(err))
+      setData(json as OrderStatusResponse)
+    } catch (err: unknown) {
+      setError(String(err?.toString() || err))
     } finally {
       setLoading(false)
     }

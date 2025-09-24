@@ -1,24 +1,30 @@
 import { supabase } from "@/lib/supabase/client"
-import type { Product } from "@/lib/types"
+import type { Product, SizeMeasurement } from "@/lib/types"
 
-function mapRowToProduct(row: any, stockBySize?: Record<string, number>): Product {
+function mapRowToProduct(row: unknown, stockBySize?: Record<string, number>): Product {
   return {
-    id: row.id,
-    name: row.name,
-    price: Number(row.price),
-    currency: row.currency,
-    images: row.images ?? [],
-    colors: row.colors ?? [],
-    sizes: row.sizes ?? [],
-    measurementsBySize: row.measurements_by_size ?? undefined,
-    category: row.category,
-    sku: row.sku,
-    stock: row.stock ?? 0,
+    id: (row as { id: string }).id,
+    name: (row as { name: string }).name,
+    price: Number((row as { price: string }).price),
+    currency: (row as { currency: string }).currency,
+    images: (row as { images: string[] }).images ?? [],
+    colors: (row as { colors: string[] }).colors ?? [],
+    sizes: (row as { sizes: string[] }).sizes ?? [],
+    measurementsBySize: (() => {
+      const raw = (row as { measurements_by_size?: unknown }).measurements_by_size
+      if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+        return raw as Record<string, SizeMeasurement>
+      }
+      return undefined
+    })(),
+    category: (row as { category: string }).category,
+    sku: (row as { sku: string }).sku,
+    stock: Number((row as { stock: string }).stock) ?? 0,
     stockBySize,
-    description: row.description ?? "",
-    tags: row.tags ?? [],
-    rating: Number(row.rating ?? 0),
-    reviews: Number(row.reviews ?? 0),
+    description: (row as { description: string }).description ?? "",
+    tags: (row as { tags: string[] }).tags ?? [],
+    rating: Number((row as { rating: string }).rating ?? 0),
+    reviews: Number((row as { reviews: string }).reviews ?? 0),
   }
 }
 
@@ -42,7 +48,7 @@ export async function getProductsAsync(params?: {
   if (params?.minPrice !== undefined) query = query.gte("price", params.minPrice)
   if (params?.maxPrice !== undefined) query = query.lte("price", params.maxPrice)
   if (params?.tagsContains && params.tagsContains.length) query = query.contains("tags", params.tagsContains)
-  if (params?.featuredOnly) query = query.contains("tags", ["featured"]) 
+  if (params?.featuredOnly) query = query.contains("tags", ["featured"])
 
   if (params?.sortBy) {
     switch (params.sortBy) {
@@ -71,7 +77,7 @@ export async function getProductsAsync(params?: {
   if (rows.length === 0) return []
 
   // Fetch size-level stock and merge
-  const ids = rows.map((r: any) => r.id)
+  const ids = rows.map((r) => (r as { id: string }).id)
   const { data: sizesData, error: sizesError } = await supabase
     .from("product_sizes")
     .select("product_id,size,stock")
@@ -89,7 +95,7 @@ export async function getProductsAsync(params?: {
     stockMap.get(key)![size] = stock
   }
 
-  return rows.map((r: any) => mapRowToProduct(r, stockMap.get(r.id)))
+  return rows.map((r) => mapRowToProduct(r, stockMap.get((r as { id: string }).id)))
 }
 
 export async function getProductByIdAsync(id: string): Promise<Product | undefined> {
@@ -121,7 +127,7 @@ export async function searchProductsAsync(queryText: string): Promise<Product[]>
   if (error) throw error
   const rows = data ?? []
   // Optionally fetch size stock for these rows as well
-  const ids = rows.map((r: any) => r.id)
+  const ids = rows.map((r: unknown) => (r as { id: string }).id)
   let stockMap = new Map<string, Record<string, number>>()
   if (ids.length) {
     const { data: sizesData } = await supabase
@@ -139,5 +145,5 @@ export async function searchProductsAsync(queryText: string): Promise<Product[]>
       }
     }
   }
-  return rows.map((r: any) => mapRowToProduct(r, stockMap.get(r.id)))
+  return rows.map((r) => mapRowToProduct(r, stockMap.get((r as { id: string }).id)))
 }

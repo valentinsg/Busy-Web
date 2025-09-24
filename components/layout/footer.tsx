@@ -5,7 +5,6 @@ import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useI18n } from "@/components/i18n-provider"
-import { usePathname } from "next/navigation"
 import * as React from "react"
 
 const footerSections = (t: (k: string) => string) => ({
@@ -118,8 +117,8 @@ export function Footer() {
                     } else {
                       setMessage("¡Gracias por suscribirte!")
                     }
-                  } catch (e:any) {
-                    setMessage(e?.message || "No se pudo suscribir")
+                  } catch (e: unknown) {
+                    setMessage(e?.toString() || "No se pudo suscribir")
                   } finally {
                     setSubmitting(false)
                   }
@@ -135,7 +134,7 @@ export function Footer() {
             <div key={key}>
               <h4 className="font-heading font-bold  mb-3">{section.title}</h4>
               <ul className="space-y-2">
-                {section.links.map((link: any) => {
+                {section.links.map((link: { nameKey: string, href: string }) => {
                   const label = t(link.nameKey)
                   const humanFallback = link.nameKey?.split(".").pop()?.replaceAll("_", " ")
                   const finalLabel = label === link.nameKey ? formatFallback(humanFallback || link.nameKey) : label

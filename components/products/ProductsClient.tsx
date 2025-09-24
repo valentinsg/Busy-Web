@@ -70,7 +70,7 @@ export default function ProductsClient() {
           const list = await getProductsAsync(params)
           if (!cancelled) setAsyncProducts(list)
         }
-      } catch (e) {
+      } catch {
         if (!cancelled) {
           setAsyncProducts([])
           setError('offline')

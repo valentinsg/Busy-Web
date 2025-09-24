@@ -7,8 +7,8 @@ export async function GET() {
     const { data, error } = await sb.from("coupons").select("code, percent, active, max_uses, used_count, expires_at").order("code")
     if (error) throw error
     return NextResponse.json({ items: data ?? [] })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }
 
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const { error } = await sb.from("coupons").insert({ code: String(code).toUpperCase().trim(), percent, active, max_uses, expires_at })
     if (error) throw error
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

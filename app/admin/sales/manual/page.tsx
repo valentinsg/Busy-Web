@@ -63,7 +63,7 @@ export default function ManualSalePage() {
           stockAvailable = json.total ?? undefined
         }
         const sizeStocks: Record<string, number> = Object.fromEntries(
-          sizes.map((s: any) => [s.size, Number(s.stock || 0)])
+          sizes.map((s) => [s.size, Number(s.stock || 0)])
         )
         updateItem(idx, { quantity: 1 })
         updateItem(idx, {
@@ -94,7 +94,7 @@ export default function ManualSalePage() {
     return m
   }, [items])
 
-  const anyOverStock = items.some((it, idx) => {
+  const anyOverStock = items.some((it) => {
     if (!it.product_id) return false
     const key = `${it.product_id}__${it.variant_size || ''}`
     const selected = (selectedCounts.get(key) || 0)
@@ -146,8 +146,8 @@ export default function ManualSalePage() {
       setTax(0)
       setNotes("")
       setIsBarter(false)
-    } catch (e: any) {
-      toast({ title: "Error al crear venta", description: e?.message || "", variant: "destructive" })
+    } catch (e: unknown) {
+      toast({ title: "Error al crear venta", description: (e instanceof Error ? e.message : String(e)) || "", variant: "destructive" })
     } finally {
       setLoading(false)
     }
@@ -170,7 +170,7 @@ export default function ManualSalePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
             <div className="flex flex-col">
               <label className="text-xs text-muted-foreground">Canal</label>
-              <select value={channel} onChange={(e) => setChannel(e.target.value as any)} className="border rounded px-2 py-1 bg-background">
+              <select value={channel} onChange={(e) => setChannel(e.target.value as (typeof channels)[number])} className="border rounded px-2 py-1 bg-background">
                 {channels.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
@@ -218,13 +218,13 @@ export default function ManualSalePage() {
                         product_id: pid,
                         product_name: product?.name,
                         unit_price: Number(product?.price || 0),
-                        available_sizes: (product?.sizes as any) || undefined,
+                        available_sizes: product?.sizes || undefined,
                       })
                       // Auto-select first size with stock > 0 using freshly fetched data
                       if (product?.sizes && product.sizes.length) {
                         void (async () => {
                           const res = await fetchItemStock(idx, pid)
-                          const sizes = (product.sizes as any as string[]) || []
+                          const sizes = (product.sizes as string[]) || []
                           const sizeStocks = res?.sizeStocks || {}
                           let picked: string | undefined
                           for (const s of sizes) {
@@ -381,7 +381,7 @@ function CustomerSearchInput({
         const params = new URLSearchParams({ q, limit: "10" })
         const res = await fetch(`/api/admin/customers/search?${params.toString()}`, { signal: ctrl.signal })
         const json = await res.json()
-        if (res.ok) setList((json.customers || []).map((c: any) => ({ id: c.id, name: c.full_name || "", email: c.email || "" })))
+        if (res.ok) setList((json.customers || []).map((c: { id: string; full_name?: string; email?: string }) => ({ id: c.id, name: c.full_name || "", email: c.email || "" })))
       } catch {}
     }, 200)
     return () => {

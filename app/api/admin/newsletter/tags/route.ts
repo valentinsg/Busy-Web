@@ -16,9 +16,10 @@ export async function GET(req: NextRequest) {
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 400 })
 
   const counts = new Map<string, number>()
-  for (const row of data || []) {
-    const tags: string[] = (row as any).tags || []
-    if (status && (row as any).status !== status) continue
+  const rows = (data as Array<{ tags?: string[]; status?: string }> | null) || []
+  for (const row of rows) {
+    const tags = Array.isArray(row.tags) ? row.tags : []
+    if (status && row.status !== status) continue
     for (const t of tags) {
       const tag = String(t)
       if (q && !tag.toLowerCase().includes(q)) continue

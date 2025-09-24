@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     if (!customerId) return NextResponse.json({ error: "customer_id requerido" }, { status: 400 })
     const orders = await getCustomerOrders(customerId, limit)
     return NextResponse.json({ ok: true, orders })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

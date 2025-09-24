@@ -23,13 +23,27 @@ export async function GET(req: NextRequest) {
   }
 
   // Try to map quick info from raw
-  const mapped = (data || []).map((row: any) => {
-    const p = row?.raw ?? {}
-    const status = p?.status || p?.body?.status || p?.response?.status
-    const status_detail = p?.status_detail || p?.body?.status_detail || p?.response?.status_detail
-    const payment_method_id = p?.payment_method_id || p?.body?.payment_method_id || p?.response?.payment_method_id
-    const payment_type_id = p?.payment_type_id || p?.body?.payment_type_id || p?.response?.payment_type_id
-    const external_reference = p?.external_reference || p?.body?.external_reference || p?.response?.external_reference
+  type WebhookRow = { payment_id: string; event_type: string; created_at: string; raw?: unknown }
+  const getPath = (obj: unknown, path: string[]): unknown => {
+    let cur: unknown = obj
+    for (const key of path) {
+      if (cur && typeof cur === 'object' && key in (cur as Record<string, unknown>)) {
+        cur = (cur as Record<string, unknown>)[key]
+      } else {
+        return undefined
+      }
+    }
+    return cur
+  }
+  const toStr = (v: unknown): string | undefined => (typeof v === 'string' || typeof v === 'number') ? String(v) : undefined
+
+  const mapped = (data || []).map((row: WebhookRow) => {
+    const p = row?.raw
+    const status = toStr(getPath(p, ['status'])) || toStr(getPath(p, ['body', 'status'])) || toStr(getPath(p, ['response', 'status']))
+    const status_detail = toStr(getPath(p, ['status_detail'])) || toStr(getPath(p, ['body', 'status_detail'])) || toStr(getPath(p, ['response', 'status_detail']))
+    const payment_method_id = toStr(getPath(p, ['payment_method_id'])) || toStr(getPath(p, ['body', 'payment_method_id'])) || toStr(getPath(p, ['response', 'payment_method_id']))
+    const payment_type_id = toStr(getPath(p, ['payment_type_id'])) || toStr(getPath(p, ['body', 'payment_type_id'])) || toStr(getPath(p, ['response', 'payment_type_id']))
+    const external_reference = toStr(getPath(p, ['external_reference'])) || toStr(getPath(p, ['body', 'external_reference'])) || toStr(getPath(p, ['response', 'external_reference']))
 
     return {
       created_at: row.created_at,

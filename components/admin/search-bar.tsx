@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 export default function AdminSearchBar({ placeholder = "Buscar..." }: { placeholder?: string }) {
@@ -22,7 +22,7 @@ export default function AdminSearchBar({ placeholder = "Buscar..." }: { placehol
       router.replace(`${pathname}?${sp.toString()}`)
     }, 300)
     return () => clearTimeout(t)
-  }, [q])
+  }, [q, pathname, params, router])
 
   return (
     <input

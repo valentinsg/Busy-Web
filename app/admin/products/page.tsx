@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { getProductsAsync } from "@/lib/repo/products"
 import { ProductCard } from "@/components/shop/product-card"
 import type { Product } from "@/lib/types"
@@ -14,7 +15,7 @@ export default async function AdminProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="font-heading text-xl font-semibold">Productos</h2>
-        <a href="/admin/products/new" className="text-sm underline">Nuevo producto</a>
+        <Link href="/admin/products/new" className="text-sm underline">Nuevo producto</Link>
       </div>
 
       {products.length === 0 ? (
@@ -26,7 +27,7 @@ export default async function AdminProductsPage() {
               <ProductCard product={p} adminEditHref={`/admin/products/${p.id}`} />
               <div className="flex gap-2">
                 <ProductFeatureToggle productId={p.id} initialFeatured={(p.tags || []).includes("featured")} initialTags={p.tags} />
-                <a href={`/admin/products/${p.id}`} className="text-xs underline">Editar</a>
+                <Link href={`/admin/products/${p.id}`} className="text-xs underline">Editar</Link>
               </div>
             </div>
           ))}

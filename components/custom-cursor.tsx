@@ -46,13 +46,13 @@ export function CustomCursor() {
     const onResize = () => setEnabled(computeEnabled())
     try {
       window.addEventListener("resize", onResize)
-      window.addEventListener("orientationchange", onResize as any)
+      window.addEventListener("orientationchange", onResize)
     } catch {}
 
     return () => {
       try {
         window.removeEventListener("resize", onResize)
-        window.removeEventListener("orientationchange", onResize as any)
+        window.removeEventListener("orientationchange", onResize)
       } catch {}
     }
   }, [])
@@ -87,7 +87,7 @@ export function CustomCursor() {
         clearTimeout(dwellTimerRef.current)
         dwellTimerRef.current = null
       }
-      
+
       setHeartbeat(false)
     }
 
@@ -103,7 +103,7 @@ export function CustomCursor() {
       const raw = e.target as EventTarget | null
       // Resolve to a proper Element (Text nodes do not have closest)
       const target: Element | null =
-        raw && (raw as any).closest
+        raw && (raw as Element).closest
           ? (raw as Element)
           : (raw as Node | null)?.parentElement || null
 

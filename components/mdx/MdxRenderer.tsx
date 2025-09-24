@@ -1,6 +1,7 @@
 import { MDXRemote } from "next-mdx-remote/rsc"
 import remarkBreaks from "remark-breaks"
 import remarkGfm from "remark-gfm"
+import Image from "next/image"
 
 export default function MdxRenderer({ source }: { source: string }) {
   return (
@@ -10,19 +11,28 @@ export default function MdxRenderer({ source }: { source: string }) {
         options={{ mdxOptions: { remarkPlugins: [remarkGfm, remarkBreaks] } }}
         // Simple element overrides for styling
         components={{
-          table: (p: any) => <table className="w-full border-collapse" {...p} />,
-          th: (p: any) => <th className="border px-3 py-2 text-left" {...p} />,
-          h1: (p: any) => <h1 className="font-body text-2xl md:text-3xl" {...p} />,
-          h2: (p: any) => <h2 className="font-body text-2xl md:text-2xl" {...p} />,
-          h3: (p: any) => <h3 className="font-body text-md md:text-lg" {...p} />,
-          p: (p: any) => <p className="font-body text-md md:text-md" {...p} />,
-          strong: (p: any) => <strong className="font-body font-bold text-md md:text-md" {...p} />,
-          li: (p: any) => <li className="font-body text-md md:text-md" {...p} />,
-          td: (p: any) => <td className="border px-3 py-2 align-top text-md md:text-md" {...p} />,
-          blockquote: (p: any) => <blockquote className="border-l-4 pl-4 opacity-80 italic text-md md:text-md" {...p} />,
-          a: (p: any) => <a className="font-body text-md md:text-md" {...p} />,
-          img: (p: any) => <img className="font-body text-md md:text-md" {...p} />,
-          quote: (p: any) => <blockquote className="border-l-4 pl-4 opacity-80 italic text-md md:text-md" {...p} />,
+          table: (p: { className?: string }) => <table className="w-full border-collapse" {...p} />,
+          th: (p: { className?: string }) => <th className="border px-3 py-2 text-left" {...p} />,
+          h1: (p: { className?: string }) => <h1 className="font-body text-2xl md:text-3xl" {...p} />,
+          h2: (p: { className?: string }) => <h2 className="font-body text-2xl md:text-2xl" {...p} />,
+          h3: (p: { className?: string }) => <h3 className="font-body text-md md:text-lg" {...p} />,
+          p: (p: { className?: string }) => <p className="font-body text-md md:text-md" {...p} />,
+          strong: (p: { className?: string }) => <strong className="font-body font-bold text-md md:text-md" {...p} />,
+          li: (p: { className?: string }) => <li className="font-body text-md md:text-md" {...p} />,
+          td: (p: { className?: string }) => <td className="border px-3 py-2 align-top text-md md:text-md" {...p} />,
+          blockquote: (p: { className?: string }) => <blockquote className="border-l-4 pl-4 opacity-80 italic text-md md:text-md" {...p} />,
+          a: (p: { className?: string }) => <a className="font-body text-md md:text-md" {...p} />,
+          img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+            const { src, alt, width, height, className, ...rest } = props
+            if (typeof src === 'string') {
+              const w = typeof width === 'number' ? width : Number(width) || 800
+              const h = typeof height === 'number' ? height : Number(height) || 450
+              return <Image src={src} alt={alt ?? ''} width={w} height={h} className={className} />
+            }
+            // Fallback in case src is missing or not a string
+            return <p {...rest} className={className} />
+          },
+          quote: (p: { className?: string }) => <blockquote className="border-l-4 pl-4 opacity-80 italic text-md md:text-md" {...p} />,
         }}
       />
     </div>

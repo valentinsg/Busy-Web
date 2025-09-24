@@ -49,10 +49,11 @@ export async function getRevenueByChannel(params: {
   if (params.to) query = query.lte("placed_at", params.to)
   const { data, error } = await query
   if (error) throw error
+  type ChannelRow = { channel: string; total: number }
   const agg = new Map<string, { channel: string; orders: number; revenue: number }>()
-  for (const row of data ?? []) {
-    const ch = String((row as any).channel)
-    const total = Number((row as any).total) || 0
+  for (const row of (data as ChannelRow[] | null) ?? []) {
+    const ch = String(row.channel)
+    const total = Number(row.total) || 0
     if (!agg.has(ch)) agg.set(ch, { channel: ch, orders: 0, revenue: 0 })
     const a = agg.get(ch)!
     a.orders += 1
@@ -68,20 +69,22 @@ export async function getProfitSummary(params: {
 }): Promise<{ revenue: number; expenses: number; profit: number }> {
   const supabase = getServiceClient()
   // Fetch values and aggregate in app to avoid PostgREST aggregate quirks
+  type OrderRow = { total: number; placed_at: string }
   let ordersQB = supabase.from("orders").select("total,placed_at")
   if (params.from) ordersQB = ordersQB.gte("placed_at", params.from)
   if (params.to) ordersQB = ordersQB.lte("placed_at", params.to)
   const { data: orderRows, error: revErr } = await ordersQB
   if (revErr) throw revErr
 
+  type ExpenseRow = { amount: number; incurred_at: string }
   let expensesQB = supabase.from("expenses").select("amount,incurred_at")
   if (params.from) expensesQB = expensesQB.gte("incurred_at", params.from)
   if (params.to) expensesQB = expensesQB.lte("incurred_at", params.to)
   const { data: expenseRows, error: expErr } = await expensesQB
   if (expErr) throw expErr
 
-  const revenue = (orderRows ?? []).reduce((acc: number, r: any) => acc + Number(r.total || 0), 0)
-  const expenses = (expenseRows ?? []).reduce((acc: number, r: any) => acc + Number(r.amount || 0), 0)
+  const revenue = ((orderRows as OrderRow[] | null) ?? []).reduce((acc: number, r) => acc + Number(r.total || 0), 0)
+  const expenses = ((expenseRows as ExpenseRow[] | null) ?? []).reduce((acc: number, r) => acc + Number(r.amount || 0), 0)
   return { revenue, expenses, profit: revenue - expenses }
 }
 
@@ -111,6 +114,8 @@ export async function getTimeSeries(params: {
 }): Promise<Array<{ bucket: string; revenue: number; expenses: number; orders: number; profit: number }>> {
   const groupBy = params.groupBy || 'day'
   const supabase = getServiceClient()
+  type TSOrderRow = { total: number; placed_at: string }
+  type TSExpenseRow = { amount: number; incurred_at: string }
   // fetch orders
   let ordersQB = supabase.from('orders').select('total,placed_at')
   if (params.from) ordersQB = ordersQB.gte('placed_at', params.from)
@@ -128,19 +133,19 @@ export async function getTimeSeries(params: {
   if (eErr) throw eErr
 
   const agg = new Map<string, { revenue: number; expenses: number; orders: number }>()
-  for (const r of orderRows ?? []) {
-    const d = new Date(String((r as any).placed_at))
+  for (const r of ((orderRows as TSOrderRow[] | null) ?? [])) {
+    const d = new Date(String(r.placed_at))
     const key = toDateKey(d, groupBy)
     const a = agg.get(key) || { revenue: 0, expenses: 0, orders: 0 }
-    a.revenue += Number((r as any).total || 0)
+    a.revenue += Number(r.total || 0)
     a.orders += 1
     agg.set(key, a)
   }
-  for (const r of expRows ?? []) {
-    const d = new Date(String((r as any).incurred_at))
+  for (const r of ((expRows as TSExpenseRow[] | null) ?? [])) {
+    const d = new Date(String(r.incurred_at))
     const key = toDateKey(d, groupBy)
     const a = agg.get(key) || { revenue: 0, expenses: 0, orders: 0 }
-    a.expenses += Number((r as any).amount || 0)
+    a.expenses += Number(r.amount || 0)
     agg.set(key, a)
   }
   const out = Array.from(agg.entries())
@@ -158,7 +163,7 @@ export async function getKPIs(params: { from?: string; to?: string }): Promise<{
   const { data: orderRows, error: ordErr } = await ordersQB
   if (ordErr) throw ordErr
   const orders = (orderRows ?? []).length
-  const revenue = (orderRows ?? []).reduce((acc: number, r: any) => acc + Number(r.total || 0), 0)
+  const revenue = ((orderRows as Array<{ total: number }> | null) ?? []).reduce((acc: number, r) => acc + Number(r.total || 0), 0)
   const aov = orders > 0 ? revenue / orders : 0
 
   // New customers in period

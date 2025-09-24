@@ -47,7 +47,7 @@ export default function HomeLatestBlog() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
           {posts.map((post) => (
             <div key={post.slug}>
-              <PostCard post={post as PostCardData} variant="home" aspectRatio="4/3" showExcerpt={true} />
+              <PostCard post={post as PostCardData} aspectRatio="4/3" showExcerpt={true} />
               <div className="mt-4">
                 <Link
                   href={`/blog/${post.slug}`}

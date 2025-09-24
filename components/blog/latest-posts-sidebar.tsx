@@ -1,5 +1,6 @@
 import { getAllPosts } from "@/lib/blog"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function LatestPostsSidebar({ currentSlug }: { currentSlug: string }) {
   const posts = getAllPosts().filter((p) => p.slug !== currentSlug).slice(0, 4)
@@ -12,7 +13,7 @@ export default function LatestPostsSidebar({ currentSlug }: { currentSlug: strin
           <li key={p.slug} className="flex items-center gap-2">
             {p.cover ? (
               <Link href={`/blog/${p.slug}`}>
-                <img src={p.cover} alt={p.coverAlt || p.title} className="h-14 w-16 object-cover rounded border" />
+                <Image src={p.cover} alt={p.coverAlt || p.title} className="h-14 w-16 object-cover rounded border" />
               </Link>
             ) : (
               <Link href={`/blog/${p.slug}`}>

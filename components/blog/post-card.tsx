@@ -19,12 +19,11 @@ export interface PostCardData {
 
 interface PostCardProps {
   post: PostCardData
-  variant?: "home" | "list"
   aspectRatio?: "4/3" | "16/9" | "1/1"
   showExcerpt?: boolean
 }
 
-export default function PostCard({ post, variant = "home", aspectRatio = "4/3", showExcerpt = true }: PostCardProps) {
+export default function PostCard({ post, aspectRatio = "4/3", showExcerpt = true }: PostCardProps) {
   const ar = aspectRatio === "16/9" ? "aspect-[16/9]" : aspectRatio === "1/1" ? "aspect-square" : "aspect-[4/3]"
   const date = post.date ? format(new Date(post.date), "MMMM d, yyyy", { locale: es }) : null
 

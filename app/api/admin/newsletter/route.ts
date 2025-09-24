@@ -40,8 +40,8 @@ export async function DELETE(req: NextRequest) {
     const { error } = await svc.from("newsletter_subscribers").delete().eq("email", email)
     if (error) throw error
     return NextResponse.json({ ok: true })
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message ?? String(e) }, { status: 400 })
+  } catch (e: unknown) {
+    return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 400 })
   }
 }
 
@@ -58,7 +58,7 @@ export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json()
     const { email, status, tags } = patchSchema.parse(body)
-    const patch: any = {}
+    const patch: Record<string, unknown> = {}
     if (status) patch.status = status
     if (tags) patch.tags = tags
     if (Object.keys(patch).length === 0) {
@@ -67,7 +67,7 @@ export async function PATCH(req: NextRequest) {
     const { error } = await svc.from("newsletter_subscribers").update(patch).eq("email", email)
     if (error) throw error
     return NextResponse.json({ ok: true })
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message ?? String(e) }, { status: 400 })
+  } catch (e: unknown) {
+    return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 400 })
   }
 }

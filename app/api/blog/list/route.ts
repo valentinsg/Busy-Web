@@ -13,7 +13,7 @@ export async function GET() {
         cover: p.cover || null,
       }))
     return NextResponse.json({ ok: true, posts })
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message || "Error" }, { status: 500 })
+  } catch (e: unknown) {
+    return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "Error" }, { status: 500 })
   }
 }

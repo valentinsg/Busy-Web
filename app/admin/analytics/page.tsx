@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import DashboardCards from "@/components/admin/dashboard-cards"
 import { useToast } from "@/hooks/use-toast"
@@ -90,9 +90,9 @@ export default function AnalyticsPage() {
         const res = await fetch("/api/admin/analytics/product-popularity?limit=20")
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || "Error")
-        setPopular((json.data || []).map((r: any) => ({ product_id: r.product_id, name: r.name, revenue: Number(r.revenue || 0), orders_count: Number(r.orders_count || 0) })))
-      } catch (e: any) {
-        toast({ title: "Error al cargar populares", description: e?.message || "", variant: "destructive" })
+        setPopular((json.data || []).map((r: { product_id: string; name: string; revenue: number; orders_count: number }) => ({ product_id: r.product_id, name: r.name, revenue: Number(r.revenue || 0), orders_count: Number(r.orders_count || 0) })))
+      } catch (e: unknown ) {
+        toast({ title: "Error al cargar populares", description: e?.toString() || "", variant: "destructive" })
       } finally {
         setLoading(false)
       }
@@ -117,8 +117,8 @@ export default function AnalyticsPage() {
           timeSeries: json.timeSeries || [],
           kpis: json.kpis || null,
         })
-      } catch (e: any) {
-        toast({ title: 'Error al cargar análisis', description: e?.message || '', variant: 'destructive' })
+      } catch (e: unknown) {
+        toast({ title: 'Error al cargar análisis', description: e?.toString() || '', variant: 'destructive' })
       } finally {
         setLoading(false)
       }
@@ -126,9 +126,9 @@ export default function AnalyticsPage() {
   )
 
   useEffect(() => {
-    loadPopular()
-    loadSummary()
-  }, [])
+    void loadPopular()
+    void loadSummary()
+  }, [loadPopular, loadSummary ])
 
   // Helpers to build comparison series (previous period)
   const prevRange = useMemo(() => {
@@ -163,7 +163,7 @@ export default function AnalyticsPage() {
       void loadSummary()
     }, 400)
     return () => clearTimeout(t)
-  }, [from, to, groupBy])
+  }, [from, to, groupBy, loadSummary])
 
   return (
     <div className="space-y-6">
@@ -219,7 +219,7 @@ export default function AnalyticsPage() {
             <div className="mt-2 flex flex-wrap gap-3 items-end">
               <div className="flex flex-col">
                 <label className="text-xs text-muted-foreground" title="Agrupar la serie temporal por día, semana o mes">Agrupar por</label>
-                <select value={groupBy} onChange={(e) => setGroupBy(e.target.value as any)} className="border rounded px-2 py-1 bg-background">
+                <select value={groupBy} onChange={(e) => setGroupBy(e.target.value as 'day' | 'week' | 'month')} className="border rounded px-2 py-1 bg-background">
                   <option value="day">Día</option>
                   <option value="week">Semana</option>
                   <option value="month">Mes</option>

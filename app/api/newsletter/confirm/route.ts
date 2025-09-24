@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     // For now, just return JSON. You could redirect to a thank-you page.
     return NextResponse.json({ ok: true, message: "Suscripción confirmada" })
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message ?? String(e) }, { status: 400 })
+  } catch (e: unknown) {
+    return NextResponse.json({ ok: false, error: String(e) }, { status: 400 })
   }
 }

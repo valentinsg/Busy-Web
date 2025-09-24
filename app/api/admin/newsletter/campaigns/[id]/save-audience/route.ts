@@ -23,8 +23,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const { data: filtered, error } = await q
     if (error) throw error
     const allowedByFilters = new Set<string>((filtered||[])
-      .filter((r: any) => r.status === 'subscribed')
-      .map((r: any) => String(r.email).toLowerCase()))
+      .filter((r: Record<string, unknown>) => r.status === 'subscribed')
+      .map((r: Record<string, unknown>) => String(r.email).toLowerCase()))
 
     // If a list of emails is provided, validate against DB
     let allowed: string[]
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         .select("email,status")
         .in("email", norm)
       if (e2) throw e2
-      const map = new Map((rows||[]).map((r: any) => [String(r.email).toLowerCase(), r.status]))
+      const map = new Map((rows||[]).map((r: Record<string, unknown>) => [String(r.email).toLowerCase(), r.status]))
       allowed = norm.filter(em => map.get(em)==='subscribed' && (allowedByFilters.size===0 || allowedByFilters.has(em)))
     } else {
       allowed = Array.from(allowedByFilters)
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     return NextResponse.json({ ok: true, saved: allowed.length })
-  } catch (e:any) {
-    return NextResponse.json({ ok: false, error: e?.message || String(e) }, { status: 400 })
+  } catch (e: unknown) {
+    return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 400 })
   }
 }

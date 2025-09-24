@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
+import Image from "next/image"
 
 export default function NewProductPage() {
   const router = useRouter()
@@ -58,8 +59,8 @@ export default function NewProductPage() {
         uploaded.push(json.url as string)
       }
       setForm((f) => ({ ...f, images: [...f.images, ...uploaded] }))
-    } catch (e: any) {
-      setError(e?.message || String(e))
+    } catch (e: unknown) {
+      setError(e?.toString() || String(e))
     } finally {
       setUploading(false)
     }
@@ -125,8 +126,8 @@ export default function NewProductPage() {
       const json = await res.json()
       if (!res.ok || !json.ok) throw new Error(json.error || "Error al guardar")
       router.replace("/admin/products")
-    } catch (e: any) {
-      setError(e?.message || String(e))
+    } catch (e: unknown) {
+      setError(e?.toString() || String(e))
     } finally {
       setSaving(false)
     }
@@ -260,7 +261,7 @@ export default function NewProductPage() {
             </label>
             <div className="mt-2 grid grid-cols-3 gap-2">
               {form.images.map((url) => (
-                <img key={url} src={url} alt="img" className="w-full h-24 object-cover rounded" />
+                <Image key={url} src={url} alt="img" className="w-full h-24 object-cover rounded" />
               ))}
             </div>
             {uploading && <p className="text-sm text-muted-foreground mt-1">Subiendo...</p>}

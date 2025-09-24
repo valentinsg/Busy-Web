@@ -36,7 +36,7 @@ export default function BlogRowActions({ slug }: { slug: string }) {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Borrar artículo?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará el archivo MDX "{slug}.mdx".
+              Esta acción no se puede deshacer. Se eliminará el archivo MDX &quot;{slug}&quot;.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {error && <div className="text-sm text-red-500">{error}</div>}

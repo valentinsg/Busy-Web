@@ -53,8 +53,9 @@ export default function NewCouponPage() {
             setMessage("Cupón creado correctamente. Redirigiendo...")
             setRedirecting(true)
             setTimeout(() => router.push("/admin/coupons"), 800)
-          } catch (err: any) {
-            setMessage(err.message)
+          } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err)
+            setMessage(msg)
           } finally {
             setSaving(false)
           }

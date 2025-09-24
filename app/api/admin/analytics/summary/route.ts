@@ -16,7 +16,7 @@ export async function GET(req: Request) {
     ])
 
     return NextResponse.json({ ok: true, revenueByChannel, profit, timeSeries, kpis })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

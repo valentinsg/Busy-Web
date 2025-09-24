@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { supabase } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -16,7 +17,19 @@ export default function EditProductPage({ params }: PageProps) {
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [saving, setSaving] = React.useState(false)
-  const [form, setForm] = React.useState<any>({})
+  type FormState = {
+    name?: string
+    price?: number
+    currency?: string
+    images?: string[]
+    colors?: string
+    sizes?: string
+    category?: string
+    sku?: string
+    stock?: number
+    description?: string
+  }
+  const [form, setForm] = React.useState<FormState>({})
   const [stockBySize, setStockBySize] = React.useState<Record<string, number>>({})
   const [uploading, setUploading] = React.useState(false)
   const [sizeRows, setSizeRows] = React.useState<
@@ -54,10 +67,10 @@ export default function EditProductPage({ params }: PageProps) {
         if (!res.ok || !json.ok) throw new Error(json.error || "Upload failed")
         uploaded.push(json.url as string)
       }
-      setForm((f: any) => ({ ...f, images: [...(f.images || []), ...uploaded] }))
+      setForm((f) => ({ ...f, images: [...(f.images || []), ...uploaded] }))
       toast({ title: "Imágenes subidas", description: `${uploaded.length} archivo(s) agregado(s)` })
-    } catch (e: any) {
-      const message = e?.message || String(e)
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e)
       setError(message)
       toast({ title: "Error al subir", description: message })
     } finally {
@@ -89,22 +102,24 @@ export default function EditProductPage({ params }: PageProps) {
             setStockBySize(p.stockBySize || {})
             const sizes = p.sizes || []
             const rows = sizes.map((s) => {
-              const m: any = (p as any).measurementsBySize?.[s] || {}
+              const mRaw = (p as unknown as { measurementsBySize?: Record<string, unknown> })
+                .measurementsBySize?.[s] as unknown
+              const m = (mRaw && typeof mRaw === 'object' ? mRaw as Record<string, unknown> : {})
               return {
                 size: s,
-                chest: typeof m.chest === 'number' ? m.chest : undefined,
-                length: typeof m.length === 'number' ? m.length : undefined,
-                sleeve: typeof m.sleeve === 'number' ? m.sleeve : undefined,
-                waist: typeof m.waist === 'number' ? m.waist : undefined,
-                hip: typeof m.hip === 'number' ? m.hip : undefined,
+                chest: typeof m.chest === 'number' ? (m.chest as number) : undefined,
+                length: typeof m.length === 'number' ? (m.length as number) : undefined,
+                sleeve: typeof m.sleeve === 'number' ? (m.sleeve as number) : undefined,
+                waist: typeof m.waist === 'number' ? (m.waist as number) : undefined,
+                hip: typeof m.hip === 'number' ? (m.hip as number) : undefined,
                 stock: (p.stockBySize || {})[s] ?? undefined,
               }
             })
             setSizeRows(rows)
           }
         }
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message || String(e))
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e))
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -172,8 +187,8 @@ export default function EditProductPage({ params }: PageProps) {
       const json2 = await res2.json()
       if (!res2.ok || !json2.ok) throw new Error(json2.error || "Error al guardar stock por talle")
       toast({ title: "Cambios guardados", description: "El producto fue actualizado correctamente." })
-    } catch (e: any) {
-      const message = e?.message || String(e)
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e)
       setError(message)
       toast({ title: "Error al guardar", description: message })
     } finally {
@@ -199,8 +214,8 @@ export default function EditProductPage({ params }: PageProps) {
       setTimeout(() => {
         window.location.reload()
       }, 50)
-    } catch (e: any) {
-      const message = e?.message || String(e)
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e)
       setError(message)
       toast({ title: "Error al eliminar", description: message })
     }
@@ -251,8 +266,8 @@ export default function EditProductPage({ params }: PageProps) {
             <div className="mt-2 grid grid-cols-3 gap-2">
               {(form.images||[]).map((url: string) => (
                 <div key={url} className="relative group">
-                  <img src={url} alt="img" className="w-full h-24 object-cover rounded" />
-                  <button type="button" onClick={() => setForm((f:any)=>({ ...f, images: (f.images||[]).filter((u:string)=>u!==url) }))} className="absolute top-1 right-1 text-[11px] underline bg-black/60 rounded px-1 py-0.5 opacity-0 group-hover:opacity-100">Quitar</button>
+                  <Image src={url} alt="img" className="w-full h-24 object-cover rounded" width={200} height={96} />
+                  <button type="button" onClick={() => setForm((f)=>({ ...f, images: (f.images||[]).filter((u:string)=>u!==url) }))} className="absolute top-1 right-1 text-[11px] underline bg-black/60 rounded px-1 py-0.5 opacity-0 group-hover:opacity-100">Quitar</button>
                 </div>
               ))}
             </div>

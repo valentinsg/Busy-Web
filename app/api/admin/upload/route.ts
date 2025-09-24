@@ -19,16 +19,16 @@ export async function POST(req: NextRequest) {
     // Ensure bucket exists and is public
     try {
       // getBucket is available; if not, list and check
-      const { data: bInfo } = await (svc.storage as any).getBucket?.(bucket)
+      const { data: bInfo } = await svc.storage.getBucket?.(bucket)
       if (!bInfo) {
-        const { data: list } = await (svc.storage as any).listBuckets?.()
-        const exists = Array.isArray(list) && list.some((b: any) => b.name === bucket)
+        const { data: list } = await svc.storage.listBuckets?.()
+        const exists = Array.isArray(list) && list.some((b: unknown) => (b as { name: string }).name === bucket)
         if (!exists) {
-          await (svc.storage as any).createBucket?.(bucket, { public: true })
+          await svc.storage.createBucket?.(bucket, { public: true })
         }
       }
       // Try to set public if not already
-      await (svc.storage as any).updateBucket?.(bucket, { public: true })
+      await svc.storage.updateBucket?.(bucket, { public: true })
     } catch {
       // best-effort; continue
     }
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     const { data: pub } = svc.storage.from(bucket).getPublicUrl(path)
     return NextResponse.json({ ok: true, url: pub.publicUrl, path })
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message ?? String(e) }, { status: 400 })
+  } catch (e: unknown) {
+    return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 400 })
   }
 }

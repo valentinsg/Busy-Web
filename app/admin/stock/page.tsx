@@ -60,8 +60,8 @@ export default function AdminStockPage() {
       const json = await res.json()
       if (!res.ok || !json.ok) throw new Error(json.error || "Error al guardar stock")
       toast({ title: "Stock actualizado", description: "Se guardaron los cambios." })
-    } catch (e: any) {
-      toast({ title: "Error", description: e?.message || String(e) })
+    } catch (e: unknown) {
+      toast({ title: "Error", description: e?.toString() || String(e) })
     } finally {
       setSavingId(null)
     }

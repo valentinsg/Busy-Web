@@ -19,7 +19,7 @@ export default function SettingsPage() {
           setFlat(Number(data.shipping_flat_rate ?? 20000))
           setFree(Number(data.shipping_free_threshold ?? 80000))
         }
-      } catch (e) {
+      } catch {
         // ignore
       } finally {
         if (!cancelled) setLoading(false)
@@ -44,8 +44,8 @@ export default function SettingsPage() {
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data?.error || "Error guardando cambios")
       setToast("Guardado ✔")
-    } catch (err: any) {
-      setToast(err?.message || "Error inesperado")
+    } catch (err: unknown) {
+      setToast(err?.toString() || "Error inesperado")
     } finally {
       setSaving(false)
     }

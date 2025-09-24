@@ -11,8 +11,8 @@ export async function GET(req: Request) {
 
     const data = await listExpenses({ from, to, category, supplier_id })
     return NextResponse.json({ ok: true, data })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }
 
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       metadata: body.metadata ?? null,
     })
     return NextResponse.json({ ok: true, expense })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

@@ -12,8 +12,8 @@ export async function PATCH(request: Request, { params }: { params: { code: stri
     const { error } = await sb.from("coupons").update({ active }).eq("code", decodeURIComponent(params.code))
     if (error) throw error
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }
 
@@ -23,7 +23,7 @@ export async function DELETE(_request: Request, { params }: { params: { code: st
     const { error } = await sb.from("coupons").delete().eq("code", decodeURIComponent(params.code))
     if (error) throw error
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

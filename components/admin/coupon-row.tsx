@@ -58,7 +58,7 @@ export default function CouponRow({ coupon }: { coupon: Coupon }) {
         <div className="text-xs text-muted-foreground hidden sm:block">
           {local.percent}%
           {typeof local.max_uses === "number" ? ` · ${local.used_count}/${local.max_uses}` : ""}
-          {local.expires_at ? ` · vence: ${new Date(local.expires_at as any).toLocaleDateString()}` : ""}
+          {local.expires_at ? ` · vence: ${new Date(local.expires_at).toLocaleDateString()}` : ""}
         </div>
         <TooltipProvider>
           <Tooltip>

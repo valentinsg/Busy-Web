@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     })
 
     return NextResponse.json({ ok: true, order: result.order, items: result.items })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

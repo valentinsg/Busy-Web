@@ -2,13 +2,10 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 
 export default function AdminQuickFAB() {
   const [open, setOpen] = React.useState(false)
   const [isAdmin, setIsAdmin] = React.useState(false)
-  const pathname = usePathname()
-  const isAdminRoute = pathname?.startsWith("/admin")
 
   // Check if user is admin
   React.useEffect(() => {
@@ -61,7 +58,7 @@ export default function AdminQuickFAB() {
   return (
     <div className={`fixed right-6 bottom-6 z-40`}>
       {open && (
-        <div 
+        <div
           className={`
             absolute right-0 bottom-0 transition-all duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)]
             ${open ? 'scale-100' : 'scale-0 origin-bottom-right'}
@@ -114,7 +111,7 @@ export default function AdminQuickFAB() {
       <button
         onClick={() => setOpen((v) => !v)}
         className={`
-          rounded-2xl h-16 w-16 flex items-center justify-center 
+          rounded-2xl h-16 w-16 flex items-center justify-center
           transition-all duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)]
           bg-gradient-to-br from-blue-500 to-purple-600 text-white
           shadow-lg hover:shadow-xl active:scale-95

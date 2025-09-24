@@ -47,7 +47,7 @@ export default function NewPopoverPage() {
           setSections((p.sections || []).join(", "))
           setPaths((p.paths || []).join(", "))
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
@@ -83,7 +83,7 @@ export default function NewPopoverPage() {
               sections: arrFromInput(sections),
               paths: arrFromInput(paths),
             }
-            const headers: any = { "Content-Type": "application/json" }
+            const headers: Record<string, string> = { "Content-Type": "application/json" }
             const token = localStorage.getItem("sb-access-token")
             if (token) headers.Authorization = `Bearer ${token}`
             const url = isEdit ? `/api/admin/popovers/${editingId}` : "/api/admin/popovers"
@@ -93,8 +93,8 @@ export default function NewPopoverPage() {
             if (!res.ok) throw new Error(json?.error || "Error")
             setMessage(isEdit ? "Actualizado" : "Creado")
             setTimeout(() => router.push("/admin/popovers"), 600)
-          } catch (err: any) {
-            setMessage(err.message)
+          } catch (err: unknown) {
+            setMessage(err?.toString() || String(err))
           } finally {
             setSaving(false)
           }
@@ -155,15 +155,15 @@ export default function NewPopoverPage() {
                 setSaving(true)
                 setMessage(null)
                 try {
-                  const headers: any = {}
+                  const headers: Record<string, string> = {}
                   const token = localStorage.getItem("sb-access-token")
                   if (token) headers.Authorization = `Bearer ${token}`
                   const res = await fetch(`/api/admin/popovers/${editingId}`, { method: "DELETE", headers })
                   const json = await res.json()
                   if (!res.ok) throw new Error(json?.error || "Error")
                   router.push("/admin/popovers")
-                } catch (err: any) {
-                  setMessage(err.message)
+                } catch (err: unknown) {
+                  setMessage(err?.toString() || String(err))
                 } finally {
                   setSaving(false)
                 }

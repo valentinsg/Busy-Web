@@ -10,6 +10,7 @@ import authors from '@/data/authors.json'
 import { getAllPosts, getPostBySlug } from '@/lib/blog'
 import { format } from 'date-fns'
 import { enUS, es } from 'date-fns/locale'
+import Image from 'next/image'
 import {
   ArrowUpRight,
   Calendar,
@@ -18,6 +19,7 @@ import {
   Share2,
 } from 'lucide-react'
 import type { Metadata } from 'next'
+import type { BlogPost } from '@/types/blog'
 import dynamic from 'next/dynamic'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
@@ -110,11 +112,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null
   const nextPost =
     currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null
-  const related = allPosts
-    .filter(
-      (p) => p.slug !== post.slug && p.category && p.category === post.category
-    )
-    .slice(0, 4)
+  // Note: related posts are rendered via backlinks below; explicit 'related' list removed
 
   const localeCookie = cookies().get('busy_locale')?.value
   const dfnsLocale = localeCookie === 'es' ? es : enUS
@@ -282,7 +280,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         {/* Author card */}
         <div className="mt-10">
           {(() => {
-            const list = authors as any[]
+            const list = authors as Array<{ name?: string; avatar?: string; instagram?: string; bio?: string }>
             const a = list.find(
               (x) =>
                 (x.name || '').toLowerCase() ===
@@ -346,7 +344,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             <div className="grid sm:grid-cols-2 gap-4">
               {post.backlinks.map((b, i) => {
                 const isInternal = b.url?.startsWith('/blog/')
-                let enriched: any = null
+                let enriched: BlogPost | null = null
                 if (isInternal) {
                   const slug = (b.url || '')
                     .replace(/^\/?blog\//, '')
@@ -362,11 +360,12 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                       href={b.url}
                       className="group text-white rounded-lg border bg-muted/20 p-3 flex gap-3 items-center hover:border-accent-brand transition-colors"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       {enriched.cover ? (
-                        <img
+                        <Image
                           src={enriched.cover}
                           alt={enriched.title}
+                          width={96}
+                          height={64}
                           className="h-16 w-24 object-cover rounded border"
                         />
                       ) : (

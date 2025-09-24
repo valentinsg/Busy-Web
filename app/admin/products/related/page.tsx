@@ -19,8 +19,8 @@ export default function RelatedProductsAdminPage() {
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || "Error")
         // fetch product names for the related ids
-        const ids = (json.data || []).map((r: any) => r.related_product_id)
-        let names: Record<string, string> = {}
+        const ids = (json.data || []).map((r: { related_product_id: string }) => r.related_product_id)
+        const names: Record<string, string> = {}
         if (ids.length) {
           const pr = await fetch(`/api/admin/products/search?${new URLSearchParams({ q: "", limit: String(ids.length) }).toString()}`)
           const pj = await pr.json()
@@ -28,9 +28,9 @@ export default function RelatedProductsAdminPage() {
             for (const p of pj.products || []) names[p.id] = p.name
           }
         }
-        setList((json.data || []).map((r: any) => ({ ...r, name: names[r.related_product_id] })))
-      } catch (e: any) {
-        toast({ title: "Error al cargar relaciones", description: e?.message || "", variant: "destructive" })
+        setList((json.data || []).map((r: { related_product_id: string }) => ({ ...r, name: names[r.related_product_id] })))
+      } catch (e: unknown) {
+        toast({ title: "Error al cargar relaciones", description: e?.toString() || String(e), variant: "destructive" })
       } finally {
         setLoading(false)
       }
@@ -40,7 +40,7 @@ export default function RelatedProductsAdminPage() {
 
   useEffect(() => {
     if (base?.id) load(base.id)
-  }, [base?.id])
+  }, [base?.id, load])
 
   async function addRelation(rel: { related_product_id: string; relation_type: string; weight: number }) {
     if (!base?.id) return
@@ -55,8 +55,8 @@ export default function RelatedProductsAdminPage() {
       if (!res.ok) throw new Error(json?.error || "Error")
       toast({ title: "Relación creada" })
       await load(base.id)
-    } catch (e: any) {
-      toast({ title: "Error al crear relación", description: e?.message || "", variant: "destructive" })
+    } catch (e: unknown) {
+      toast({ title: "Error al crear relación", description: e?.toString() || String(e), variant: "destructive" })
     } finally {
       setLoading(false)
     }
@@ -70,8 +70,8 @@ export default function RelatedProductsAdminPage() {
       if (!res.ok) throw new Error(json?.error || "Error")
       toast({ title: "Relación eliminada" })
       setList((arr) => arr.filter((r) => r.id !== id))
-    } catch (e: any) {
-      toast({ title: "Error al eliminar relación", description: e?.message || "", variant: "destructive" })
+    } catch (e: unknown) {
+      toast({ title: "Error al eliminar relación", description: e?.toString() || String(e), variant: "destructive" })
     } finally {
       setLoading(false)
     }
@@ -151,7 +151,7 @@ function ProductPicker({ onSelect }: { onSelect: (p: { id: string; name: string 
       try {
         const res = await fetch(`/api/admin/products/search?${new URLSearchParams({ q, limit: "10" }).toString()}`, { signal: ctrl.signal })
         const json = await res.json()
-        if (res.ok) setList((json.products || []).map((p: any) => ({ id: p.id, name: p.name })))
+        if (res.ok) setList((json.products || []).map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })))
       } catch {}
     }, 200)
     return () => { clearTimeout(t); ctrl.abort() }

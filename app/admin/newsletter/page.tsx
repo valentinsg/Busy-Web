@@ -5,8 +5,7 @@ import { supabase } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { SimpleSelect } from "@/components/ui/simple-select"
 import { Menu } from "@/components/ui/menu"
-
-interface Subscriber { email: string; created_at: string }
+import { Subscriber } from "@/lib/types"
 
 export default function NewsletterAdminPage() {
   const { toast } = useToast()
@@ -42,8 +41,8 @@ export default function NewsletterAdminPage() {
       if (!res.ok || !json.ok) throw new Error(json.error || "Error")
       setItems(json.items || [])
       setTotal(Number(json.total || 0))
-    } catch (e: any) {
-      setError(e?.message || String(e))
+    } catch (e: unknown) {
+      setError(e?.toString() || String(e))
     } finally {
       setLoading(false)
     }
@@ -65,8 +64,8 @@ export default function NewsletterAdminPage() {
       if (!res.ok || !json.ok) throw new Error(json.error || "Error")
       setItems((prev) => prev.filter((it) => it.email !== email))
       toast({ title: "Eliminado", description: `${email} fue eliminado.` })
-    } catch (e: any) {
-      toast({ title: "Error", description: e?.message || String(e) })
+    } catch (e: unknown) {
+      toast({ title: "Error", description: e?.toString() || String(e) })
     }
   }
 
@@ -87,11 +86,11 @@ export default function NewsletterAdminPage() {
       })
       const json = await res.json()
       if (!res.ok || !json.ok) throw new Error(json.error || "Error al agregar")
-      setItems((prev) => [{ email, created_at: new Date().toISOString() }, ...prev.filter(i=>i.email!==email)])
+      setItems((prev) => [{ email, created_at: new Date().toISOString(), status: "pending", tags: [] }, ...prev.filter(i=>i.email!==email)])
       setNewEmail("")
       toast({ title: "Agregado", description: `${email} suscripto.` })
-    } catch (e: any) {
-      toast({ title: "Error", description: e?.message || String(e) })
+    } catch (e: unknown) {
+      toast({ title: "Error", description: e?.toString() || String(e) })
     } finally {
       setAdding(false)
     }
@@ -149,8 +148,8 @@ export default function NewsletterAdminPage() {
             buttonLabel="⋯"
             items={[
               { label: "Copiar emails separados por coma (,)", onClick: ()=>copyAll(",") },
-              { label: "Copiar emails separados por ;", onClick: ()=>copyAll(";" as any) },
-              { label: "Copiar emails en líneas", onClick: ()=>copyAll("\n" as any) },
+              { label: "Copiar emails separados por ;", onClick: ()=>copyAll(";") },
+              { label: "Copiar emails en líneas", onClick: ()=>copyAll("\n") },
               { label: "Exportar CSV", onClick: exportCsv },
             ]}
           />
@@ -168,7 +167,7 @@ export default function NewsletterAdminPage() {
             <p className="text-sm text-muted-foreground">Total: {total}</p>
           </div>
           <div className="grid gap-3">
-            {items.map((s:any) => (
+            {items.map((s:Subscriber) => (
               <div key={s.email} className="rounded-lg border border-border/40 bg-muted/5 hover:bg-muted/10 transition-colors">
                 <Row s={s} onRemove={removeEmail} />
               </div>
@@ -213,7 +212,7 @@ export default function NewsletterAdminPage() {
   )
 }
 
-function Row({ s, onRemove }: { s: any; onRemove: (email:string)=>void }) {
+function Row({ s, onRemove }: { s: Subscriber; onRemove: (email:string)=>void }) {
   const { toast } = useToast()
   // Editable values
   const [status, setStatus] = React.useState<string>(s.status || "pending")
@@ -232,7 +231,7 @@ function Row({ s, onRemove }: { s: any; onRemove: (email:string)=>void }) {
     setTags(nextTags)
     setBaseStatus(nextStatus)
     setBaseTags(nextTags)
-  }, [s.email, s.status, Array.isArray(s.tags)? s.tags.join(",") : s.tags])
+  }, [s.email, s.status, s.tags])
 
   const save = async () => {
     setSaving(true)
@@ -240,7 +239,7 @@ function Row({ s, onRemove }: { s: any; onRemove: (email:string)=>void }) {
       const { data: session } = await supabase.auth.getSession()
       const token = session.session?.access_token
       if (!token) throw new Error("No auth token")
-      const body:any = { email: s.email, status, tags: tags.split(",").map((t:string)=>t.trim()).filter(Boolean) }
+      const body = { email: s.email, status, tags: tags.split(",").map((t:string)=>t.trim()).filter(Boolean) }
       const res = await fetch("/api/admin/newsletter", {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -252,8 +251,8 @@ function Row({ s, onRemove }: { s: any; onRemove: (email:string)=>void }) {
       // Update baseline so the Save button hides
       setBaseStatus(status)
       setBaseTags(tags)
-    } catch (e:any) {
-      toast({ title: "Error", description: e?.message || String(e) })
+    } catch (e:unknown) {
+      toast({ title: "Error", description: e?.toString() || String(e) })
     } finally {
       setSaving(false)
     }

@@ -30,11 +30,43 @@ export async function GET(req: NextRequest) {
     if (tmp?.payment_id) {
       try {
         const payments = getPaymentClient()
-        const p: any = await payments.get({ id: String(tmp.payment_id) })
-        const status: string = p?.status ?? p?.body?.status ?? p?.response?.status ?? tmp?.status ?? "unknown"
-        const status_detail: string | undefined = p?.status_detail ?? p?.body?.status_detail ?? p?.response?.status_detail
-        const preference_id: string | undefined = p?.preference_id ?? p?.body?.preference_id ?? p?.response?.preference_id ?? tmp?.preference_id
-        const merchant_order_id: string | undefined = p?.order?.id ?? p?.body?.order?.id ?? p?.response?.order?.id ?? tmp?.merchant_order_id
+        const p: unknown = await payments.get({ id: String(tmp.payment_id) })
+        const getPath = (obj: unknown, path: string[]): unknown => {
+          let cur: unknown = obj
+          for (const key of path) {
+            if (cur && typeof cur === 'object' && key in (cur as Record<string, unknown>)) {
+              cur = (cur as Record<string, unknown>)[key]
+            } else {
+              return undefined
+            }
+          }
+          return cur
+        }
+        const toStr = (v: unknown): string | undefined =>
+          typeof v === 'string' || typeof v === 'number' ? String(v) : undefined
+
+        const status: string =
+          toStr(getPath(p, ['status'])) ||
+          toStr(getPath(p, ['body', 'status'])) ||
+          toStr(getPath(p, ['response', 'status'])) ||
+          tmp?.status ||
+          'unknown'
+        const status_detail: string | undefined =
+          toStr(getPath(p, ['status_detail'])) ||
+          toStr(getPath(p, ['body', 'status_detail'])) ||
+          toStr(getPath(p, ['response', 'status_detail']))
+        const preference_id: string | undefined =
+          toStr(getPath(p, ['preference_id'])) ||
+          toStr(getPath(p, ['body', 'preference_id'])) ||
+          toStr(getPath(p, ['response', 'preference_id'])) ||
+          tmp?.preference_id ||
+          undefined
+        const merchant_order_id: string | undefined =
+          toStr(getPath(p, ['order', 'id'])) ||
+          toStr(getPath(p, ['body', 'order', 'id'])) ||
+          toStr(getPath(p, ['response', 'order', 'id'])) ||
+          tmp?.merchant_order_id ||
+          undefined
 
         // Try to find the created order stored by the webhook
         const { data: order } = await supabase
@@ -57,8 +89,8 @@ export async function GET(req: NextRequest) {
 
         logInfo("order-status from MP", payload)
         return NextResponse.json(payload)
-      } catch (err: any) {
-        logError("order-status MP fetch error", { error: String(err?.message || err), session_id, payment_id: tmp.payment_id })
+      } catch (err: unknown) {
+        logError("order-status MP fetch error", { error: String(err?.toString() || err), session_id, payment_id: tmp.payment_id })
         // Fall back to tmp record if MP call fails
         return NextResponse.json({
           session_id,
@@ -73,8 +105,8 @@ export async function GET(req: NextRequest) {
 
     // No payment yet recorded
     return NextResponse.json({ session_id, payment_id: null, status: "unknown" })
-  } catch (err: any) {
-    logError("order-status fatal", { error: String(err?.message || err) })
+  } catch (err: unknown) {
+    logError("order-status fatal", { error: String(err?.toString() || err) })
     return NextResponse.json({ error: "Internal error" }, { status: 500 })
   }
 }

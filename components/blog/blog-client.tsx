@@ -9,17 +9,17 @@ import { format } from "date-fns"
 import { enUS, es as esLocale } from "date-fns/locale"
 import { Calendar, Clock, Search } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import * as React from "react"
 import { BlogCategories, CategoryBadge } from "./blog-categories"
 import { MarketingSidebar } from "./marketing-sidebar"
 
 interface BlogClientProps {
   allPosts: BlogPost[]
-  allTags: string[]
   latestPost?: BlogPost
 }
 
-export default function BlogClient({ allPosts, allTags, latestPost }: BlogClientProps) {
+export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
   const { t, locale } = useI18n() as { t: (k: string) => string; locale: "en" | "es" }
   const dfnsLocale = locale === "es" ? esLocale : enUS
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -106,10 +106,12 @@ export default function BlogClient({ allPosts, allTags, latestPost }: BlogClient
                   <Link href={`/blog/${featuredPost.slug}`} prefetch={false}>
                     {featuredPost.cover && (
                       <div className="relative aspect-[16/9] overflow-hidden">
-                        <img
+                        <Image
                           src={featuredPost.cover}
                           alt={featuredPost.coverAlt || featuredPost.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          fill
+                          sizes="100vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                       </div>
@@ -176,10 +178,12 @@ export default function BlogClient({ allPosts, allTags, latestPost }: BlogClient
                       <Link href={`/blog/${post.slug}`} prefetch={false} className="flex h-full flex-col">
                         {post.cover && (
                           <div className="relative aspect-[16/9] overflow-hidden">
-                            <img
+                            <Image
                               src={post.cover}
                               alt={post.coverAlt || post.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              fill
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
                             {post.category && (

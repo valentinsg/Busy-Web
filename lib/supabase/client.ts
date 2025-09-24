@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 
 // Client for browser and server (using anon key). For privileged operations use a server-side service key variant.
@@ -22,7 +23,7 @@ function createUnavailableClient(): SupabaseClient<any, any, any> {
   return new Proxy({}, handler) as any
 }
 
-let supabase: SupabaseClient
+let supabase: SupabaseClient<any, any, any>
 if (supabaseUrl && supabaseAnonKey) {
   supabase = createClient(supabaseUrl, supabaseAnonKey)
 } else {

@@ -13,7 +13,7 @@ export async function GET(req: Request) {
 
     const data = await getCustomerRanking({ metric, limit })
     return NextResponse.json({ ok: true, data })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

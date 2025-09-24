@@ -11,7 +11,7 @@ const BASE_URL = process.env.BASE_URL || process.env.SITE_URL
 const CURRENCY = "ARS"
 const IS_PROD = process.env.NODE_ENV === "production"
 
-function badRequest(message: string, meta?: Record<string, any>) {
+function badRequest(message: string, meta?: Record<string, unknown>) {
   logError(message, meta)
   return NextResponse.json({ error: message }, { status: 400 })
 }
@@ -172,15 +172,15 @@ export async function POST(req: NextRequest) {
     })
 
     // Only use production init_point; avoid sandbox fallback
-    const init_point = (preference as any)?.init_point || (preference as any)?.body?.init_point
-    const preference_id = (preference as any)?.id || (preference as any)?.body?.id
+    const init_point = (preference as unknown as { init_point: string })?.init_point || (preference as unknown as { body: { init_point: string } })?.body?.init_point
+    const preference_id = (preference as unknown as { id: string })?.id || (preference as unknown as { body: { id: string } })?.body?.id
     if (!init_point || !preference_id) throw new Error("Failed to create preference")
 
     logInfo("Preference created", { session_id, preference_id })
 
     return NextResponse.json({ init_point, order_id: session_id })
-  } catch (err: any) {
-    logError("create-preference failed", { error: String(err?.message || err) })
+  } catch (err: unknown) {
+    logError("create-preference failed", { error: String(err?.toString() || err) })
     return NextResponse.json({ error: "Internal error" }, { status: 500 })
   }
 }

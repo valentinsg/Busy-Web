@@ -10,7 +10,8 @@ export async function GET(req: NextRequest) {
     const section = searchParams.get("section") || undefined
     const pop = await getActivePopoverFor(path, section)
     return NextResponse.json({ ok: true, popover: pop })
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message || "Error" }, { status: 500 })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "Error"
+    return NextResponse.json({ ok: false, error: msg }, { status: 500 })
   }
 }

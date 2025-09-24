@@ -27,7 +27,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
           if (!cancelled) router.replace(`/admin/sign-in?next=${encodeURIComponent(pathname || "/admin")}`)
           return
         }
-      } catch (e) {
+      } catch {
         if (!cancelled) router.replace(`/admin/sign-in?next=${encodeURIComponent(pathname || "/admin")}`)
         return
       } finally {

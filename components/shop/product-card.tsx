@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Star, ShoppingCart } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
@@ -61,8 +61,8 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
   }, [product.sizes])
 
   const formatSizeTooltip = (size: string) => {
-    const m = (product as any).measurementsBySize?.[size] as
-      | Record<string, any>
+    const m = (product as Product).measurementsBySize?.[size] as
+      | Record<string, number>
       | undefined
     if (!m) return 'Medidas no disponibles'
     const unit = typeof m.unit === 'string' ? m.unit : undefined
@@ -213,14 +213,29 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
               // Do not stop propagation on background so clicking the image navigates
               onPointerEnter={() => setIsHovered(true)}
               onPointerLeave={() => setIsHovered(false)}
-              onMouseDown={(e) => {
+              onMouseDown={(e: React.MouseEvent) => {
+                e.stopPropagation()
                 // Let background clicks bubble; controls will stop via data attribute check in parent
               }}
-              onPointerDown={(e) => {
+              onMouseUp={(e: React.MouseEvent) => {
+                e.stopPropagation()
+                // Let background mouse up bubble
+              }}
+              onPointerDown={(e: React.PointerEvent) => {
+                e.stopPropagation()
                 // Let background pointer down bubble
               }}
-              onTouchStart={(e) => {
+              onPointerUp={(e: React.PointerEvent) => {
+                e.stopPropagation()
+                // Let background pointer up bubble
+              }}
+              onTouchStart={(e: React.TouchEvent) => {
+                e.stopPropagation()
                 // Allow background taps to bubble so they can navigate
+              }}
+              onTouchEnd={(e: React.TouchEvent) => {
+                e.stopPropagation()
+                // Allow background touch end to bubble so they can navigate
               }}
             >
               <div
@@ -260,7 +275,7 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
                           >
                             <div className="flex items-start gap-4 pr-3 pl-0">
                               {/* Hanger icon, pegado a la izquierda */}
-                              <img
+                              <Image
                                 src="/icons/checkroom_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
                                 alt="Guía de talles"
                                 width={16}
@@ -296,7 +311,7 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
                             >
                               <div className="flex items-start gap-4 pr-3 pl-0">
                                 {/* Hanger icon, pegado a la izquierda */}
-                                <img
+                                <Image
                                   src="/icons/checkroom_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
                                   alt="Guía de talles"
                                   width={16}

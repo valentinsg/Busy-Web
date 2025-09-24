@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true, result: { allowed, not_subscribed: notSubscribed, invalid } })
-  } catch (e:any) {
-    return NextResponse.json({ ok: false, error: e?.message || String(e) }, { status: 400 })
+  } catch (e: unknown) {
+    return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 400 })
   }
 }

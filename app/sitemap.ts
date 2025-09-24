@@ -59,8 +59,8 @@ async function getProductRoutes() {
       .select('id')
       .order('created_at', { ascending: false })
     if (error || !data) return []
-    return data
-      .map((row: any) => row.id)
+    return (data as Array<{ id: string }> )
+      .map((row) => row.id)
       .filter(Boolean)
       .map((id: string) => ({
         url: `${SITE_URL}/product/${id}`,
@@ -75,10 +75,10 @@ async function getProductRoutes() {
     const dataFile = path.join(process.cwd(), 'data', 'products.json')
     const raw = fs.readFileSync(dataFile, 'utf-8')
     const items = JSON.parse(raw) as Array<{ id?: string; slug?: string; handle?: string }>
-    return items
-      .map((p: any) => p.id || p.slug || p.handle)
-      .filter(Boolean)
-      .map((id: string) => ({
+    const ids = items
+      .map((p) => p.id || p.slug || p.handle)
+      .filter((v): v is string => typeof v === 'string' && v.length > 0)
+    return ids.map((id) => ({
         url: `${SITE_URL}/product/${id}`,
         lastModified: now,
         changeFrequency: 'weekly' as const,

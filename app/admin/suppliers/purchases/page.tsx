@@ -13,7 +13,8 @@ export default function SupplierPurchasesPage() {
   const [supplierId, setSupplierId] = useState<string>("")
 
   // list
-  const [rows, setRows] = useState<Array<any>>([])
+  type PurchaseRow = { id: string; placed_at?: string; status: string; currency: string; total: number }
+  const [rows, setRows] = useState<PurchaseRow[]>([])
 
   // form
   const [currency, setCurrency] = useState("USD")
@@ -38,9 +39,9 @@ export default function SupplierPurchasesPage() {
         const res = await fetch("/api/admin/suppliers")
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || "Error")
-        setSuppliers((json.data || []).map((s: any) => ({ id: s.id, name: s.name })))
-      } catch (e: any) {
-        toast({ title: "Error cargando proveedores", description: e?.message || "", variant: "destructive" })
+        setSuppliers((json.data || []).map((s: { id: string; name: string }) => ({ id: s.id, name: s.name })))
+      } catch (e: unknown) {
+        toast({ title: "Error cargando proveedores", description: (e instanceof Error ? e.message : String(e)) || "", variant: "destructive" })
       }
     },
     [toast],
@@ -54,9 +55,9 @@ export default function SupplierPurchasesPage() {
         const res = await fetch(`/api/admin/suppliers/purchases?supplier_id=${encodeURIComponent(sid)}`)
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || "Error")
-        setRows(json.data || [])
-      } catch (e: any) {
-        toast({ title: "Error cargando compras", description: e?.message || "", variant: "destructive" })
+        setRows((json.data || []) as PurchaseRow[])
+      } catch (e: unknown) {
+        toast({ title: "Error cargando compras", description: (e instanceof Error ? e.message : String(e)) || "", variant: "destructive" })
       } finally {
         setLoading(false)
       }
@@ -88,8 +89,8 @@ export default function SupplierPurchasesPage() {
       setItems([{ product_id: "", quantity: 1, unit_cost: 0 }])
       setShipping(0); setTax(0); setNotes("")
       await loadPurchases(supplierId)
-    } catch (e: any) {
-      toast({ title: "Error al crear compra", description: e?.message || "", variant: "destructive" })
+    } catch (e: unknown) {
+      toast({ title: "Error al crear compra", description: (e instanceof Error ? e.message : String(e)) || "", variant: "destructive" })
     } finally {
       setLoading(false)
     }
@@ -97,11 +98,11 @@ export default function SupplierPurchasesPage() {
 
   useEffect(() => {
     loadSuppliers()
-  }, [])
+  }, [loadSuppliers])
 
   useEffect(() => {
     if (supplierId) loadPurchases(supplierId)
-  }, [supplierId])
+  }, [supplierId, loadPurchases])
 
   return (
     <div className="space-y-6">
@@ -213,7 +214,7 @@ export default function SupplierPurchasesPage() {
                   <td className="px-3 py-6 text-center text-muted-foreground" colSpan={4}>{loading ? "Cargando..." : "Sin datos"}</td>
                 </tr>
               )}
-              {rows.map((r: any) => (
+              {rows.map((r: PurchaseRow) => (
                 <tr key={r.id} className="border-t">
                   <td className="px-3 py-2">{r.placed_at ? new Date(r.placed_at).toLocaleString() : "-"}</td>
                   <td className="px-3 py-2">{r.status}</td>
@@ -240,7 +241,7 @@ function ProductPicker({ value, onChange }: { value: string; onChange: (p?: { id
       try {
         const res = await fetch(`/api/admin/products/search?${new URLSearchParams({ q, limit: "10" }).toString()}`, { signal: ctrl.signal })
         const json = await res.json()
-        if (res.ok) setList((json.products || []).map((p: any) => ({ id: p.id, name: p.name })))
+        if (res.ok) setList((json.products || []).map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })))
       } catch {}
     }, 200)
     return () => { clearTimeout(t); ctrl.abort() }

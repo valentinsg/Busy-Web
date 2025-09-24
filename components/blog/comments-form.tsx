@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -16,16 +16,16 @@ export default function CommentsForm() {
   const [list, setList] = useState<CommentItem[]>([])
   const slug = useMemo(() => typeof window !== "undefined" ? window.location.pathname.split("/").pop() || "" : "", [])
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       const res = await fetch(`/api/blog/comments?slug=${encodeURIComponent(slug)}`, { cache: "no-store" })
       if (!res.ok) return
       const data = await res.json()
       setList(Array.isArray(data?.items) ? data.items : [])
     } catch {}
-  }
+  }, [slug])
 
-  useEffect(() => { if (slug) void load() }, [slug])
+  useEffect(() => { if (slug) void load() }, [slug, load])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()

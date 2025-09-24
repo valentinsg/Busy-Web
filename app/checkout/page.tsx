@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useCart } from "@/hooks/use-cart"
@@ -16,25 +15,13 @@ import { formatPrice, capitalize } from "@/lib/format"
 import { computeShipping, computeTax } from "@/lib/checkout/totals"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/hooks/use-toast"
-import { ConfettiBurst } from "@/components/ui/confetti"
 import PayWithMercadoPago from "@/components/checkout/pay-with-mercadopago"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 
 const CHECKOUT_MODE = process.env.NEXT_PUBLIC_CHECKOUT_MODE || "mailto"
 
 export default function CheckoutPage() {
-  const { items, getTotalItems, getSubtotal, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon, clearCart } = useCart()
+  const { items, getTotalItems, getSubtotal, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon } = useCart()
   const { t } = useI18n()
   const { toast } = useToast()
   const [shippingData, setShippingData] = React.useState({
@@ -52,8 +39,7 @@ export default function CheckoutPage() {
   const [newsletterOptIn, setNewsletterOptIn] = React.useState<boolean>(false)
   const [paymentMethod, setPaymentMethod] = React.useState("card")
   const [couponCode, setCouponCode] = React.useState("")
-  const [confirmClear, setConfirmClear] = React.useState(false)
-  const [confettiKey, setConfettiKey] = React.useState<number | null>(null)
+  
 
   const totalItems = getTotalItems()
   const subtotal = getSubtotal()
@@ -67,77 +53,7 @@ export default function CheckoutPage() {
     setShippingData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const generateOrderSummary = () => {
-    const orderItems = items
-      .map(
-        (item) =>
-          `${item.product.name} (${capitalize(item.selectedColor)}, ${item.selectedSize}) x${item.quantity} - ${formatPrice(item.product.price * item.quantity)}`,
-      )
-      .join("\n")
-
-    return `
-Order Summary:
-${orderItems}
-
-Subtotal: ${formatPrice(subtotal)}
-${discount > 0 ? `Discount (${coupon?.code ?? ""}): -${formatPrice(discount)}` : ""}
-Subtotal after discount: ${formatPrice(discountedSubtotal)}
-Shipping: ${estimatedShipping === 0 ? "Free" : formatPrice(estimatedShipping)}
-Tax: ${formatPrice(estimatedTax)}
-Total: ${formatPrice(finalTotal)}
-
-Shipping Address:
-${shippingData.firstName} ${shippingData.lastName}
-${shippingData.address}
-${shippingData.city}, ${shippingData.state} ${shippingData.zipCode}
-${shippingData.country}
-
-Email: ${shippingData.email}
-Phone: ${shippingData.phone}
-`.trim()
-  }
-
-  const handleCheckout = () => {
-    const orderSummary = generateOrderSummary()
-
-    switch (CHECKOUT_MODE) {
-      case "whatsapp":
-        const whatsappMessage = encodeURIComponent(`Hi! I'd like to place an order:\n\n${orderSummary}`)
-        window.open(`https://wa.me/1234567890?text=${whatsappMessage}`, "_blank")
-        break
-
-      case "mailto":
-        const emailSubject = encodeURIComponent("New Order from Busy Store")
-        const emailBody = encodeURIComponent(orderSummary)
-        window.location.href = `mailto:orders@busy.com?subject=${emailSubject}&body=${emailBody}`
-        break
-
-      case "stripe-test":
-        toast({
-          title: "Stripe (demo)",
-          description: "Aquí iría la integración con Stripe.",
-        })
-        break
-
-      default:
-        toast({
-          title: "Checkout no configurado",
-          description: "Revisá NEXT_PUBLIC_CHECKOUT_MODE",
-          variant: "destructive",
-        })
-    }
-
-    // Confirm before clearing cart
-    setConfirmClear(true)
-  }
-
-  const handleApplyCoupon = () => {
-    if (couponCode) {
-      applyCoupon(couponCode)
-        ? toast({ title: "Cupón aplicado", description: "¡Descuento aplicado con éxito!" })
-        : toast({ title: "Cupón inválido", description: "Lo sentimos, el cupón no es válido.", variant: "destructive" })
-    }
-  }
+  
 
   if (items.length === 0) {
     return (
@@ -395,10 +311,9 @@ Phone: ${shippingData.phone}
                             })
                           } else {
                             toast({
-                              title: "¡Cupón aplicado! 🎉",
+                              title: "¡Cupón aplicado! ",
                               description: `Se aplicó ${couponCode.toUpperCase()}. Disfrutá el descuento.`,
                             })
-                            setConfettiKey(Date.now())
                           }
                         }}
                       >

@@ -49,7 +49,7 @@ export default async function AdminCouponsPage({ searchParams }: { searchParams:
           <div className="p-4 text-sm text-muted-foreground">No hay cupones todavía.</div>
         )}
         {coupons.map((c) => (
-          <CouponRow key={c.code} coupon={c as any} />
+          <CouponRow key={c.code} coupon={c} />
         ))}
       </div>
     </div>

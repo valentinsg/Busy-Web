@@ -18,12 +18,33 @@ export async function POST(req: NextRequest) {
     return new NextResponse("Unauthorized", { status: 401 })
   }
 
-  let payload: any
+  let payload: unknown
   try { payload = await req.json() } catch { payload = null }
 
+  // Helpers to safely access unknown objects
+  const getPath = (obj: unknown, path: string[]): unknown => {
+    let cur: unknown = obj
+    for (const key of path) {
+      if (cur && typeof cur === 'object' && key in (cur as Record<string, unknown>)) {
+        cur = (cur as Record<string, unknown>)[key]
+      } else {
+        return undefined
+      }
+    }
+    return cur
+  }
+  const toStr = (v: unknown): string | undefined =>
+    typeof v === 'string' || typeof v === 'number' ? String(v) : undefined
+
   // Mercado Pago can send topic/type and data.id
-  const type = payload?.type || payload?.topic || payload?.action
-  const paymentId = payload?.data?.id || payload?.resource?.id || payload?.id
+  const type =
+    toStr(getPath(payload, ['type'])) ||
+    toStr(getPath(payload, ['topic'])) ||
+    toStr(getPath(payload, ['action']))
+  const paymentId =
+    toStr(getPath(payload, ['data', 'id'])) ||
+    toStr(getPath(payload, ['resource', 'id'])) ||
+    toStr(getPath(payload, ['id']))
 
   if (type !== "payment" || !paymentId) {
     logInfo("Ignoring non-payment event", { type, paymentId })
@@ -45,15 +66,40 @@ export async function POST(req: NextRequest) {
   try {
     const payments = getPaymentClient()
     const payment = await payments.get({ id: String(paymentId) })
-    const p: any = payment as any
-    const status: string = p?.status ?? p?.body?.status ?? p?.response?.status ?? ""
-    const status_detail: string | undefined = p?.status_detail ?? p?.body?.status_detail ?? p?.response?.status_detail
-    const payment_method_id: string | undefined = p?.payment_method_id ?? p?.body?.payment_method_id ?? p?.response?.payment_method_id
-    const payment_type_id: string | undefined = p?.payment_type_id ?? p?.body?.payment_type_id ?? p?.response?.payment_type_id
-    const external_reference: string | undefined = p?.external_reference ?? p?.body?.external_reference ?? p?.response?.external_reference
-    const metadata: any = p?.metadata ?? p?.body?.metadata ?? p?.response?.metadata
-    const preference_id: string | undefined = p?.preference_id ?? p?.body?.preference_id ?? p?.response?.preference_id
-    const merchant_order_id: string | undefined = p?.order?.id ?? p?.body?.order?.id ?? p?.response?.order?.id
+    const p: unknown = payment as unknown
+    const status: string =
+      toStr(getPath(p, ['status'])) ||
+      toStr(getPath(p, ['body', 'status'])) ||
+      toStr(getPath(p, ['response', 'status'])) ||
+      ''
+    const status_detail: string | undefined =
+      toStr(getPath(p, ['status_detail'])) ||
+      toStr(getPath(p, ['body', 'status_detail'])) ||
+      toStr(getPath(p, ['response', 'status_detail']))
+    const payment_method_id: string | undefined =
+      toStr(getPath(p, ['payment_method_id'])) ||
+      toStr(getPath(p, ['body', 'payment_method_id'])) ||
+      toStr(getPath(p, ['response', 'payment_method_id']))
+    const payment_type_id: string | undefined =
+      toStr(getPath(p, ['payment_type_id'])) ||
+      toStr(getPath(p, ['body', 'payment_type_id'])) ||
+      toStr(getPath(p, ['response', 'payment_type_id']))
+    const external_reference: string | undefined =
+      toStr(getPath(p, ['external_reference'])) ||
+      toStr(getPath(p, ['body', 'external_reference'])) ||
+      toStr(getPath(p, ['response', 'external_reference']))
+    const metadata: unknown =
+      getPath(p, ['metadata']) ||
+      getPath(p, ['body', 'metadata']) ||
+      getPath(p, ['response', 'metadata'])
+    const preference_id: string | undefined =
+      toStr(getPath(p, ['preference_id'])) ||
+      toStr(getPath(p, ['body', 'preference_id'])) ||
+      toStr(getPath(p, ['response', 'preference_id']))
+    const merchant_order_id: string | undefined =
+      toStr(getPath(p, ['order', 'id'])) ||
+      toStr(getPath(p, ['body', 'order', 'id'])) ||
+      toStr(getPath(p, ['response', 'order', 'id']))
 
     let mapped: "approved" | "rejected" | "in_process" | "pending"
     if (status === "approved") mapped = "approved"
@@ -77,16 +123,17 @@ export async function POST(req: NextRequest) {
         status_detail: status_detail ?? null,
         preference_id: preference_id ?? null,
         merchant_order_id: merchant_order_id ?? null,
-        raw: p?.body ?? p ?? null,
+        raw: (getPath(p, ['body']) ?? p ?? null) as unknown,
       })
-    } catch (e: any) {
-      logError("orders_tmp insert error", { error: String(e?.message || e), session_id, paymentId })
+    } catch (e: unknown) {
+      logError("orders_tmp insert error", { error: String((e as Error)?.message || String(e)), session_id, paymentId })
     }
 
     if (mapped === "approved") {
       // Build order on-the-fly from metadata
-      const itemsMeta: Array<{ product_id: string; quantity: number; variant_size?: string | null }> = Array.isArray(metadata?.items)
-        ? metadata.items
+      const metaObj = (metadata && typeof metadata === 'object') ? (metadata as Record<string, unknown>) : undefined
+      const itemsMeta: Array<{ product_id: string; quantity: number; variant_size?: string | null }> = Array.isArray(metaObj?.items)
+        ? (metaObj!.items as Array<{ product_id: string; quantity: number; variant_size?: string | null }>)
         : []
 
       // Fetch products to compute trusted totals and titles
@@ -119,7 +166,7 @@ export async function POST(req: NextRequest) {
         flat_rate: Number(settings.shipping_flat_rate ?? 20000),
         free_threshold: Number(settings.shipping_free_threshold ?? 80000),
       })
-      const coupon_code = (metadata?.coupon_code ?? null) as string | null
+      const coupon_code = (metaObj?.coupon_code ?? null) as string | null
       const discount_percent = await validateCouponPercent(coupon_code)
       const discount = discount_percent ? Number(((items_total * discount_percent) / 100).toFixed(2)) : 0
       const pre_tax_total = Number((items_total - discount + shipping_cost).toFixed(2))
@@ -128,7 +175,7 @@ export async function POST(req: NextRequest) {
 
       // Resolve customer if email provided
       let customer_id: string | null = null
-      const customer = (metadata?.customer ?? {}) as { email?: string | null; first_name?: string | null; last_name?: string | null; phone?: string | null }
+      const customer = (metaObj?.customer ?? {}) as { email?: string | null; first_name?: string | null; last_name?: string | null; phone?: string | null }
       if (customer?.email) {
         const { data: existing } = await supabase.from("customers").select("id").eq("email", customer.email).maybeSingle()
         if (existing?.id) {
@@ -190,7 +237,9 @@ export async function POST(req: NextRequest) {
         logInfo("Order created and marked paid", { order_id: order.id, paymentId, session_id })
         // Send invoice email if possible
         try {
-          const emailTo = (metadata?.customer?.email ?? null) as string | null
+          const emailTo = (metaObj?.customer && typeof metaObj.customer === 'object'
+            ? (metaObj.customer as { email?: string | null }).email ?? null
+            : null) as string | null
           if (emailTo) {
             await sendInvoiceEmail({
               to: emailTo,
@@ -202,13 +251,13 @@ export async function POST(req: NextRequest) {
               discount,
             })
           }
-        } catch (e: any) {
-          logError("sendInvoiceEmail failed", { error: String(e?.message || e), order_id: order.id })
+        } catch (e: unknown) {
+          logError("sendInvoiceEmail failed", { error: String((e as Error)?.message || String(e)), order_id: order.id })
         }
       }
 
       // Newsletter opt-in (idempotent by PK: email)
-      if (metadata?.newsletter_opt_in && customer?.email) {
+      if ((metaObj?.newsletter_opt_in as boolean | undefined) && customer?.email) {
         await supabase
           .from("newsletter_subscribers")
           .upsert({ email: customer.email, status: "subscribed" }, { onConflict: "email", ignoreDuplicates: true })
@@ -217,8 +266,8 @@ export async function POST(req: NextRequest) {
       // Do nothing: we only create order/customer on approved as requested
       logInfo("Non-approved payment received", { session_id, paymentId, status: mapped, status_detail, payment_method_id, payment_type_id })
     }
-  } catch (err: any) {
-    logError("webhook processing error", { error: String(err?.message || err) })
+  } catch (err: unknown) {
+    logError("webhook processing error", { error: String((err as Error)?.message || String(err)) })
   }
 
   return ok()

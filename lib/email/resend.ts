@@ -1,4 +1,5 @@
 import { Resend } from "resend"
+import type { Order } from "@/types/commerce"
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const EMAIL_FROM = process.env.EMAIL_FROM || "Busy Store <no-reply@busy.com.ar>"
@@ -10,7 +11,7 @@ if (!RESEND_API_KEY) {
 
 export async function sendInvoiceEmail(params: {
   to: string
-  order: any
+  order: Pick<Order, "total">
   items: Array<{ product_id: string; product_name?: string; quantity: number; unit_price: number; total: number }>
   paymentId: string
   tax: number

@@ -4,28 +4,42 @@ import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 
+type Supplier = {
+  id: string
+  name: string
+  contact_name?: string | null
+  contact_email?: string | null
+  contact_phone?: string | null
+  notes?: string | null
+  category?: string | null
+  product_tags?: string[]
+  reference_price?: string | null
+  minimum_order_quantity?: number | null
+  delivery_time_days?: number | null
+  payment_terms?: string | null
+  tags?: string[]
+  status?: 'active' | 'inactive'
+  reliability_rating?: number | null
+}
+
+type UpdateSupplierPayload = {
+  id: string
+  name: string
+  contact_name: string
+  contact_email: string
+  contact_phone: string
+  notes?: string | null
+  category?: string | null
+  minimum_order_quantity: number | null
+  delivery_time_days: number | null
+  status?: 'active' | 'inactive'
+  reliability_rating: number | null
+}
+
 export default function SuppliersPage() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
-  const [suppliers, setSuppliers] = useState<
-    Array<{
-      id: string
-      name: string
-      contact_name?: string | null
-      contact_email?: string | null
-      contact_phone?: string | null
-      notes?: string | null
-      category?: string | null
-      product_tags?: string[]
-      reference_price?: string | null
-      minimum_order_quantity?: number | null
-      delivery_time_days?: number | null
-      payment_terms?: string | null
-      tags?: string[]
-      status?: 'active' | 'inactive'
-      reliability_rating?: number | null
-    }>
-  >([])
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
 
   const [name, setName] = useState('')
   const [contactName, setContactName] = useState('')
@@ -53,8 +67,8 @@ export default function SuppliersPage() {
   const [createOpen, setCreateOpen] = useState(false)
 
   // simple validations
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  const phoneRegex = /^[+()\-\s\d]{7,20}$/
+  const emailRegex = useMemo(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/, [])
+  const phoneRegex = useMemo(() => /^[+()\-\s\d]{7,20}$/, [])
   const MAX_NOTES = 500
 
   const createErrors = useMemo(() => {
@@ -67,7 +81,7 @@ export default function SuppliersPage() {
     if (notes && notes.length > MAX_NOTES)
       errs.notes = `Máximo ${MAX_NOTES} caracteres`
     return errs
-  }, [name, contactEmail, contactPhone, notes])
+  }, [name, contactEmail, contactPhone, notes, emailRegex, phoneRegex])
 
   // inline edit state
   const [editId, setEditId] = useState<string | null>(null)
@@ -107,7 +121,7 @@ export default function SuppliersPage() {
         errs.notes = `Máximo ${MAX_NOTES} caracteres`
     }
     return errs
-  }, [editId, editData])
+  }, [editId, editData, emailRegex, phoneRegex])
 
   const filtered = useMemo(() => {
     let list = suppliers
@@ -168,8 +182,8 @@ export default function SuppliersPage() {
       if (!res.ok) throw new Error(json?.error || 'Error')
       toast({ title: 'Compra rápida registrada', description: json?.expense?.id })
       setQpOpen(null)
-    } catch (e:any) {
-      toast({ title: 'Error registrando compra', description: e?.message || '', variant: 'destructive' })
+    } catch (e:unknown) {
+      toast({ title: 'Error registrando compra', description: e?.toString() || '', variant: 'destructive' })
     } finally {
       setQpLoading(false)
     }
@@ -183,10 +197,10 @@ export default function SuppliersPage() {
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || 'Error')
         setSuppliers(json.data || [])
-      } catch (e: any) {
+      } catch (e: unknown) {
         toast({
           title: 'Error al cargar proveedores',
-          description: e?.message || '',
+          description: e?.toString() || '',
           variant: 'destructive',
         })
       } finally {
@@ -196,7 +210,7 @@ export default function SuppliersPage() {
     [toast]
   )
 
-  const startEdit = (s: any) => {
+  const startEdit = (s: Supplier) => {
     setEditId(s.id)
     setEditData({
       name: s.name || '',
@@ -222,7 +236,7 @@ export default function SuppliersPage() {
     try {
       setLoading(true)
       // normalize numeric fields and empty strings
-      const payload: any = {
+      const payload: UpdateSupplierPayload = {
         id: editId,
         name: editData.name,
         contact_name: editData.contact_name,
@@ -257,10 +271,10 @@ export default function SuppliersPage() {
       })
       setEditId(null)
       await load()
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast({
         title: 'Error al actualizar',
-        description: e?.message || '',
+        description: e?.toString() || '',
         variant: 'destructive',
       })
     } finally {
@@ -279,10 +293,11 @@ export default function SuppliersPage() {
       if (!res.ok) throw new Error(json?.error || 'Error')
       toast({ title: 'Proveedor eliminado' })
       await load()
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
       toast({
         title: 'Error al eliminar',
-        description: e?.message || '',
+        description: msg || '',
         variant: 'destructive',
       })
     } finally {
@@ -337,10 +352,11 @@ export default function SuppliersPage() {
       setRating('')
       setCreateOpen(false)
       await load()
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
       toast({
         title: 'Error al crear proveedor',
-        description: e?.message || '',
+        description: msg || '',
         variant: 'destructive',
       })
     } finally {
@@ -350,7 +366,7 @@ export default function SuppliersPage() {
 
   useEffect(() => {
     load()
-  }, [])
+  }, [load])
 
   return (
     <div className="space-y-6">
@@ -558,7 +574,7 @@ export default function SuppliersPage() {
                         <select
                           value={editData.status}
                           onChange={(e) =>
-                            setEditData((d) => ({ ...d, status: e.target.value as any }))
+                            setEditData((d) => ({ ...d, status: e.target.value as 'active' | 'inactive' }))
                           }
                           className="w-full border rounded px-2 py-1 bg-background"
                         >
@@ -781,7 +797,7 @@ export default function SuppliersPage() {
               </div>
               <div>
                 <label className="text-xs text-muted-foreground">Estado</label>
-                <select value={status} onChange={(e)=>setStatus(e.target.value as any)} className="w-full border rounded px-2 py-1 bg-background">
+                <select value={status} onChange={(e)=>setStatus(e.target.value as 'active' | 'inactive')} className="w-full border rounded px-2 py-1 bg-background">
                   <option value="active">Activo</option>
                   <option value="inactive">Inactivo</option>
                 </select>

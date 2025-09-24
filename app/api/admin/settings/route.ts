@@ -15,8 +15,8 @@ export async function GET() {
       shipping_free_threshold: Number(data?.shipping_free_threshold ?? 80000),
     }
     return NextResponse.json(payload)
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }
 
@@ -34,7 +34,7 @@ export async function PUT(request: Request) {
       .upsert({ id: 1, shipping_flat_rate, shipping_free_threshold }, { onConflict: "id" })
     if (error) throw error
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

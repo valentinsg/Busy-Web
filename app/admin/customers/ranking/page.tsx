@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
+import { Order, CartItem } from "@/lib/types"
 
 type Metric = "spend" | "frequency" | "recency"
 
@@ -25,7 +26,7 @@ export default function CustomersRankingPage() {
   const [editData, setEditData] = useState<{ full_name: string; email: string; phone: string; tags: string } | null>(null)
   const [saving, setSaving] = useState<boolean>(false)
   const [expandedCustomerId, setExpandedCustomerId] = useState<string | null>(null)
-  const [ordersCache, setOrdersCache] = useState<Record<string, any[]>>({})
+  const [ordersCache, setOrdersCache] = useState<Record<string, Order[]>>({})
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
   const load = useMemo(
@@ -39,8 +40,8 @@ export default function CustomersRankingPage() {
         if (!opts?.quiet) {
           toast({ title: "Ranking actualizado", description: `Métrica: ${metric.toUpperCase()} | TOP ${limit}` })
         }
-      } catch (e: any) {
-        toast({ title: "Error al cargar ranking", description: e?.message || "", variant: "destructive" })
+      } catch (e: unknown) {
+        toast({ title: "Error al cargar ranking", description: e?.toString() || "", variant: "destructive" })
       } finally {
         setLoading(false)
       }
@@ -51,7 +52,7 @@ export default function CustomersRankingPage() {
   useEffect(() => {
     // Initial load
     load({ quiet: true })
-  }, [])
+  }, [metric, limit, load])
 
   async function openEdit(row: Row) {
     setEditingId(row.customer_id)
@@ -83,8 +84,8 @@ export default function CustomersRankingPage() {
       setEditingId(null)
       setEditData(null)
       await load({ quiet: true })
-    } catch (e: any) {
-      toast({ title: 'Error al actualizar', description: e?.message || '', variant: 'destructive' })
+    } catch (e: unknown) {
+      toast({ title: 'Error al actualizar', description: e?.toString() || '', variant: 'destructive' })
     } finally {
       setSaving(false)
     }
@@ -99,8 +100,8 @@ export default function CustomersRankingPage() {
       if (!res.ok) throw new Error(json?.error || 'Error')
       toast({ title: 'Cliente eliminado' })
       await load({ quiet: true })
-    } catch (e: any) {
-      toast({ title: 'Error al eliminar', description: e?.message || '', variant: 'destructive' })
+    } catch (e: unknown) {
+      toast({ title: 'Error al eliminar', description: e?.toString() || '', variant: 'destructive' })
     } finally {
       setLoading(false)
     }
@@ -119,8 +120,8 @@ export default function CustomersRankingPage() {
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || 'Error')
         setOrdersCache((m) => ({ ...m, [id]: json.orders || [] }))
-      } catch (e: any) {
-        toast({ title: 'Error al cargar compras', description: e?.message || '', variant: 'destructive' })
+      } catch (e: unknown) {
+        toast({ title: 'Error al cargar compras', description: e?.toString() || '', variant: 'destructive' })
       }
     }
   }
@@ -216,17 +217,15 @@ export default function CustomersRankingPage() {
                         <div className="text-xs text-muted-foreground">Sin compras registradas</div>
                       ) : (
                         <div className="space-y-3">
-                          {ordersCache[r.customer_id].map((o: any) => (
+                          {ordersCache[r.customer_id].map((o: Order) => (
                             <div key={o.id} className="rounded border p-2">
                               <div className="flex flex-wrap justify-between text-xs">
                                 <div>
                                   <div><span className="text-muted-foreground">Orden</span>: {o.id}</div>
-                                  <div><span className="text-muted-foreground">Fecha</span>: {new Date(o.placed_at).toLocaleString()}</div>
-                                  <div><span className="text-muted-foreground">Canal</span>: {o.channel}</div>
-                                  <div><span className="text-muted-foreground">Estado</span>: {o.status}</div>
+                                  <div><span className="text-muted-foreground">Fecha</span>: {new Date(o.created_at).toLocaleString()}</div>
                                 </div>
                                 <div className="text-right">
-                                  <div>Subtotal: ${" "}{Number(o.subtotal).toFixed(2)} {o.currency}</div>
+                                  <div>Subtotal: ${" "}{Number(o.total).toFixed(2)} {o.currency}</div>
                                   <div>Desc.: ${" "}{Number(o.discount).toFixed(2)}</div>
                                   <div>Env.: ${" "}{Number(o.shipping).toFixed(2)}</div>
                                   <div>Imp.: ${" "}{Number(o.tax).toFixed(2)}</div>
@@ -247,13 +246,13 @@ export default function CustomersRankingPage() {
                                       </tr>
                                     </thead>
                                     <tbody>
-                                      {o.items.map((it: any, i: number) => (
+                                      {o.items.map((it: CartItem, i: number) => (
                                         <tr key={i} className="border-t">
-                                          <td className="px-2 py-1">{it.product_name || it.product_id}</td>
-                                          <td className="px-2 py-1">{it.variant_size || '-'}</td>
+                                          <td className="px-2 py-1">{it.product.name}</td>
+                                          <td className="px-2 py-1">{it.selectedSize || '-'}</td>
                                           <td className="px-2 py-1">{it.quantity}</td>
-                                          <td className="px-2 py-1">${" "}{Number(it.unit_price).toFixed(2)}</td>
-                                          <td className="px-2 py-1">${" "}{Number(it.total).toFixed(2)}</td>
+                                          <td className="px-2 py-1">${" "}{Number(it.product.price).toFixed(2)}</td>
+                                          <td className="px-2 py-1">${" "}{Number(it.product.price * it.quantity).toFixed(2)}</td>
                                         </tr>
                                       ))}
                                     </tbody>

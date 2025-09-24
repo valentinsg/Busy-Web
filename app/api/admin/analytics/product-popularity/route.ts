@@ -7,7 +7,7 @@ export async function GET(req: Request) {
     const limit = searchParams.get("limit") ? Number(searchParams.get("limit")) : 20
     const data = await getProductPopularity(limit)
     return NextResponse.json({ ok: true, data })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

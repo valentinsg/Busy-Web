@@ -52,8 +52,8 @@ export default function PayWithMercadoPago(props: {
       } else {
         throw new Error("No se recibió init_point")
       }
-    } catch (err: any) {
-      setError(err?.message || String(err))
+    } catch (err: unknown) {
+      setError(err?.toString() || String(err))
     } finally {
       setLoading(false)
     }

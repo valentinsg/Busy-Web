@@ -4,11 +4,8 @@ import path from "path"
 import matter from "gray-matter"
 import readingTime from "reading-time"
 import type { BlogPost } from "@/types/blog"
-import getServiceClient from "@/lib/supabase/server"
 
 const postsDirectory = path.join(process.cwd(), "content/blog")
-const BLOG_BUCKET = process.env.BLOG_STORAGE_BUCKET || process.env.SUPABASE_STORAGE_BUCKET || "blog"
-const USE_STORAGE = Boolean(process.env.VERCEL) || String(process.env.BLOG_SOURCE || "").toLowerCase() === "storage"
 
 function normalizeSlug(input: string) {
   return (input || "")
@@ -24,12 +21,6 @@ function normalizeSlug(input: string) {
 
 export function getAllPosts(): BlogPost[] {
   try {
-    if (USE_STORAGE) {
-      // Synchronous interface expected; perform a blocking-like fetch via deasync pattern is not ideal.
-      // Instead, attempt filesystem first when running in a strictly sync context.
-      // For production pages (server components), prefer API route that can be async.
-      // Here we fall back to filesystem if storage cannot be read synchronously.
-    }
     const fileNames = fs.readdirSync(postsDirectory)
     const allPostsData = fileNames
       .filter((name) => name.endsWith(".mdx"))
@@ -65,7 +56,7 @@ export function getAllPosts(): BlogPost[] {
       })
 
     return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1))
-  } catch (error) {
+  } catch {
     return []
   }
 }
@@ -74,8 +65,6 @@ export function getPostBySlug(slug: string): BlogPost | null {
   try {
     const decoded = (() => { try { return decodeURIComponent(slug) } catch { return slug } })()
     const candidates = [decoded, normalizeSlug(decoded)]
-
-    // Try filesystem first (works locally and also for pre-bundled content)
     let fileContents: string | null = null
     let finalSlug = decoded
     for (const cand of candidates) {
@@ -86,21 +75,6 @@ export function getPostBySlug(slug: string): BlogPost | null {
         break
       } catch {}
     }
-
-    // If not found and storage is enabled, try Supabase Storage
-    if (!fileContents && USE_STORAGE) {
-      const supabase = getServiceClient()
-      for (const cand of candidates) {
-        const key = `${cand}.mdx`
-        const { data, error } = (supabase.storage as any).from(BLOG_BUCKET).download(key)
-        // Note: supabase-js v2 download is async; in this sync context we cannot await.
-        // Therefore, rely on filesystem for synchronous server usage.
-        if (!error && data) {
-          // best-effort: Node Blob may expose a synchronous "size>0" but no sync read; skip here
-        }
-      }
-    }
-
     if (!fileContents) return null
     const { data, content } = matter(fileContents)
     const readTime = readingTime(content)
@@ -121,13 +95,14 @@ export function getPostBySlug(slug: string): BlogPost | null {
       backlinks: data.backlinks || undefined,
       content,
       readingTime: data.readingTime || readTime.text,
+      // Category comes directly from frontmatter when present
       category: (data.category as string) || undefined,
       ogImage: data.ogImage || undefined,
       faqs: data.faqs || undefined,
       cta: data.cta || undefined,
       seoKeywords: data.seoKeywords || undefined,
     }
-  } catch (error) {
+  } catch {
     return null
   }
 }

@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     fs.writeFileSync(filePath, fileContents, "utf8")
 
     return NextResponse.json({ ok: true, slug: safeSlug })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

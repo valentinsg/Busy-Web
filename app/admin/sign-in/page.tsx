@@ -24,8 +24,8 @@ export default function AdminSignInPage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
       router.replace(next)
-    } catch (err: any) {
-      setError(err?.message || "Error al iniciar sesión")
+    } catch (err: unknown) {
+      setError(err?.toString() || "Error al iniciar sesión")
     } finally {
       setLoading(false)
     }

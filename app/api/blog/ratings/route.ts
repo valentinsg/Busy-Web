@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
   if (error || !data) return NextResponse.json({ avg: null, count: 0 }, { status: 200 })
   const count = data.length
-  const avg = count ? data.reduce((a: number, b: any) => a + (b.rating as number), 0) / count : null
+  const avg = count ? data.reduce((a: number, b: unknown) => a + (b as { rating: number }).rating, 0) / count : null
   return NextResponse.json({ avg, count }, { status: 200 })
 }
 
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, avg: rating, count: 1 })
   }
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || (req as any).ip || null
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || (req as unknown as { ip: string }).ip || null
   const hash = ipHash(ip, slug)
 
   const supabase = getServiceClient()
@@ -71,6 +71,6 @@ export async function POST(req: NextRequest) {
 
   if (error || !data) return NextResponse.json({ ok: true, avg: rating, count: 1 })
   const count = data.length
-  const avg = count ? data.reduce((a: number, b: any) => a + (b.rating as number), 0) / count : rating
+  const avg = count ? data.reduce((a: number, b: unknown) => a + (b as { rating: number }).rating, 0) / count : rating
   return NextResponse.json({ ok: true, avg, count }, { status: 200 })
 }

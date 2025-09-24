@@ -5,8 +5,8 @@ export async function GET() {
   try {
     const data = await listSuppliers()
     return NextResponse.json({ ok: true, data })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }
 
@@ -37,8 +37,8 @@ export async function POST(req: Request) {
       reliability_rating: body.reliability_rating ?? null,
     })
     return NextResponse.json({ ok: true, supplier })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }
 
@@ -68,8 +68,8 @@ export async function PATCH(req: Request) {
       reliability_rating: body?.reliability_rating ?? undefined,
     })
     return NextResponse.json({ ok: true, supplier })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }
 
@@ -80,7 +80,7 @@ export async function DELETE(req: Request) {
     if (!id) return NextResponse.json({ error: "id requerido" }, { status: 400 })
     await deleteSupplier(id)
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

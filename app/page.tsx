@@ -8,6 +8,7 @@ import { getProductsAsync } from '@/lib/repo/products'
 import type { Product } from '@/lib/types'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
@@ -389,9 +390,11 @@ export default function Home() {
                           className="group inline-block"
                         >
                           <div className="inline-flex bg-transparent rounded-full border-4 border-white items-center justify-center mb-3 sm:mb-4">
-                            <img
-                              src={item.iconSrc}
-                              alt=""
+                            <Image
+                              src={item.iconSrc || ''}
+                              alt={item.title}
+                              width={160}
+                              height={160}
                               className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32 lg:h-40 lg:w-40 rounded-full contrast-150 brightness-25 transition-transform duration-300"
                             />
                           </div>
@@ -411,9 +414,11 @@ export default function Home() {
                           className="group inline-block"
                         >
                           <div className="inline-flex bg-transparent  rounded-full border-4 border-white items-center justify-center mb-3 sm:mb-4">
-                            <img
-                              src={item.iconSrc}
-                              alt=""
+                            <Image
+                              src={item.iconSrc || ''}
+                              alt={item.title}
+                              width={160}
+                              height={160}
                               className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32 lg:h-40 lg:w-40 rounded-full contrast-150 brightness-25 transition-transform duration-300"
                             />
                           </div>

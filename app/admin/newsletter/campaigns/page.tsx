@@ -48,7 +48,7 @@ export default async function CampaignsPage({ searchParams }: { searchParams: { 
                 </span>
               </div>
               <div className="text-xs text-muted-foreground truncate max-w-[80ch]">
-                {c.subject} {c.scheduled_at ? `· programa: ${new Date(c.scheduled_at as any).toLocaleString()}` : ''} · creado: {new Date(c.created_at as any).toLocaleString()} · enviados: {c.sent_count}
+                {c.subject} {c.scheduled_at ? `· programa: ${new Date(c.scheduled_at as string).toLocaleString()}` : ''} · creado: {new Date(c.created_at as string).toLocaleString()} · enviados: {c.sent_count}
               </div>
             </div>
             <Link href={`/admin/newsletter/campaigns/new`} className="text-xs rounded-md border px-2 py-1 hover:bg-accent hover:text-accent-foreground">

@@ -26,7 +26,7 @@ export async function createExpense(input: {
   supplier_id?: string | null
   channel?: string | null
   incurred_at?: string
-  metadata?: Record<string, any> | null
+  metadata?: Record<string, unknown> | null
 }): Promise<Expense> {
   const supabase = getServiceClient()
   const { data, error } = await supabase

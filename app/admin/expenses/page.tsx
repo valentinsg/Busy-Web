@@ -3,13 +3,14 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
+import { Expense } from "@/lib/types"
 
 const categories = ["supplier", "fixed_cost", "marketing", "shipping", "taxes", "other"]
 
 export default function ExpensesPage() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
-  const [rows, setRows] = useState<Array<any>>([])
+  const [rows, setRows] = useState<Array<Expense>>([])
 
   // filters
   const [from, setFrom] = useState("")
@@ -37,8 +38,8 @@ export default function ExpensesPage() {
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || "Error")
         setRows(json.data || [])
-      } catch (e: any) {
-        toast({ title: "Error al cargar gastos", description: e?.message || "", variant: "destructive" })
+      } catch (e: unknown) {
+        toast({ title: "Error al cargar gastos", description: e?.toString() || "", variant: "destructive" })
       } finally {
         setLoading(false)
       }
@@ -77,8 +78,8 @@ export default function ExpensesPage() {
       setCChannel("")
       setCDate("")
       await load()
-    } catch (e: any) {
-      toast({ title: "Error al crear gasto", description: e?.message || "", variant: "destructive" })
+    } catch (e: unknown) {
+      toast({ title: "Error al crear gasto", description: e?.toString() || "", variant: "destructive" })
     } finally {
       setLoading(false)
     }
@@ -86,9 +87,9 @@ export default function ExpensesPage() {
 
   useEffect(() => {
     load()
-  }, [])
+  }, [load])
 
-  const total = rows.reduce((acc: number, r: any) => acc + Number(r.amount || 0), 0)
+  const total = rows.reduce((acc: number, r: Expense) => acc + Number(r.amount || 0), 0)
 
   return (
     <div className="space-y-6">
@@ -143,7 +144,7 @@ export default function ExpensesPage() {
                     <td className="px-3 py-6 text-center text-muted-foreground" colSpan={5}>{loading ? "Cargando..." : "Sin datos"}</td>
                   </tr>
                 )}
-                {rows.map((r: any) => (
+                {rows.map((r: Expense) => (
                   <tr key={r.id} className="border-t">
                     <td className="px-3 py-2">{r.incurred_at ? new Date(r.incurred_at).toLocaleString() : "-"}</td>
                     <td className="px-3 py-2">{r.category}</td>

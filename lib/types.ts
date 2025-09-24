@@ -38,6 +38,22 @@ export interface SizeMeasurement {
   [key: string]: unknown
 }
 
+export interface Subscriber {
+  email: string
+  created_at: string
+  status: string
+  tags: string[]
+}
+export interface Expense {
+  id: string
+  category: string
+  amount: number
+  currency: string
+  description: string
+  supplier_id: string
+  channel: string
+  incurred_at: string
+}
 export interface CartItem {
   product: Product
   quantity: number
@@ -52,4 +68,57 @@ export interface FilterOptions {
   minPrice?: number
   maxPrice?: number
   sortBy?: "price-asc" | "price-desc" | "rating" | "newest"
+}
+
+export interface Author {
+  id: string
+  name: string
+  avatar: string
+  instagram: string
+  bio: string
+}
+
+export interface Coupon {
+  id: string
+  code: string
+  percent: number
+  active: boolean
+  max_uses: number
+  expires_at: string | null
+}
+
+export interface Order {
+  id: string
+  customer_id: string
+  items: CartItem[]
+  total: number
+  currency: string
+  created_at: string
+  updated_at: string
+  discount: number
+  shipping: number
+  tax: number
+  notes: string
+}
+
+export interface Post {
+  id: string
+  title: string
+  slug: string
+  description: string
+  tags: string[]
+  content: string
+  authorName: string
+  authorAvatar: string
+  cover: string
+  coverAlt: string
+  canonical: string
+  backlinks: string[]
+  excerpt: string
+  category: string
+  readingTime: string
+  ogImage: string
+  faqs: string[]
+  cta: string
+  seoKeywords: string[]
 }

@@ -63,7 +63,7 @@ export async function createManualOrder(input: CreateManualOrderInput): Promise<
   const total = subtotal - discount + shipping + tax
 
   // 1) create order (with fallback if is_barter column is missing)
-  const basePayload: any = {
+  const basePayload = {
     customer_id: resolvedCustomerId ?? null,
     channel: input.channel,
     status: "paid",
@@ -79,8 +79,8 @@ export async function createManualOrder(input: CreateManualOrderInput): Promise<
   // Prefer including is_barter, but we'll retry if the column doesn't exist
   const firstTryPayload = { ...basePayload, is_barter: Boolean(input.is_barter) || false }
 
-  let order: any | null = null
-  let orderErr: any | null = null
+  let order: Order | null = null
+  let orderErr: Error | null = null
   {
     const res = await supabase.from("orders").insert(firstTryPayload).select("*").single()
     order = res.data
@@ -93,10 +93,12 @@ export async function createManualOrder(input: CreateManualOrderInput): Promise<
     orderErr = res2.error
   }
   if (orderErr) throw orderErr
+  if (!order) throw new Error("Failed to create order")
+  const createdOrder: Order = order
 
   // 2) insert items
-  const itemsPayload = input.items.map((it) => ({
-    order_id: order.id,
+  const itemsPayload = input.items.map((it: CreateManualOrderInput["items"][number]) => ({
+    order_id: createdOrder.id,
     product_id: it.product_id,
     product_name: it.product_name ?? null,
     variant_color: it.variant_color ?? null,
@@ -130,5 +132,5 @@ export async function createManualOrder(input: CreateManualOrderInput): Promise<
     }
   }
 
-  return { order: order as Order, items: (items ?? []) as OrderItem[] }
+  return { order: createdOrder, items: (items ?? []) as OrderItem[] }
 }

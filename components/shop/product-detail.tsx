@@ -182,7 +182,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                     const sizes = product.sizes && product.sizes.length ? product.sizes : Object.keys(product.measurementsBySize!)
                     const allKeys = Array.from(new Set(
                       sizes.flatMap((s) => {
-                        const m = (product.measurementsBySize as any)?.[s]
+                        const m = (product.measurementsBySize as Record<string, Record<string, number | string> > | undefined)?.[s]
                         return m ? Object.keys(m).filter((k) => k !== 'unit') : []
                       })
                     ))
@@ -211,7 +211,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                         </thead>
                         <tbody>
                           {sizes.map((s) => {
-                            const m = (product.measurementsBySize as any)?.[s]
+                            const m = (product.measurementsBySize as Record<string, Record<string, number | string> > | undefined)?.[s]
                             return (
                               <tr key={s}>
                                 <td className="border border-border p-2">{s}</td>

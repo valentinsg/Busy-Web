@@ -15,8 +15,8 @@ export async function GET(req: Request) {
       .order("weight", { ascending: false })
     if (error) throw error
     return NextResponse.json({ ok: true, data: data ?? [] })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }
 
@@ -34,8 +34,8 @@ export async function POST(req: Request) {
       .single()
     if (error) throw error
     return NextResponse.json({ ok: true, relation: data })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }
 
@@ -49,7 +49,7 @@ export async function DELETE(req: Request) {
     const { error } = await supabase.from("related_products").delete().eq("id", id)
     if (error) throw error
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unexpected error" }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })
   }
 }

@@ -58,8 +58,8 @@ export default function NewCampaignPage() {
       } else {
         toast({ title: "Campaña creada", description: json.item?.name || "" })
       }
-    } catch (e:any) {
-      toast({ title: "Error", description: e?.message || String(e) })
+    } catch (e:unknown) {
+      toast({ title: "Error", description: e?.toString() || String(e) })
     } finally {
       setSaving(false)
     }
@@ -88,8 +88,8 @@ export default function NewCampaignPage() {
         ...(json.result.allowed as string[]),
       ]))
       setSelected(merged)
-    } catch (e:any) {
-      toast({ title: "Error al procesar CSV", description: e?.message || String(e) })
+    } catch (e:unknown) {
+      toast({ title: "Error al procesar CSV", description: e?.toString() || String(e) })
     }
   }
 

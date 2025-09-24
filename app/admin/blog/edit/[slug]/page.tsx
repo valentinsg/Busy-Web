@@ -5,12 +5,14 @@ import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import MarkdownPreview from "@/components/blog/markdown-preview"
 import authors from "@/data/authors.json"
+import { Author } from "@/lib/types"
 import supabase from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import Image from "next/image"
 
 // Importación directa para evitar problemas de carga de chunks en tiempo de ejecución
 
@@ -52,8 +54,8 @@ export default function AdminBlogEditPage() {
   const [seoKeywords, setSeoKeywords] = useState("")
   const [backlinks, setBacklinks] = useState<string>("")
 
-  const [authorsList, setAuthorsList] = useState<any[]>(authors as any[])
-  const [authorId, setAuthorId] = useState<string>(((authors as any[])?.[0]?.id as string) || "")
+  const [authorsList, setAuthorsList] = useState<Author[]>(authors as Author[])
+  const [authorId, setAuthorId] = useState<string>(((authors as Author[])?.[0]?.id as string) || "")
   const [authorName, setAuthorName] = useState<string>("")
   const [authorAvatar, setAuthorAvatar] = useState<string>("")
 
@@ -96,13 +98,13 @@ export default function AdminBlogEditPage() {
       try {
         const { data, error } = await supabase
           .from("authors")
-          .select("id,name,email,avatar_url,active,created_at")
+          .select("id,name,email,avatar_url,instagram_url,bio,active,created_at")
           .eq("active", true)
           .order("created_at", { ascending: true })
         if (error) throw error
         if (!cancelled && Array.isArray(data) && data.length) {
-          const mapped = data.map((a) => ({ id: a.id, name: a.name, email: a.email, avatar: a.avatar_url }))
-          setAuthorsList(mapped)
+          const mapped = data.map((a) => ({ id: a.id, name: a.name, email: a.email, avatar: a.avatar_url, instagram: a.instagram_url, bio: a.bio }))
+          setAuthorsList(mapped as Author[])
         }
       } catch {}
     }
@@ -128,15 +130,17 @@ export default function AdminBlogEditPage() {
         setOgImage(post.ogImage || "")
         setCategory(post.category || "")
         setReadingOverride(post.readingTime || "")
-        setFaqs(Array.isArray(post.faqs) ? post.faqs.map((f: any) => `${f.question}|${f.answer}`).join("\n") : "")
+        setFaqs(Array.isArray(post.faqs) ? post.faqs.map((f: { question: string; answer: string }) => `${f.question}|${f.answer}`).join("\n") : "")
         setCtaText(post.cta?.text || "")
         setCtaUrl(post.cta?.url || "")
         setSeoKeywords(Array.isArray(post.seoKeywords) ? post.seoKeywords.join(", ") : "")
-        setBacklinks(Array.isArray(post.backlinks) ? post.backlinks.map((b: any) => `${b.label}|${b.url}`).join("\n") : "")
-        setAuthorName(post.authorName || post.author || "")
-        setAuthorAvatar(post.authorAvatar || "")
-      } catch (e: any) {
-        setError(e?.message || "Error al cargar el artículo")
+        setBacklinks(Array.isArray(post.backlinks) ? post.backlinks.map((b: { label: string; url: string }) => `${b.label}|${b.url}`).join("\n") : "")
+        setAuthorId(post.author || "")
+        const author = authorsList.find((a) => a.id === post.author)
+        setAuthorName(author?.name || "")
+        setAuthorAvatar(author?.avatar || "")
+      } catch (e: unknown) {
+        setError(e?.toString() || "Error al cargar el artículo")
       } finally {
         setLoading(false)
       }
@@ -147,7 +151,7 @@ export default function AdminBlogEditPage() {
     return () => {
       cancelled = true
     }
-  }, [currentSlug])
+  }, [currentSlug, authorsList])
 
   function applyFormat(before: string, after = "") {
     const el = textareaRef.current
@@ -173,14 +177,13 @@ export default function AdminBlogEditPage() {
       // Normalize content: enforce a single H1 by demoting subsequent H1s to H2
       let normalizedContent = content
       const h1Regex = /^#\s+/gm
-      let match
       let count = 0
       normalizedContent = normalizedContent.replace(h1Regex, () => {
         count += 1
         return count === 1 ? "# " : "## "
       })
 
-      const selectedAuthor = (authorsList as any[]).find((a) => a.id === authorId)
+      const selectedAuthor = authorsList.find((a) => a.id === authorId)
       const finalAuthorName = selectedAuthor?.name || authorName || ""
       const finalAuthorAvatar = selectedAuthor?.avatar || authorAvatar || ""
 
@@ -232,8 +235,8 @@ export default function AdminBlogEditPage() {
       } else {
         router.refresh()
       }
-    } catch (err: any) {
-      setError(err?.message || "Error al guardar")
+    } catch (err: unknown) {
+      setError(err?.toString() || "Error al guardar")
     } finally {
       setSaving(false)
     }
@@ -336,7 +339,7 @@ export default function AdminBlogEditPage() {
             </Button>
           </div>
           {cover && <div className="text-xs text-muted-foreground">Vista previa:</div>}
-          {cover && <img src={cover} alt={coverAlt || "Portada del artículo"} className="h-28 w-auto rounded border" />}
+          {cover && <Image src={cover} alt={coverAlt || "Portada del artículo"} className="h-28 w-auto rounded border" />}
         </div>
         <div className="grid gap-2">
           <label className="text-sm">Alt de portada</label>
@@ -357,7 +360,7 @@ export default function AdminBlogEditPage() {
               <SelectValue placeholder={authorName || "Seleccioná un autor"} />
             </SelectTrigger>
             <SelectContent className="font-body">
-              {(authorsList as any[]).map((a) => (
+              {(authorsList as Author[]).map((a) => (
                 <SelectItem key={a.id} value={a.id}>
                   {a.name}
                 </SelectItem>
@@ -409,7 +412,7 @@ export default function AdminBlogEditPage() {
                     </Button>
                   </div>
                   {imageUrl && (
-                    <img src={imageUrl} alt="imagen" className="h-28 w-auto rounded border" />
+                    <Image src={imageUrl} alt="imagen" className="h-28 w-auto rounded border" />
                   )}
                   <label className="text-xs text-muted-foreground">Texto alternativo</label>
                   <Input value={imageAlt} onChange={(e) => setImageAlt(e.target.value)} placeholder="Descripción" />
@@ -438,7 +441,7 @@ export default function AdminBlogEditPage() {
             <div className="min-h-[260px] rounded-md border bg-muted/30 p-3 text-sm overflow-auto">
               <div className="prose prose-neutral dark:prose-invert max-w-none">
                 <h3 className="mt-0">Vista previa</h3>
-                {cover && <img src={cover} alt={coverAlt || "Portada del artículo"} className="rounded mb-3" />}
+                {cover && <Image src={cover} alt={coverAlt || "Portada del artículo"} className="rounded mb-3" />}
                 {category && <div className="text-xs inline-block bg-muted px-2 py-1 rounded mr-2">{category}</div>}
                 <h1 className="mb-2">{title || "Título"}</h1>
                 <p className="text-muted-foreground">{(excerpt || description) || "Descripción"}</p>

@@ -27,8 +27,8 @@ export default function SitePopover({ section }: { section?: string }) {
             setData({ id: p.id, title: p.title, body: p.body, discount_code: p.discount_code })
           }
         }
-      } catch (e) {
-        // silent
+      } catch (e: unknown) {
+        console.error(e)
       } finally {
         setLoading(false)
       }

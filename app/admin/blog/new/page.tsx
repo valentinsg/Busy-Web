@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Author } from "@/lib/types"
+import Image from "next/image"
 
 const MarkdownPreview = dynamic(() => import("@/components/blog/markdown-preview"), {
   ssr: false,
@@ -33,8 +35,8 @@ export default function AdminBlogNewPage() {
   const [category, setCategory] = useState("")
   const [tags, setTags] = useState("")
   const [content, setContent] = useState("")
-  const [authorsList, setAuthorsList] = useState<any[]>(authors as any[])
-  const [authorId, setAuthorId] = useState<string>(((authors as any[])?.[0]?.id as string) || "")
+  const [authorsList, setAuthorsList] = useState<Author[]>(authors as Author[])
+  const [authorId, setAuthorId] = useState<string>(((authors as Author[])?.[0]?.id as string) || "")
   const [cover, setCover] = useState("")
   const [coverAlt, setCoverAlt] = useState("")
   const [canonical, setCanonical] = useState("")
@@ -50,8 +52,6 @@ export default function AdminBlogNewPage() {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   // Toolbar popovers state
-  const [linkOpen, setLinkOpen] = useState(false)
-  const [linkUrl, setLinkUrl] = useState("")
   const [imageOpen, setImageOpen] = useState(false)
   const [imageUrl, setImageUrl] = useState("")
   const [imageAlt, setImageAlt] = useState("")
@@ -94,11 +94,11 @@ export default function AdminBlogNewPage() {
         if (error) throw error
         if (!cancelled && Array.isArray(data) && data.length) {
           const mapped = data.map((a) => ({ id: a.id, name: a.name, email: a.email, avatar: a.avatar_url }))
-          setAuthorsList(mapped)
+          setAuthorsList(mapped as unknown as Author[])
           setAuthorId(mapped[0]?.id || "")
         }
-      } catch (e) {
-        // fallback to local file already in state
+      } catch (e: unknown) {
+        console.error(e)
       }
     }
     loadAuthors()
@@ -139,7 +139,7 @@ export default function AdminBlogNewPage() {
           setSaving(true)
           setMessage(null)
           try {
-            const author = (authorsList as any[]).find((a) => a.id === authorId) || (authorsList as any[])?.[0]
+            const author = authorsList.find((a) => a.id === authorId) || authorsList?.[0]
             const res = await fetch("/api/admin/blog/new", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -181,8 +181,8 @@ export default function AdminBlogNewPage() {
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || "Error al guardar")
             setMessage("Artículo creado correctamente")
-          } catch (err: any) {
-            setMessage(err.message)
+          } catch (err: unknown) {
+            setMessage(err?.toString() || "Error al guardar")
           } finally {
             setSaving(false)
           }
@@ -236,7 +236,7 @@ export default function AdminBlogNewPage() {
             <div className="text-xs text-muted-foreground">Vista previa:</div>
           )}
           {cover && (
-            <img src={cover} alt={coverAlt || "Portada del artículo"} className="h-28 w-auto rounded border" />
+            <Image src={cover} alt={coverAlt || "Portada del artículo"} className="h-28 w-auto rounded border" />
           )}
         </div>
         <div className="grid gap-2">
@@ -266,7 +266,7 @@ export default function AdminBlogNewPage() {
               <SelectValue placeholder="Seleccioná un autor" />
             </SelectTrigger>
             <SelectContent className="font-body">
-              {(authorsList as any[]).map((a) => (
+              {(authorsList as Author[]).map((a) => (
                 <SelectItem key={a.id} value={a.id}>
                   {a.name}
                 </SelectItem>
@@ -319,7 +319,7 @@ export default function AdminBlogNewPage() {
                     </Button>
                   </div>
                   {imageUrl && (
-                    <img src={imageUrl} alt="imagen" className="h-28 w-auto rounded border" />
+                    <Image src={imageUrl} alt="imagen" className="h-28 w-auto rounded border" />
                   )}
                   <label className="text-xs text-muted-foreground">Texto alternativo</label>
                   <Input value={imageAlt} onChange={(e) => setImageAlt(e.target.value)} placeholder="Descripción" />
@@ -348,7 +348,7 @@ export default function AdminBlogNewPage() {
             <div className="min-h-[260px] rounded-md border bg-muted/30 p-3 text-sm overflow-auto">
               <div className="prose prose-neutral dark:prose-invert max-w-none">
                 <h3 className="mt-0">Vista previa</h3>
-                {cover && <img src={cover} alt={coverAlt || "Portada del artículo"} className="rounded mb-3" />}
+                {cover && <Image src={cover} alt={coverAlt || "Portada del artículo"} className="rounded mb-3" />}
                 {category && <div className="text-xs inline-block bg-muted px-2 py-1 rounded mr-2">{category}</div>}
                 <h1 className="mb-2">{title || "Título"}</h1>
                 <p className="text-muted-foreground">{(excerpt || description) || "Descripción"}</p>

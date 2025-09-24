@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
+import type { DateRange } from "react-day-picker"
 import {
   ChartContainer,
   ChartLegend,
@@ -40,7 +41,7 @@ export default function DashboardCards({
   const [groupBy, setGroupBy] = useState<'day'|'week'|'month'>("day")
   const [preset, setPreset] = useState<string>("last30")
   const [rangeOpen, setRangeOpen] = useState(false)
-  const [customRange, setCustomRange] = useState<{ from?: Date; to?: Date }>({})
+  const [customRange, setCustomRange] = useState<Partial<DateRange>>({})
 
   const load = useMemo(
     () => async (opts?: { quiet?: boolean }) => {
@@ -60,8 +61,8 @@ export default function DashboardCards({
         setTimeSeries(json.timeSeries || [])
         setKpis(json.kpis || null)
         if (!opts?.quiet) toast({ title: "Resumen actualizado" })
-      } catch (e: any) {
-        toast({ title: "Error al cargar resumen", description: e?.message || "", variant: "destructive" })
+      } catch (e: unknown) {
+        toast({ title: "Error al cargar resumen", description: String(e), variant: "destructive" })
       } finally {
         setLoading(false)
       }
@@ -70,8 +71,8 @@ export default function DashboardCards({
   )
 
   useEffect(() => {
-    load({ quiet: true })
-  }, [])
+    void load({ quiet: true })
+  }, [load])
 
   // Keep in sync with external props (when provided)
   useEffect(() => {
@@ -80,7 +81,7 @@ export default function DashboardCards({
     if (typeof externalFrom !== 'undefined' || typeof externalTo !== 'undefined') {
       void load({ quiet: true })
     }
-  }, [externalFrom, externalTo])
+  }, [load, externalFrom, externalTo])
 
   // Presets handler
   useEffect(() => {
@@ -183,7 +184,12 @@ export default function DashboardCards({
             </PopoverTrigger>
             <PopoverContent className="w-auto p-2">
               <div className="grid grid-cols-1 gap-2">
-                <Calendar mode="range" selected={customRange as any} onSelect={(r: any) => setCustomRange(r || {})} numberOfMonths={2} />
+                <Calendar
+                  mode="range"
+                  selected={customRange.from ? (customRange as DateRange) : undefined}
+                  onSelect={(r: DateRange | undefined) => setCustomRange(r || {})}
+                  numberOfMonths={2}
+                />
                 <div className="flex justify-end gap-2">
                   <Button variant="ghost" size="sm" onClick={() => { setRangeOpen(false) }}>Cerrar</Button>
                   <Button size="sm" onClick={() => { setRangeOpen(false); load(); }}>Aplicar</Button>
