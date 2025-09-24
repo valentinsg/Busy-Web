@@ -77,12 +77,22 @@ export default function SuppliersPage() {
     contact_email: string
     contact_phone: string
     notes?: string
+    category?: string
+    minimum_order_quantity?: number | ''
+    delivery_time_days?: number | ''
+    status?: 'active' | 'inactive'
+    reliability_rating?: number | ''
   }>({
     name: '',
     contact_name: '',
     contact_email: '',
     contact_phone: '',
     notes: '',
+    category: '',
+    minimum_order_quantity: '',
+    delivery_time_days: '',
+    status: 'active',
+    reliability_rating: '',
   })
 
   const editErrors = useMemo(() => {
@@ -194,6 +204,11 @@ export default function SuppliersPage() {
       contact_email: s.contact_email || '',
       contact_phone: s.contact_phone || '',
       notes: s.notes || '',
+      category: s.category || '',
+      minimum_order_quantity: typeof s.minimum_order_quantity === 'number' ? s.minimum_order_quantity : '',
+      delivery_time_days: typeof s.delivery_time_days === 'number' ? s.delivery_time_days : '',
+      status: (s.status === 'inactive' ? 'inactive' : 'active'),
+      reliability_rating: typeof s.reliability_rating === 'number' ? s.reliability_rating : '',
     })
   }
 
@@ -206,10 +221,33 @@ export default function SuppliersPage() {
     if (Object.keys(editErrors).length > 0) return
     try {
       setLoading(true)
+      // normalize numeric fields and empty strings
+      const payload: any = {
+        id: editId,
+        name: editData.name,
+        contact_name: editData.contact_name,
+        contact_email: editData.contact_email,
+        contact_phone: editData.contact_phone,
+        notes: editData.notes,
+        category: editData.category,
+        minimum_order_quantity:
+          editData.minimum_order_quantity === ''
+            ? null
+            : Number(editData.minimum_order_quantity),
+        delivery_time_days:
+          editData.delivery_time_days === ''
+            ? null
+            : Number(editData.delivery_time_days),
+        status: editData.status,
+        reliability_rating:
+          editData.reliability_rating === ''
+            ? null
+            : Number(editData.reliability_rating),
+      }
       const res = await fetch('/api/admin/suppliers', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: editId, ...editData }),
+        body: JSON.stringify(payload),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json?.error || 'Error')
@@ -464,12 +502,97 @@ export default function SuppliersPage() {
                         </div>
                       )}
                     </td>
-                    <td className="px-3 py-2">{s.category || '-'}</td>
-                    <td className="px-3 py-2">{s.minimum_order_quantity ?? '-'}</td>
-                    <td className="px-3 py-2">{s.delivery_time_days ?? '-'}
+                    <td className="px-3 py-2">
+                      {editId === s.id ? (
+                        <input
+                          value={editData.category || ''}
+                          onChange={(e) =>
+                            setEditData((d) => ({ ...d, category: e.target.value }))
+                          }
+                          className="w-full border rounded px-2 py-1 bg-background"
+                        />
+                      ) : (
+                        s.category || '-'
+                      )}
                     </td>
-                    <td className="px-3 py-2">{s.status === 'inactive' ? 'Inactivo' : 'Activo'}</td>
-                    <td className="px-3 py-2">{s.reliability_rating ? '★'.repeat(s.reliability_rating) : '-'}</td>
+                    <td className="px-3 py-2">
+                      {editId === s.id ? (
+                        <input
+                          type="number"
+                          min={0}
+                          value={editData.minimum_order_quantity}
+                          onChange={(e) =>
+                            setEditData((d) => ({
+                              ...d,
+                              minimum_order_quantity:
+                                e.target.value === '' ? '' : Number(e.target.value),
+                            }))
+                          }
+                          className="w-full border rounded px-2 py-1 bg-background"
+                        />
+                      ) : (
+                        s.minimum_order_quantity ?? '-'
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      {editId === s.id ? (
+                        <input
+                          type="number"
+                          min={0}
+                          value={editData.delivery_time_days}
+                          onChange={(e) =>
+                            setEditData((d) => ({
+                              ...d,
+                              delivery_time_days:
+                                e.target.value === '' ? '' : Number(e.target.value),
+                            }))
+                          }
+                          className="w-full border rounded px-2 py-1 bg-background"
+                        />
+                      ) : (
+                        s.delivery_time_days ?? '-'
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      {editId === s.id ? (
+                        <select
+                          value={editData.status}
+                          onChange={(e) =>
+                            setEditData((d) => ({ ...d, status: e.target.value as any }))
+                          }
+                          className="w-full border rounded px-2 py-1 bg-background"
+                        >
+                          <option value="active">Activo</option>
+                          <option value="inactive">Inactivo</option>
+                        </select>
+                      ) : (
+                        s.status === 'inactive' ? 'Inactivo' : 'Activo'
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      {editId === s.id ? (
+                        <select
+                          value={editData.reliability_rating}
+                          onChange={(e) =>
+                            setEditData((d) => ({
+                              ...d,
+                              reliability_rating:
+                                e.target.value === '' ? '' : Number(e.target.value),
+                            }))
+                          }
+                          className="w-full border rounded px-2 py-1 bg-background"
+                        >
+                          <option value="">Sin especificar</option>
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                          <option value="4">4</option>
+                          <option value="5">5</option>
+                        </select>
+                      ) : (
+                        s.reliability_rating ? '★'.repeat(s.reliability_rating) : '-'
+                      )}
+                    </td>
                     <td className="px-3 py-2">
                       {editId === s.id ? (
                         <textarea

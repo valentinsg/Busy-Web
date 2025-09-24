@@ -86,7 +86,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-background">
+    <footer className="transition-[background-color,border-color,backdrop-filter] duration-500 ease-out">
       <div className="container px-2 py-16">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2">

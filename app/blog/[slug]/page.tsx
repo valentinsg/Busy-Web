@@ -124,7 +124,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   const preparedContent = (post.content || '').replace(/\r\n/g, '\n')
 
   return (
-    <div className="container py-8 pt-28 tracking-wide font-body bg-black/90 backdrop-blur-sm">
+    <div className="container py-8 pt-28 tracking-wide font-body backdrop-blur-sm">
       <div className="max-w-7xl mx-auto">
         {/* JSON-LD Article */}
         <script

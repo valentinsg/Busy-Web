@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
-import dynamic from "next/dynamic"
+import MarkdownPreview from "@/components/blog/markdown-preview"
 import authors from "@/data/authors.json"
 import supabase from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -12,10 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
-const MarkdownPreview = dynamic(() => import("@/components/blog/markdown-preview"), {
-  ssr: false,
-  loading: () => <div className="text-sm text-muted-foreground">Cargando vista previa...</div>,
-})
+// Importación directa para evitar problemas de carga de chunks en tiempo de ejecución
 
 function slugify(input: string) {
   return (input || "")

@@ -1,6 +1,6 @@
 import { MDXRemote } from "next-mdx-remote/rsc"
-import remarkGfm from "remark-gfm"
 import remarkBreaks from "remark-breaks"
+import remarkGfm from "remark-gfm"
 
 export default function MdxRenderer({ source }: { source: string }) {
   return (
@@ -16,7 +16,7 @@ export default function MdxRenderer({ source }: { source: string }) {
           h2: (p: any) => <h2 className="font-body text-2xl md:text-2xl" {...p} />,
           h3: (p: any) => <h3 className="font-body text-md md:text-lg" {...p} />,
           p: (p: any) => <p className="font-body text-md md:text-md" {...p} />,
-          strong: (p: any) => <strong className="font-body font-bold text-white/75 text-md md:text-md" {...p} />,
+          strong: (p: any) => <strong className="font-body font-bold text-md md:text-md" {...p} />,
           li: (p: any) => <li className="font-body text-md md:text-md" {...p} />,
           td: (p: any) => <td className="border px-3 py-2 align-top text-md md:text-md" {...p} />,
           blockquote: (p: any) => <blockquote className="border-l-4 pl-4 opacity-80 italic text-md md:text-md" {...p} />,
