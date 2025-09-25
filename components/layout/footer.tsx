@@ -15,7 +15,7 @@ const footerSections = (t: (k: string) => string) => ({
       { nameKey: "footer.sections.shop.links.hoodies", href: "/products?category=hoodies" },
       { nameKey: "footer.sections.shop.links.tshirts", href: "/products?category=tshirts" },
       { nameKey: "footer.sections.shop.links.accessories", href: "/products?category=accessories" },
-      { nameKey: "footer.sections.shop.links.care_guide", href: "/blog/cuidar-tus-prendas" },
+      { nameKey: "footer.sections.shop.links.care_guide", href: "/blog/guia-para-cuidar-tu-ropa" },
     ],
   },
   brand: {

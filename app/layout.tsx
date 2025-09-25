@@ -81,13 +81,7 @@ export const metadata: Metadata = {
     shortcut: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
-  alternates: {
-    canonical: '/',
-    languages: {
-      'es-AR': '/',
-      'x-default': '/',
-    },
-  },
+  // Do not set a global canonical here; individual pages define their own canonical
 }
 
 export const viewport: Viewport = {

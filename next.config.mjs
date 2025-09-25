@@ -29,6 +29,18 @@ const nextConfig = {
         destination: 'https://busy.com.ar/:path*',
         permanent: true,
       },
+      // Blog legacy slug -> new slug
+      {
+        source: '/blog/cuidar-tus-prendas',
+        destination: '/blog/guia-para-cuidar-tu-ropa',
+        permanent: true,
+      },
+      // FAQs alias
+      {
+        source: '/faqs',
+        destination: '/faq',
+        permanent: true,
+      },
     ]
   },
   async headers() {
@@ -40,6 +52,27 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
           },
+        ],
+      },
+      // Prevent indexing of font files via X-Robots-Tag
+      {
+        source: '/:all*(woff|woff2|ttf|otf)',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      // Prevent indexing of favicon (requested)
+      {
+        source: '/favicon.ico',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      // Security: HSTS (enforce HTTPS on supporting browsers)
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
         ],
       },
     ]

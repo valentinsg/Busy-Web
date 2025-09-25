@@ -20,7 +20,7 @@ const nextConfig = {
     return [
       {
         source: '/blog/cuidar-tus-prendas',
-        destination: '/blog/guía-para-cuidar-tu-ropa',
+        destination: '/blog/guia-para-cuidar-tu-ropa',
         permanent: true,
       },
     ]
