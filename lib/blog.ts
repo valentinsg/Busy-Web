@@ -28,7 +28,7 @@ export async function getAllPostsAsync(): Promise<BlogPost[]> {
   try {
     if (USE_STORAGE) {
       const supabase = getServiceClient()
-      const listRes = (await (supabase.storage.from(BLOG_BUCKET).list('', { limit: 1000 }) as unknown as Promise<{ data: Array<{ name: string }>; error: any }>))
+      const listRes = (await (supabase.storage.from(BLOG_BUCKET).list('', { limit: 1000 }) as unknown as Promise<{ data: Array<{ name: string }>; error: Error | null }>))
       const list = listRes?.data || []
       const mdxFiles = list.filter((o) => o.name?.endsWith('.mdx'))
       const results: BlogPost[] = []

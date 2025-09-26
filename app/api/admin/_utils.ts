@@ -6,6 +6,13 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
 
 export async function assertAdmin(req: NextRequest) {
+  // Optional development bypass: set ADMIN_DEV_BYPASS=true in .env.local (ignored in production)
+  const devBypass = process.env.ADMIN_DEV_BYPASS === 'true' && process.env.NODE_ENV !== 'production'
+  if (devBypass) {
+    const svc = getServiceClient()
+    return { ok: true as const, svc, user: { email: 'dev@local' } }
+  }
+
   const auth = req.headers.get("authorization") || req.headers.get("Authorization")
   if (!auth || !auth.toLowerCase().startsWith("bearer ")) {
     return { ok: false as const, res: NextResponse.json({ error: "Missing token" }, { status: 401 }) }

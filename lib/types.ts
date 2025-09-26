@@ -72,10 +72,13 @@ export interface FilterOptions {
 
 export interface Author {
   id: string
-  name: string
-  avatar: string
-  instagram: string
-  bio: string
+  name?: string
+  avatar?: string
+  instagram?: string
+  twitter?: string
+  linkedin?: string
+  medium?: string
+  bio?: string
 }
 
 export interface Coupon {

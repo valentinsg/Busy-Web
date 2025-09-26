@@ -261,7 +261,14 @@ export default function NewProductPage() {
             </label>
             <div className="mt-2 grid grid-cols-3 gap-2">
               {form.images.map((url) => (
-                <Image key={url} src={url} alt="img" className="w-full h-24 object-cover rounded" />
+                <Image
+                  key={url}
+                  src={url}
+                  alt="img"
+                  width={200}
+                  height={96}
+                  className="w-full h-24 object-cover rounded"
+                />
               ))}
             </div>
             {uploading && <p className="text-sm text-muted-foreground mt-1">Subiendo...</p>}

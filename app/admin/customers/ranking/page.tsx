@@ -1,4 +1,5 @@
 "use client"
+export const dynamic = "force-dynamic"
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
@@ -33,27 +34,25 @@ export default function CustomersRankingPage() {
     () => async (opts?: { quiet?: boolean }) => {
       try {
         setLoading(true)
-        const res = await fetch(`/api/admin/analytics/customer-ranking?metric=${metric}&limit=${limit}`)
+        const res = await fetch(`/api/admin/analytics/customer-ranking?metric=${metric}&limit=${limit}`, { cache: 'no-store' })
         const json = await res.json()
-        if (!res.ok) throw new Error(json?.error || "Error")
+        if (!res.ok) throw new Error(json?.error || 'Error')
         setRows(json.data || [])
         if (!opts?.quiet) {
-          toast({ title: "Ranking actualizado", description: `Métrica: ${metric.toUpperCase()} | TOP ${limit}` })
+          toast({ title: 'Ranking actualizado', description: `Métrica: ${metric.toUpperCase()} | TOP ${limit}` })
         }
       } catch (e: unknown) {
-        toast({ title: "Error al cargar ranking", description: e?.toString() || "", variant: "destructive" })
+        toast({ title: 'Error al cargar ranking', description: e?.toString() || '', variant: 'destructive' })
       } finally {
         setLoading(false)
       }
     },
     [metric, limit, toast],
   )
-
   useEffect(() => {
     // Initial load
     load({ quiet: true })
-  }, [metric, limit, load])
-
+  }, [load])
   async function openEdit(row: Row) {
     setEditingId(row.customer_id)
     setEditData({ full_name: row.full_name || "", email: row.email || "", phone: "", tags: "" })

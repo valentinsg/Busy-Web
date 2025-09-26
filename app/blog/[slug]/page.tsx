@@ -6,10 +6,13 @@ import MdxRenderer from '@/components/mdx/MdxRenderer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import authorsJson from '@/data/authors.json'
 import { getAllPostsAsync, getPostBySlugAsync } from '@/lib/blog'
+import getServiceClient from '@/lib/supabase/server'
+import { Author } from '@/lib/types'
+import type { BlogPost } from '@/types/blog'
 import { format } from 'date-fns'
 import { enUS, es } from 'date-fns/locale'
-import Image from 'next/image'
 import {
   ArrowUpRight,
   Calendar,
@@ -18,13 +21,11 @@ import {
   Share2,
 } from 'lucide-react'
 import type { Metadata } from 'next'
-import type { BlogPost } from '@/types/blog'
 import NextDynamic from 'next/dynamic'
 import { cookies } from 'next/headers'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import getServiceClient from '@/lib/supabase/server'
-import authorsJson from '@/data/authors.json'
 
 // Client helpers
 const CopyLinkButton = NextDynamic(
@@ -114,7 +115,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null
   const nextPost =
     currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null
-  // Note: related posts are rendered via backlinks below; explicit 'related' list removed
 
   const localeCookie = cookies().get('busy_locale')?.value
   const dfnsLocale = localeCookie === 'es' ? es : enUS
@@ -122,20 +122,20 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   // Enrich author social links from Supabase (authors table)
   const supabase = getServiceClient()
-  let social: { instagram?: string; x?: string; linkedin?: string; medium?: string; bio?: string } = {}
+  const social: { instagram?: string; x?: string; linkedin?: string; medium?: string; bio?: string } = {}
   try {
     if (authorName) {
       const { data } = await supabase
         .from('authors')
-        .select('instagram_url, linkedin_url, medium_url, twitter_url, bio, name')
-        .ilike('name', authorName) // case-insensitive match; if fails, we'll fallback to JSON
+        .select('instagram, linkedin, medium, twitter, bio, name')
+        .ilike('name', authorName)
         .maybeSingle()
       if (data) {
-        social.instagram = (data as any).instagram_url || undefined
-        social.linkedin = (data as any).linkedin_url || undefined
-        social.medium = (data as any).medium_url || undefined
-        social.x = (data as any).twitter_url || undefined
-        social.bio = (data as any).bio || undefined
+        social.instagram = (data as unknown as Author).instagram || undefined
+        social.linkedin = (data as unknown as Author).linkedin || undefined
+        social.medium = (data as unknown as Author).medium || undefined
+        social.x = (data as unknown as Author).twitter || undefined
+        social.bio = (data as unknown as Author).bio || undefined
       }
     }
   } catch {}
@@ -156,11 +156,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       const norm = (s: string) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
       const found = list.find((a) => norm(a.name || '') === norm(authorName))
       if (found) {
-        social.instagram = social.instagram || (found as any).instagram || undefined
-        social.x = social.x || (found as any).twitter || undefined
-        social.linkedin = social.linkedin || (found as any).linkedin || undefined
-        social.medium = social.medium || (found as any).medium || undefined
-        social.bio = social.bio || (found as any).bio || undefined
+        social.instagram = social.instagram || (found as Author).instagram || undefined
+        social.x = social.x || (found as Author).twitter || undefined
+        social.linkedin = social.linkedin || (found as Author).linkedin || undefined
+        social.medium = social.medium || (found as Author).medium || undefined
+        social.bio = social.bio || (found as Author).bio || undefined
       }
     } catch {}
   }

@@ -236,7 +236,13 @@ export default function AdminBlogNewPage() {
             <div className="text-xs text-muted-foreground">Vista previa:</div>
           )}
           {cover && (
-            <Image src={cover} alt={coverAlt || "Portada del artículo"} className="h-28 w-auto rounded border" />
+            <Image
+              src={cover}
+              alt={coverAlt || "Portada del artículo"}
+              width={448}
+              height={112}
+              className="h-28 w-auto rounded border"
+            />
           )}
         </div>
         <div className="grid gap-2">
@@ -319,7 +325,13 @@ export default function AdminBlogNewPage() {
                     </Button>
                   </div>
                   {imageUrl && (
-                    <Image src={imageUrl} alt="imagen" className="h-28 w-auto rounded border" />
+                    <Image
+                      src={imageUrl}
+                      alt="imagen"
+                      width={448}
+                      height={112}
+                      className="h-28 w-auto rounded border"
+                    />
                   )}
                   <label className="text-xs text-muted-foreground">Texto alternativo</label>
                   <Input value={imageAlt} onChange={(e) => setImageAlt(e.target.value)} placeholder="Descripción" />
@@ -348,7 +360,15 @@ export default function AdminBlogNewPage() {
             <div className="min-h-[260px] rounded-md border bg-muted/30 p-3 text-sm overflow-auto">
               <div className="prose prose-neutral dark:prose-invert max-w-none">
                 <h3 className="mt-0">Vista previa</h3>
-                {cover && <Image src={cover} alt={coverAlt || "Portada del artículo"} className="rounded mb-3" />}
+                {cover && (
+                  <Image
+                    src={cover}
+                    alt={coverAlt || "Portada del artículo"}
+                    width={800}
+                    height={450}
+                    className="rounded mb-3"
+                  />
+                )}
                 {category && <div className="text-xs inline-block bg-muted px-2 py-1 rounded mr-2">{category}</div>}
                 <h1 className="mb-2">{title || "Título"}</h1>
                 <p className="text-muted-foreground">{(excerpt || description) || "Descripción"}</p>

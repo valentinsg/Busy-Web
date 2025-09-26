@@ -340,7 +340,7 @@ export default function AdminBlogEditPage() {
           </div>
           {cover && <div className="text-xs text-muted-foreground">Vista previa:</div>}
           {cover && (
-            <img
+            <Image
               src={cover}
               alt={coverAlt || "Portada del artículo"}
               className="h-28 w-auto rounded border"
@@ -420,7 +420,7 @@ export default function AdminBlogEditPage() {
                     </Button>
                   </div>
                   {imageUrl && (
-                    <img
+                    <Image
                       src={imageUrl}
                       alt="imagen"
                       className="h-28 w-auto rounded border"
@@ -456,7 +456,7 @@ export default function AdminBlogEditPage() {
               <div className="prose prose-neutral dark:prose-invert max-w-none">
                 <h3 className="mt-0">Vista previa</h3>
                 {cover && (
-                  <img
+                  <Image
                     src={cover}
                     alt={coverAlt || "Portada del artículo"}
                     className="rounded mb-3"

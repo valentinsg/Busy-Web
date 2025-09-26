@@ -8,14 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import type { DateRange } from "react-day-picker"
-import {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+// Chart UI helpers removed; charts now rendered via client-only component
+import RevenueAreaChart from "@/components/admin/RevenueAreaChart"
 
 type Variant = "compact" | "full"
 
@@ -226,20 +220,7 @@ export default function DashboardCards({
       {/* Time series chart */}
       <div className="rounded-lg border p-4">
         <div className="mb-2 font-medium">Evolución ingresos y beneficio</div>
-        <ChartContainer
-          config={{ revenue: { label: "Ingresos", color: "hsl(var(--primary))" }, profit: { label: "Beneficio", color: "hsl(var(--accent))" } }}
-          className="w-full h-[260px]"
-        >
-          <AreaChart data={timeSeries} margin={{ left: 8, right: 8, top: 10, bottom: 0 }}>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
-            <XAxis dataKey="bucket" tickLine={false} axisLine={false} hide={false} />
-            <YAxis tickLine={false} axisLine={false} width={40} />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Area type="monotone" dataKey="revenue" stroke="var(--color-revenue)" fill="var(--color-revenue)" fillOpacity={0.15} />
-            <Area type="monotone" dataKey="profit" stroke="var(--color-profit)" fill="var(--color-profit)" fillOpacity={0.2} />
-            <ChartLegend content={<ChartLegendContent />} />
-          </AreaChart>
-        </ChartContainer>
+        <RevenueAreaChart data={timeSeries} />
       </div>
 
       {/* Revenue by channel list */}
