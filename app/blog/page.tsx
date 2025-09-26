@@ -1,4 +1,4 @@
-import { getAllPosts } from "@/lib/blog"
+import { getAllPostsAsync } from "@/lib/blog"
 import BlogClient from "@/components/blog/blog-client"
 import type { Metadata } from "next"
 import { generateSEO } from "@/lib/seo"
@@ -11,8 +11,11 @@ export const metadata: Metadata = generateSEO({
   type: "website",
 })
 
+export const revalidate = process.env.NODE_ENV === 'production' ? 3600 : 0
+export const dynamic = process.env.NODE_ENV === 'production' ? 'auto' : 'force-dynamic'
+
 export default async function BlogPage() {
-  const allPosts = getAllPosts()
+  const allPosts = await getAllPostsAsync()
   const latestPost = allPosts[0]
 
   return (

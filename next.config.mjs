@@ -44,6 +44,11 @@ const nextConfig = {
     ]
   },
   async headers() {
+    const isProd = process.env.NODE_ENV === 'production'
+    if (!isProd) {
+      // In development, avoid adding HSTS or indexing headers to prevent sticky browser behavior
+      return []
+    }
     return [
       {
         source: '/:all*(js|css|png|jpg|jpeg|gif|svg|webp|ico|ttf|otf|woff|woff2)',

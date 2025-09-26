@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server"
-import { getAllPosts } from "@/lib/blog"
+import { getAllPostsAsync } from "@/lib/blog"
 
 export async function GET() {
   try {
-    const posts = getAllPosts()
+    const all = await getAllPostsAsync()
+    const posts = all
       .slice(0, 3)
-      .map((p) => ({
+      .map((p: any) => ({
         slug: p.slug,
         title: p.title,
         description: p.description,
         date: p.date,
         cover: p.cover || null,
       }))
-    return NextResponse.json({ ok: true, posts })
+    return NextResponse.json({ ok: true, posts }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (e: unknown) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "Error" }, { status: 500 })
   }

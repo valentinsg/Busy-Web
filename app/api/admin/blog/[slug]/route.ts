@@ -27,19 +27,15 @@ function normalizeSlug(input: string) {
 
 export async function GET(_: Request, { params }: { params: { slug: string } }) {
   const raw = params.slug
-  const decoded = (() => {
-    try { return decodeURIComponent(raw) } catch { return raw }
-  })()
-  let post: BlogPost | null = getPostBySlug(decoded)
-  if (!post) {
-    const fallback = normalizeSlug(decoded)
-    post = getPostBySlug(fallback)
-  }
+  const decoded = (() => { try { return decodeURIComponent(raw) } catch { return raw } })()
+  const candidates = [decoded, normalizeSlug(decoded)]
 
-  if (!post && USE_STORAGE) {
-    // Try to read from Supabase Storage
+  let post: BlogPost | null = null
+
+  // Prefer Supabase Storage if configured
+  if (USE_STORAGE) {
     const supabase = getServiceClient()
-    for (const cand of [decoded, normalizeSlug(decoded)]) {
+    for (const cand of candidates) {
       const key = `${cand}.mdx`
       const { data, error } = await supabase.storage.from(BLOG_BUCKET).download(key)
       if (!error && data) {
@@ -68,14 +64,25 @@ export async function GET(_: Request, { params }: { params: { slug: string } }) 
           cta: (m.cta as { text: string; url: string }) || undefined,
           seoKeywords: (m.seoKeywords as string[]) || undefined,
         }
-
         break
       }
     }
   }
 
+  // Fallback to filesystem (dev) if not found in storage
+  if (!post) {
+    post = getPostBySlug(decoded)
+    if (!post) {
+      const fallback = normalizeSlug(decoded)
+      post = getPostBySlug(fallback)
+    }
+  }
+
   if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 })
-  return NextResponse.json({ ok: true, post })
+  return NextResponse.json(
+    { ok: true, post },
+    { headers: { 'Cache-Control': 'no-store' } },
+  )
 }
 
 export async function DELETE(_: Request, { params }: { params: { slug: string } }) {

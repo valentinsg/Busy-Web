@@ -1,9 +1,9 @@
-import { getAllPosts } from "@/lib/blog"
+import { getAllPostsAsync } from "@/lib/blog"
 import Link from "next/link"
 import Image from "next/image"
 
-export default function LatestPostsSidebar({ currentSlug }: { currentSlug: string }) {
-  const posts = getAllPosts().filter((p) => p.slug !== currentSlug).slice(0, 4)
+export default async function LatestPostsSidebar({ currentSlug }: { currentSlug: string }) {
+  const posts = (await getAllPostsAsync()).filter((p) => p.slug !== currentSlug).slice(0, 4)
   if (posts.length === 0) return null
   return (
     <div className="rounded-md border bg-muted/20 p-4 " >
@@ -13,7 +13,7 @@ export default function LatestPostsSidebar({ currentSlug }: { currentSlug: strin
           <li key={p.slug} className="flex items-center gap-2">
             {p.cover ? (
               <Link href={`/blog/${p.slug}`}>
-                <Image src={p.cover} alt={p.coverAlt || p.title} className="h-14 w-16 object-cover rounded border" />
+                <Image src={p.cover} alt={p.coverAlt || p.title} width={64} height={56} className="h-14 w-16 object-cover rounded border" />
               </Link>
             ) : (
               <Link href={`/blog/${p.slug}`}>

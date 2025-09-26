@@ -47,10 +47,10 @@ export default function TableOfContents({ targetSelector = "#post-content" }: { 
       </Button>
       <nav aria-label="Tabla de contenidos" className="text-md">
         <div
-          className={`border bg-transparent overflow-hidden transition-all duration-300 ${
+          className={`border bg-transparent transition-all duration-300 ${
             open
-              ? "max-h-96 opacity-100 rounded-b-md -mt-px border-t-0"
-              : "max-h-0 opacity-0 rounded-md"
+              ? "opacity-100 rounded-b-md -mt-px border-t-0 max-h-[45vh] md:max-h-[55vh] overflow-y-auto overscroll-contain"
+              : "max-h-0 opacity-0 rounded-md overflow-hidden"
           }`}
         >
           <div className="p-3">

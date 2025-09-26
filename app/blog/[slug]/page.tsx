@@ -6,8 +6,7 @@ import MdxRenderer from '@/components/mdx/MdxRenderer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import authors from '@/data/authors.json'
-import { getAllPosts, getPostBySlug } from '@/lib/blog'
+import { getAllPostsAsync, getPostBySlugAsync } from '@/lib/blog'
 import { format } from 'date-fns'
 import { enUS, es } from 'date-fns/locale'
 import Image from 'next/image'
@@ -20,19 +19,21 @@ import {
 } from 'lucide-react'
 import type { Metadata } from 'next'
 import type { BlogPost } from '@/types/blog'
-import dynamic from 'next/dynamic'
+import NextDynamic from 'next/dynamic'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import getServiceClient from '@/lib/supabase/server'
+import authorsJson from '@/data/authors.json'
 
 // Client helpers
-const CopyLinkButton = dynamic(
+const CopyLinkButton = NextDynamic(
   () => import('@/components/blog/copy-link-button'),
   { ssr: false }
 )
 
 // Table of contents (client)
-const TableOfContents = dynamic(
+const TableOfContents = NextDynamic(
   () =>
     import('@/components/blog/table-of-contents').catch(() => ({
       default: () => null,
@@ -40,20 +41,21 @@ const TableOfContents = dynamic(
   { ssr: false }
 )
 
-const NewsletterSignup = dynamic(
+const NewsletterSignup = NextDynamic(
   () => import('@/components/blog/newsletter-signup'),
   { ssr: false }
 )
 
-const RatingStars = dynamic(() => import('@/components/blog/rating-stars'), {
+const RatingStars = NextDynamic(() => import('@/components/blog/rating-stars'), {
   ssr: false,
 })
 
-const CommentsForm = dynamic(() => import('@/components/blog/comments-form'), {
+const CommentsForm = NextDynamic(() => import('@/components/blog/comments-form'), {
   ssr: false,
 })
 
-export const revalidate = 3600
+export const revalidate = process.env.NODE_ENV === 'production' ? 3600 : 0
+export const dynamic = process.env.NODE_ENV === 'production' ? 'auto' : 'force-dynamic'
 
 // Note: This page is a server component. Avoid client hooks here.
 
@@ -66,7 +68,7 @@ interface BlogPostPageProps {
 export async function generateMetadata({
   params,
 }: BlogPostPageProps): Promise<Metadata> {
-  const post = getPostBySlug(params.slug)
+  const post = await getPostBySlugAsync(params.slug)
 
   if (!post) {
     return {
@@ -100,14 +102,14 @@ export async function generateMetadata({
   }
 }
 
-export default function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = getPostBySlug(params.slug)
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const post = await getPostBySlugAsync(params.slug)
 
   if (!post) {
     notFound()
   }
 
-  const allPosts = getAllPosts()
+  const allPosts = await getAllPostsAsync()
   const currentIndex = allPosts.findIndex((p) => p.slug === post.slug)
   const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null
   const nextPost =
@@ -117,6 +119,56 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   const localeCookie = cookies().get('busy_locale')?.value
   const dfnsLocale = localeCookie === 'es' ? es : enUS
   const authorName = post.authorName || post.author || ''
+
+  // Enrich author social links from Supabase (authors table)
+  const supabase = getServiceClient()
+  let social: { instagram?: string; x?: string; linkedin?: string; medium?: string; bio?: string } = {}
+  try {
+    if (authorName) {
+      const { data } = await supabase
+        .from('authors')
+        .select('instagram_url, linkedin_url, medium_url, twitter_url, bio, name')
+        .ilike('name', authorName) // case-insensitive match; if fails, we'll fallback to JSON
+        .maybeSingle()
+      if (data) {
+        social.instagram = (data as any).instagram_url || undefined
+        social.linkedin = (data as any).linkedin_url || undefined
+        social.medium = (data as any).medium_url || undefined
+        social.x = (data as any).twitter_url || undefined
+        social.bio = (data as any).bio || undefined
+      }
+    }
+  } catch {}
+
+  // Fallback: explicit X/Twitter link for Valentín Sánchez Guevara
+  if (!social.x && authorName.toLowerCase().includes('valent')) {
+    social.x = 'https://x.com/valentainn__'
+  }
+  // Fallback: Instagram for Valentín Sánchez Guevara
+  if (!social.instagram && authorName.toLowerCase().includes('valent')) {
+    social.instagram = 'https://instagram.com/valensanchez.g'
+  }
+
+  // Fallback to local authors.json if still missing any field
+  if (!social.instagram || !social.x || !social.linkedin || !social.medium || !social.bio) {
+    try {
+      const list = authorsJson as Array<{ name?: string; instagram?: string; twitter?: string; linkedin?: string; medium?: string; bio?: string }>
+      const norm = (s: string) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+      const found = list.find((a) => norm(a.name || '') === norm(authorName))
+      if (found) {
+        social.instagram = social.instagram || (found as any).instagram || undefined
+        social.x = social.x || (found as any).twitter || undefined
+        social.linkedin = social.linkedin || (found as any).linkedin || undefined
+        social.medium = social.medium || (found as any).medium || undefined
+        social.bio = social.bio || (found as any).bio || undefined
+      }
+    } catch {}
+  }
+
+  // Final fallback bio for Valentín if still missing
+  if (!social.bio && authorName.toLowerCase().includes('valent')) {
+    social.bio = 'Co-Founder, Director Técnico y Creativo de Busy, desarrollador de software y creador de la identidad de la marca.'
+  }
 
   // Normalize CRLF to LF only; remark-breaks will handle single newlines as <br>
   const preparedContent = (post.content || '').replace(/\r\n/g, '\n')
@@ -280,17 +332,14 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         {/* Author card */}
         <div className="mt-10">
           {(() => {
-            const list = authors as Array<{ name?: string; avatar?: string; instagram?: string; bio?: string }>
-            const a = list.find(
-              (x) =>
-                (x.name || '').toLowerCase() ===
-                (authorName || '').toLowerCase()
-            )
             const authorInfo = {
               name: authorName || post.author || 'Equipo Busy',
-              avatar: a?.avatar || post.authorAvatar || '/busy-gothic.png',
-              instagram: a?.instagram,
-              bio: a?.bio,
+              avatar: post.authorAvatar || '/busy-gothic.png',
+              instagram: social.instagram,
+              x: social.x,
+              linkedin: social.linkedin,
+              medium: social.medium,
+              bio: social.bio,
             }
             return <AuthorCard author={authorInfo} />
           })()}
@@ -349,9 +398,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                   const slug = (b.url || '')
                     .replace(/^\/?blog\//, '')
                     .split(/[?#]/)[0]
-                  try {
-                    enriched = getPostBySlug(slug)
-                  } catch {}
+                  enriched = allPosts.find((p) => p.slug === slug) || null
                 }
                 if (enriched) {
                   return (
