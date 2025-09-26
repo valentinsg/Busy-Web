@@ -12,9 +12,10 @@ import { capitalize } from "@/lib/format"
 interface AddToCartProps {
   product: Product
   className?: string
+  sizeLabel?: string
 }
 
-export function AddToCart({ product, className = "" }: AddToCartProps) {
+export function AddToCart({ product, className = "", sizeLabel = "Size" }: AddToCartProps) {
   const [selectedSize, setSelectedSize] = React.useState(product.sizes[0])
   const [selectedColor, setSelectedColor] = React.useState(product.colors[0])
   const [quantity, setQuantity] = React.useState(1)
@@ -56,7 +57,7 @@ export function AddToCart({ product, className = "" }: AddToCartProps) {
       {/* Size Selection */}
       {product.sizes.length > 0 && (
         <div className="space-y-2">
-          <label className="text-sm font-medium">Size</label>
+          <label className="text-sm font-medium">{sizeLabel}</label>
           <Select
             value={selectedSize}
             onValueChange={(value) => {

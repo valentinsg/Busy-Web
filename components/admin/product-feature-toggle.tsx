@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { supabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 
 type Props = {
@@ -22,16 +23,24 @@ export default function ProductFeatureToggle({ productId, initialFeatured, initi
       } else {
         tags.add("featured")
       }
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
       const res = await fetch(`/api/admin/products/${productId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ tags: Array.from(tags) }),
       })
-      if (!res.ok) throw new Error("Error al actualizar producto")
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({} as any))
+        throw new Error(json?.error || "Error al actualizar producto")
+      }
       setFeatured(!featured)
     } catch (e) {
       console.error(e)
-      alert("No se pudo actualizar el estado destacado")
+      alert("No se pudo actualizar el estado destacado. Asegúrate de haber iniciado sesión como admin.")
     } finally {
       setLoading(false)
     }

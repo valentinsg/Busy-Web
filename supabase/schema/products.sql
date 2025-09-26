@@ -12,6 +12,10 @@ create table if not exists public.products (
   sku text not null,
   stock integer not null default 0,
   description text,
+  -- Optional per-product UX fields
+  benefits jsonb, -- [ { title: text, subtitle: text, icon: text } ]
+  care_instructions text,
+  imported boolean not null default false,
   tags text[] not null default '{}',
   rating numeric(3,2) not null default 0,
   reviews integer not null default 0,

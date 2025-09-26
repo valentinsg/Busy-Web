@@ -22,6 +22,12 @@ export interface Product {
    */
   stockBySize?: Record<string, number>
   description: string
+  /** Optional per-product benefits to show in PDP */
+  benefits?: BenefitItem[]
+  /** Optional markdown/plaintext care instructions */
+  careInstructions?: string
+  /** Whether the product is imported */
+  imported?: boolean
   tags: string[]
   rating: number
   reviews: number
@@ -36,6 +42,12 @@ export interface SizeMeasurement {
   hip?: number
   /** Additional arbitrary data for non-garment items (e.g., caps) */
   [key: string]: unknown
+}
+
+export interface BenefitItem {
+  title: string
+  subtitle?: string
+  icon?: string // optional icon name
 }
 
 export interface Subscriber {

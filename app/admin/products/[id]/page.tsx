@@ -24,10 +24,14 @@ export default function EditProductPage({ params }: PageProps) {
     images?: string[]
     colors?: string
     sizes?: string
+    tags?: string
     category?: string
     sku?: string
     stock?: number
     description?: string
+    imported?: boolean
+    careInstructions?: string
+    benefitsText?: string // one per line: Title|Subtitle
   }
   const [form, setForm] = React.useState<FormState>({})
   const [stockBySize, setStockBySize] = React.useState<Record<string, number>>({})
@@ -94,10 +98,14 @@ export default function EditProductPage({ params }: PageProps) {
               images: p.images,
               colors: p.colors.join(","),
               sizes: p.sizes.join(","),
+              tags: (p.tags || []).join(","),
               category: p.category,
               sku: p.sku,
               stock: p.stock,
               description: p.description ?? "",
+              imported: !!(p as any).imported,
+              careInstructions: (p as any).careInstructions || "",
+              benefitsText: Array.isArray((p as any).benefits) ? ((p as any).benefits as Array<{title:string; subtitle?:string}>).map(b=> b.subtitle? `${b.title}|${b.subtitle}`: b.title).join("\n") : "",
             })
             setStockBySize(p.stockBySize || {})
             const sizes = p.sizes || []
@@ -158,6 +166,16 @@ export default function EditProductPage({ params }: PageProps) {
       const stockMap = sizeRows.length
         ? Object.fromEntries(sizeRows.filter((r)=>r.size && typeof r.stock === 'number').map((r)=>[r.size, Number(r.stock)]))
         : stockBySize
+      // Parse benefits text lines -> array
+      const benefits = String(form.benefitsText||"")
+        .split("\n")
+        .map((l)=>l.trim())
+        .filter(Boolean)
+        .map((l)=>{
+          const [title, subtitle] = l.split("|").map(s=>s.trim())
+          return subtitle ? { title, subtitle } : { title }
+        })
+
       const payload = {
         name: form.name,
         price: Number(form.price),
@@ -166,10 +184,14 @@ export default function EditProductPage({ params }: PageProps) {
         colors: String(form.colors).split(",").map((s)=>s.trim()).filter(Boolean),
         sizes: uniqueSizes,
         measurements_by_size,
+        tags: String(form.tags||"").split(",").map((s)=>s.trim()).filter(Boolean),
         category: form.category,
         sku: form.sku,
         stock: Number(form.stock) || 0,
         description: form.description || "",
+        imported: !!form.imported,
+        care_instructions: form.careInstructions || undefined,
+        benefits: benefits.length ? benefits : undefined,
       }
       const res = await fetch(`/api/admin/products/${params.id}`, {
         method: "PUT",
@@ -253,11 +275,24 @@ export default function EditProductPage({ params }: PageProps) {
           <label className="text-sm md:col-span-2">Descripción
             <textarea value={form.description||""} onChange={(e)=>setForm({...form, description: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" rows={4} />
           </label>
+          <div className="md:col-span-2 flex items-center gap-2">
+            <input id="imported" type="checkbox" checked={!!form.imported} onChange={(e)=>setForm({...form, imported: e.target.checked})} />
+            <label htmlFor="imported" className="text-sm">Producto importado</label>
+          </div>
           <label className="text-sm">Colores (coma)
             <input value={form.colors||""} onChange={(e)=>setForm({...form, colors: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>
           <label className="text-sm">Talles (coma)
             <input value={form.sizes||""} onChange={(e)=>setForm({...form, sizes: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
+          </label>
+          <label className="text-sm md:col-span-2">Tags (coma)
+            <input value={form.tags||""} onChange={(e)=>setForm({...form, tags: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" placeholder="featured,pin,no-care,no-free-shipping,no-returns,no-quality,no-default-features" />
+          </label>
+          <label className="text-sm md:col-span-2">Cuidados (texto)
+            <textarea value={form.careInstructions||""} onChange={(e)=>setForm({...form, careInstructions: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" rows={4} placeholder={"• Lavar a máquina con agua fría..."} />
+          </label>
+          <label className="text-sm md:col-span-2">Beneficios (uno por línea, usar "Título|Subtítulo" opcional)
+            <textarea value={form.benefitsText||""} onChange={(e)=>setForm({...form, benefitsText: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" rows={4} placeholder={"Envío gratis|En compras superiores a $80.000\nDevoluciones fáciles|Política de 30 días"} />
           </label>
           <div className="md:col-span-2">
             <label className="text-sm">Imágenes

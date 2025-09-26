@@ -64,6 +64,16 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
     }
   }
 
+  const hasTag = React.useCallback((t: string) => (product.tags || []).includes(t), [product.tags])
+  const showFreeShipping = !hasTag('no-free-shipping')
+  const showReturns = !hasTag('no-returns')
+  const showQuality = !hasTag('no-quality')
+  const showCare = !hasTag('no-care')
+  const isPin = hasTag('pin')
+  const showSizing = !isPin && (!!product.measurementsBySize || (product.sizes && product.sizes.length > 0))
+  const tabsCount = 2 + (showCare ? 1 : 0) + (showSizing ? 1 : 0)
+  const colsClass = tabsCount === 4 ? 'grid-cols-4' : tabsCount === 3 ? 'grid-cols-3' : 'grid-cols-2'
+
   return (
     <div className="max-w-7xl mx-auto">
       {/* Breadcrumb */}
@@ -88,6 +98,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="font-body">{product.category}</Badge>
               {product.stock < 10 && <Badge variant="destructive" className="font-body">Quedan solo {product.stock}</Badge>}
+              {product.imported && <Badge variant="outline" className="font-body">Importado</Badge>}
             </div>
             <h1 className="font-heading text-3xl font-bold mb-2">{product.name}</h1>
             <div className="flex items-center space-x-4 mb-4">
@@ -119,34 +130,54 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           <Separator />
 
           {/* Add to Cart */}
-          <AddToCart product={product} />
+          <AddToCart product={product} sizeLabel={isPin ? "Tipo" : "Size"} />
 
           <Separator />
 
-          {/* Features */}
+          {/* Features / Benefits */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <Truck className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <div className="font-medium font-heading">Envío gratis</div>
-                <div className="text-sm text-muted-foreground font-body">En compras superiores a $80.000</div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <RotateCcw className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <div className="font-medium font-heading">Devoluciones fáciles</div>
-                <div className="text-sm text-muted-foreground font-body">Política de 30 días</div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Shield className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <div className="font-medium font-heading">Garantía de calidad</div>
-                <div className="text-sm text-muted-foreground font-body">Materiales premium y excelente confección</div>
-              </div>
-            </div>
-
+            {(product.benefits && product.benefits.length > 0) ? (
+              product.benefits.map((b, idx) => (
+                <div key={idx} className="flex items-center space-x-3">
+                  {/* Icons could be improved using b.icon in the future */}
+                  <Shield className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium font-heading">{b.title}</div>
+                    {b.subtitle && <div className="text-sm text-muted-foreground font-body">{b.subtitle}</div>}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                {showFreeShipping && (
+                  <div className="flex items-center space-x-3">
+                    <Truck className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <div className="font-medium font-heading">Envío gratis</div>
+                      <div className="text-sm text-muted-foreground font-body">En compras superiores a $80.000</div>
+                    </div>
+                  </div>
+                )}
+                {showReturns && (
+                  <div className="flex items-center space-x-3">
+                    <RotateCcw className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <div className="font-medium font-heading">Devoluciones fáciles</div>
+                      <div className="text-sm text-muted-foreground font-body">Política de 30 días</div>
+                    </div>
+                  </div>
+                )}
+                {showQuality && (
+                  <div className="flex items-center space-x-3">
+                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <div className="font-medium font-heading">Garantía de calidad</div>
+                      <div className="text-sm text-muted-foreground font-body">Materiales premium y excelente confección</div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -154,10 +185,12 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
       {/* Product Details Tabs */}
       <div className="mb-16">
         <Tabs defaultValue="description" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className={`grid w-full ${colsClass}`}>
             <TabsTrigger value="description">Descripción</TabsTrigger>
-            <TabsTrigger value="sizing">Guía de Talles</TabsTrigger>
-            <TabsTrigger value="care">Cuidados</TabsTrigger>
+            {!isPin && (product.measurementsBySize || product.sizes?.length) && (
+              <TabsTrigger value="sizing">Guía de Talles</TabsTrigger>
+            )}
+            {showCare && <TabsTrigger value="care">Cuidados</TabsTrigger>}
             <TabsTrigger value="reviews">Reseñas</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="mt-6">
@@ -173,6 +206,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               <span className="libre-barcode-39-text-regular text-muted-foreground font-semibold text-xl">SKU: {product.sku}</span>
             </div>
           </TabsContent>
+          {!isPin && (product.measurementsBySize || product.sizes?.length) && (
           <TabsContent value="sizing" className="mt-6">
             <div className="space-y-4">
               <h3 className="font-medium font-heading">Guía de Talles</h3>
@@ -265,19 +299,26 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               )}
             </div>
           </TabsContent>
+          )}
+          {showCare && (
           <TabsContent value="care" className="mt-6">
             <div className="space-y-4">
               <h3 className="font-medium font-heading">Instrucciones de cuidado</h3>
-              <ul className="space-y-2 text-muted-foreground font-body">
-                <li>• Lavar a máquina con agua fría junto a colores similares</li>
-                <li>• Usar detergente suave</li>
-                <li>• Secar a baja temperatura</li>
-                <li>• No usar blanqueador</li>
-                <li>• Planchar a baja temperatura si es necesario</li>
-                <li>• No lavar en seco</li>
-              </ul>
+              {product.careInstructions ? (
+                <div className="prose prose-neutral dark:prose-invert max-w-none whitespace-pre-line font-body text-muted-foreground">{product.careInstructions}</div>
+              ) : (
+                <ul className="space-y-2 text-muted-foreground font-body">
+                  <li>• Lavar a máquina con agua fría junto a colores similares</li>
+                  <li>• Usar detergente suave</li>
+                  <li>• Secar a baja temperatura</li>
+                  <li>• No usar blanqueador</li>
+                  <li>• Planchar a baja temperatura si es necesario</li>
+                  <li>• No lavar en seco</li>
+                </ul>
+              )}
             </div>
           </TabsContent>
+          )}
           <TabsContent value="reviews" className="mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-4">
