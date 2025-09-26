@@ -103,9 +103,9 @@ export default function EditProductPage({ params }: PageProps) {
               sku: p.sku,
               stock: p.stock,
               description: p.description ?? "",
-              imported: !!(p as any).imported,
-              careInstructions: (p as any).careInstructions || "",
-              benefitsText: Array.isArray((p as any).benefits) ? ((p as any).benefits as Array<{title:string; subtitle?:string}>).map(b=> b.subtitle? `${b.title}|${b.subtitle}`: b.title).join("\n") : "",
+              imported: !!(p as unknown as { imported?: boolean }).imported,
+              careInstructions: (p as unknown as { careInstructions?: string }).careInstructions || "",
+              benefitsText: Array.isArray((p as unknown as { benefits?: Array<{title:string; subtitle?:string}> }).benefits) ? ((p as unknown as { benefits?: Array<{title:string; subtitle?:string}> }).benefits as Array<{title:string; subtitle?:string}>).map(b=> b.subtitle? `${b.title}|${b.subtitle}`: b.title).join("\n") : "",
             })
             setStockBySize(p.stockBySize || {})
             const sizes = p.sizes || []
@@ -291,7 +291,7 @@ export default function EditProductPage({ params }: PageProps) {
           <label className="text-sm md:col-span-2">Cuidados (texto)
             <textarea value={form.careInstructions||""} onChange={(e)=>setForm({...form, careInstructions: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" rows={4} placeholder={"• Lavar a máquina con agua fría..."} />
           </label>
-          <label className="text-sm md:col-span-2">Beneficios (uno por línea, usar "Título|Subtítulo" opcional)
+          <label className="text-sm md:col-span-2">Beneficios (uno por línea, usar &quot;Título|Subtítulo&quot; opcional)
             <textarea value={form.benefitsText||""} onChange={(e)=>setForm({...form, benefitsText: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" rows={4} placeholder={"Envío gratis|En compras superiores a $80.000\nDevoluciones fáciles|Política de 30 días"} />
           </label>
           <div className="md:col-span-2">

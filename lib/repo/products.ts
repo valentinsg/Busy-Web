@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase/client"
-import type { Product, SizeMeasurement } from "@/lib/types"
+import type { Product, SizeMeasurement, BenefitItem } from "@/lib/types"
 
 function mapRowToProduct(row: unknown, stockBySize?: Record<string, number>): Product {
   return {
@@ -22,7 +22,10 @@ function mapRowToProduct(row: unknown, stockBySize?: Record<string, number>): Pr
     stock: Number((row as { stock: string }).stock) ?? 0,
     stockBySize,
     description: (row as { description: string }).description ?? "",
-    benefits: (row as { benefits?: unknown }).benefits as any,
+    benefits: ((): BenefitItem[] | undefined => {
+      const b = (row as { benefits?: unknown }).benefits
+      return Array.isArray(b) ? (b as BenefitItem[]) : undefined
+    })(),
     careInstructions: (row as { care_instructions?: string }).care_instructions ?? undefined,
     imported: Boolean((row as { imported?: boolean }).imported),
     tags: (row as { tags: string[] }).tags ?? [],

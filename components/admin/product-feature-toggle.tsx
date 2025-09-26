@@ -34,8 +34,12 @@ export default function ProductFeatureToggle({ productId, initialFeatured, initi
         body: JSON.stringify({ tags: Array.from(tags) }),
       })
       if (!res.ok) {
-        const json = await res.json().catch(() => ({} as any))
-        throw new Error(json?.error || "Error al actualizar producto")
+        let errMsg = "Error al actualizar producto"
+        try {
+          const json = (await res.json()) as { error?: string }
+          if (json && typeof json.error === "string" && json.error) errMsg = json.error
+        } catch {}
+        throw new Error(errMsg)
       }
       setFeatured(!featured)
     } catch (e) {
