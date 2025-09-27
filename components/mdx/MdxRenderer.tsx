@@ -57,7 +57,7 @@ export default function MdxRenderer({ source }: { source: string }) {
           th: (p: { className?: string }) => <th className="border px-3 py-2 text-left align-middle" {...p} />,
           h1: (p: { className?: string }) => <h1 className="font-body text-2xl md:text-3xl" {...p} />,
           h2: (p: { className?: string }) => <h2 className="font-body text-2xl md:text-2xl" {...p} />,
-          h3: (p: { className?: string }) => <h3 className="font-body text-md md:text-lg" {...p} />,
+          h3: (p: { className?: string }) => <h3 className="font-body text-md md:text-xl" {...p} />,
           p: (p: { className?: string }) => <p className="font-body text-md md:text-md" {...p} />,
           strong: (p: { className?: string }) => <strong className="font-body font-bold text-md md:text-md" {...p} />,
           li: (p: { className?: string }) => <li className="font-body text-md md:text-md" {...p} />,

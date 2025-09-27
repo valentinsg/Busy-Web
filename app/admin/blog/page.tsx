@@ -1,11 +1,11 @@
 import Link from "next/link"
-import { getAllPosts } from "@/lib/blog"
+import { getAllPostsAsync } from "@/lib/blog"
 import BlogRowActions from "@/components/admin/blog-row-actions"
 
 export const dynamic = "force-dynamic"
 
-export default function AdminBlogPage() {
-  const posts = getAllPosts()
+export default async function AdminBlogPage() {
+  const posts = await getAllPostsAsync()
 
   return (
     <div className="space-y-6">
