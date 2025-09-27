@@ -19,12 +19,10 @@ export function PageTransition({ children }: PageTransitionProps) {
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={pathname}
-        initial={reduce ? false : { filter: 'blur(3px)' }}
-        animate={{
-          filter: reduce ? 'none' : ['blur(3px)', 'blur(1px)', 'blur(0px)'],
-          transition: { duration: 0.42, times: [0, 0.5, 1] },
-        }}
-        className="min-h-screen will-change-[filter]"
+        initial={reduce ? false : { opacity: 0.92, y: 6 }}
+        animate={reduce ? { opacity: 1, y: 0 } : { opacity: [0.92, 0.98, 1], y: [6, 2, 0], transition: { duration: 0.35, times: [0, 0.6, 1], ease: 'easeOut' } }}
+        exit={reduce ? { opacity: 0.98 } : { opacity: 0.98, y: 2, transition: { duration: 0.2 } }}
+        className="min-h-screen will-change-[opacity,transform]"
       >
         {children}
       </motion.div>

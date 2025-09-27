@@ -70,7 +70,8 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
   const showQuality = !hasTag('no-quality')
   const showCare = !hasTag('no-care')
   const isPin = hasTag('pin')
-  const showSizing = !isPin && (!!product.measurementsBySize || (product.sizes && product.sizes.length > 0))
+  const isAccessory = hasTag('accessory') || /accesor/i.test(product.category || '')
+  const showSizing = !isPin && !isAccessory && (!!product.measurementsBySize || (product.sizes && product.sizes.length > 0))
   const tabsCount = 2 + (showCare ? 1 : 0) + (showSizing ? 1 : 0)
   const colsClass = tabsCount === 4 ? 'grid-cols-4' : tabsCount === 3 ? 'grid-cols-3' : 'grid-cols-2'
 
@@ -115,7 +116,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           </div>
 
           <div>
-            <p className="font-body text-muted-foreground leading-relaxed">{product.description}</p>
+            <p className="font-body text-muted-foreground leading-relaxed whitespace-pre-line">{product.description}</p>
           </div>
 
           {/* Tags */}
@@ -137,16 +138,27 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           {/* Features / Benefits */}
           <div className="space-y-4">
             {(product.benefits && product.benefits.length > 0) ? (
-              product.benefits.map((b, idx) => (
-                <div key={idx} className="flex items-center space-x-3">
-                  {/* Icons could be improved using b.icon in the future */}
-                  <Shield className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <div className="font-medium font-heading">{b.title}</div>
-                    {b.subtitle && <div className="text-sm text-muted-foreground font-body">{b.subtitle}</div>}
+              <>
+                {product.benefits.map((b, idx) => (
+                  <div key={idx} className="flex items-center space-x-3">
+                    {/* Icons could be improved using b.icon in the future */}
+                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <div className="font-medium font-heading">{b.title}</div>
+                      {b.subtitle && <div className="text-sm text-muted-foreground font-body">{b.subtitle}</div>}
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+                {product.imported && (
+                  <div className="flex items-center space-x-3">
+                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <div className="font-medium font-heading">Producto importado</div>
+                      <div className="text-sm text-muted-foreground font-body">Origen internacional</div>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <>
                 {showFreeShipping && (
@@ -176,6 +188,15 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                     </div>
                   </div>
                 )}
+                {product.imported && (
+                  <div className="flex items-center space-x-3">
+                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <div className="font-medium font-heading">Producto importado</div>
+                      <div className="text-sm text-muted-foreground font-body">Origen internacional</div>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -195,7 +216,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           </TabsList>
           <TabsContent value="description" className="mt-6">
             <div className="prose prose-neutral dark:prose-invert max-w-none">
-              <p className="leading-relaxed font-body">{product.description}</p>
+              <p className="leading-relaxed font-body whitespace-pre-line">{product.description}</p>
               <h3 className="font-heading">Características</h3>
               <ul>
                 <li>Tejido de algodón premium</li>
