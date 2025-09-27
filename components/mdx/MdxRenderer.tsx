@@ -1,7 +1,7 @@
 import { MDXRemote } from "next-mdx-remote/rsc"
+import Image from "next/image"
 import remarkBreaks from "remark-breaks"
 import remarkGfm from "remark-gfm"
-import Image from "next/image"
 
 export default function MdxRenderer({ source }: { source: string }) {
   // Convert simple tab-separated blocks into GFM tables so authors can paste from spreadsheets

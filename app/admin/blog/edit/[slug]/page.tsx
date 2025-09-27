@@ -343,6 +343,8 @@ export default function AdminBlogEditPage() {
             <Image
               src={cover}
               alt={coverAlt || "Portada del artículo"}
+              width={448}
+              height={112}
               className="h-28 w-auto rounded border"
               loading="lazy"
               decoding="async"
@@ -423,6 +425,8 @@ export default function AdminBlogEditPage() {
                     <Image
                       src={imageUrl}
                       alt="imagen"
+                      width={448}
+                      height={112}
                       className="h-28 w-auto rounded border"
                       loading="lazy"
                       decoding="async"
@@ -459,6 +463,8 @@ export default function AdminBlogEditPage() {
                   <Image
                     src={cover}
                     alt={coverAlt || "Portada del artículo"}
+                    width={800}
+                    height={450}
                     className="rounded mb-3"
                     loading="lazy"
                     decoding="async"
