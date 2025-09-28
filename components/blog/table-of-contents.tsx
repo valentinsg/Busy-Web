@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 interface TocItem { id: string; text: string; level: number }
 
 export default function TableOfContents({ targetSelector = "#post-content" }: { targetSelector?: string }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const [items, setItems] = useState<TocItem[]>([])
 
   useEffect(() => {

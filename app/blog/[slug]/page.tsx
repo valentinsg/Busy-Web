@@ -99,6 +99,10 @@ export async function generateMetadata({
     },
     alternates: {
       canonical,
+      languages: {
+        'es-AR': canonical,
+        en: canonical,
+      },
     },
   }
 }
@@ -174,7 +178,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const preparedContent = (post.content || '').replace(/\r\n/g, '\n')
 
   return (
-    <div className="container py-8 pt-28 tracking-wide font-body backdrop-blur-sm">
+    <div className="container py-6 sm:py-8 pt-24 sm:pt-28 tracking-wide font-body backdrop-blur-sm">
       <div className="max-w-7xl mx-auto">
         {/* JSON-LD Article */}
         <script
@@ -211,17 +215,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         />
         {/* Article Header */}
         <article>
-          <header className="mb-6">
-            <h1 className="font-heading text-4xl md:text-5xl font-bold mb-3 text-balance">
+          <header className="mb-5 sm:mb-6">
+            <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-3 text-balance">
               {post.title}
             </h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground mb-4 text-pretty font-body">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-3 sm:mb-4 text-pretty font-body">
               {post.description || post.excerpt}
             </p>
 
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+            <div className="flex items-center justify-between gap-3 sm:gap-4 flex-wrap">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
                 {post.category && (
                   <span className="text-xs inline-block bg-muted px-2 py-1 rounded mr-2">
                     {post.category}
@@ -240,16 +244,20 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </div>
 
               <div className="flex items-center gap-2">
-                <CopyLinkButton />
+                {/* Hide copy link on mobile to avoid layout issues */}
+                <div className="hidden md:block">
+                  <CopyLinkButton />
+                </div>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="icon"
+                  className="sm:size-auto"
                   aria-label="Share"
                   title="Share"
                   data-label="Share"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  <I18nText k="blog.post.share" />
+                  <Share2 className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline"><I18nText k="blog.post.share" /></span>
                 </Button>
               </div>
             </div>
@@ -263,7 +271,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               {/* Article Content */}
               <div
                 id="post-content"
-                className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-body prose-h1:font-heading prose-p:font-body prose-li:font-body md:prose-xl prose-p:text-[18px] md:prose-p:text-[20px] prose-h1:text-5xl prose-h2:text-4xl prose-h3:text-3xl prose-p:leading-relaxed prose-p:my-5 prose-li:my-2 prose-a:text-accent-brand prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-accent-brand prose-blockquote:bg-muted prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2 prose-th:border prose-td:border prose-table:border prose-table:rounded-md whitespace-normal break-words"
+                className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-body prose-h1:font-heading prose-p:font-body prose-li:font-body md:prose-xl prose-p:text-[16px] sm:prose-p:text-[18px] md:prose-p:text-[20px] prose-h1:text-4xl sm:prose-h1:text-5xl prose-h2:text-2xl sm:prose-h2:text-3xl md:prose-h2:text-4xl prose-h3:text-xl sm:prose-h3:text-2xl prose-p:leading-relaxed prose-p:my-4 sm:prose-p:my-5 prose-li:my-2 prose-a:text-accent-brand prose-a:no-underline hover:prose-a:underline prose-img:rounded-lg prose-img:mx-auto prose-img:w-full prose-img:max-h-[320px] sm:prose-img:max-h-[420px] prose-img:object-cover prose-blockquote:border-l-accent-brand prose-blockquote:bg-muted prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2 prose-th:border prose-td:border prose-table:border prose-table:rounded-md whitespace-normal break-words"
               >
                 <MdxRenderer source={preparedContent} />
               </div>
@@ -274,13 +282,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               {post.cta?.url && (post.cta.text || post.cta.url) && (
                 <div className="mt-12 mb-12 text-center ">
                   <Card>
-                    <CardContent className="p-6 bg-muted/20">
+                    <CardContent className="p-5 sm:p-6 bg-muted/20">
                       <h3 className="font-body text-xl font-bold mb-4">
                         {post.cta.text || 'Descubrí más'}
                       </h3>
                       <Button
                         asChild
-                        size="lg"
+                        size="sm"
+                        className="relative z-10"
                         aria-label="CTA"
                         title="CTA"
                         data-label="CTA"
@@ -356,7 +365,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 <Link
                   href={`/blog/${prevPost.slug}`}
                   prefetch={false}
-                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground"
+                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground line-clamp-1 max-w-[60vw] sm:max-w-none text-sm sm:text-base"
                 >
                   {prevPost.title}
                 </Link>
@@ -372,7 +381,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 <Link
                   href={`/blog/${nextPost.slug}`}
                   prefetch={false}
-                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground"
+                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground line-clamp-1 max-w-[60vw] sm:max-w-none text-sm sm:text-base"
                 >
                   {nextPost.title}
                 </Link>

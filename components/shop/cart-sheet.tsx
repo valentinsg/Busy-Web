@@ -110,7 +110,7 @@ export function CartSheet({ children }: CartSheetProps) {
                   <div key={`${item.product.id}-${item.selectedSize}-${item.selectedColor}`} className="flex space-x-4">
                     <div className="relative w-16 h-16 bg-muted rounded-md overflow-hidden">
                       <Image
-                        src={item.product.images[0] || "/placeholder.svg?height=64&width=64&query=product"}
+                        src={item.product.images[0] || "/busy-streetwear.png"}
                         alt={item.product.name}
                         fill
                         className="object-cover"

@@ -25,6 +25,7 @@ interface ProductCardProps {
 export function ProductCard({ product, adminEditHref }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0)
   const [isHovered, setIsHovered] = React.useState(false)
+  const [showAllSizes, setShowAllSizes] = React.useState(false)
 
   const { addItem, openCart } = useCart()
   const router = useRouter()
@@ -40,6 +41,7 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
   const handleMouseLeave = () => {
     setIsHovered(false)
     setCurrentImageIndex(0)
+    setShowAllSizes(false)
   }
 
   const handleAddToCartWithSize = (
@@ -59,6 +61,19 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
     const s = product.sizes[0]
     return /^(one|one size|onesize|único|talle único)$/i.test(String(s))
   }, [product.sizes])
+
+  // Accessories should not display measurement tooltips on size hover
+  const isAccessory = React.useMemo(() => {
+    const cat = (product.category || '').toLowerCase()
+    if (cat.includes('acces') || cat.includes('accessor')) return true
+    const tags = Array.isArray(product.tags) ? product.tags.map((t) => String(t).toLowerCase()) : []
+    return tags.some((t) => t.includes('acces') || t.includes('accessor'))
+  }, [product.category, product.tags])
+
+  const hasMeasurementsForSize = React.useCallback((size: string) => {
+    const m = (product as Product).measurementsBySize?.[size] as | Record<string, unknown> | undefined
+    return !!m && Object.keys(m).length > 0
+  }, [product])
 
   const formatSizeTooltip = (size: string) => {
     const m = (product as Product).measurementsBySize?.[size] as
@@ -172,7 +187,7 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
             <Image
               src={
                 product.images[currentImageIndex] ||
-                '/placeholder.svg?height=400&width=400&query=hoodie'
+                '/busy-streetwear.png'
               }
               alt={product.name}
               fill
@@ -267,42 +282,7 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
                               {String(product.sizes[0])}
                             </button>
                           </TooltipTrigger>
-                          <TooltipContent
-                            side="top"
-                            align="start"
-                            sideOffset={8}
-                            className="max-w-[340px] text-sm bg-black/85 border-white/10 shadow-xl py-2 px-0"
-                          >
-                            <div className="flex items-start gap-4 pr-3 pl-0">
-                              {/* Hanger icon, pegado a la izquierda */}
-                              <Image
-                                src="/icons/checkroom_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
-                                alt="Guía de talles"
-                                width={16}
-                                height={16}
-                                className="opacity-95 shrink-0"
-                              />
-                              <div className="leading-snug opacity-90 text-sm">
-                                {formatSizeTooltip(String(product.sizes[0]))}
-                              </div>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        product.sizes.map((size) => (
-                          <Tooltip key={size}>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                onClick={(e) =>
-                                  handleAddToCartWithSize(e, size)
-                                }
-                                data-overlay-control="true"
-                                className="min-w-8 rounded-md px-2 py-1 text-sm font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-                              >
-                                {size}
-                              </button>
-                            </TooltipTrigger>
+                          {!isAccessory && hasMeasurementsForSize(String(product.sizes[0])) && (
                             <TooltipContent
                               side="top"
                               align="start"
@@ -319,12 +299,86 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
                                   className="opacity-95 shrink-0"
                                 />
                                 <div className="leading-snug opacity-90 text-sm">
-                                  {formatSizeTooltip(size)}
+                                  {formatSizeTooltip(String(product.sizes[0]))}
                                 </div>
                               </div>
                             </TooltipContent>
-                          </Tooltip>
-                        ))
+                          )}
+                        </Tooltip>
+                      ) : (
+                        (() => {
+                          const sizes = Array.isArray(product.sizes) ? product.sizes : []
+                          const visible = showAllSizes ? sizes : sizes.slice(0, 6)
+                          return (
+                            <>
+                              {visible.map((size) => (
+                                isAccessory || !hasMeasurementsForSize(size) ? (
+                                  <button
+                                    key={size}
+                                    type="button"
+                                    onClick={(e) => handleAddToCartWithSize(e, size)}
+                                    data-overlay-control="true"
+                                    className="min-w-8 rounded-md px-2 py-1 text-sm font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                                  >
+                                    {size}
+                                  </button>
+                                ) : (
+                                  <Tooltip key={size}>
+                                    <TooltipTrigger asChild>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => handleAddToCartWithSize(e, size)}
+                                        data-overlay-control="true"
+                                        className="min-w-8 rounded-md px-2 py-1 text-sm font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                                      >
+                                        {size}
+                                      </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent
+                                      side="top"
+                                      align="start"
+                                      sideOffset={8}
+                                      className="max-w-[340px] text-sm bg-black/85 border-white/10 shadow-xl py-2 px-0"
+                                    >
+                                      <div className="flex items-start gap-4 pr-3 pl-0">
+                                        <Image
+                                          src="/icons/checkroom_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+                                          alt="Guía de talles"
+                                          width={16}
+                                          height={16}
+                                          className="opacity-95 shrink-0"
+                                        />
+                                        <div className="leading-snug opacity-90 text-sm">
+                                          {formatSizeTooltip(size)}
+                                        </div>
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )
+                              ))}
+                              {sizes.length > 6 && !showAllSizes && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowAllSizes(true) }}
+                                  data-overlay-control="true"
+                                  className="ml-2 rounded-md px-3 py-1 text-xs font-body text-white/90 bg-white/10 hover:bg-white/20 transition-colors"
+                                >
+                                  Ver todos…
+                                </button>
+                              )}
+                              {sizes.length > 6 && showAllSizes && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowAllSizes(false) }}
+                                  data-overlay-control="true"
+                                  className="ml-2 rounded-md px-3 py-1 text-xs font-body text-white/90 bg-white/10 hover:bg-white/20 transition-colors"
+                                >
+                                  Ver menos
+                                </button>
+                              )}
+                            </>
+                          )
+                        })()
                       )}
                     </div>
                   </TooltipProvider>

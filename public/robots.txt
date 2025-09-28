@@ -7,7 +7,7 @@ Disallow: /*.woff2$
 Disallow: /favicon.ico
 
 # Host
-Host: http://localhost:3000
+Host: https://busy.com.ar
 
 # Sitemaps
-Sitemap: http://localhost:3000/sitemap.xml
+Sitemap: https://busy.com.ar/sitemap.xml

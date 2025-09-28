@@ -1,15 +1,29 @@
 import { getAllPostsAsync } from "@/lib/blog"
 import BlogClient from "@/components/blog/blog-client"
 import type { Metadata } from "next"
-import { generateSEO } from "@/lib/seo"
 
-export const metadata: Metadata = generateSEO({
-  title: "Blog",
-  description: "Consejos de estilo, sostenibilidad y novedades de Busy. Descubrí guías prácticas para cuidar tus prendas, ideas de looks para todos los días y tendencias del streetwear con foco en calidad, diseño y vida urbana.",
-  url: `${process.env.SITE_URL || "https://busy.com.ar"}/blog`,
-  image: "/busy-streetwear.png",
-  type: "website",
-})
+export function generateMetadata(): Metadata {
+  const siteUrl = process.env.SITE_URL || "https://busy.com.ar"
+  return {
+    title: "Blog",
+    description:
+      "Consejos de estilo, sostenibilidad y novedades de Busy. Descubrí guías prácticas para cuidar tus prendas, ideas de looks para todos los días y tendencias del streetwear con foco en calidad, diseño y vida urbana.",
+    alternates: {
+      canonical: "/blog",
+      languages: {
+        "es-AR": `${siteUrl}/blog`,
+        en: `${siteUrl}/blog`,
+      },
+    },
+    openGraph: {
+      title: "Blog",
+      description:
+        "Consejos de estilo, sostenibilidad y novedades de Busy.",
+      url: `${siteUrl}/blog`,
+      images: [{ url: "/busy-streetwear.png" }],
+    },
+  }
+}
 
 export const revalidate = process.env.NODE_ENV === 'production' ? 3600 : 0
 export const dynamic = process.env.NODE_ENV === 'production' ? 'auto' : 'force-dynamic'

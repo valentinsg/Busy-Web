@@ -5,7 +5,11 @@ const CANONICAL_HOST = 'busy.com.ar'
 export function middleware(req: NextRequest) {
   // Skip middleware logic entirely in development to avoid breaking localhost
   if (process.env.NODE_ENV !== 'production') {
-    return NextResponse.next()
+    const res = NextResponse.next()
+    const cookieLocale = req.cookies.get('busy_locale')?.value
+    const lang = cookieLocale === 'en' ? 'en' : 'es-AR'
+    res.headers.set('Content-Language', lang)
+    return res
   }
 
   const url = req.nextUrl.clone()
@@ -36,7 +40,11 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url, { status: 301 })
   }
 
-  return NextResponse.next()
+  const res = NextResponse.next()
+  const cookieLocale = req.cookies.get('busy_locale')?.value
+  const lang = cookieLocale === 'en' ? 'en' : 'es-AR'
+  res.headers.set('Content-Language', lang)
+  return res
 }
 
 // Only run middleware for user-facing paths

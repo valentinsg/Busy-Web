@@ -67,16 +67,16 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
   //const regularPosts = filteredPosts.length > 0 ? filteredPosts.slice(1) : allPosts.slice(1)
 
   return (
-    <div className="container px-4 py-8 pt-24 font-body">
+    <div className="container px-3 sm:px-4 py-6 sm:py-8 pt-24 font-body">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4 ">{t("blog.header.title")}</h1>
-          <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">{t("blog.header.subtitle")}</p>
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-3">{t("blog.header.title")}</h1>
+          <p className="font-body text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">{t("blog.header.subtitle")}</p>
         </div>
 
         {/* Categories + Search in one section */}
-        <div className="mb-6 space-y-4">
+        <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
           <BlogCategories
             categories={categories}
             selectedCategory={selectedCategory}
@@ -95,17 +95,17 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
         </div>
 
         {/* Main Content with Sidebar */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-3">
             {/* Featured Post */}
             {!searchQuery && !selectedCategory && featuredPost && (
-              <div className="mb-12">
-                <h2 className="font-heading text-2xl font-bold mb-6">Artículo Destacado</h2>
+              <div className="mb-8 sm:mb-10">
+                <h2 className="font-heading text-xl sm:text-2xl font-bold mb-4 sm:mb-5">Artículo Destacado</h2>
                 <Card className="overflow-hidden hover:shadow-lg transition-shadow rounded-xl border bg-muted/10">
                   <Link href={`/blog/${featuredPost.slug}`} prefetch={false}>
                     {featuredPost.cover && (
-                      <div className="relative aspect-[16/9] overflow-hidden">
+                      <div className="relative aspect-[7/4] sm:aspect-[16/9] overflow-hidden">
                         <Image
                           src={featuredPost.cover}
                           alt={featuredPost.coverAlt || featuredPost.title}
@@ -116,14 +116,14 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                       </div>
                     )}
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center gap-2 mb-4">
                         {featuredPost.category && <CategoryBadge categoryId={featuredPost.category} />}
                       </div>
-                      <h3 className="font-heading text-2xl font-bold mb-4 line-clamp-2 hover:text-accent-brand transition-colors">
+                      <h3 className="font-heading text-xl sm:text-2xl font-bold mb-3 sm:mb-4 line-clamp-2 hover:text-accent-brand transition-colors">
                         {featuredPost.title}
                       </h3>
-                      <p className="font-body text-muted-foreground mb-6 line-clamp-3">{featuredPost.description}</p>
+                      <p className="font-body text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 line-clamp-3">{featuredPost.description}</p>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
@@ -142,11 +142,11 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
 
             {/* Posts Grid */}
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-heading text-2xl font-bold">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="font-heading text-xl sm:text-2xl font-bold">
                   {searchQuery || selectedCategory ? "Resultados de búsqueda" : "Últimos artículos"}
                 </h2>
-                <p className="font-body text-sm text-muted-foreground">
+                <p className="font-body text-xs sm:text-sm text-muted-foreground">
                   {filteredPosts.length} artículo{filteredPosts.length !== 1 ? 's' : ''}
                 </p>
               </div>
@@ -169,7 +169,7 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-7">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 sm:gap-6">
                   {filteredPosts.map((post) => (
                     <Card
                       key={post.slug}
@@ -177,7 +177,7 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
                     >
                       <Link href={`/blog/${post.slug}`} prefetch={false} className="flex h-full flex-col">
                         {post.cover && (
-                          <div className="relative aspect-[16/9] overflow-hidden">
+                          <div className="relative aspect-[7/4] sm:aspect-[16/9] overflow-hidden">
                             <Image
                               src={post.cover}
                               alt={post.coverAlt || post.title}
@@ -193,14 +193,14 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
                             )}
                           </div>
                         )}
-                        <CardContent className="p-5 flex flex-col gap-2 grow">
-                          <h3 className="font-heading text-lg font-bold line-clamp-2 group-hover:text-accent-brand transition-colors">
+                        <CardContent className="p-4 sm:p-5 flex flex-col gap-2 grow">
+                          <h3 className="font-heading text-base sm:text-lg font-bold line-clamp-2 group-hover:text-accent-brand transition-colors">
                             {post.title}
                           </h3>
-                          <p className="font-body text-muted-foreground text-sm line-clamp-2">
+                          <p className="font-body text-muted-foreground text-xs sm:text-sm line-clamp-2">
                             {post.excerpt || post.description}
                           </p>
-                          <div className="mt-auto pt-3 flex items-center justify-between text-xs text-muted-foreground">
+                          <div className="mt-auto pt-2 sm:pt-3 flex items-center justify-between text-[11px] sm:text-xs text-muted-foreground">
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
                               {format(new Date(post.date), "MMM dd", { locale: dfnsLocale })}

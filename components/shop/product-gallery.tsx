@@ -54,7 +54,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         <Image
           src={
             images[currentImage] ||
-            '/placeholder.svg?height=600&width=600&query=product'
+            '/busy-streetwear.png'
           }
           alt={`${productName} - Image ${currentImage + 1}`}
           fill
@@ -112,7 +112,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               />
               <Image
                 src={
-                  image || '/placeholder.svg?height=150&width=150&query=product'
+                  image || '/busy-streetwear.png'
                 }
                 alt={`${productName} - Thumbnail ${index + 1}`}
                 fill

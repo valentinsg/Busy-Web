@@ -1,6 +1,7 @@
 'use client'
 
 import { useI18n } from '@/components/i18n-provider'
+import { supabase } from '@/lib/supabase/client'
 import { LanguageToggle } from '@/components/layout/language-toggle'
 import { CartSheet } from '@/components/shop/cart-sheet'
 import { Button } from '@/components/ui/button'
@@ -14,11 +15,11 @@ import { usePathname } from 'next/navigation'
 import * as React from 'react'
 
 const navigation = [
-  { key: 'home', href: '/' },
-  { key: 'products', href: '/products' },
-  { key: 'about', href: '/about' },
-  { key: 'blog', href: '/blog' },
-  { key: 'contact', href: '/contact' },
+  { label: 'Inicio', href: '/' },
+  { label: 'Productos', href: '/products' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Cultura', href: '/about' },
+  { label: 'Contactanos', href: '/contact' },
 ]
 
 export function Header() {
@@ -27,6 +28,26 @@ export function Header() {
   const [heroInView, setHeroInView] = React.useState(true)
   const pathname = usePathname()
   const { t } = useI18n()
+  const [isAdmin, setIsAdmin] = React.useState(false)
+
+  React.useEffect(() => {
+    let cancelled = false
+    async function checkAdmin() {
+      try {
+        const { data } = await supabase.auth.getUser()
+        const email = data?.user?.email
+        if (!email) return
+        const res = await fetch('/api/admin/is-admin', { cache: 'no-store' })
+        const json = await res.json()
+        const admins: string[] = json.admins || []
+        if (!cancelled) setIsAdmin(admins.includes(email))
+      } catch {
+        // ignore
+      }
+    }
+    checkAdmin()
+    return () => { cancelled = true }
+  }, [])
 
 
   const { getTotalItems } = useCart()
@@ -146,12 +167,12 @@ export function Header() {
         >
           {navigation.map((item) => (
             <Link
-              key={item.key}
+              key={item.href}
               href={item.href}
               prefetch={false}
               className="text-sm transition-colors hover:text-accent-brand"
             >
-              {t(`nav.${item.key}`)}
+              {item.label}
             </Link>
           ))}
         </nav>
@@ -168,7 +189,7 @@ export function Header() {
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={t('search.placeholder')}
+                placeholder={t('search.placeholder', { default: 'Buscar productos' })}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8 w-[200px]"
@@ -220,33 +241,71 @@ export function Header() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+            <SheetContent side="right" className="w-[300px] sm:w-[400px] font-body">
               <div className="flex flex-col space-y-4 mt-4">
-                {/* Mobile Search */}
-                <div className="relative">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder={t('search.placeholder')}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-8"
-                  />
+                {/* Logo at top */}
+                <div className="flex items-center justify-center py-2">
+                  <Link href="/" onClick={() => setIsOpen(false)}>
+                    <Image src="/busy-gothic.png" alt="Busy" width={120} height={28} className="object-contain" />
+                  </Link>
                 </div>
 
                 {/* Mobile Navigation */}
-                <nav className="flex flex-col space-y-2 font-heading">
+                <nav className="flex flex-col space-y-2 font-body">
                   {navigation.map((item) => (
                     <Link
-                      key={item.key}
+                      key={item.href}
                       href={item.href}
                       prefetch={false}
                       onClick={() => setIsOpen(false)}
                       className="text-sm font-medium py-2 px-2 rounded-md hover:bg-accent transition-colors"
                     >
-                      {t(`nav.${item.key}`)}
+                      {item.label}
                     </Link>
                   ))}
                 </nav>
+
+                {/* Language toggle inside menu */}
+                <div className="pt-2 border-t">
+                  <LanguageToggle />
+                </div>
+
+                {/* Newsletter at bottom */}
+                <div className="mt-4 pt-2 border-t">
+                  <form
+                    className="flex gap-2"
+                    onSubmit={async (e) => {
+                      e.preventDefault()
+                      const form = e.currentTarget as HTMLFormElement
+                      const formData = new FormData(form)
+                      const email = String(formData.get('email') || '')
+                      if (!email) return
+                      try {
+                        await fetch('/api/newsletter/subscribe', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ email }),
+                        })
+                        form.reset()
+                        alert('¡Gracias por suscribirte!')
+                      } catch {
+                        alert('No se pudo suscribir. Intentá de nuevo.')
+                      }
+                    }}
+                  >
+                    <Input type="email" name="email" placeholder="Tu email" required className="flex-1" />
+                    <Button type="submit" className="shrink-0">OK</Button>
+                  </form>
+                </div>
+
+                {/* Admin shortcut if admin */}
+                {isAdmin && (
+                  <div className="pt-2">
+                    <Button asChild className="w-full">
+                      <Link href="/admin" onClick={() => setIsOpen(false)}>Panel Admin</Link>
+                    </Button>
+                  </div>
+                )}
               </div>
             </SheetContent>
           </Sheet>

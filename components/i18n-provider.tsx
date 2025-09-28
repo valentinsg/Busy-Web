@@ -10,7 +10,7 @@ export type Messages = Record<string, unknown>
 type I18nContextType = {
   locale: Locale
   setLocale: (l: Locale) => void
-  t: (key: string) => string
+  t: (key: string, opts?: { default?: string }) => string
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
@@ -73,15 +73,20 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem("busy.locale", l)
       // Also hint SSR/SEO via cookie (non-httpOnly). Path=/ for app-wide
-      document.cookie = `busy_locale=${l}; path=/; max-age=${60 * 60 * 24 * 365}`
+      const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:'
+      // Set SameSite=Lax and Secure when on HTTPS to reduce third-party cookie surface
+      document.cookie = `busy_locale=${l}; Path=/; Max-Age=${60 * 60 * 24 * 365}; SameSite=Lax${isSecure ? '; Secure' : ''}`
     } catch {
       // ignore
     }
   }, [])
 
   const t = useCallback(
-    (key: string) => {
-      return messages[key] ?? key
+    (key: string, opts?: { default?: string }) => {
+      const val = messages[key]
+      if (typeof val === 'string') return val
+      if (opts && typeof opts.default === 'string') return opts.default
+      return key
     },
     [messages],
   )

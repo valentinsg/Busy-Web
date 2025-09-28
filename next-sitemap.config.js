@@ -4,6 +4,10 @@ module.exports = {
   generateRobotsTxt: true,
   exclude: ["/api/*", "/admin/*"],
   generateIndexSitemap: true,
+  alternateRefs: [
+    { href: (process.env.SITE_URL || "https://busy.com.ar"), hreflang: 'es-AR' },
+    { href: (process.env.SITE_URL || "https://busy.com.ar"), hreflang: 'en' },
+  ],
   robotsTxtOptions: {
     policies: [
       {

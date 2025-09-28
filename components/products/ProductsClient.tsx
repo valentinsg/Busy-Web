@@ -331,7 +331,7 @@ export default function ProductsClient() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 xl:gap-6">
               {asyncProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

@@ -11,6 +11,7 @@ import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+// metadata for Home is provided at higher level or can be added via a route group layout if needed
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -100,17 +101,17 @@ export default function Home() {
 
   const categories = [
     {
-      name: t('footer.sections.shop.links.hoodies'),
+      name: t('footer.sections.shop.links.hoodies', { default: 'Hoodies' }),
       href: '/products?category=hoodies',
       image: '/hoodies-background.png',
     },
     {
-      name: t('footer.sections.shop.links.tshirts'),
+      name: t('footer.sections.shop.links.tshirts', { default: 'Remeras' }),
       href: '/products?category=tshirts',
       image: '/t-shirts-background.png',
     },
     {
-      name: t('footer.sections.shop.links.pants'),
+      name: t('footer.sections.shop.links.pants', { default: 'Pantalones' }),
       href: '/products?category=pants',
       image: '/pants-background.png',
     },
@@ -134,10 +135,10 @@ export default function Home() {
           <div className="relative container px-3 sm:px-4">
             <motion.div {...fadeInUp} className="text-center mb-12">
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-                {t('home.latest.title')}
+                {t('home.latest.title', { default: 'Últimos lanzamientos' })}
               </h2>
               <p className="font-body text-muted-foreground text-lg md:text-xl">
-                {t('home.latest.subtitle')}
+                {t('home.latest.subtitle', { default: 'Descubrí lo más nuevo de Busy' })}
               </p>
             </motion.div>
 
@@ -162,7 +163,7 @@ export default function Home() {
                   prefetch={false}
                   className="font-heading"
                 >
-                  {t('home.latest.view_all')}
+                  {t('home.latest.view_all', { default: 'Ver todos' })}
                 </Link>
               </Button>
             </motion.div>
@@ -176,10 +177,10 @@ export default function Home() {
           <div className="container px-3 sm:px-4">
             <motion.div {...fadeInUp} className="text-center mb-12">
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-                {t('home.categories.title')}
+                {t('home.categories.title', { default: 'Categorías' })}
               </h2>
               <p className="font-body text-muted-foreground  text-lg md:text-xl">
-                {t('home.categories.subtitle')}
+                {t('home.categories.subtitle', { default: 'Explorá por tipo de producto' })}
               </p>
             </motion.div>
 
@@ -237,7 +238,7 @@ export default function Home() {
                             size="sm"
                             className="font-body"
                           >
-                            {t('home.categories.cta')}{' '}
+                            {t('home.categories.cta', { default: 'Ver colección' })}{' '}
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </Button>
                         </div>
@@ -267,17 +268,17 @@ export default function Home() {
                 className="w-full max-w-xl mx-auto text-center"
               >
                 <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-                  {t('home.about.title')}
+                  {t('home.about.title', { default: 'Hecho para la vida urbana' })}
                 </h2>
                 <p className="text-muted-foreground font-body text-lg md:text-xl mb-4 leading-relaxed ">
-                  {t('home.about.p1')}
+                  {t('home.about.p1', { default: 'Diseñamos básicos premium con foco en calidad, confort y durabilidad.' })}
                 </p>
                 <p className="text-muted-foreground font-body text-lg md:text-xl mb-8 leading-relaxed">
-                  {t('home.about.p2')}
+                  {t('home.about.p2', { default: 'Productos versátiles pensados para acompañarte todos los días.' })}
                 </p>
                 <Button asChild variant="outline" size="lg">
                   <Link href="/about" prefetch={false} className="font-heading">
-                    {t('home.about.cta')}
+                    {t('home.about.cta', { default: 'Conocé más' })}
                   </Link>
                 </Button>
               </motion.div>
@@ -333,10 +334,10 @@ export default function Home() {
           <div className="relative z-10 container px-3 sm:px-4">
             <motion.div {...fadeInUp} className="text-center mb-24">
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-                {t('home.social.title')}
+                {t('home.social.title', { default: 'Comunidad Busy' })}
               </h2>
               <p className="font-body text-muted-foreground text-lg md:text-xl">
-                {t('home.social.subtitle')}
+                {t('home.social.subtitle', { default: 'Lo que construimos con nuestra comunidad' })}
               </p>
             </motion.div>
 
@@ -350,20 +351,20 @@ export default function Home() {
               {[
                 {
                   iconSrc: '/blog.png',
-                  title: t('home.social.items.rating.title'),
-                  description: t('home.social.items.rating.desc'),
+                  title: t('home.social.items.rating.title', { default: 'Guías y noticias' }),
+                  description: t('home.social.items.rating.desc', { default: 'Consejos de estilo, cuidado y cultura Busy' }),
                   href: '/blog',
                 },
                 {
                   iconSrc: '/spotify.png',
-                  title: t('home.social.items.customers.title'),
-                  description: t('home.social.items.customers.desc'),
+                  title: t('home.social.items.customers.title', { default: 'Playlist' }),
+                  description: t('home.social.items.customers.desc', { default: 'Sonido para acompañar tu día' }),
                   href: 'https://open.spotify.com/',
                 },
                 {
                   iconSrc: '/drops.png',
-                  title: t('home.social.items.quality.title'),
-                  description: t('home.social.items.quality.desc'),
+                  title: t('home.social.items.quality.title', { default: 'Calidad Busy' }),
+                  description: t('home.social.items.quality.desc', { default: 'Materiales premium y confección cuidada' }),
                   href: '/products',
                 },
               ].map(

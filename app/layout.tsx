@@ -74,7 +74,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: 'Busy Streetwear',
-    template: '%s - Busy Streetwear',
+    template: 'Busy Streetwear - %s',
   },
   icons: {
     icon: '/favicon.ico',

@@ -118,7 +118,7 @@ export default function CartPage() {
                   <div className="flex space-x-4">
                     <div className="relative w-24 h-24 bg-muted rounded-lg overflow-hidden">
                       <Image
-                        src={item.product.images[0] || "/placeholder.svg?height=96&width=96&query=product"}
+                        src={item.product.images[0] || "/busy-streetwear.png"}
                         alt={item.product.name}
                         fill
                         className="object-cover"
