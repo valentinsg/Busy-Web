@@ -4,12 +4,12 @@ import NewsletterSignup from "@/components/blog/newsletter-signup"
 import SocialLinksInline from "@/components/blog/social-links-inline"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getProductsAsync } from "@/lib/repo/products"
+import type { Product } from "@/lib/types"
+import type { BlogPost } from "@/types/blog"
 import { ArrowRight, ShoppingBag } from "lucide-react"
 import Link from "next/link"
 import * as React from "react"
-import type { BlogPost } from "@/types/blog"
-import { getProductsAsync } from "@/lib/repo/products"
-import type { Product } from "@/lib/types"
 
 export function MarketingSidebar({ latestPost }: { latestPost?: BlogPost }) {
   const [featuredProducts, setFeaturedProducts] = React.useState<Product[]>([])
@@ -28,7 +28,7 @@ export function MarketingSidebar({ latestPost }: { latestPost?: BlogPost }) {
   }, [])
 
   return (
-    <div className="space-y-6 mt-14 font-body">
+    <div className="space-y-6 mt-6 md:mt-12 font-body">
       {/* Newsletter Subscription (shared component) */}
       <NewsletterSignup />
 

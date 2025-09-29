@@ -8,8 +8,8 @@ import type { BlogPost } from "@/types/blog"
 import { format } from "date-fns"
 import { enUS, es as esLocale } from "date-fns/locale"
 import { Calendar, Clock, Search } from "lucide-react"
-import Link from "next/link"
 import Image from "next/image"
+import Link from "next/link"
 import * as React from "react"
 import { BlogCategories, CategoryBadge } from "./blog-categories"
 import { MarketingSidebar } from "./marketing-sidebar"
@@ -67,23 +67,23 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
   //const regularPosts = filteredPosts.length > 0 ? filteredPosts.slice(1) : allPosts.slice(1)
 
   return (
-    <div className="container px-3 sm:px-4 py-6 sm:py-8 pt-24 font-body">
-      <div className="max-w-7xl mx-auto">
+    <div className="container mt-20 pt-24 px-4 sm:px-3 py-6 sm:py-8 font-body">
+      <div className="mx-auto">
         {/* Header */}
         <div className="text-center mb-4 sm:mb-6">
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-3">{t("blog.header.title")}</h1>
-          <p className="font-body text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">{t("blog.header.subtitle")}</p>
+          <p className="font-body text-base sm:text-lg text-muted-foreground max-w-md md:max-w-2xl mx-auto">{t("blog.header.subtitle")}</p>
         </div>
 
         {/* Categories + Search in one section */}
-        <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
+        <div className="mb-4 sm:mb-6 space-y-2 sm:space-y-4 px-12 sm:px-0">
           <BlogCategories
             categories={categories}
             selectedCategory={selectedCategory}
             onCategoryChangeAction={setSelectedCategory}
             postCounts={postCounts}
           />
-          <div className="relative max-w-xl mx-auto w-full">
+          <div className="relative max-w-xl mx-auto w-full mt-6">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={t("blog.search.placeholder")}
@@ -95,14 +95,14 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
         </div>
 
         {/* Main Content with Sidebar */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-4">
           {/* Main Content */}
           <div className="lg:col-span-3">
             {/* Featured Post */}
             {!searchQuery && !selectedCategory && featuredPost && (
               <div className="mb-8 sm:mb-10">
-                <h2 className="font-heading text-xl sm:text-2xl font-bold mb-4 sm:mb-5">Artículo Destacado</h2>
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow rounded-xl border bg-muted/10">
+                <h2 className="font-heading text-xl sm:text-2xl font-bold my-3 md:my-0 sm:mb-6">Artículo Destacado</h2>
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow rounded-xl mt-4 border bg-muted/10">
                   <Link href={`/blog/${featuredPost.slug}`} prefetch={false}>
                     {featuredPost.cover && (
                       <div className="relative aspect-[7/4] sm:aspect-[16/9] overflow-hidden">
@@ -194,10 +194,10 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
                           </div>
                         )}
                         <CardContent className="p-4 sm:p-5 flex flex-col gap-2 grow">
-                          <h3 className="font-heading text-base sm:text-lg font-bold line-clamp-2 group-hover:text-accent-brand transition-colors">
+                          <h3 className="font-heading max-w-md text-md sm:text-lg font-bold line-clamp-2 group-hover:text-accent-brand transition-colors">
                             {post.title}
                           </h3>
-                          <p className="font-body text-muted-foreground text-xs sm:text-sm line-clamp-2">
+                          <p className="font-body text-muted-foreground text-sm sm:text-sm line-clamp-2">
                             {post.excerpt || post.description}
                           </p>
                           <div className="mt-auto pt-2 sm:pt-3 flex items-center justify-between text-[11px] sm:text-xs text-muted-foreground">

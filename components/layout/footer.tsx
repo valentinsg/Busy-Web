@@ -86,11 +86,11 @@ export function Footer() {
 
   return (
     <footer className="transition-[background-color,border-color,backdrop-filter] duration-500 ease-out">
-      <div className="container px-2 py-16">
+      <div className="container px-3 sm:px-4 py-14 sm:py-16">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-6 gap-6">
           {/* Brand Section */}
-          <div className="lg:col-span-2">
+          <div className="sm:col-span-2 lg:col-span-2">
             <Link href="/" prefetch={false} className="flex w-28 -mt-6">
               <div className="relative h-28 w-28">
                 <Image src="/busy-parche.png" alt="Busy" fill className="object-contain hidden dark:block contrast-40" />
@@ -103,7 +103,7 @@ export function Footer() {
             {/* Newsletter */}
             <div className="space-y-2">
               <h4 className="font-heading font-medium">{tt("footer.newsletter.title", "Mantente al día")}</h4>
-              <div className="flex space-x-2 ">
+              <div className="flex items-center gap-2 flex-nowrap">
                 <Input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder={tt("footer.newsletter.placeholder", "Ingresa tu email")} className="max-w-[200px] text-sm font-heading" />
                 <Button size="sm" disabled={submitting} onClick={async ()=>{
                   setSubmitting(true); setMessage(null)
@@ -123,9 +123,11 @@ export function Footer() {
                     setSubmitting(false)
                   }
                 }} className="text-sm font-heading font-semibold">{submitting ? "..." : tt("footer.newsletter.subscribe", "Suscribirse")}</Button>
+                <Link href="https://wa.me/542236680041" target="_blank" className="text-[11px] sm:text-xs text-muted-foreground underline whitespace-nowrap">
+                  Soporte por WhatsApp
+                </Link>
               </div>
               {message && <p className="text-xs text-muted-foreground mt-2">{message}</p>}
-              <p className="text-xs text-muted-foreground mt-4 font-body">Soporte por WhatsApp: <Link href="https://wa.me/542236680041" target="_blank" className="underline">223 668 0041</Link></p>
             </div>
           </div>
 
@@ -155,9 +157,9 @@ export function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="border-t mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p className="font-body text-sm text-muted-foreground"> 2024 Busy. {t("footer.bottom.rights")}</p>
-          <div className="flex space-x-4 text-sm text-muted-foreground">
+        <div className="border-t mt-8 pt-8 flex flex-row flex-wrap items-center justify-between gap-3">
+          <p className="font-body text-xs sm:text-sm text-muted-foreground whitespace-nowrap">2024 Busy. {t("footer.bottom.rights")}</p>
+          <div className="flex flex-row items-center space-x-4 text-xs sm:text-sm text-muted-foreground">
             <Link href="/legal/privacy" prefetch={false} className="font-body hover:text-foreground transition-colors">
               {t("footer.bottom.privacy")}
             </Link>
@@ -167,7 +169,7 @@ export function Footer() {
             <Link href="/legal/cookies" prefetch={false} className="font-body hover:text-foreground transition-colors">
               {t("footer.bottom.cookies")}
             </Link>
-            </div>
+          </div>
         </div>
       </div>
     </footer>
