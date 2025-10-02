@@ -44,7 +44,8 @@ export async function getRevenueByChannel(params: {
 }): Promise<Array<{ channel: string; orders: number; revenue: number }>> {
   const supabase = getServiceClient()
   // Fetch channel + total and aggregate in application code for reliability
-  let query = supabase.from("orders").select("channel,total,placed_at")
+  // Exclude pending orders from revenue calculations
+  let query = supabase.from("orders").select("channel,total,placed_at").neq("status", "pending")
   if (params.from) query = query.gte("placed_at", params.from)
   if (params.to) query = query.lte("placed_at", params.to)
   const { data, error } = await query
@@ -69,8 +70,9 @@ export async function getProfitSummary(params: {
 }): Promise<{ revenue: number; expenses: number; profit: number }> {
   const supabase = getServiceClient()
   // Fetch values and aggregate in app to avoid PostgREST aggregate quirks
+  // Exclude pending orders from profit calculations
   type OrderRow = { total: number; placed_at: string }
-  let ordersQB = supabase.from("orders").select("total,placed_at")
+  let ordersQB = supabase.from("orders").select("total,placed_at").neq("status", "pending")
   if (params.from) ordersQB = ordersQB.gte("placed_at", params.from)
   if (params.to) ordersQB = ordersQB.lte("placed_at", params.to)
   const { data: orderRows, error: revErr } = await ordersQB
@@ -111,53 +113,70 @@ export async function getTimeSeries(params: {
   from?: string
   to?: string
   groupBy?: 'day'|'week'|'month'
-}): Promise<Array<{ bucket: string; revenue: number; expenses: number; orders: number; profit: number }>> {
+  includeComparison?: boolean
+}): Promise<Array<{ bucket: string; revenue: number; revenue_prev?: number }>> {
   const groupBy = params.groupBy || 'day'
   const supabase = getServiceClient()
   type TSOrderRow = { total: number; placed_at: string }
-  type TSExpenseRow = { amount: number; incurred_at: string }
-  // fetch orders
-  let ordersQB = supabase.from('orders').select('total,placed_at')
+  
+  // fetch orders for current period (exclude pending)
+  let ordersQB = supabase.from('orders').select('total,placed_at').neq('status', 'pending')
   if (params.from) ordersQB = ordersQB.gte('placed_at', params.from)
   if (params.to) ordersQB = ordersQB.lte('placed_at', params.to)
-  const [{ data: orderRows, error: oErr }, { data: expRows, error: eErr }] = await Promise.all([
-    ordersQB,
-    (() => {
-      let q = supabase.from('expenses').select('amount,incurred_at')
-      if (params.from) q = q.gte('incurred_at', params.from)
-      if (params.to) q = q.lte('incurred_at', params.to)
-      return q
-    })(),
-  ])
+  const { data: orderRows, error: oErr } = await ordersQB
   if (oErr) throw oErr
-  if (eErr) throw eErr
 
-  const agg = new Map<string, { revenue: number; expenses: number; orders: number }>()
+  const agg = new Map<string, { revenue: number; revenue_prev?: number }>()
   for (const r of ((orderRows as TSOrderRow[] | null) ?? [])) {
     const d = new Date(String(r.placed_at))
     const key = toDateKey(d, groupBy)
-    const a = agg.get(key) || { revenue: 0, expenses: 0, orders: 0 }
+    const a = agg.get(key) || { revenue: 0 }
     a.revenue += Number(r.total || 0)
-    a.orders += 1
     agg.set(key, a)
   }
-  for (const r of ((expRows as TSExpenseRow[] | null) ?? [])) {
-    const d = new Date(String(r.incurred_at))
-    const key = toDateKey(d, groupBy)
-    const a = agg.get(key) || { revenue: 0, expenses: 0, orders: 0 }
-    a.expenses += Number(r.amount || 0)
-    agg.set(key, a)
+
+  // If comparison requested, fetch previous period
+  if (params.includeComparison && params.from && params.to) {
+    const fromDate = new Date(params.from)
+    const toDate = new Date(params.to)
+    const diff = toDate.getTime() - fromDate.getTime()
+    const prevFrom = new Date(fromDate.getTime() - diff)
+    const prevTo = new Date(fromDate.getTime() - 1)
+    
+    let prevOrdersQB = supabase.from('orders').select('total,placed_at')
+      .neq('status', 'pending')
+      .gte('placed_at', prevFrom.toISOString().slice(0, 10))
+      .lte('placed_at', prevTo.toISOString().slice(0, 10))
+    const { data: prevOrderRows } = await prevOrdersQB
+    
+    const prevAgg = new Map<string, number>()
+    for (const r of ((prevOrderRows as TSOrderRow[] | null) ?? [])) {
+      const d = new Date(String(r.placed_at))
+      const key = toDateKey(d, groupBy)
+      prevAgg.set(key, (prevAgg.get(key) || 0) + Number(r.total || 0))
+    }
+    
+    // Map previous period data to current period buckets
+    const buckets = Array.from(agg.keys()).sort()
+    const prevBuckets = Array.from(prevAgg.keys()).sort()
+    buckets.forEach((bucket, idx) => {
+      if (prevBuckets[idx]) {
+        const a = agg.get(bucket)
+        if (a) a.revenue_prev = prevAgg.get(prevBuckets[idx])
+      }
+    })
   }
+
   const out = Array.from(agg.entries())
-    .map(([bucket, v]) => ({ bucket, revenue: v.revenue, expenses: v.expenses, orders: v.orders, profit: v.revenue - v.expenses }))
+    .map(([bucket, v]) => ({ bucket, revenue: v.revenue, revenue_prev: v.revenue_prev }))
     .sort((a, b) => a.bucket.localeCompare(b.bucket))
   return out
 }
 
 export async function getKPIs(params: { from?: string; to?: string }): Promise<{ orders: number; aov: number; new_customers: number }> {
   const supabase = getServiceClient()
-  // Orders and revenue
-  let ordersQB = supabase.from('orders').select('id,total,placed_at')
+  // Orders and revenue (exclude pending)
+  let ordersQB = supabase.from('orders').select('id,total,placed_at').neq('status', 'pending')
   if (params.from) ordersQB = ordersQB.gte('placed_at', params.from)
   if (params.to) ordersQB = ordersQB.lte('placed_at', params.to)
   const { data: orderRows, error: ordErr } = await ordersQB

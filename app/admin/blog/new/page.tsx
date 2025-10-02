@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Author } from "@/lib/types"
 import Image from "next/image"
 
@@ -343,60 +344,67 @@ export default function AdminBlogNewPage() {
               </PopoverContent>
             </Popover>
           </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            <Textarea
-              ref={textareaRef}
-              className="min-h-[260px] font-body"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              onKeyDown={(e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                  e.preventDefault()
-                  applyFormat("\n\n")
-                }
-              }}
-              placeholder={"Escribe contenido en MDX... • Ctrl+Enter: insertar espacio entre párrafos • Usa los botones: Espacio, Cita, Tabla"}
-            />
-            <div className="min-h-[260px] rounded-md border bg-muted/30 p-3 text-sm overflow-auto">
-              <div className="prose prose-neutral dark:prose-invert max-w-none">
-                <h3 className="mt-0">Vista previa</h3>
-                {cover && (
-                  <Image
-                    src={cover}
-                    alt={coverAlt || "Portada del artículo"}
-                    width={800}
-                    height={450}
-                    className="rounded mb-3"
-                  />
-                )}
-                {category && <div className="text-xs inline-block bg-muted px-2 py-1 rounded mr-2">{category}</div>}
-                <h1 className="mb-2">{title || "Título"}</h1>
-                <p className="text-muted-foreground">{(excerpt || description) || "Descripción"}</p>
-                <hr className="my-3" />
-                <MarkdownPreview content={content} />
-                {(faqs.trim() || ctaText || ctaUrl) && <hr className="my-3" />}
-                {faqs.trim() && (
-                  <div className="mt-4">
-                    <h4 className="font-heading font-semibold mb-2">Preguntas frecuentes</h4>
-                    <ul className="list-disc pl-5 space-y-1">
-                      {faqs.split('\n').filter(Boolean).map((line, i) => {
-                        const [q, a] = line.split('|')
-                        return (
-                          <li key={i}><strong>{(q || '').trim()}:</strong> {(a || '').trim()}</li>
-                        )
-                      })}
-                    </ul>
-                  </div>
-                )}
-                {(ctaText || ctaUrl) && (
-                  <div className="mt-6 p-4 rounded-md border bg-muted/40">
-                    <h4 className="font-heading font-semibold mb-2">CTA</h4>
-                    <a className="text-accent-brand hover:underline" href={ctaUrl || '#'}>{ctaText || ctaUrl}</a>
-                  </div>
-                )}
+          <Tabs defaultValue="preview" className="w-full">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="editor">Editor (Markdown)</TabsTrigger>
+              <TabsTrigger value="preview">Vista Previa</TabsTrigger>
+            </TabsList>
+            <TabsContent value="editor" className="mt-4">
+              <Textarea
+                ref={textareaRef}
+                className="min-h-[500px] font-body"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                onKeyDown={(e) => {
+                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault()
+                    applyFormat("\n\n")
+                  }
+                }}
+                placeholder={"Escribe contenido en MDX... • Ctrl+Enter: insertar espacio entre párrafos • Usa los botones: Espacio, Cita, Tabla"}
+              />
+            </TabsContent>
+            <TabsContent value="preview" className="mt-4">
+              <div className="min-h-[500px] rounded-md border bg-muted/30 p-6 text-sm overflow-auto">
+                <div className="prose prose-neutral dark:prose-invert max-w-none">
+                  {cover && (
+                    <Image
+                      src={cover}
+                      alt={coverAlt || "Portada del artículo"}
+                      width={800}
+                      height={450}
+                      className="rounded mb-6"
+                    />
+                  )}
+                  {category && <div className="text-xs inline-block bg-muted px-2 py-1 rounded mr-2 mb-4">{category}</div>}
+                  <h1 className="mb-4">{title || "Título del artículo"}</h1>
+                  <p className="text-muted-foreground mb-6">{(excerpt || description) || "Descripción del artículo"}</p>
+                  <hr className="my-6" />
+                  <MarkdownPreview content={content} />
+                  {(faqs.trim() || ctaText || ctaUrl) && <hr className="my-6" />}
+                  {faqs.trim() && (
+                    <div className="mt-6">
+                      <h4 className="font-heading font-semibold mb-3">Preguntas frecuentes</h4>
+                      <ul className="list-disc pl-5 space-y-2">
+                        {faqs.split('\n').filter(Boolean).map((line, i) => {
+                          const [q, a] = line.split('|')
+                          return (
+                            <li key={i}><strong>{(q || '').trim()}:</strong> {(a || '').trim()}</li>
+                          )
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                  {(ctaText || ctaUrl) && (
+                    <div className="mt-6 p-4 rounded-md border bg-muted/40">
+                      <h4 className="font-heading font-semibold mb-2">CTA</h4>
+                      <a className="text-accent-brand hover:underline" href={ctaUrl || '#'}>{ctaText || ctaUrl}</a>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         </div>
         <div className="grid gap-2">
           <label className="text-sm">Backlinks (uno por línea, formato: label|url o solo url)</label>

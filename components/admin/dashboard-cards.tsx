@@ -30,10 +30,11 @@ export default function DashboardCards({
   const [loading, setLoading] = useState<boolean>(false)
   const [profit, setProfit] = useState<{ revenue: number; expenses: number; profit: number } | null>(null)
   const [revenueByChannel, setRevenueByChannel] = useState<Array<{ channel: string; orders: number; revenue: number }>>([])
-  const [timeSeries, setTimeSeries] = useState<Array<{ bucket: string; revenue: number; expenses: number; profit: number }>>([])
+  const [timeSeries, setTimeSeries] = useState<Array<{ bucket: string; revenue: number; revenue_prev?: number }>>([])
   const [kpis, setKpis] = useState<{ orders: number; aov: number; new_customers: number } | null>(null)
   const [groupBy, setGroupBy] = useState<'day'|'week'|'month'>("day")
   const [preset, setPreset] = useState<string>("last30")
+  const [showComparison, setShowComparison] = useState(false)
   const [rangeOpen, setRangeOpen] = useState(false)
   const [customRange, setCustomRange] = useState<Partial<DateRange>>({})
 
@@ -47,6 +48,7 @@ export default function DashboardCards({
         if (effFrom) params.set("from", effFrom)
         if (effTo) params.set("to", effTo)
         if (groupBy) params.set("groupBy", groupBy)
+        if (showComparison) params.set("comparison", "true")
         const res = await fetch(`/api/admin/analytics/summary?${params.toString()}`)
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || "Error")
@@ -61,7 +63,7 @@ export default function DashboardCards({
         setLoading(false)
       }
     },
-    [externalFrom, externalTo, from, to, groupBy, toast],
+    [externalFrom, externalTo, from, to, groupBy, showComparison, toast],
   )
 
   useEffect(() => {
@@ -198,18 +200,14 @@ export default function DashboardCards({
       )}
 
       {/* KPI cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="rounded-lg border p-4">
           <div className="text-xs text-muted-foreground">Ingresos</div>
           <div className="text-2xl font-semibold">${" "}{profit ? profit.revenue.toFixed(2) : loading ? "…" : "0.00"}</div>
         </div>
         <div className="rounded-lg border p-4">
-          <div className="text-xs text-muted-foreground">Gastos</div>
-          <div className="text-2xl font-semibold">${" "}{profit ? profit.expenses.toFixed(2) : loading ? "…" : "0.00"}</div>
-        </div>
-        <div className="rounded-lg border p-4">
-          <div className="text-xs text-muted-foreground">Beneficio</div>
-          <div className={`text-2xl font-semibold ${profit && profit.profit < 0 ? "text-red-600" : ""}`}>${" "}{profit ? profit.profit.toFixed(2) : loading ? "…" : "0.00"}</div>
+          <div className="text-xs text-muted-foreground">Pedidos</div>
+          <div className="text-2xl font-semibold">{kpis ? kpis.orders : loading ? "…" : "0"}</div>
         </div>
         <div className="rounded-lg border p-4">
           <div className="text-xs text-muted-foreground">Ticket promedio</div>
@@ -219,8 +217,17 @@ export default function DashboardCards({
 
       {/* Time series chart */}
       <div className="rounded-lg border p-4">
-        <div className="mb-2 font-medium">Evolución ingresos y beneficio</div>
-        <RevenueAreaChart data={timeSeries} />
+        <div className="flex items-center justify-between mb-2">
+          <div className="font-medium">Evolución de ingresos</div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowComparison(!showComparison)}
+          >
+            {showComparison ? "Ocultar comparación" : "Comparar período"}
+          </Button>
+        </div>
+        <RevenueAreaChart data={timeSeries} showComparison={showComparison} />
       </div>
 
       {/* Revenue by channel list */}

@@ -11,6 +11,7 @@ export async function GET() {
         slug: p.slug,
         title: p.title,
         description: p.description,
+        excerpt: p.excerpt,
         date: p.date,
         cover: p.cover || null,
       }))

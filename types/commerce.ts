@@ -139,6 +139,7 @@ export type CustomerStats = {
 export type ProductPopularity = {
   product_id: string
   name: string
+  image_url?: string
   views: number
   clicks: number
   add_to_carts: number

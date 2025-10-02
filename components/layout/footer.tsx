@@ -12,9 +12,9 @@ const footerSections = (t: (k: string) => string) => ({
     title: t("footer.sections.shop.title"),
     links: [
       { nameKey: "footer.sections.shop.links.all_products", href: "/products" },
-      { nameKey: "footer.sections.shop.links.hoodies", href: "/products?category=hoodies" },
-      { nameKey: "footer.sections.shop.links.tshirts", href: "/products?category=tshirts" },
-      { nameKey: "footer.sections.shop.links.accessories", href: "/products?category=accessories" },
+      { nameKey: "footer.sections.shop.links.hoodies", href: "/products/category/buzos" },
+      { nameKey: "footer.sections.shop.links.tshirts", href: "/products/category/remeras" },
+      { nameKey: "footer.sections.shop.links.accessories", href: "/products/category/accesorios" },
       { nameKey: "footer.sections.shop.links.care_guide", href: "/blog/guia-para-cuidar-tu-ropa" },
     ],
   },
@@ -32,8 +32,7 @@ const footerSections = (t: (k: string) => string) => ({
       { nameKey: "footer.sections.support.links.faq", href: "/faq" },
       { nameKey: "footer.sections.support.links.contact", href: "/contact" },
       { nameKey: "footer.sections.support.links.size_guide", href: "/faq#size-guide" },
-      { nameKey: "footer.sections.support.links.returns", href: "/faq#returns" },
-      { nameKey: "footer.sections.support.links.whatsapp", href: "https://wa.me/542236680041" },
+      { nameKey: "Nuestros Productos", href: "/products" },
     ],
   },
   social: {
@@ -123,9 +122,6 @@ export function Footer() {
                     setSubmitting(false)
                   }
                 }} className="text-sm font-heading font-semibold">{submitting ? "..." : tt("footer.newsletter.subscribe", "Suscribirse")}</Button>
-                <Link href="https://wa.me/542236680041" target="_blank" className="text-[11px] sm:text-xs text-muted-foreground underline whitespace-nowrap">
-                  Soporte por WhatsApp
-                </Link>
               </div>
               {message && <p className="text-xs text-muted-foreground mt-2">{message}</p>}
             </div>
@@ -151,6 +147,19 @@ export function Footer() {
                     </Link>
                   </li>
                 )})}
+                {/* Agregar WhatsApp solo en Redes y solo en mobile */}
+                {key === 'social' && (
+                  <li className="sm:hidden">
+                    <Link
+                      href="https://wa.me/5492236680041"
+                      target="_blank"
+                      prefetch={false}
+                      className="font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Soporte por WhatsApp
+                    </Link>
+                  </li>
+                )}
               </ul>
             </div>
           ))}
@@ -159,7 +168,7 @@ export function Footer() {
         {/* Bottom Section */}
         <div className="border-t mt-8 pt-8 flex flex-row flex-wrap items-center justify-between gap-3">
           <p className="font-body text-xs sm:text-sm text-muted-foreground whitespace-nowrap">2024 Busy. {t("footer.bottom.rights")}</p>
-          <div className="flex flex-row items-center space-x-4 text-xs sm:text-sm text-muted-foreground">
+          <div className="flex flex-row items-center flex-wrap gap-3 sm:space-x-4 text-xs sm:text-sm text-muted-foreground">
             <Link href="/legal/privacy" prefetch={false} className="font-body hover:text-foreground transition-colors">
               {t("footer.bottom.privacy")}
             </Link>
@@ -168,6 +177,10 @@ export function Footer() {
             </Link>
             <Link href="/legal/cookies" prefetch={false} className="font-body hover:text-foreground transition-colors">
               {t("footer.bottom.cookies")}
+            </Link>
+            {/* WhatsApp en desktop */}
+            <Link href="https://wa.me/5492236680041" target="_blank" prefetch={false} className="hidden sm:inline font-body hover:text-foreground transition-colors">
+              Soporte por WhatsApp
             </Link>
           </div>
         </div>

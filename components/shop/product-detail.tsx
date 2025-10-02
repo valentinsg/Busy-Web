@@ -78,8 +78,8 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
   return (
     <div className="max-w-7xl mx-auto">
       {/* Breadcrumb */}
-      <div className="mb-8">
-        <Button asChild variant="ghost" className="mb-4">
+      <div className="mb-4 sm:mb-8">
+        <Button asChild variant="ghost" className="mb-2 sm:mb-4">
           <Link href="/products">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver a productos
@@ -87,7 +87,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-12 mb-8 sm:mb-16">
         {/* Product Gallery */}
         <div>
           <ProductGallery images={product.images} productName={product.name} />
@@ -204,15 +204,15 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
       </div>
 
       {/* Product Details Tabs */}
-      <div className="mb-16">
+      <div className="mb-8 sm:mb-16">
         <Tabs defaultValue="description" className="w-full">
-          <TabsList className={`grid w-full ${colsClass}`}>
-            <TabsTrigger value="description">Descripción</TabsTrigger>
-            {!isPin && (product.measurementsBySize || product.sizes?.length) && (
-              <TabsTrigger value="sizing">Guía de Talles</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+            <TabsTrigger value="description" className="text-xs sm:text-sm">Descripción</TabsTrigger>
+            {showSizing && (
+              <TabsTrigger value="sizing" className="text-xs sm:text-sm">Guía de Talles</TabsTrigger>
             )}
-            {showCare && <TabsTrigger value="care">Cuidados</TabsTrigger>}
-            <TabsTrigger value="reviews">Reseñas</TabsTrigger>
+            {showCare && <TabsTrigger value="care" className="text-xs sm:text-sm">Cuidados</TabsTrigger>}
+            <TabsTrigger value="reviews" className="text-xs sm:text-sm">Reseñas</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="mt-6">
             <div className="prose prose-neutral dark:prose-invert max-w-none">
@@ -227,7 +227,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               <span className="libre-barcode-39-text-regular text-muted-foreground font-semibold text-xl">SKU: {product.sku}</span>
             </div>
           </TabsContent>
-          {!isPin && (product.measurementsBySize || product.sizes?.length) && (
+          {showSizing && (
           <TabsContent value="sizing" className="mt-6">
             <div className="space-y-4">
               <h3 className="font-medium font-heading">Guía de Talles</h3>
@@ -341,8 +341,8 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           </TabsContent>
           )}
           <TabsContent value="reviews" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-4">
+            <div className="grid grid-cols-1 gap-8">
+              <div className="space-y-4">
                 <h3 className="font-medium font-heading">Reseñas</h3>
                 {reviews.length === 0 ? (
                   <p className="text-sm text-muted-foreground font-body">Aún no hay reseñas. ¡Sé el primero en opinar!</p>
@@ -366,35 +366,39 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                     ))}
                   </ul>
                 )}
-              </div>
-              <div>
-                <h3 className="font-medium mb-3 font-heading">Dejar una reseña</h3>
-                <form onSubmit={onSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="font-body">Nombre</Label>
-                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="rating" className="font-body">Rating</Label>
-                    <Select value={rating} onValueChange={setRating}>
-                      <SelectTrigger id="rating">
-                        <SelectValue placeholder="Selecciona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[5,4,3,2,1].map((r) => (
-                          <SelectItem key={r} value={String(r)}>{r} estrellas</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="comment" className="font-body">Comentario</Label>
-                    <Textarea id="comment" value={comment} onChange={(e) => setComment(e.target.value)} rows={5} placeholder="¿Qué te pareció el producto?" />
-                  </div>
-                  <Button type="submit" disabled={submitting} className="w-full font-heading">
-                    {submitting ? "Enviando..." : "Enviar reseña"}
-                  </Button>
-                </form>
+                
+                {/* Formulario de reseña */}
+                <div className="mt-8 pt-8 border-t">
+                  <h3 className="font-medium mb-4 font-heading">Dejar una reseña</h3>
+                  <form onSubmit={onSubmit} className="space-y-4 max-w-2xl">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className="font-body">Nombre</Label>
+                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="rating" className="font-body">Rating</Label>
+                        <Select value={rating} onValueChange={setRating}>
+                          <SelectTrigger id="rating">
+                            <SelectValue placeholder="Selecciona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[5,4,3,2,1].map((r) => (
+                              <SelectItem key={r} value={String(r)}>{r} estrellas</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="comment" className="font-body">Comentario</Label>
+                      <Textarea id="comment" value={comment} onChange={(e) => setComment(e.target.value)} rows={4} placeholder="¿Qué te pareció el producto?" />
+                    </div>
+                    <Button type="submit" disabled={submitting} className="font-heading">
+                      {submitting ? "Enviando..." : "Enviar reseña"}
+                    </Button>
+                  </form>
+                </div>
               </div>
             </div>
           </TabsContent>

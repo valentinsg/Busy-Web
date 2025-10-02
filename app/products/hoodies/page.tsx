@@ -12,7 +12,7 @@ export const metadata: Metadata = generateSEO({
 
 export default function HoodiesCategoryPage() {
   const base = process.env.SITE_URL || "https://busy.com.ar"
-  const listingUrl = `/products?category=hoodies`
+  const listingUrl = `/products/category/hoodies`
   return (
     <div className="container px-4 py-8 pt-20">
       {/* JSON-LD: CollectionPage + Breadcrumbs */}

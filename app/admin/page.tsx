@@ -39,12 +39,6 @@ export default function AdminHomePage() {
         </div>
       </section>
 
-      <section>
-        <div className="rounded-lg border p-4">
-          <div className="mb-2 font-medium">Stock bajo</div>
-          <div className="text-sm text-muted-foreground">Conectamos este bloque a tu fuente de stock para listar variantes por debajo del umbral.</div>
-        </div>
-      </section>
     </div>
   )
 }

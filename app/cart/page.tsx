@@ -56,7 +56,7 @@ export default function CartPage() {
 
   if (itemsForRender.length === 0) {
     return (
-      <div className="container px-4 min-h-[60vh] flex items-center justify-center">
+      <div className="container px-4 min-h-[60vh] flex items-center justify-center font-body">
         <div className="max-w-2xl mx-auto text-center">
           <ShoppingBag className="h-24 w-24 text-muted-foreground mx-auto mb-6" />
           <h1 className="font-heading text-3xl font-bold mb-4">{t("cart.empty.title")}</h1>
@@ -70,7 +70,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="container px-4 py-8 pt-28">
+    <div className="container px-4 py-8 pt-28 font-body">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -229,9 +229,9 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                {subtotal < 80000 && (
+                {subtotal < 100000 && (
                   <div className="font-body text-sm text-center text-muted-foreground p-3 bg-muted rounded-lg">
-                    {t("cart.free_shipping_notice").replace("{amount}", formatPrice(80000 - subtotal))}
+                    {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100000 - subtotal))}
                   </div>
                 )}
 

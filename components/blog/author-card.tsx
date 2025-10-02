@@ -21,49 +21,29 @@ export default function AuthorCard({ author }: { author: AuthorInfo }) {
     .slice(0, 2)
     .toUpperCase()
   return (
-    <div className="rounded-lg border bg-transparent">
-      <div className="p-5 flex items-center gap-4">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src={author.avatar || ''} alt={author.name} />
-          <AvatarFallback>{initials}</AvatarFallback>
-        </Avatar>
-        <div className="min-w-0">
-          <div className="flex items-center gap-4">
-            <div className="font-heading text-xl font-semibold leading-tight text-accent-brand">
+    <div className="rounded-xl border bg-muted/20 backdrop-blur-sm">
+      <div className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
+          <Avatar className="h-16 w-16 sm:h-20 sm:w-20 ring-2 ring-accent-brand/20">
+            <AvatarImage src={author.avatar || ''} alt={author.name} />
+            <AvatarFallback className="bg-accent-brand/10 text-accent-brand font-semibold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="font-heading text-lg sm:text-xl font-bold mb-1">
               {author.name}
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 flex-wrap">
               {author.x && (
                 <a
                   href={author.x}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="X"
-                  className="opacity-80 hover:opacity-100 transition"
+                  className="text-muted-foreground hover:text-accent-brand transition-colors"
                 >
-                  <Twitter className="h-5 w-5" aria-hidden />
-                </a>
-              )}
-              {author.linkedin && (
-                <a
-                  href={author.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn"
-                  className="opacity-80 hover:opacity-100 transition"
-                >
-                  <Linkedin className="h-5 w-5" aria-hidden />
-                </a>
-              )}
-              {author.medium && (
-                <a
-                  href={author.medium}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Medium"
-                  className="opacity-80 hover:opacity-100 transition"
-                >
-                  <Badge className="h-5 w-5" aria-hidden />
+                  <Twitter className="h-4 w-4" aria-hidden />
                 </a>
               )}
               {author.instagram && (
@@ -72,19 +52,41 @@ export default function AuthorCard({ author }: { author: AuthorInfo }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
-                  className="opacity-80 hover:opacity-100 transition"
+                  className="text-muted-foreground hover:text-accent-brand transition-colors"
                 >
-                  <Instagram className="h-5 w-5" aria-hidden />
+                  <Instagram className="h-4 w-4" aria-hidden />
+                </a>
+              )}
+              {author.linkedin && (
+                <a
+                  href={author.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                  className="text-muted-foreground hover:text-accent-brand transition-colors"
+                >
+                  <Linkedin className="h-4 w-4" aria-hidden />
+                </a>
+              )}
+              {author.medium && (
+                <a
+                  href={author.medium}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Medium"
+                  className="text-muted-foreground hover:text-accent-brand transition-colors"
+                >
+                  <Badge className="h-4 w-4" aria-hidden />
                 </a>
               )}
             </div>
           </div>
-          {author.bio && (
-            <p className="mt-2 text-[15px] md:text-base text-muted-foreground font-body leading-relaxed">
-              {author.bio}
-            </p>
-          )}
         </div>
+        {author.bio && (
+          <p className="text-sm sm:text-base text-muted-foreground font-body leading-relaxed">
+            {author.bio}
+          </p>
+        )}
       </div>
     </div>
   )

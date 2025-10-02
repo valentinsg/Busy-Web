@@ -52,7 +52,7 @@ export function generateMetadata(): Metadata {
   }
 }
 
-export default async function ProductsPage() {
+export default async function ProductsPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
   const siteUrl = process.env.SITE_URL || 'https://busy.com.ar'
   return (
     <div className="container px-4 py-8 pt-28">
@@ -95,7 +95,7 @@ export default async function ProductsPage() {
       />
 
       <div className="max-w-7xl mx-auto">
-        <ProductsClient />
+        <ProductsClient initialCategory={typeof searchParams?.category === 'string' ? searchParams?.category : undefined} />
       </div>
     </div>
   )

@@ -55,7 +55,7 @@ export function CartSheet({ children }: CartSheetProps) {
   return (
     <Sheet open={isOpen} onOpenChange={(open) => (open ? openCart() : closeCart())}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg py-14">
+      <SheetContent className="w-full sm:max-w-lg py-14 font-body">
         <SheetHeader>
           <SheetTitle className="font-heading flex items-center justify-between">
             <span>{t("cart.title")} ({totalItems})</span>
@@ -73,16 +73,21 @@ export function CartSheet({ children }: CartSheetProps) {
                     {t("cart.clear_all")}
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("cart.clear_all")}</AlertDialogTitle>
-                    <AlertDialogDescription>
+                <AlertDialogContent className="sm:max-w-md">
+                  <AlertDialogHeader className="space-y-3">
+                    <AlertDialogTitle className="text-2xl font-heading">{t("cart.clear_all")}</AlertDialogTitle>
+                    <AlertDialogDescription className="text-base">
                       {t("cart.empty.subtitle")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={clearCart}>Confirmar</AlertDialogAction>
+                  <AlertDialogFooter className="gap-2 sm:gap-2">
+                    <AlertDialogCancel className="font-medium">Cancelar</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={clearCart}
+                      className="bg-destructive hover:bg-destructive/90 font-medium"
+                    >
+                      Confirmar
+                    </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -174,16 +179,19 @@ export function CartSheet({ children }: CartSheetProps) {
                           <X className="h-3 w-3" />
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Eliminar producto</AlertDialogTitle>
-                          <AlertDialogDescription>
+                      <AlertDialogContent className="sm:max-w-md">
+                        <AlertDialogHeader className="space-y-3">
+                          <AlertDialogTitle className="text-2xl font-heading">Eliminar producto</AlertDialogTitle>
+                          <AlertDialogDescription className="text-base">
                             ¿Querés eliminar este producto del carrito?
                           </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor)}>
+                        <AlertDialogFooter className="gap-2 sm:gap-2">
+                          <AlertDialogCancel className="font-medium">Cancelar</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor)}
+                            className="bg-destructive hover:bg-destructive/90 font-medium"
+                          >
                             Eliminar
                           </AlertDialogAction>
                         </AlertDialogFooter>
@@ -233,9 +241,9 @@ export function CartSheet({ children }: CartSheetProps) {
               </div>
 
               {/* Free Shipping Notice */}
-              {subtotal < 80000 && (
+              {subtotal < 100000 && (
                 <div className="font-body text-xs text-center text-muted-foreground">
-                  {t("cart.free_shipping_notice").replace("{amount}", formatPrice(80000 - subtotal))}
+                  {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100000 - subtotal))}
                 </div>
               )}
             </div>

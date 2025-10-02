@@ -160,11 +160,14 @@ export async function POST(req: NextRequest) {
       })
 
       // Compute totals with authoritative server rules (respect store settings)
-      const settings = await getSettingsServer().catch(() => ({ shipping_flat_rate: 20000, shipping_free_threshold: 80000 }))
+      const settings = await getSettingsServer().catch(() => ({ shipping_flat_rate: 25000, shipping_free_threshold: 100000 }))
       const items_total = detailed.reduce((acc, i) => acc + i.unit_price * i.quantity, 0)
+      // Apply city-based rule: Mar del Plata 10k, otherwise configured flat rate
+      const customerCity = toStr(getPath(metadata, ['customer', 'city'])) || ''
+      const isMarDelPlata = customerCity.trim().toLowerCase().includes('mar del plata')
       const shipping_cost = computeShipping(items_total, {
-        flat_rate: Number(settings.shipping_flat_rate ?? 20000),
-        free_threshold: Number(settings.shipping_free_threshold ?? 80000),
+        flat_rate: isMarDelPlata ? 10000 : Number(settings.shipping_flat_rate ?? 25000),
+        free_threshold: Number(settings.shipping_free_threshold ?? 100000),
       })
       const coupon_code = (metaObj?.coupon_code ?? null) as string | null
       const discount_percent = await validateCouponPercent(coupon_code)

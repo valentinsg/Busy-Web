@@ -8,6 +8,7 @@ type Row = {
   orders_count: number
   quantity_sold: number
   revenue: number
+  image_url?: string
 }
 
 export default function TopProducts({ limit = 5 }: { limit?: number }) {
@@ -37,14 +38,22 @@ export default function TopProducts({ limit = 5 }: { limit?: number }) {
       {!loading && rows.length === 0 && (
         <div className="text-sm text-muted-foreground">Sin datos</div>
       )}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {rows.map((r) => (
-          <div key={r.product_id} className="flex items-center justify-between text-sm">
-            <span className="truncate mr-2" title={r.name}>{r.name}</span>
-            <div className="flex items-center gap-3">
-              <span className="text-muted-foreground tabular-nums" title="Pedidos">{r.orders_count} pedidos</span>
-              <span className="text-muted-foreground tabular-nums" title="Unidades">{r.quantity_sold} u</span>
-              <span className="font-medium tabular-nums" title="Ingresos">$ {r.revenue.toFixed(2)}</span>
+          <div key={r.product_id} className="flex items-center gap-3 text-sm">
+            {r.image_url && (
+              <img 
+                src={r.image_url} 
+                alt={r.name} 
+                className="w-12 h-12 object-cover rounded border"
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="truncate font-medium" title={r.name}>{r.name}</div>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="tabular-nums">{r.quantity_sold} unidades</span>
+                <span className="tabular-nums">$ {r.revenue.toFixed(2)}</span>
+              </div>
             </div>
           </div>
         ))}

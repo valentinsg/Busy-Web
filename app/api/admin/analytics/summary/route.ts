@@ -7,11 +7,12 @@ export async function GET(req: Request) {
     const from = searchParams.get("from") || undefined
     const to = searchParams.get("to") || undefined
     const groupBy = (searchParams.get("groupBy") as 'day'|'week'|'month' | null) || 'day'
+    const includeComparison = searchParams.get("comparison") === "true"
 
     const [revenueByChannel, profit, timeSeries, kpis] = await Promise.all([
       getRevenueByChannel({ from, to }),
       getProfitSummary({ from, to }),
-      getTimeSeries({ from, to, groupBy }),
+      getTimeSeries({ from, to, groupBy, includeComparison }),
       getKPIs({ from, to }),
     ])
 

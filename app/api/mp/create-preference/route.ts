@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
     const discount_percent = await validateCouponPercent(body.coupon_code)
 
     // Load store settings (shipping)
-    const settings = await getSettingsServer().catch(() => ({ shipping_flat_rate: 20000, shipping_free_threshold: 80000 }))
+    const settings = await getSettingsServer().catch(() => ({ shipping_flat_rate: 25000, shipping_free_threshold: 100000 }))
 
     // Totals
     const totals = calcOrderTotals({
@@ -82,8 +82,8 @@ export async function POST(req: NextRequest) {
       // If client didn't provide shipping, let server rule compute it
       shipping_cost: body.shipping_cost ?? undefined,
       shipping_rule: {
-        flat_rate: Number(settings.shipping_flat_rate ?? 20000),
-        free_threshold: Number(settings.shipping_free_threshold ?? 80000),
+        flat_rate: Number(settings.shipping_flat_rate ?? 25000),
+        free_threshold: Number(settings.shipping_free_threshold ?? 100000),
       },
       discount_percent: discount_percent ?? null,
     })

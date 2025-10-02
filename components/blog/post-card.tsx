@@ -46,23 +46,23 @@ export default function PostCard({ post, aspectRatio = "4/3", showExcerpt = true
       </Link>
 
       {date && (
-        <div className="mt-3 text-xs md:text-sm text-muted-foreground font-body">{date}</div>
+        <div className="mt-2 sm:mt-3 text-[10px] sm:text-xs md:text-sm text-muted-foreground font-body">{date}</div>
       )}
 
-      <h3 className="mt-2 font-heading text-xl font-semibold leading-snug">
+      <h3 className="mt-1 sm:mt-2 font-heading text-sm sm:text-lg md:text-xl font-semibold leading-snug line-clamp-2">
         <Link href={`/blog/${post.slug}`} prefetch={false} className="hover:underline">
           {post.title}
         </Link>
       </h3>
 
-      <div className="mt-2 flex items-center gap-2">
+      <div className="mt-1 sm:mt-2 items-center gap-2 hidden sm:flex">
         {post.category && (
           <span className="text-[10px] inline-block bg-muted px-2 py-0.5 rounded">{post.category}</span>
         )}
       </div>
 
       {showExcerpt && (post.excerpt || post.description) && (
-        <p className="mt-2 text-[0.95rem] text-muted-foreground line-clamp-3 font-body">{post.excerpt || post.description}</p>
+        <p className="mt-1 sm:mt-2 text-xs sm:text-sm md:text-[0.95rem] text-muted-foreground line-clamp-2 sm:line-clamp-3 font-body hidden sm:block">{post.excerpt || post.description}</p>
       )}
     </article>
   )

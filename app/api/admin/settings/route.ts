@@ -11,8 +11,8 @@ export async function GET() {
       .maybeSingle()
     if (error) throw error
     const payload = {
-      shipping_flat_rate: Number(data?.shipping_flat_rate ?? 20000),
-      shipping_free_threshold: Number(data?.shipping_free_threshold ?? 80000),
+      shipping_flat_rate: Number(data?.shipping_flat_rate ?? 25000),
+      shipping_free_threshold: Number(data?.shipping_free_threshold ?? 100000),
     }
     return NextResponse.json(payload)
   } catch (error: unknown) {

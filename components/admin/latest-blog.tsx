@@ -1,8 +1,8 @@
 import Link from "next/link"
-import { getAllPosts } from "@/lib/blog"
+import { getAllPostsAsync } from "@/lib/blog"
 
-export default function LatestBlogCard() {
-  const posts = getAllPosts()
+export default async function LatestBlogCard() {
+  const posts = await getAllPostsAsync()
   const latest = posts[0]
   return (
     <div className="rounded-lg border p-4">

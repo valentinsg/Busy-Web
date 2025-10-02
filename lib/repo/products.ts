@@ -48,7 +48,7 @@ export async function getProductsAsync(params?: {
 }): Promise<Product[]> {
   let query = supabase.from("products").select("*")
 
-  if (params?.category) query = query.eq("category", params.category)
+  if (params?.category) query = query.ilike("category", params.category)
   if (params?.color) query = query.contains("colors", [params.color])
   if (params?.size) query = query.contains("sizes", [params.size])
   if (params?.minPrice !== undefined) query = query.gte("price", params.minPrice)

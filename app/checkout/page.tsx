@@ -16,6 +16,7 @@ import { computeShipping, computeTax } from "@/lib/checkout/totals"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/hooks/use-toast"
 import PayWithMercadoPago from "@/components/checkout/pay-with-mercadopago"
+import PayWithTransfer from "@/components/checkout/pay-with-transfer"
 import { Checkbox } from "@/components/ui/checkbox"
 
 const CHECKOUT_MODE = process.env.NEXT_PUBLIC_CHECKOUT_MODE || "mailto"
@@ -37,27 +38,50 @@ export default function CheckoutPage() {
     country: "AR", // default Argentina
   })
   const [newsletterOptIn, setNewsletterOptIn] = React.useState<boolean>(false)
-  const [paymentMethod, setPaymentMethod] = React.useState("card")
+  const [paymentMethod, setPaymentMethod] = React.useState<"card" | "transfer">("card")
   const [couponCode, setCouponCode] = React.useState("")
-  
+
 
   const totalItems = getTotalItems()
   const subtotal = getSubtotal()
   const discount = getDiscount()
   const discountedSubtotal = getSubtotalAfterDiscount()
-  const estimatedShipping = computeShipping(discountedSubtotal)
-  const estimatedTax = computeTax(Number((discountedSubtotal + estimatedShipping).toFixed(2)))
+  // Location-aware shipping: Mar del Plata 10k, otherwise 8k. Free over 100k.
+  const isMarDelPlata = (shippingData.city || "").trim().toLowerCase().includes("mar del plata")
+  const estimatedShipping = computeShipping(discountedSubtotal, {
+    flat_rate: isMarDelPlata ? 10000 : 8000,
+    free_threshold: 100000,
+  })
+  // Tax only applies to card payments (Mercado Pago), not to bank transfers
+  const estimatedTax = paymentMethod === "card" 
+    ? computeTax(Number((discountedSubtotal + estimatedShipping).toFixed(2)))
+    : 0
   const finalTotal = discountedSubtotal + estimatedShipping + estimatedTax
 
   const handleInputChange = (field: string, value: string) => {
     setShippingData((prev) => ({ ...prev, [field]: value }))
   }
 
-  
+  // Validar que todos los campos requeridos estén completos
+  const isFormValid = () => {
+    return (
+      shippingData.firstName.trim() !== "" &&
+      shippingData.lastName.trim() !== "" &&
+      shippingData.email.trim() !== "" &&
+      shippingData.phone.trim() !== "" &&
+      shippingData.dni.trim() !== "" &&
+      shippingData.address.trim() !== "" &&
+      shippingData.city.trim() !== "" &&
+      shippingData.state.trim() !== "" &&
+      shippingData.zipCode.trim() !== ""
+    )
+  }
+
+
 
   if (items.length === 0) {
     return (
-      <div className="container px-4 py-16">
+      <div className="container px-4 py-16 pt-28 font-body">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="font-heading text-3xl font-bold mb-4">{t("checkout.empty.title")}</h1>
           <p className="font-body text-muted-foreground mb-8">
@@ -201,45 +225,50 @@ export default function CheckoutPage() {
             {/* Payment Method */}
             <Card>
               <CardHeader>
-                <CardTitle className="font-heading">{t("checkout.payment.title")}</CardTitle>
+                <CardTitle className="font-heading">Método de pago</CardTitle>
               </CardHeader>
-              <CardContent>
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                  {CHECKOUT_MODE === "stripe-test" && (
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="card" id="card" />
-                      <Label htmlFor="card" className="font-body flex items-center space-x-2">
-                        <CreditCard className="h-4 w-4" />
-                        <span>{t("checkout.payment.options.card")}</span>
-                      </Label>
+              <CardContent className="space-y-4">
+                <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as "card" | "transfer")}>
+                  <Label 
+                    htmlFor="card" 
+                    className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      paymentMethod === "card" 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:bg-muted/50"
+                    }`}
+                  >
+                    <RadioGroupItem value="card" id="card" />
+                    <CreditCard className="h-5 w-5" />
+                    <div className="flex-1">
+                      <div className="font-medium">Tarjeta de crédito/débito</div>
+                      <div className="text-xs text-muted-foreground">Pago seguro con Mercado Pago</div>
                     </div>
-                  )}
+                  </Label>
 
-                  {CHECKOUT_MODE === "mailto" && (
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="email" id="email" />
-                      <Label htmlFor="email" className="font-body flex items-center space-x-2">
-                        <Mail className="h-4 w-4" />
-                        <span>{t("checkout.payment.options.email")}</span>
-                      </Label>
+                  <Label 
+                    htmlFor="transfer" 
+                    className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      paymentMethod === "transfer" 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:bg-muted/50"
+                    }`}
+                  >
+                    <RadioGroupItem value="transfer" id="transfer" />
+                    <Mail className="h-5 w-5" />
+                    <div className="flex-1">
+                      <div className="font-medium">Transferencia bancaria</div>
+                      <div className="text-xs text-muted-foreground">Sin impuesto online (10% menos)</div>
                     </div>
-                  )}
-
-                  {CHECKOUT_MODE === "whatsapp" && (
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="whatsapp" id="whatsapp" />
-                      <Label htmlFor="whatsapp" className="font-body flex items-center space-x-2">
-                        <MessageCircle className="h-4 w-4" />
-                        <span>{t("checkout.payment.options.whatsapp")}</span>
-                      </Label>
-                    </div>
-                  )}
+                  </Label>
                 </RadioGroup>
 
                 <div className="mt-4 p-4 bg-muted rounded-lg text-sm text-muted-foreground font-body">
-                  {CHECKOUT_MODE === "mailto" && t("checkout.payment.notice.mailto")}
-                  {CHECKOUT_MODE === "whatsapp" && t("checkout.payment.notice.whatsapp")}
-                  {CHECKOUT_MODE === "stripe-test" && t("checkout.payment.notice.stripe")}
+                  {paymentMethod === "card" && (
+                    <p>Serás redirigido a Mercado Pago para completar el pago de forma segura. Se aplica un impuesto online del 10%.</p>
+                  )}
+                  {paymentMethod === "transfer" && (
+                    <p>Recibirás los datos bancarios para realizar la transferencia. Tu pedido se confirmará una vez que verifiquemos el pago (24-48hs).</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -348,10 +377,12 @@ export default function CheckoutPage() {
                     <span>{t("checkout.summary.shipping")}</span>
                     <span>{estimatedShipping === 0 ? t("cart.shipping_free") : formatPrice(estimatedShipping)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Impuesto online (10%)</span>
-                    <span>{formatPrice(estimatedTax)}</span>
-                  </div>
+                  {paymentMethod === "card" && estimatedTax > 0 && (
+                    <div className="flex justify-between">
+                      <span>Impuesto online (10%)</span>
+                      <span>{formatPrice(estimatedTax)}</span>
+                    </div>
+                  )}
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
                     <span>{t("checkout.summary.total")}</span>
@@ -365,25 +396,54 @@ export default function CheckoutPage() {
                   <Label htmlFor="newsletter" className="font-body">Quiero recibir novedades por email</Label>
                 </div>
 
-                {/* Mercado Pago Pay Button */}
-                <PayWithMercadoPago
-                  items={items.map((it) => ({ product_id: it.product.id, quantity: it.quantity, variant_size: it.selectedSize }))}
-                  couponCode={coupon?.code ?? null}
-                  shippingCost={estimatedShipping}
-                  customer={{
-                    first_name: shippingData.firstName,
-                    last_name: shippingData.lastName,
-                    email: shippingData.email,
-                    phone: shippingData.phone,
-                    dni: shippingData.dni,
-                    address: shippingData.address,
-                    city: shippingData.city,
-                    state: shippingData.state,
-                    zip: shippingData.zipCode,
-                  }}
-                  newsletterOptIn={newsletterOptIn}
-                  buttonText="Pagar con Mercado Pago"
-                />
+                {/* Validation Warning */}
+                {!isFormValid() && (
+                  <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-sm text-yellow-600 dark:text-yellow-500">
+                    ⚠️ Por favor completá todos los campos de envío para continuar
+                  </div>
+                )}
+
+                {/* Payment Button */}
+                {paymentMethod === "card" ? (
+                  <PayWithMercadoPago
+                    items={items.map((it) => ({ product_id: it.product.id, quantity: it.quantity, variant_size: it.selectedSize }))}
+                    couponCode={coupon?.code ?? null}
+                    shippingCost={estimatedShipping}
+                    disabled={!isFormValid()}
+                    customer={{
+                      first_name: shippingData.firstName,
+                      last_name: shippingData.lastName,
+                      email: shippingData.email,
+                      phone: shippingData.phone,
+                      dni: shippingData.dni,
+                      address: shippingData.address,
+                      city: shippingData.city,
+                      state: shippingData.state,
+                      zip: shippingData.zipCode,
+                    }}
+                    newsletterOptIn={newsletterOptIn}
+                    buttonText="Pagar con Mercado Pago"
+                  />
+                ) : (
+                  <PayWithTransfer
+                    items={items.map((it) => ({ product_id: it.product.id, quantity: it.quantity, variant_size: it.selectedSize }))}
+                    couponCode={coupon?.code ?? null}
+                    shippingCost={estimatedShipping}
+                    disabled={!isFormValid()}
+                    customer={{
+                      first_name: shippingData.firstName,
+                      last_name: shippingData.lastName,
+                      email: shippingData.email,
+                      phone: shippingData.phone,
+                      dni: shippingData.dni,
+                      address: shippingData.address,
+                      city: shippingData.city,
+                      state: shippingData.state,
+                      zip: shippingData.zipCode,
+                    }}
+                    newsletterOptIn={newsletterOptIn}
+                  />
+                )}
 
                 {/* Security Notice */}
                 <div className="font-body text-xs text-center text-muted-foreground">

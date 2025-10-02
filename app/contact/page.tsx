@@ -31,17 +31,17 @@ export default function ContactPage() {
     setIsSubmitting(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
 
-      // In a real app, you would send this to your API
-      const mailtoLink = `mailto:support@busy.com?subject=${encodeURIComponent(
-        formData.subject || t("contact.mail.default_subject"),
-      )}&body=${encodeURIComponent(
-        `${t("contact.mail.name")}: ${formData.name}\n${t("contact.mail.email")}: ${formData.email}\n\n${t("contact.mail.message")}:\n${formData.message}`,
-      )}`
-
-      window.location.href = mailtoLink
+      if (!response.ok) {
+        throw new Error("Error al enviar el mensaje")
+      }
 
       toast({
         title: t("contact.toast.success.title"),
@@ -80,11 +80,11 @@ export default function ContactPage() {
                 <div className="flex items-start space-x-3">
                   <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <div className="font-medium">{t("contact.info.address.title")}</div>
+                    <div className="font-medium">Dirección</div>
                     <div className="font-body text-sm text-muted-foreground">
-                      {t("contact.info.address.line1")}
+                      Showroom privado en Mar del Plata
                       <br />
-                      {t("contact.info.address.line2")}
+                      <span className="text-xs italic">Coordinamos tu visita por WhatsApp</span>
                     </div>
                   </div>
                 </div>
@@ -92,27 +92,31 @@ export default function ContactPage() {
                 <div className="flex items-start space-x-3">
                   <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <div className="font-medium">{t("contact.info.phone.title")}</div>
-                    <div className="font-body text-sm text-muted-foreground">{t("contact.info.phone.value")}</div>
+                    <div className="font-medium">Teléfono / WhatsApp</div>
+                    <a href="https://wa.me/5492236680041" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-accent-brand hover:underline">
+                      +54 9 223 668-0041
+                    </a>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-3">
                   <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <div className="font-medium">{t("contact.info.email.title")}</div>
-                    <div className="font-body text-sm text-muted-foreground">{t("contact.info.email.value")}</div>
+                    <div className="font-medium">Email</div>
+                    <a href="mailto:busy.streetwear@gmail.com" className="font-body text-sm text-accent-brand hover:underline">
+                      busy.streetwear@gmail.com
+                    </a>
                   </div>
                 </div>
 
-                <div className="font-body flex items-center gap-1">
+                <div className="font-body flex items-start space-x-3">
                   <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <div className="font-medium">{t("contact.info.hours.title")}</div>
+                    <div className="font-medium">Horarios de atención</div>
                     <div className="font-body text-sm text-muted-foreground">
-                      {t("contact.info.hours.weekdays")}
+                      Lunes a Sábado: 24 horas
                       <br />
-                      {t("contact.info.hours.weekend")}
+                      <span className="text-xs italic">Respondemos por WhatsApp</span>
                     </div>
                   </div>
                 </div>
@@ -121,20 +125,20 @@ export default function ContactPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>{t("contact.links.title")}</CardTitle>
+                <CardTitle>Enlaces rápidos</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div>
-                  <a href="/faq" className="font-body text-sm text-accent-brand hover:underline">{t("contact.links.faq")}</a>
+                  <a href="/products" className="font-body text-sm text-accent-brand hover:underline">Nuestros Productos</a>
                 </div>
                 <div>
-                  <a href="/faq#size-guide" className="font-body text-sm text-accent-brand hover:underline">{t("contact.links.size_guide")}</a>
+                  <a href="/faq" className="font-body text-sm text-accent-brand hover:underline">Preguntas Frecuentes</a>
                 </div>
                 <div>
-                  <a href="/faq#returns" className="font-body text-sm text-accent-brand hover:underline">{t("contact.links.returns")}</a>
+                  <a href="/faq#size-guide" className="font-body text-sm text-accent-brand hover:underline">Guía de Talles</a>
                 </div>
                 <div>
-                  <a href="/about" className="font-body text-sm text-accent-brand hover:underline">{t("contact.links.about")}</a>
+                  <a href="/about" className="font-body text-sm text-accent-brand hover:underline">Sobre Nosotros</a>
                 </div>
               </CardContent>
             </Card>

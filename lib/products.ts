@@ -3,6 +3,40 @@ import productsData from "@/data/products.json"
 
 export const products: Product[] = productsData
 
+// Category slug normalization (ES and EN synonyms)
+const SLUG_TO_CATEGORY: Record<string, string> = {
+  // Spanish
+  buzos: 'buzos',
+  remeras: 'remeras',
+  accesorios: 'accesorios',
+  pantalones: 'pantalones',
+  // English aliases -> Spanish canonical
+  hoodies: 'buzos',
+  tshirts: 'remeras',
+  tees: 'remeras',
+  accessories: 'accesorios',
+  pants: 'pantalones',
+}
+
+const PREFERRED_SLUG_BY_CATEGORY: Record<string, string> = {
+  // Prefer Spanish slugs for URL
+  buzos: 'buzos',
+  remeras: 'remeras',
+  accesorios: 'accesorios',
+  pantalones: 'pantalones',
+}
+
+export function resolveCategorySlug(slug?: string | null): string | undefined {
+  if (!slug) return undefined
+  return SLUG_TO_CATEGORY[slug.toLowerCase()]
+}
+
+export function categoryToSlug(category?: string | null): string | undefined {
+  if (!category) return undefined
+  const canonical = resolveCategorySlug(category) || category.toLowerCase()
+  return PREFERRED_SLUG_BY_CATEGORY[canonical] || canonical
+}
+
 export function getProducts(filters?: FilterOptions): Product[] {
   let filteredProducts = [...products]
 

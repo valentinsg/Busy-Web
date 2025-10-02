@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import { useCart } from "@/hooks/use-cart"
 import type { CartItemInput } from "@/lib/checkout/types"
 
 export default function PayWithMercadoPago(props: {
@@ -7,6 +8,7 @@ export default function PayWithMercadoPago(props: {
   couponCode?: string | null
   shippingCost?: number | null
   buttonText?: string
+  disabled?: boolean
   customer?: {
     first_name?: string | null
     last_name?: string | null
@@ -22,6 +24,7 @@ export default function PayWithMercadoPago(props: {
 }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { clearCart } = useCart()
 
   async function handlePay() {
     setLoading(true)
@@ -47,6 +50,10 @@ export default function PayWithMercadoPago(props: {
       if (data.order_id) {
         try { window.sessionStorage.setItem("mp_session_id", data.order_id) } catch {}
       }
+      
+      // Limpiar el carrito antes de redirigir a Mercado Pago
+      clearCart()
+      
       if (data.init_point) {
         window.location.href = data.init_point
       } else {
@@ -61,7 +68,11 @@ export default function PayWithMercadoPago(props: {
 
   return (
     <div>
-      <button onClick={handlePay} disabled={loading} className="inline-flex items-center rounded bg-black px-4 py-2 text-white disabled:opacity-50">
+      <button 
+        onClick={handlePay} 
+        disabled={loading || props.disabled} 
+        className="w-full inline-flex items-center justify-center rounded-lg bg-black px-4 py-3 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/90 transition-colors"
+      >
         {loading ? "Redirigiendo..." : props.buttonText ?? "Pagar con Mercado Pago"}
       </button>
       {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}

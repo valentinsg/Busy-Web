@@ -16,9 +16,16 @@ export default function CopyLinkButton({ className = "" }: { className?: string 
   }
 
   return (
-    <Button type="button" size="sm" variant="ghost" onClick={copy} className={className} aria-label="Copiar link" title="Copiar link" data-label="Copiar link">
-      {copied ? <Check className="h-4 w-4 mr-2" /> : <LinkIcon className="h-4 w-4 mr-2" />}
-      {copied ? "Copiado" : "Copiar link del artículo"}
+    <Button 
+      type="button" 
+      variant="outline" 
+      onClick={copy} 
+      className={`h-9 w-9 sm:h-10 sm:w-auto sm:px-4 ${className}`}
+      aria-label="Copiar link" 
+      title="Copiar link"
+    >
+      {copied ? <Check className="h-4 w-4 sm:mr-2" /> : <LinkIcon className="h-4 w-4 sm:mr-2" />}
+      <span className="hidden sm:inline">{copied ? "Copiado" : "Copiar link"}</span>
     </Button>
   )
 }

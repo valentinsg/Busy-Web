@@ -48,28 +48,17 @@ export function AutoSliderBanner() {
       ))}
       <motion.div
         className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center"
-        variants={{
-          initial: { opacity: 0, filter: 'blur(6px)' },
-          animate: {
-            opacity: 1,
-            filter: 'blur(0px)',
-            transition: { duration: 4.5, when: 'beforeChildren', staggerChildren: 0.12, delayChildren: 0.05 },
-          },
-        }}
-        initial="initial"
-        animate="animate"
       >
-        <motion.div variants={{ initial: { opacity: 0, y: 18, scale: 0.98 }, animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6 } } }}>
+        <motion.div>
           <Image src="/busy-streetwear.png" alt="Busy Streetwear" width={325} height={325} />
         </motion.div>
         <motion.a
           href="/contact"
           className="google-sans-code text-xl tracking-tight text-gray-300 text-center mb-8 font-bold"
-          variants={{ initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
         >
           38°00′S 57°33′O
         </motion.a>
-        <motion.div variants={{ initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}>
+        <motion.div>
           <Button
             onClick={handleShopClick}
             size="lg"

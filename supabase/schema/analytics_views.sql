@@ -37,6 +37,7 @@ orders as (
 select
   p.id as product_id,
   p.name,
+  p.image_url,
   coalesce(v.views, 0) as views,
   coalesce(v.clicks, 0) as clicks,
   coalesce(v.add_to_carts, 0) as add_to_carts,

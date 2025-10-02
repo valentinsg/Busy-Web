@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Package, Boxes, FileText, Mail, Sparkles, BadgePercent, MessageCircle, BarChart2, HandCoins, Users, Factory, Wallet } from "lucide-react"
+import { LayoutDashboard, Package, Boxes, FileText, Mail, Sparkles, BadgePercent, MessageCircle, BarChart2, HandCoins, Users, Factory, Wallet, Clock } from "lucide-react"
 import {
   SidebarContent,
   SidebarGroup,
@@ -121,6 +121,13 @@ export default function AdminSidebarMenu() {
               <Link href="/admin/analytics" legacyBehavior>
                 <SidebarMenuButton asChild isActive={isActive("/admin/analytics")} variant="outline" className="font-body hover:bg-accent hover:text-accent-foreground">
                   <a className="flex items-center gap-2"><BarChart2 className="h-4 w-4" /> Inteligencia comercial</a>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Link href="/admin/orders/pending" legacyBehavior>
+                <SidebarMenuButton asChild isActive={isActive("/admin/orders/pending")} variant="outline" className="font-body hover:bg-accent hover:text-accent-foreground">
+                  <a className="flex items-center gap-2"><Clock className="h-4 w-4" /> Transferencias pendientes</a>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>

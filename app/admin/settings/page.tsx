@@ -5,8 +5,8 @@ import * as React from "react"
 export default function SettingsPage() {
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
-  const [flat, setFlat] = React.useState<number>(20000)
-  const [free, setFree] = React.useState<number>(80000)
+  const [flat, setFlat] = React.useState<number>(25000)
+  const [free, setFree] = React.useState<number>(100000)
   const [toast, setToast] = React.useState<string>("")
 
   React.useEffect(() => {
@@ -16,8 +16,8 @@ export default function SettingsPage() {
         const res = await fetch("/api/admin/settings", { cache: "no-store" })
         const data = await res.json()
         if (!cancelled && res.ok) {
-          setFlat(Number(data.shipping_flat_rate ?? 20000))
-          setFree(Number(data.shipping_free_threshold ?? 80000))
+          setFlat(Number(data.shipping_flat_rate ?? 25000))
+          setFree(Number(data.shipping_free_threshold ?? 100000))
         }
       } catch {
         // ignore

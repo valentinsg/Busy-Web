@@ -1,5 +1,4 @@
 import AuthorCard from '@/components/blog/author-card'
-import { I18nText } from '@/components/blog/i18n-text'
 import LatestPostsSidebar from '@/components/blog/latest-posts-sidebar'
 import SocialLinksInline from '@/components/blog/social-links-inline'
 import MdxRenderer from '@/components/mdx/MdxRenderer'
@@ -18,7 +17,6 @@ import {
   Calendar,
   ChevronDown,
   Clock,
-  Share2,
 } from 'lucide-react'
 import type { Metadata } from 'next'
 import NextDynamic from 'next/dynamic'
@@ -30,6 +28,11 @@ import { notFound } from 'next/navigation'
 // Client helpers
 const CopyLinkButton = NextDynamic(
   () => import('@/components/blog/copy-link-button'),
+  { ssr: false }
+)
+
+const ShareButton = NextDynamic(
+  () => import('@/components/blog/share-button'),
   { ssr: false }
 )
 
@@ -178,7 +181,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const preparedContent = (post.content || '').replace(/\r\n/g, '\n')
 
   return (
-    <div className="container py-6 sm:py-8 pt-24 sm:pt-28 tracking-wide font-body backdrop-blur-sm">
+    <div className="container py-6 sm:py-8 pt-24 sm:pt-28 tracking-wide font-body backdrop-blur-sm px-3 sm:px-4">
       <div className="max-w-7xl mx-auto">
         {/* JSON-LD Article */}
         <script
@@ -244,21 +247,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </div>
 
               <div className="flex items-center gap-2">
-                {/* Hide copy link on mobile to avoid layout issues */}
-                <div className="hidden md:block">
-                  <CopyLinkButton />
-                </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="sm:size-auto"
-                  aria-label="Share"
-                  title="Share"
-                  data-label="Share"
-                >
-                  <Share2 className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline"><I18nText k="blog.post.share" /></span>
-                </Button>
+                <CopyLinkButton />
+                <ShareButton title={post.title} text={post.description} />
               </div>
             </div>
           </header>
@@ -355,7 +345,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
 
         {/* Minimal navigation links above newsletter */}
-        <div className="my-8 flex justify-between items-end">
+        <div className="my-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             {prevPost && (
               <>
@@ -365,14 +355,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 <Link
                   href={`/blog/${prevPost.slug}`}
                   prefetch={false}
-                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground line-clamp-1 max-w-[60vw] sm:max-w-none text-sm sm:text-base"
+                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground line-clamp-2 text-sm sm:text-base"
                 >
                   {prevPost.title}
                 </Link>
               </>
             )}
           </div>
-          <div className="text-right">
+          <div className="sm:text-right">
             {nextPost && (
               <>
                 <div className="text-xs text-muted-foreground mb-1">
@@ -381,7 +371,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 <Link
                   href={`/blog/${nextPost.slug}`}
                   prefetch={false}
-                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground line-clamp-1 max-w-[60vw] sm:max-w-none text-sm sm:text-base"
+                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground line-clamp-2 text-sm sm:text-base"
                 >
                   {nextPost.title}
                 </Link>

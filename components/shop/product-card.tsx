@@ -199,7 +199,7 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
           {product.stock < 10 && (
             <Badge
               variant="destructive"
-              className="absolute top-2 left-2 font-body"
+              className="absolute top-1 left-1 text-[10px] sm:text-xs font-body px-1.5 py-0.5 sm:px-2 sm:py-1"
             >
               Quedan solo {product.stock}
             </Badge>
@@ -389,32 +389,32 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
           </div>
         </div>
 
-        <CardContent className="p-4">
-          <div className="space-y-2">
-            <h3 className="font-heading font-medium text-sm line-clamp-2 transition-all group-hover:text-accent-brand group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.35)]">
+        <CardContent className="p-2 sm:p-4">
+          <div className="space-y-1 sm:space-y-2">
+            <h3 className="font-heading font-medium text-xs sm:text-sm line-clamp-2 transition-all group-hover:text-accent-brand group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.35)]">
               {product.name}
             </h3>
 
             <div className="flex items-center space-x-1">
               <div className="flex items-center">
-                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                <span className="text-xs text-muted-foreground ml-1 font-body">
+                <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-yellow-400 text-yellow-400" />
+                <span className="text-[10px] sm:text-xs text-muted-foreground ml-1 font-body">
                   {formatRating(product.rating)} ({product.reviews})
                 </span>
               </div>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="font-heading font-semibold">
+              <span className="font-heading font-semibold text-sm sm:text-base">
                 {formatPrice(product.price, product.currency)}
               </span>
 
               {/* Color options */}
-              <div className="flex space-x-1">
+              <div className="flex space-x-0.5 sm:space-x-1">
                 {product.colors.slice(0, 3).map((color) => (
                   <div
                     key={color}
-                    className="w-4 h-4 rounded-full border border-border"
+                    className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border"
                     style={{
                       backgroundColor:
                         color === 'black'
@@ -430,7 +430,7 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
                   />
                 ))}
                 {product.colors.length > 3 && (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[10px] sm:text-xs text-muted-foreground">
                     +{product.colors.length - 3}
                   </span>
                 )}

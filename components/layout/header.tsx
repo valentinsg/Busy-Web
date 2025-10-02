@@ -46,9 +46,10 @@ export function Header() {
       }
     }
     checkAdmin()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [])
-
 
   const { getTotalItems } = useCart()
   // Hydration guard: ensure SSR/CSR render same markup initially
@@ -98,17 +99,17 @@ export function Header() {
   return (
     <header
       className={
-        'fixed font-heading p-2 top-0 left-0 right-0 z-50 w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
+        'fixed font-heading top-0 left-0 right-0 z-50 w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
         (showHeroVariant
-          ? '!border-0 p-2 !bg-transparent supports-[backdrop-filter]:!bg-transparent !backdrop-blur-0 !shadow-none'
-          : 'border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60')
+          ? '!border-0 py-2 sm:p-2 !bg-transparent supports-[backdrop-filter]:!bg-transparent !backdrop-blur-0 !shadow-none'
+          : 'border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-2 sm:py-0')
       }
     >
       <div
         className={
           showHeroVariant
-            ? 'container flex h-16 items-center justify-between px-4 transition-opacity duration-300'
-            : 'container flex h-16 items-center justify-between px-4 transition-opacity duration-300'
+            ? 'container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4 transition-opacity duration-300'
+            : 'container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4 transition-opacity duration-300'
         }
       >
         {/* Centered B logo (hero) */}
@@ -189,7 +190,9 @@ export function Header() {
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={t('search.placeholder', { default: 'Buscar productos' })}
+                placeholder={t('search.placeholder', {
+                  default: 'Buscar productos',
+                })}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8 w-[200px]"
@@ -213,26 +216,31 @@ export function Header() {
               <span
                 aria-hidden
                 className={
-                  "absolute -top-2 -right-2 grid place-items-center rounded-full border border-white/20 bg-red-600 text-white text-[10px] leading-none font-semibold tabular-nums shadow-sm transition-all duration-200 ease-out " +
+                  'absolute -top-2 -right-2 grid place-items-center rounded-full border border-white/20 bg-red-600 text-white text-[10px] leading-none font-semibold tabular-nums shadow-sm transition-all duration-200 ease-out ' +
                   (cartCount > 0
-                    ? "min-w-[18px] h-[18px] px-[4px] opacity-100 scale-100 animate-[pulse_2s_ease-in-out_infinite]"
-                    : "min-w-[18px] h-[18px] px-[4px] opacity-0 scale-0")
+                    ? 'min-w-[18px] h-[18px] px-[4px] opacity-100 scale-100 animate-[pulse_2s_ease-in-out_infinite]'
+                    : 'min-w-[18px] h-[18px] px-[4px] opacity-0 scale-0')
                 }
               >
-                {cartCount > 0 ? String(cartCount) : ""}
+                {cartCount > 0 ? String(cartCount) : ''}
               </span>
               <style jsx>{`
                 @keyframes pulse {
-                  0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.6); }
-                  50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+                  0%,
+                  100% {
+                    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+                  }
+                  50% {
+                    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+                  }
                 }
               `}</style>
             </Button>
           </CartSheet>
-
-          <LanguageToggle />
-
-          {/*<ThemeToggle />*/}
+          
+          <div className="hidden md:flex ">
+            <LanguageToggle />
+          </div>
 
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -241,12 +249,21 @@ export function Header() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px] font-body">
+            <SheetContent
+              side="right"
+              className="w-[300px] sm:w-[400px] font-body"
+            >
               <div className="flex flex-col space-y-4 mt-4">
                 {/* Logo at top */}
                 <div className="flex items-center justify-center py-2">
                   <Link href="/" onClick={() => setIsOpen(false)}>
-                    <Image src="/busy-gothic.png" alt="Busy" width={120} height={28} className="object-contain" />
+                    <Image
+                      src="/busy-gothic.png"
+                      alt="Busy"
+                      width={120}
+                      height={28}
+                      className="object-contain"
+                    />
                   </Link>
                 </div>
 
@@ -293,8 +310,16 @@ export function Header() {
                       }
                     }}
                   >
-                    <Input type="email" name="email" placeholder="Tu email" required className="flex-1" />
-                    <Button type="submit" className="shrink-0">OK</Button>
+                    <Input
+                      type="email"
+                      name="email"
+                      placeholder="Tu email"
+                      required
+                      className="flex-1"
+                    />
+                    <Button type="submit" className="shrink-0">
+                      OK
+                    </Button>
                   </form>
                 </div>
 
@@ -302,7 +327,9 @@ export function Header() {
                 {isAdmin && (
                   <div className="pt-2">
                     <Button asChild className="w-full">
-                      <Link href="/admin" onClick={() => setIsOpen(false)}>Panel Admin</Link>
+                      <Link href="/admin" onClick={() => setIsOpen(false)}>
+                        Panel Admin
+                      </Link>
                     </Button>
                   </div>
                 )}

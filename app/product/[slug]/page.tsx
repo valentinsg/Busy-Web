@@ -82,7 +82,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   } catch {}
 
   return (
-    <div className="container px-4 py-8 pt-28 font-body">
+    <div className="container px-4 py-6 pt-20 sm:py-8 sm:pt-28 font-body">
       {/* JSON-LD Product */}
       <script
         type="application/ld+json"
