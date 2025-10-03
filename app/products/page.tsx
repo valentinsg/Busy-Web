@@ -7,7 +7,7 @@ export function generateMetadata(): Metadata {
   return {
     title: 'Shop',
     description:
-      'Conseguí nuestros productos online desde 5000$, con envíos a todo el país. Desde remeras oversize o jeans baggy hasta accesorios.',
+      'Conseguí nuestros productos online apartir de 5000$, con envíos a todo el país. Desde remeras oversize o jeans baggy hasta accesorios.',
     alternates: {
       canonical: `${siteUrl}/products`,
       languages: {
@@ -18,7 +18,7 @@ export function generateMetadata(): Metadata {
     openGraph: {
       title: 'Productos de moda',
       description:
-        'Conseguí nuestros productos online desde 5000$, con envíos a todo el país. Desde remeras oversize o jeans baggy hasta accesorios.',
+        'Conseguí nuestros productos online apartir de 5000$, con envíos a todo el país. Desde remeras oversize o jeans baggy hasta accesorios.',
       url: `${siteUrl}/products`,
       images: [
         {
@@ -33,7 +33,7 @@ export function generateMetadata(): Metadata {
       card: 'summary_large_image',
       title: 'Shop',
       description:
-        'Conseguí nuestros productos online desde 5000$, con envíos a todo el país. Desde remeras oversize o jeans baggy hasta accesorios.',
+        'Conseguí nuestros productos online apartir de 5000$, con envíos a todo el país. Desde remeras oversize o jeans baggy hasta accesorios.',
       images: [`${siteUrl}/og/busy-products.png`],
     },
     keywords: [

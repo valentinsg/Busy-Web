@@ -1,20 +1,20 @@
-import './globals.css'
-import type { Metadata, Viewport } from 'next'
-import { Space_Grotesk, Plus_Jakarta_Sans, Abel, DM_Sans, Libre_Barcode_39_Text, Poppins } from 'next/font/google'
-import type React from 'react'
-import { Analytics } from '@vercel/analytics/react'
-import { SpeedInsights } from '@vercel/speed-insights/next'
-import { ThemeProvider } from '@/components/theme-provider'
-import SiteFrame from '@/components/layout/site-frame'
-import { Toaster } from '@/components/ui/toaster'
-import { generateSEO } from '@/lib/seo'
-import { SplashGate } from '@/components/home/splash-gate'
 import { CustomCursor } from '@/components/custom-cursor'
+import { SplashGate } from '@/components/home/splash-gate'
 import { I18nProvider } from '@/components/i18n-provider'
 import { HtmlLang } from '@/components/layout/html-lang'
+import SiteFrame from '@/components/layout/site-frame'
 import SitePopover from '@/components/site-popover'
+import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/toaster'
+import { generateSEO } from '@/lib/seo'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+import type { Metadata, Viewport } from 'next'
+import dynamic from 'next/dynamic'
+import { Abel, DM_Sans, Libre_Barcode_39_Text, Plus_Jakarta_Sans, Poppins, Space_Grotesk } from 'next/font/google'
 import { cookies } from 'next/headers'
-import dynamic from 'next/dynamic';
+import type React from 'react'
+import './globals.css'
 
 // Ensure we always have a valid absolute URL (with scheme) for metadataBase and JSON-LD
 const RAW_SITE_URL = process.env.SITE_URL || ''
@@ -70,16 +70,24 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  ...generateSEO(),
+  ...generateSEO({
+    title: 'Busy Streetwear',
+    description: 'Somos Busy Streetwear, la marca que representa a los que hacen. Únite a nuestra comunidad que ofrece ropa streetwear de moda, contenido relacionado a la cultura urbana, playlists, eventos exclusivos y más.',
+    image: '/busy-streetwear.png',
+    url: SITE_URL,
+  }),
   metadataBase: new URL(SITE_URL),
   title: {
     default: 'Busy Streetwear',
-    template: 'Busy Streetwear - %s',
+    template: '%s - Busy Streetwear',
   },
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
     apple: '/apple-touch-icon.png',
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
   },
   // Do not set a global canonical here; individual pages define their own canonical
 }
@@ -99,17 +107,19 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Busy Streetwear',
-    description: 'Streetwear para la vida moderna',
+    description: 'Somos Busy Streetwear, la marca que representa a los que hacen. Únite a nuestra comunidad que ofrece ropa streetwear de moda, contenido relacionado a la cultura urbana, playlists, eventos exclusivos y más.',
     url: SITE_URL,
     logo: `${SITE_URL}/logo-busy-black.png`,
     sameAs: [
       'https://instagram.com/busy.streetwear',
+      'https://www.facebook.com/profile.php?id=61581696441351',
+      'https://www.tiktok.com/@busy.streetwear',
     ],
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+54 9 22 3668 0041',
       contactType: 'Customer Service',
-      email: 'contacto@busy.com.ar',
+      email: 'busy.streetwear@gmail.com',
     },
   },
   {

@@ -34,6 +34,7 @@ function getStaticRoutes() {
     { url: `${SITE_URL}/cart`, lastModified: now, changeFrequency: monthly, priority: 0.5, alternates: { languages: createLang('/cart') } },
     { url: `${SITE_URL}/checkout`, lastModified: now, changeFrequency: monthly, priority: 0.4, alternates: { languages: createLang('/checkout') } },
     { url: `${SITE_URL}/faq`, lastModified: now, changeFrequency: monthly, priority: 0.6, alternates: { languages: createLang('/faq') } },
+    { url: `${SITE_URL}/size-calculator`, lastModified: now, changeFrequency: monthly, priority: 0.7, alternates: { languages: createLang('/size-calculator') } },
     
     // Legal pages
     { url: `${SITE_URL}/legal/cookies`, lastModified: now, changeFrequency: monthly, priority: 0.3, alternates: { languages: createLang('/legal/cookies') } },

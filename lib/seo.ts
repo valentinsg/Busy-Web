@@ -9,8 +9,8 @@ interface SEOProps {
 }
 
 export function generateSEO({
-  title = "Busy - Streetwear premium",
-  description = "Busy Streetwear ofrece ropa urbana premium con diseño contemporáneo y calidad superior. Hoodies, remeras y básicos hechos para la vida moderna.",
+  title = "Busy Streetwear",
+  description = 'Somos Busy Streetwear, la marca que representa a los que hacen. Únite a nuestra comunidad que ofrece ropa streetwear de moda, contenido relacionado a la cultura urbana, playlists, eventos exclusivos y más.',
   image = "/busy-streetwear.png",
   url = process.env.SITE_URL || "https://busy.com.ar",
   type = "website",
@@ -24,7 +24,9 @@ export function generateSEO({
       "Streetwear",
       "Ropa urbana",
       "Moda",
+      "Streetwear",
       "Hoodies",
+      "Básicos",
       "Remeras",
       "Pantalones",
       "Argentina",
@@ -36,7 +38,7 @@ export function generateSEO({
       images: [{ url: image, alt: title }],
       url,
       type: ogType,
-      siteName: "Busy",
+      siteName: "Busy Streetwear",
       locale: "es_AR",
       alternateLocale: ["en_US"],
     },
@@ -72,7 +74,7 @@ export function generateProductSEO(product: {
   sku: string
 }) {
   return generateSEO({
-    title: `${product.name} - Busy`,
+    title: `${product.name} - Busy Streetwear`,
     description: product.description,
     image: product.images[0],
     type: "website",

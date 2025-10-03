@@ -10,7 +10,7 @@ import { generateSEO } from "@/lib/seo"
 export const metadata: Metadata = generateSEO({
   title: "Preguntas frecuentes - Busy",
   description:
-    "Respuestas a las preguntas más comunes sobre productos, envíos, cambios y políticas.",
+    "Respuestas a las preguntas más comunes sobre productos, envíos, políticas y más.",
   url: `${process.env.SITE_URL || "https://busy.com.ar"}/faq`,
 })
 

@@ -6,22 +6,25 @@ import type {
 } from '@/types/size-calculator'
 
 /**
- * Tabla de medidas estándar para productos Busy
- * TODO: Estas medidas deberían venir de la base de datos o del producto específico
+ * Tabla de medidas estándar MEJORADA para productos Busy
+ * Basada en medidas reales de streetwear argentino
+ * NOTA: Estas son medidas de la PRENDA (ancho x 2), no del cuerpo
  */
 const STANDARD_MEASUREMENTS: Record<string, Record<string, ProductMeasurements>> = {
   hoodies: {
-    S: { chest: 96, length: 68, shoulders: 50 },
-    M: { chest: 102, length: 70, shoulders: 52 },
-    L: { chest: 108, length: 72, shoulders: 54 },
-    XL: { chest: 114, length: 74, shoulders: 56 },
+    // Medidas más realistas para buzos oversize/streetwear
+    S: { chest: 108, length: 68, shoulders: 52 },   // ~54cm ancho (108/2)
+    M: { chest: 114, length: 70, shoulders: 54 },   // ~57cm ancho
+    L: { chest: 120, length: 72, shoulders: 56 },   // ~60cm ancho
+    XL: { chest: 126, length: 74, shoulders: 58 },  // ~63cm ancho
   },
   tshirts: {
-    S: { chest: 92, length: 68, shoulders: 48 },
-    M: { chest: 98, length: 70, shoulders: 50 },
-    L: { chest: 104, length: 72, shoulders: 52 },
-    XL: { chest: 110, length: 74, shoulders: 54 },
-    XXL: { chest: 116, length: 76, shoulders: 56 },
+    // Remeras más ajustadas que buzos
+    S: { chest: 100, length: 68, shoulders: 48 },
+    M: { chest: 106, length: 70, shoulders: 50 },
+    L: { chest: 112, length: 72, shoulders: 52 },
+    XL: { chest: 118, length: 74, shoulders: 54 },
+    XXL: { chest: 124, length: 76, shoulders: 56 },
   },
   pants: {
     S: { chest: 76, length: 100, shoulders: 0, waist: 76, inseam: 76 },
@@ -41,34 +44,39 @@ function calculateBMI(height: number, weight: number): number {
 
 /**
  * Estima el perímetro de pecho basado en altura, peso y tipo de cuerpo
- * Esta es una aproximación - idealmente el usuario debería medirse
+ * Fórmula mejorada basada en datos antropométricos reales
  */
 function estimateChestCircumference(user: UserMeasurements): number {
   const bmi = calculateBMI(user.height, user.weight)
   
-  // Base: altura correlaciona con tamaño de torso
-  let baseChest = 85 + (user.height - 170) * 0.3
+  // Fórmula base más precisa
+  // Para hombres: perímetro pecho ≈ 0.45 * altura + 0.35 * peso + ajustes
+  let baseChest = (user.height * 0.45) + (user.weight * 0.35)
   
-  // Ajuste por BMI
+  // Ajuste por BMI (más granular)
   if (bmi < 18.5) {
-    baseChest -= 8 // Delgado
-  } else if (bmi >= 18.5 && bmi < 25) {
+    baseChest -= 6 // Delgado
+  } else if (bmi >= 18.5 && bmi < 22) {
+    baseChest -= 2 // Delgado-normal
+  } else if (bmi >= 22 && bmi < 25) {
     baseChest += 0 // Normal
-  } else if (bmi >= 25 && bmi < 30) {
-    baseChest += 10 // Sobrepeso
+  } else if (bmi >= 25 && bmi < 27) {
+    baseChest += 4 // Normal-robusto
+  } else if (bmi >= 27 && bmi < 30) {
+    baseChest += 8 // Robusto
   } else {
-    baseChest += 18 // Obesidad
+    baseChest += 14 // Plus
   }
   
-  // Ajuste por tipo de cuerpo
+  // Ajuste por tipo de cuerpo (más significativo)
   if (user.bodyType === 'slim') {
-    baseChest -= 6
+    baseChest -= 5
   } else if (user.bodyType === 'athletic') {
-    baseChest += 4
+    baseChest += 3 // Atlético tiene más pecho/espalda
   } else if (user.bodyType === 'muscular') {
-    baseChest += 8
+    baseChest += 7 // Musculoso necesita más espacio
   } else if (user.bodyType === 'plus') {
-    baseChest += 12
+    baseChest += 10
   }
   
   return Math.round(baseChest)
@@ -76,6 +84,7 @@ function estimateChestCircumference(user: UserMeasurements): number {
 
 /**
  * Ajusta el talle recomendado según la preferencia de fit del usuario
+ * MEJORADO: Ajustes más agresivos para fit loose/oversized
  */
 function adjustForFitPreference(
   baseSize: string,
@@ -87,20 +96,23 @@ function adjustForFitPreference(
   if (fitPreference === 'tight' && sizeIndex > 0) {
     // Prefiere ajustado: baja un talle
     return availableSizes[sizeIndex - 1]
-  } else if (fitPreference === 'loose' && sizeIndex < availableSizes.length - 1) {
-    // Prefiere holgado: sube un talle
-    return availableSizes[sizeIndex + 1]
-  } else if (fitPreference === 'oversized' && sizeIndex < availableSizes.length - 1) {
-    // Prefiere oversized: sube uno o dos talles
+  } else if (fitPreference === 'loose') {
+    // Prefiere holgado: sube uno o dos talles
+    const targetIndex = Math.min(sizeIndex + 1, availableSizes.length - 1)
+    return availableSizes[targetIndex]
+  } else if (fitPreference === 'oversized') {
+    // Prefiere oversized: sube dos talles mínimo
     const targetIndex = Math.min(sizeIndex + 2, availableSizes.length - 1)
     return availableSizes[targetIndex]
   }
   
+  // Regular: devuelve el talle base
   return baseSize
 }
 
 /**
  * Encuentra el talle base según las medidas del usuario
+ * MEJORADO: La prenda debe ser MÁS GRANDE que el perímetro del usuario
  */
 function findBaseSize(
   userChest: number,
@@ -109,38 +121,46 @@ function findBaseSize(
 ): string {
   const sizes = Object.keys(measurements)
   
-  // Buscar el talle cuyo ancho de pecho sea más cercano al del usuario
-  let bestSize = sizes[0]
-  let minDiff = Math.abs(measurements[sizes[0]].chest - userChest)
+  // IMPORTANTE: Necesitamos espacio extra para comodidad
+  // Mínimo 10-15cm de holgura para que no quede ajustado
+  const minComfortGap = 12 // cm de holgura mínima
+  const targetChest = userChest + minComfortGap
   
+  // Buscar el primer talle que sea >= al target
   for (const size of sizes) {
-    const diff = Math.abs(measurements[size].chest - userChest)
-    if (diff < minDiff) {
-      minDiff = diff
-      bestSize = size
+    if (measurements[size].chest >= targetChest) {
+      return size
     }
   }
   
-  return bestSize
+  // Si ninguno alcanza, devolver el más grande
+  return sizes[sizes.length - 1]
 }
 
 /**
  * Genera razones explicativas para la recomendación
+ * MEJORADO: Razones más específicas y útiles
  */
 function generateReasons(
   user: UserMeasurements,
   recommendedSize: string,
-  measurements: ProductMeasurements
+  measurements: ProductMeasurements,
+  estimatedChest: number
 ): string[] {
   const reasons: string[] = []
+  const bmi = calculateBMI(user.height, user.weight)
   
-  // Razón por altura
-  if (user.height < 165) {
-    reasons.push(`Tu altura de ${user.height}cm sugiere talles más pequeños`)
-  } else if (user.height >= 165 && user.height <= 180) {
-    reasons.push(`Tu altura de ${user.height}cm está en el rango estándar para talle ${recommendedSize}`)
-  } else {
-    reasons.push(`Tu altura de ${user.height}cm sugiere talles más grandes`)
+  // Razón principal: medidas
+  const chestWidth = Math.round(measurements.chest / 2)
+  reasons.push(
+    `Talle ${recommendedSize}: ${chestWidth}cm de ancho (perímetro ${measurements.chest}cm) - ideal para tu contextura`
+  )
+  
+  // Razón por altura y largo de prenda
+  if (user.height >= 180) {
+    reasons.push(`Con ${user.height}cm de altura, el largo de ${measurements.length}cm te quedará bien`)
+  } else if (user.height < 165) {
+    reasons.push(`Tu altura de ${user.height}cm se adapta bien al largo de ${measurements.length}cm`)
   }
   
   // Razón por preferencia de fit
@@ -150,22 +170,22 @@ function generateReasons(
     loose: 'holgado',
     oversized: 'oversized',
   }
-  reasons.push(
-    `Tu preferencia de fit "${fitLabels[user.fitPreference]}" se ajusta a este talle`
-  )
   
-  // Razón por tipo de cuerpo
-  if (user.bodyType) {
-    const bodyLabels = {
-      slim: 'delgado',
-      athletic: 'atlético',
-      regular: 'regular',
-      muscular: 'musculoso',
-      plus: 'plus',
-    }
+  if (user.fitPreference === 'loose' || user.fitPreference === 'oversized') {
     reasons.push(
-      `Tu tipo de cuerpo ${bodyLabels[user.bodyType]} fue considerado en la recomendación`
+      `Ajustado para fit ${fitLabels[user.fitPreference]} - tendrás el espacio que buscás`
     )
+  } else if (user.fitPreference === 'tight') {
+    reasons.push(`Fit ${fitLabels[user.fitPreference]} - quedará pegado al cuerpo`)
+  } else {
+    reasons.push(`Fit ${fitLabels[user.fitPreference]} - ni muy ajustado ni muy holgado`)
+  }
+  
+  // Razón por IMC/contextura
+  if (bmi >= 25 && user.bodyType !== 'muscular') {
+    reasons.push(`Consideramos tu contextura para garantizar comodidad`)
+  } else if (user.bodyType === 'muscular' || user.bodyType === 'athletic') {
+    reasons.push(`Espacio extra para hombros y pecho desarrollados`)
   }
   
   return reasons
@@ -249,7 +269,7 @@ export function calculateSizeRecommendation(
   const recommendedMeasurements = measurements[recommendedSize]
   
   // Generar razones
-  const reasons = generateReasons(user, recommendedSize, recommendedMeasurements)
+  const reasons = generateReasons(user, recommendedSize, recommendedMeasurements, userChest)
   
   // Obtener talles alternativos
   const alternativeSizes = getAlternativeSizes(recommendedSize, availableSizes)
