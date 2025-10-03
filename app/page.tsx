@@ -286,7 +286,7 @@ export default function Home() {
                 description: t('home.social.items.customers.desc', {
                   default: 'Sonido para acompañar tu día',
                 }),
-                href: 'https://open.spotify.com/',
+                href: '/playlists',
               },
               {
                 iconSrc: '/drops.png',

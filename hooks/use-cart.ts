@@ -17,7 +17,7 @@ interface CartStore {
   clearCart: () => void
   openCart: () => void
   closeCart: () => void
-  applyCoupon: (code: string) => { ok: boolean; error?: string }
+  applyCoupon: (code: string) => Promise<{ ok: boolean; error?: string }>
   removeCoupon: () => void
 
   // Computed values
@@ -120,8 +120,8 @@ export const useCart = create<CartStore>()(
         set({ isOpen: false })
       },
 
-      applyCoupon: (code: string) => {
-        const result = validateCoupon(code)
+      applyCoupon: async (code: string) => {
+        const result = await validateCoupon(code)
         if (!result) {
           return { ok: false, error: "INVALID_COUPON" }
         }

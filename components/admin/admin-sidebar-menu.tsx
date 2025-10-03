@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Package, Boxes, FileText, Mail, Sparkles, BadgePercent, MessageCircle, BarChart2, HandCoins, Users, Factory, Wallet, Clock } from "lucide-react"
+import { LayoutDashboard, Package, Boxes, FileText, Mail, Sparkles, BadgePercent, MessageCircle, BarChart2, HandCoins, Users, Factory, Wallet, Clock, Music2 } from "lucide-react"
 import {
   SidebarContent,
   SidebarGroup,
@@ -74,6 +74,22 @@ export default function AdminSidebarMenu() {
                   <Link href="/admin/blog/new" legacyBehavior>
                     <SidebarMenuSubButton asChild className="font-body hover:bg-accent hover:text-accent-foreground">
                       <a className="flex items-center gap-2"><Sparkles className="h-3.5 w-3.5" /> Nuevo artículo</a>
+                    </SidebarMenuSubButton>
+                  </Link>
+                </li>
+              </SidebarMenuSub>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Link href="/admin/playlists" legacyBehavior>
+                <SidebarMenuButton asChild isActive={isActive("/admin/playlists")} variant="outline" className="font-body hover:bg-accent hover:text-accent-foreground">
+                  <a className="flex items-center gap-2"><Music2 className="h-4 w-4" /> Playlists</a>
+                </SidebarMenuButton>
+              </Link>
+              <SidebarMenuSub>
+                <li>
+                  <Link href="/admin/playlists/new" legacyBehavior>
+                    <SidebarMenuSubButton asChild className="font-body hover:bg-accent hover:text-accent-foreground">
+                      <a className="flex items-center gap-2"><Sparkles className="h-3.5 w-3.5" /> Nueva playlist</a>
                     </SidebarMenuSubButton>
                   </Link>
                 </li>

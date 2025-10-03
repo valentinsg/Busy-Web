@@ -39,7 +39,7 @@ export default function HomeLatestBlog() {
   if (!posts.length) return null
 
   // Mostrar solo los últimos 4 artículos
-  const latestPosts = posts.slice(0, 4)
+  const latestPosts = posts.slice(0, 3)
 
   return (
     <section className="py-10 md:py-16">
@@ -48,7 +48,7 @@ export default function HomeLatestBlog() {
           Últimas entradas del Blog
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
           {latestPosts.map((post) => (
             <div key={post.slug}>
               <PostCard post={post as PostCardData} aspectRatio="4/3" showExcerpt />

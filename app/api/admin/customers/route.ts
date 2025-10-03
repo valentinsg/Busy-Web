@@ -1,7 +1,13 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { deleteCustomer, updateCustomer } from "@/lib/repo/customers"
+import { assertAdmin } from "../_utils"
 
-export async function PATCH(req: Request) {
+export const dynamic = "force-dynamic"
+
+export async function PATCH(req: NextRequest) {
+  const auth = await assertAdmin(req)
+  if (!auth.ok) return auth.res
+  
   try {
     const body = await req.json()
     const id = body?.id as string | undefined
@@ -19,7 +25,10 @@ export async function PATCH(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
+  const auth = await assertAdmin(req)
+  if (!auth.ok) return auth.res
+  
   try {
     const { searchParams } = new URL(req.url)
     const id = searchParams.get("id")

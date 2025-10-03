@@ -3,12 +3,27 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { supabase } from "@/lib/supabase/client"
 
 function arrFromInput(v: string): string[] {
   return v
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean)
+}
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" }
+  try {
+    const { data } = await supabase.auth.getSession()
+    const token = data?.session?.access_token
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
+    }
+  } catch (e) {
+    console.error("Error getting auth token:", e)
+  }
+  return headers
 }
 
 export default function NewPopoverPage() {
@@ -33,7 +48,8 @@ export default function NewPopoverPage() {
     const load = async () => {
       if (!editingId) return
       try {
-        const res = await fetch(`/api/admin/popovers/${editingId}`, { headers: { Authorization: `Bearer ${localStorage.getItem("sb-access-token") || ""}` } })
+        const headers = await getAuthHeaders()
+        const res = await fetch(`/api/admin/popovers/${editingId}`, { headers })
         const json = await res.json()
         if (json?.item) {
           const p = json.item
@@ -83,9 +99,7 @@ export default function NewPopoverPage() {
               sections: arrFromInput(sections),
               paths: arrFromInput(paths),
             }
-            const headers: Record<string, string> = { "Content-Type": "application/json" }
-            const token = localStorage.getItem("sb-access-token")
-            if (token) headers.Authorization = `Bearer ${token}`
+            const headers = await getAuthHeaders()
             const url = isEdit ? `/api/admin/popovers/${editingId}` : "/api/admin/popovers"
             const method = isEdit ? "PATCH" : "POST"
             const res = await fetch(url, { method, headers, body: JSON.stringify(payload) })
@@ -155,9 +169,7 @@ export default function NewPopoverPage() {
                 setSaving(true)
                 setMessage(null)
                 try {
-                  const headers: Record<string, string> = {}
-                  const token = localStorage.getItem("sb-access-token")
-                  if (token) headers.Authorization = `Bearer ${token}`
+                  const headers = await getAuthHeaders()
                   const res = await fetch(`/api/admin/popovers/${editingId}`, { method: "DELETE", headers })
                   const json = await res.json()
                   if (!res.ok) throw new Error(json?.error || "Error")

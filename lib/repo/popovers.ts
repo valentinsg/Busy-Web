@@ -83,15 +83,25 @@ export async function getActivePopoverFor(pathname: string, section?: string | n
     .order("priority", { ascending: false })
   if (error) throw error
   const list = (data as Popover[]) || []
+  console.log(`[Popovers] Checking ${list.length} enabled popovers for path="${pathname}", section="${section}"`)
+  
   const matches = list.filter((p) => {
     // time window
     const okTime = (!p.start_at || p.start_at <= now) && (!p.end_at || p.end_at >= now)
+    console.log(`[Popover ${p.id}] Time check: start=${p.start_at}, end=${p.end_at}, now=${now}, okTime=${okTime}`)
     if (!okTime) return false
+    
     const sec = (p.sections || []) as string[]
-    const pat = (p.paths || []) as string[]
+    const pat = ((p.paths || []) as string[]).map(s => s.trim()).filter(Boolean)
     const secOk = !section || sec.length === 0 || sec.includes(section)
     const pathOk = pat.length === 0 || pat.some((prefix) => pathname.startsWith(prefix))
+    
+    console.log(`[Popover ${p.id}] sections=${JSON.stringify(sec)}, paths=${JSON.stringify(pat)}`)
+    console.log(`[Popover ${p.id}] secOk=${secOk}, pathOk=${pathOk}, match=${secOk && pathOk}`)
+    
     return secOk && pathOk
   })
+  
+  console.log(`[Popovers] Found ${matches.length} matching popovers`)
   return matches[0] ?? null
 }

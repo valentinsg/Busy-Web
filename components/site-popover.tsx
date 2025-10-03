@@ -19,16 +19,22 @@ export default function SitePopover({ section }: { section?: string }) {
       try {
         const res = await fetch(`/api/popovers/active?path=${encodeURIComponent(pathname)}${section ? `&section=${encodeURIComponent(section)}` : ""}`)
         const json = await res.json()
+        console.log("Popover API response:", json)
         const p = json?.popover
         if (p) {
           const lsKey = `dismiss_popover_${p.id}`
           const already = typeof window !== "undefined" ? localStorage.getItem(lsKey) : null
+          console.log("Popover found:", p, "Already dismissed:", already)
           if (!already) {
             setData({ id: p.id, title: p.title, body: p.body, discount_code: p.discount_code })
+          } else {
+            console.log("Popover was already dismissed, skipping")
           }
+        } else {
+          console.log("No popover found for path:", pathname)
         }
       } catch (e: unknown) {
-        console.error(e)
+        console.error("Error loading popover:", e)
       } finally {
         setLoading(false)
       }

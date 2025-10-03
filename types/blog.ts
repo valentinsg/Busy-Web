@@ -30,3 +30,17 @@ export interface BlogPost {
   /** Internal SEO target keywords */
   seoKeywords?: string[]
 }
+
+export interface Playlist {
+  id: string
+  slug: string
+  title: string
+  description: string
+  spotify_url: string
+  cover_image?: string
+  genre?: string
+  is_published: boolean
+  created_at: string
+  updated_at: string
+  order_index?: number
+}

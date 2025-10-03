@@ -215,20 +215,7 @@ export default function DashboardCards({
         </div>
       </div>
 
-      {/* Time series chart */}
-      <div className="rounded-lg border p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="font-medium">Evolución de ingresos</div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setShowComparison(!showComparison)}
-          >
-            {showComparison ? "Ocultar comparación" : "Comparar período"}
-          </Button>
-        </div>
-        <RevenueAreaChart data={timeSeries} showComparison={showComparison} />
-      </div>
+      {/* Time series chart - Removed, only shown in /admin/analytics */}
 
       {/* Revenue by channel list */}
       <div className="rounded-lg border p-4">

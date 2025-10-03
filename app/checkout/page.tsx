@@ -330,8 +330,8 @@ export default function CheckoutPage() {
                       </Button>
                     ) : (
                       <Button
-                        onClick={() => {
-                          const res = applyCoupon(couponCode.trim())
+                        onClick={async () => {
+                          const res = await applyCoupon(couponCode.trim())
                           if (!res.ok) {
                             toast({
                               title: "Cupón inválido",
