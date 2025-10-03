@@ -32,6 +32,7 @@ const footerSections = (t: (k: string) => string) => ({
       { nameKey: "footer.sections.support.links.faq", href: "/faq" },
       { nameKey: "footer.sections.support.links.contact", href: "/contact" },
       { nameKey: "footer.sections.support.links.size_guide", href: "/faq#size-guide" },
+      { nameKey: "Calculadora de Talle", href: "/size-calculator" },
       { nameKey: "Nuestros Productos", href: "/products" },
     ],
   },

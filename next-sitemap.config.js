@@ -1,9 +1,9 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: process.env.SITE_URL || "https://busy.com.ar",
-  generateRobotsTxt: true,
+  generateRobotsTxt: false, // Disabled: using app/robots.ts instead
   exclude: ["/api/*", "/admin/*"],
-  generateIndexSitemap: true,
+  generateIndexSitemap: false, // Disabled: using app/sitemap.ts instead
   alternateRefs: [
     { href: (process.env.SITE_URL || "https://busy.com.ar"), hreflang: 'es-AR' },
     { href: (process.env.SITE_URL || "https://busy.com.ar"), hreflang: 'en' },
