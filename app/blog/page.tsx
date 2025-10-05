@@ -1,5 +1,6 @@
 import BlogClient from '@/components/blog/blog-client'
 import { getAllPostsAsync } from '@/lib/blog'
+import { getProductsAsync } from '@/lib/repo/products'
 import type { Metadata } from 'next'
 
 export function generateMetadata(): Metadata {
@@ -74,12 +75,17 @@ export function generateMetadata(): Metadata {
   }
 }
 
-export const revalidate = process.env.NODE_ENV === 'production' ? 3600 : 0
-export const dynamic = process.env.NODE_ENV === 'production' ? 'auto' : 'force-dynamic'
+export const revalidate = 3600 // Revalidar cada hora
 
 export default async function BlogPage() {
-  const allPosts = await getAllPostsAsync()
+  // Cargar posts y productos en paralelo
+  const [allPosts, productsRes] = await Promise.all([
+    getAllPostsAsync(),
+    getProductsAsync({ featuredOnly: true, sortBy: "newest" }).catch(() => [])
+  ])
+  
   const latestPost = allPosts?.[0]
+  const featuredProducts = (productsRes || []).slice(0, 3)
 
   // Para JSON-LD
   const siteUrlStr = process.env.SITE_URL ?? 'https://busy.com.ar'
@@ -165,7 +171,7 @@ export default async function BlogPage() {
         // JSON-LD consolidado (WebSite + Blog + Breadcrumb + ItemList)
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <BlogClient allPosts={allPosts} latestPost={latestPost} />
+      <BlogClient allPosts={allPosts} latestPost={latestPost} featuredProducts={featuredProducts} />
     </>
   )
 }

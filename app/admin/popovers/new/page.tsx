@@ -34,6 +34,13 @@ export default function NewPopoverPage() {
   const [title, setTitle] = useState("")
   const [body, setBody] = useState("")
   const [discount, setDiscount] = useState("")
+  const [imageUrl, setImageUrl] = useState("")
+  const [type, setType] = useState("simple")
+  const [requireEmail, setRequireEmail] = useState(false)
+  const [showNewsletter, setShowNewsletter] = useState(false)
+  const [ctaText, setCtaText] = useState("")
+  const [ctaUrl, setCtaUrl] = useState("")
+  const [delaySeconds, setDelaySeconds] = useState(0)
   const [enabled, setEnabled] = useState(true)
   const [priority, setPriority] = useState(0)
   const [startAt, setStartAt] = useState("")
@@ -42,6 +49,7 @@ export default function NewPopoverPage() {
   const [paths, setPaths] = useState("")
 
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
@@ -56,6 +64,13 @@ export default function NewPopoverPage() {
           setTitle(p.title || "")
           setBody(p.body || "")
           setDiscount(p.discount_code || "")
+          setImageUrl(p.image_url || "")
+          setType(p.type || "simple")
+          setRequireEmail(!!p.require_email)
+          setShowNewsletter(!!p.show_newsletter)
+          setCtaText(p.cta_text || "")
+          setCtaUrl(p.cta_url || "")
+          setDelaySeconds(Number(p.delay_seconds || 0))
           setEnabled(!!p.enabled)
           setPriority(Number(p.priority || 0))
           setStartAt(p.start_at ? p.start_at.slice(0, 16) : "")
@@ -92,6 +107,13 @@ export default function NewPopoverPage() {
               title: title.trim(),
               body: body.trim() || null,
               discount_code: discount.trim() || null,
+              image_url: imageUrl.trim() || null,
+              type,
+              require_email: requireEmail,
+              show_newsletter: showNewsletter,
+              cta_text: ctaText.trim() || null,
+              cta_url: ctaUrl.trim() || null,
+              delay_seconds: Number(delaySeconds),
               enabled,
               priority: Number(priority),
               start_at: startAt ? new Date(startAt).toISOString() : null,
@@ -123,12 +145,97 @@ export default function NewPopoverPage() {
           <label className="text-sm">Contenido (opcional)</label>
           <textarea className="rounded-md border bg-background px-3 py-2 text-sm" rows={3} value={body} onChange={(e) => setBody(e.target.value)} />
         </div>
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2">
+          <label className="text-sm">Imagen (opcional)</label>
+          <div className="flex gap-2">
+            <input 
+              type="file" 
+              accept="image/*" 
+              className="rounded-md border bg-background px-3 py-2 text-sm flex-1"
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                setUploading(true)
+                setMessage(null)
+                try {
+                  const fd = new FormData()
+                  fd.append("file", file)
+                  fd.append("bucket", "popovers")
+                  const headers = await getAuthHeaders()
+                  delete headers["Content-Type"] // Let browser set it for FormData
+                  const res = await fetch("/api/admin/upload", {
+                    method: "POST",
+                    body: fd,
+                    headers,
+                  })
+                  const json = await res.json()
+                  if (!res.ok || !json?.ok) throw new Error(json?.error || "Error al subir")
+                  setImageUrl(json.url)
+                  setMessage("Imagen subida correctamente")
+                } catch (err: unknown) {
+                  setMessage(err?.toString() || String(err))
+                } finally {
+                  setUploading(false)
+                }
+              }}
+              disabled={uploading}
+            />
+            {uploading && <span className="text-sm text-muted-foreground self-center">Subiendo...</span>}
+          </div>
+          {imageUrl && (
+            <div className="relative w-full h-32 rounded-md overflow-hidden border">
+              <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => setImageUrl("")}
+                className="absolute top-2 right-2 p-1 rounded-full bg-background/80 hover:bg-background text-xs"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Tipo de popover */}
+        <div className="grid gap-2">
+          <label className="text-sm font-medium">Tipo de Popover</label>
+          <select 
+            className="rounded-md border bg-background px-3 py-2 text-sm"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+          >
+            <option value="simple">Simple - Solo mensaje</option>
+            <option value="discount">Descuento - Muestra código directamente</option>
+            <option value="email-gate">Email-Gate - Pide email antes de mostrar código</option>
+            <option value="newsletter">Newsletter - Formulario de suscripción</option>
+            <option value="custom">Custom - Personalizado</option>
+          </select>
+          <p className="text-xs text-muted-foreground">
+            {type === 'simple' && 'Muestra solo el mensaje sin interacción'}
+            {type === 'discount' && 'Muestra el código de descuento directamente'}
+            {type === 'email-gate' && 'Requiere email antes de revelar el código'}
+            {type === 'newsletter' && 'Formulario de suscripción al newsletter'}
+            {type === 'custom' && 'Combina opciones personalizadas'}
+          </p>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-4">
           <div className="grid gap-2">
             <label className="text-sm">Código de descuento (opcional)</label>
             <input className="rounded-md border bg-background px-3 py-2 text-sm" placeholder="BUSY10" value={discount} onChange={(e) => setDiscount(e.target.value)} />
           </div>
-          <label className="flex items-center gap-2 text-sm">
+          <div className="grid gap-2">
+            <label className="text-sm">Delay (segundos)</label>
+            <input 
+              type="number" 
+              min="0" 
+              max="60" 
+              className="rounded-md border bg-background px-3 py-2 text-sm" 
+              value={delaySeconds} 
+              onChange={(e) => setDelaySeconds(Number(e.target.value))} 
+            />
+          </div>
+          <label className="flex items-center gap-2 text-sm pt-6">
             <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} /> Activo
           </label>
           <div className="grid gap-2">
@@ -136,6 +243,58 @@ export default function NewPopoverPage() {
             <input type="number" className="rounded-md border bg-background px-3 py-2 text-sm" value={priority} onChange={(e) => setPriority(Number(e.target.value))} />
           </div>
         </div>
+        <p className="text-xs text-muted-foreground">
+          Delay: Segundos antes de mostrar el popover (0 = inmediato, recomendado: 3-5 segundos)
+        </p>
+
+        {/* Opciones de interacción */}
+        <div className="grid gap-3 p-4 rounded-lg border bg-muted/30">
+          <h4 className="text-sm font-medium">Opciones de Interacción</h4>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <label className="flex items-center gap-2 text-sm">
+              <input 
+                type="checkbox" 
+                checked={requireEmail} 
+                onChange={(e) => setRequireEmail(e.target.checked)} 
+              /> 
+              Requiere email para ver código
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input 
+                type="checkbox" 
+                checked={showNewsletter} 
+                onChange={(e) => setShowNewsletter(e.target.checked)} 
+              /> 
+              Mostrar formulario de newsletter
+            </label>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Si marcas "Requiere email", el código se mostrará solo después de que el usuario ingrese su email.
+          </p>
+        </div>
+
+        {/* CTA personalizado */}
+        <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2">
+            <label className="text-sm">Texto del botón CTA (opcional)</label>
+            <input 
+              className="rounded-md border bg-background px-3 py-2 text-sm" 
+              placeholder="Ver productos" 
+              value={ctaText} 
+              onChange={(e) => setCtaText(e.target.value)} 
+            />
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm">URL del botón CTA (opcional)</label>
+            <input 
+              className="rounded-md border bg-background px-3 py-2 text-sm" 
+              placeholder="/products" 
+              value={ctaUrl} 
+              onChange={(e) => setCtaUrl(e.target.value)} 
+            />
+          </div>
+        </div>
+
         <div className="grid gap-2 sm:grid-cols-2">
           <div className="grid gap-2">
             <label className="text-sm">Inicio (opcional)</label>

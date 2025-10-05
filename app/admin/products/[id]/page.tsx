@@ -32,6 +32,10 @@ export default function EditProductPage({ params }: PageProps) {
     imported?: boolean
     careInstructions?: string
     benefitsText?: string // one per line: Title|Subtitle
+    badgeText?: string
+    badgeVariant?: string
+    discountPercentage?: number
+    discountActive?: boolean
   }
   const [form, setForm] = React.useState<FormState>({})
   const [stockBySize, setStockBySize] = React.useState<Record<string, number>>({})
@@ -106,6 +110,10 @@ export default function EditProductPage({ params }: PageProps) {
               imported: !!(p as unknown as { imported?: boolean }).imported,
               careInstructions: (p as unknown as { careInstructions?: string }).careInstructions || "",
               benefitsText: Array.isArray((p as unknown as { benefits?: Array<{title:string; subtitle?:string}> }).benefits) ? ((p as unknown as { benefits?: Array<{title:string; subtitle?:string}> }).benefits as Array<{title:string; subtitle?:string}>).map(b=> b.subtitle? `${b.title}|${b.subtitle}`: b.title).join("\n") : "",
+              badgeText: (p as unknown as { badgeText?: string }).badgeText || "",
+              badgeVariant: (p as unknown as { badgeVariant?: string }).badgeVariant || "default",
+              discountPercentage: (p as unknown as { discountPercentage?: number }).discountPercentage || 0,
+              discountActive: !!(p as unknown as { discountActive?: boolean }).discountActive,
             })
             setStockBySize(p.stockBySize || {})
             const sizes = p.sizes || []
@@ -192,6 +200,10 @@ export default function EditProductPage({ params }: PageProps) {
         imported: !!form.imported,
         care_instructions: form.careInstructions || undefined,
         benefits: benefits.length ? benefits : undefined,
+        badge_text: form.badgeText || null,
+        badge_variant: form.badgeVariant || "default",
+        discount_percentage: Number(form.discountPercentage) || null,
+        discount_active: !!form.discountActive,
       }
       const res = await fetch(`/api/admin/products/${params.id}`, {
         method: "PUT",
@@ -294,6 +306,60 @@ export default function EditProductPage({ params }: PageProps) {
           <label className="text-sm md:col-span-2">Beneficios (uno por línea, usar &quot;Título|Subtítulo&quot; opcional)
             <textarea value={form.benefitsText||""} onChange={(e)=>setForm({...form, benefitsText: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" rows={4} placeholder={"Envío gratis|En compras superiores a $80.000\nDevoluciones fáciles|Política de 30 días"} />
           </label>
+
+          {/* Badge and Discount Section */}
+          <div className="md:col-span-2 border-t pt-4 mt-4">
+            <h3 className="font-heading font-medium mb-3 text-base">Badge y Descuentos</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className="text-sm">
+                Texto del Badge (ej: &quot;2x1&quot;, &quot;NUEVO&quot;, &quot;OFERTA&quot;)
+                <input 
+                  value={form.badgeText||""} 
+                  onChange={(e)=>setForm({...form, badgeText: e.target.value})} 
+                  className="w-full border rounded px-3 py-2 bg-transparent" 
+                  placeholder="2x1"
+                />
+              </label>
+              <label className="text-sm">
+                Estilo del Badge
+                <select 
+                  value={form.badgeVariant||"default"} 
+                  onChange={(e)=>setForm({...form, badgeVariant: e.target.value})} 
+                  className="w-full border rounded px-3 py-2 bg-transparent"
+                >
+                  <option value="default">Default (Gris)</option>
+                  <option value="destructive">Destructive (Rojo)</option>
+                  <option value="secondary">Secondary (Oscuro)</option>
+                  <option value="outline">Outline (Borde)</option>
+                </select>
+              </label>
+              <label className="text-sm">
+                Porcentaje de Descuento (0-100)
+                <input 
+                  type="number" 
+                  min="0" 
+                  max="100" 
+                  value={form.discountPercentage||0} 
+                  onChange={(e)=>setForm({...form, discountPercentage: Number(e.target.value)})} 
+                  className="w-full border rounded px-3 py-2 bg-transparent" 
+                  placeholder="20"
+                />
+              </label>
+              <div className="flex items-center gap-2 pt-6">
+                <input 
+                  id="discountActive" 
+                  type="checkbox" 
+                  checked={!!form.discountActive} 
+                  onChange={(e)=>setForm({...form, discountActive: e.target.checked})} 
+                />
+                <label htmlFor="discountActive" className="text-sm">Descuento activo</label>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              💡 El badge se mostrará siempre si tiene texto. El descuento solo se aplicará si está activo y tiene un porcentaje mayor a 0.
+            </p>
+          </div>
+
           <div className="md:col-span-2">
             <label className="text-sm">Imágenes
               <input type="file" accept="image/*" multiple onChange={onFileChange} className="block mt-1" />

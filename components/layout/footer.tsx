@@ -1,10 +1,10 @@
 "use client"
 
-import Link from "next/link"
-import Image from "next/image"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { useI18n } from "@/components/i18n-provider"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import Image from "next/image"
+import Link from "next/link"
 import * as React from "react"
 
 const footerSections = (t: (k: string) => string) => ({
@@ -24,6 +24,7 @@ const footerSections = (t: (k: string) => string) => ({
       { nameKey: "footer.sections.brand.links.about_us", href: "/about" },
       { nameKey: "footer.sections.brand.links.our_story", href: "/about#story" },
       { nameKey: "footer.sections.brand.links.blog", href: "/blog" },
+      { nameKey: "Playlists", href: "/playlists" },
     ],
   },
   support: {
@@ -102,7 +103,7 @@ export function Footer() {
 
             {/* Newsletter */}
             <div className="space-y-2">
-              <h4 className="font-heading font-medium">{tt("footer.newsletter.title", "Mantente al día")}</h4>
+              <h4 className="font-heading font-medium">{tt("footer.newsletter.title", "Mantenete al día")}</h4>
               <div className="flex items-center gap-2 flex-nowrap">
                 <Input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder={tt("footer.newsletter.placeholder", "Ingresa tu email")} className="max-w-[200px] text-sm font-heading" />
                 <Button size="sm" disabled={submitting} onClick={async ()=>{

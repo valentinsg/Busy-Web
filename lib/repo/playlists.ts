@@ -1,16 +1,17 @@
-import supabase from '@/lib/supabase/client'
-import type { Playlist } from '@/types/blog'
+import { getServiceClient } from '@/lib/supabase/server'
+import type { Playlist } from '@/types/playlists'
 
 /**
- * Get all published playlists ordered by order_index
+ * Get all published playlists ordered by order_index and updated_at
  */
 export async function getPublishedPlaylists(): Promise<Playlist[]> {
+  const supabase = getServiceClient()
   const { data, error } = await supabase
     .from('playlists')
     .select('*')
     .eq('is_published', true)
+    .order('updated_at', { ascending: false })
     .order('order_index', { ascending: true })
-    .order('created_at', { ascending: false })
 
   if (error) {
     console.error('Error fetching published playlists:', error)
@@ -24,6 +25,7 @@ export async function getPublishedPlaylists(): Promise<Playlist[]> {
  * Get all playlists (for admin)
  */
 export async function getAllPlaylists(): Promise<Playlist[]> {
+  const supabase = getServiceClient()
   const { data, error } = await supabase
     .from('playlists')
     .select('*')
@@ -42,6 +44,7 @@ export async function getAllPlaylists(): Promise<Playlist[]> {
  * Get a single playlist by slug
  */
 export async function getPlaylistBySlug(slug: string): Promise<Playlist | null> {
+  const supabase = getServiceClient()
   const { data, error } = await supabase
     .from('playlists')
     .select('*')
@@ -60,6 +63,7 @@ export async function getPlaylistBySlug(slug: string): Promise<Playlist | null> 
  * Create a new playlist
  */
 export async function createPlaylist(playlist: Omit<Playlist, 'id' | 'created_at' | 'updated_at'>): Promise<Playlist | null> {
+  const supabase = getServiceClient()
   const { data, error } = await supabase
     .from('playlists')
     .insert([playlist])
@@ -78,6 +82,7 @@ export async function createPlaylist(playlist: Omit<Playlist, 'id' | 'created_at
  * Update an existing playlist
  */
 export async function updatePlaylist(id: string, updates: Partial<Playlist>): Promise<Playlist | null> {
+  const supabase = getServiceClient()
   const { data, error } = await supabase
     .from('playlists')
     .update(updates)
@@ -97,6 +102,7 @@ export async function updatePlaylist(id: string, updates: Partial<Playlist>): Pr
  * Delete a playlist
  */
 export async function deletePlaylist(id: string): Promise<boolean> {
+  const supabase = getServiceClient()
   const { error } = await supabase
     .from('playlists')
     .delete()

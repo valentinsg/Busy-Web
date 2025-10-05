@@ -1,5 +1,6 @@
 import AuthorCard from '@/components/blog/author-card'
 import LatestPostsSidebar from '@/components/blog/latest-posts-sidebar'
+import LatestPlaylistsSidebar from '@/components/blog/latest-playlists-sidebar'
 import SocialLinksInline from '@/components/blog/social-links-inline'
 import MdxRenderer from '@/components/mdx/MdxRenderer'
 import { Button } from '@/components/ui/button'
@@ -58,8 +59,17 @@ const CommentsForm = NextDynamic(() => import('@/components/blog/comments-form')
   ssr: false,
 })
 
-export const revalidate = process.env.NODE_ENV === 'production' ? 3600 : 0
-export const dynamic = process.env.NODE_ENV === 'production' ? 'auto' : 'force-dynamic'
+export const revalidate = 3600 // Revalidar cada hora
+export const dynamic = 'force-static' // Generar estáticamente en build
+
+// Pre-generar los slugs más populares
+export async function generateStaticParams() {
+  const posts = await getAllPostsAsync()
+  // Generar los primeros 10 posts más recientes
+  return posts.slice(0, 10).map((post) => ({
+    slug: post.slug,
+  }))
+}
 
 // Note: This page is a server component. Avoid client hooks here.
 
@@ -182,7 +192,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <div className="container py-6 sm:py-8 pt-24 sm:pt-28 tracking-wide font-body backdrop-blur-sm px-3 sm:px-4">
-      <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto">
         {/* JSON-LD Article */}
         <script
           type="application/ld+json"
@@ -256,8 +266,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <Separator className="mb-6 bg-muted h-[2px]" />
 
           {/* Body with sidebar */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="md:col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:gap-6">
+            <div>
               {/* Article Content */}
               <div
                 id="post-content"
@@ -266,14 +276,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 <MdxRenderer source={preparedContent} />
               </div>
             </div>
-            <aside className="md:col-span-1 space-y-6 md:sticky md:top-24 h-fit">
+            <aside className="space-y-10 lg:top-18 h-fit w-full">
               <TableOfContents targetSelector="#post-content" />
               {/* CTA personalizada al final después de relacionados */}
               {post.cta?.url && (post.cta.text || post.cta.url) && (
-                <div className="mt-12 mb-12 text-center ">
+                <div className="my-8 text-center ">
                   <Card>
-                    <CardContent className="p-5 sm:p-6 bg-muted/20">
-                      <h3 className="font-body text-xl font-bold mb-4">
+                    <CardContent className="p-4 sm:p-4 bg-muted/20">
+                      <h3 className="font-body text-lg font-bold mb-2">
                         {post.cta.text || 'Descubrí más'}
                       </h3>
                       <Button
@@ -298,6 +308,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               )}
               <SocialLinksInline />
               <LatestPostsSidebar currentSlug={post.slug} />
+              <LatestPlaylistsSidebar />
             </aside>
           </div>
         </article>
@@ -345,33 +356,33 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
 
         {/* Minimal navigation links above newsletter */}
-        <div className="my-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="my-8 grid grid-cols-2 gap-3 sm:gap-4">
           <div>
             {prevPost && (
               <>
-                <div className="text-xs text-muted-foreground mb-1">
-                  Artículo previo
+                <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">
+                  Previo
                 </div>
                 <Link
                   href={`/blog/${prevPost.slug}`}
                   prefetch={false}
-                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground line-clamp-2 text-sm sm:text-base"
+                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground line-clamp-1 text-xs sm:text-sm"
                 >
                   {prevPost.title}
                 </Link>
               </>
             )}
           </div>
-          <div className="sm:text-right">
+          <div className="text-right">
             {nextPost && (
               <>
-                <div className="text-xs text-muted-foreground mb-1">
-                  Artículo siguiente
+                <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">
+                  Siguiente
                 </div>
                 <Link
                   href={`/blog/${nextPost.slug}`}
                   prefetch={false}
-                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground line-clamp-2 text-sm sm:text-base"
+                  className="font-body font-medium text-accent-brand underline underline-offset-4 hover:text-foreground line-clamp-1 text-xs sm:text-sm"
                 >
                   {nextPost.title}
                 </Link>
@@ -452,7 +463,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <RatingStars />
           <CommentsForm />
         </div>
-      </div>
+        </div>
     </div>
   )
 }

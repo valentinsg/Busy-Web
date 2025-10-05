@@ -3,6 +3,7 @@ create table if not exists public.popovers (
   title text not null,
   body text,
   discount_code text,
+  image_url text,
   enabled boolean not null default true,
   priority int not null default 0,
   start_at timestamptz,

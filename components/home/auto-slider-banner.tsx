@@ -42,7 +42,9 @@ export function AutoSliderBanner() {
             fill
             style={{ objectFit: "cover" }}
             sizes="100vw"
-            priority={false}
+            priority={index === 0}
+            loading={index === 0 ? "eager" : "lazy"}
+            unoptimized
           />
         </div>
       ))}
@@ -50,7 +52,7 @@ export function AutoSliderBanner() {
         className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center"
       >
         <motion.div>
-          <Image src="/busy-streetwear.png" alt="Busy Streetwear" width={325} height={325} />
+          <Image src="/busy-streetwear.png" alt="Busy Streetwear" width={325} height={325} priority />
         </motion.div>
         <motion.a
           href="/contact"

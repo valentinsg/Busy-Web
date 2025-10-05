@@ -145,11 +145,11 @@ export default function DashboardCards({
   return (
     <div className="space-y-4">
       {showControls && (
-        <div className="flex flex-wrap gap-3 items-end">
-          <div className="flex flex-col">
-            <label className="text-xs text-muted-foreground">Rango</label>
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 items-stretch sm:items-end">
+          <div className="flex flex-col flex-1 min-w-[140px]">
+            <label className="text-xs text-muted-foreground mb-1">Rango</label>
             <Select value={preset} onValueChange={setPreset}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -161,10 +161,10 @@ export default function DashboardCards({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col">
-            <label className="text-xs text-muted-foreground">Agrupar por</label>
+          <div className="flex flex-col flex-1 min-w-[120px]">
+            <label className="text-xs text-muted-foreground mb-1">Agrupar por</label>
             <Select value={groupBy} onValueChange={(v: 'day'|'week'|'month') => setGroupBy(v)}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -176,15 +176,23 @@ export default function DashboardCards({
           </div>
           <Popover open={rangeOpen} onOpenChange={setRangeOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" disabled={preset !== 'custom'}>Elegir fechas</Button>
+              <Button variant="outline" disabled={preset !== 'custom'} className="w-full sm:w-auto">Elegir fechas</Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-2">
+            <PopoverContent className="w-auto p-2" align="start">
               <div className="grid grid-cols-1 gap-2">
                 <Calendar
                   mode="range"
                   selected={customRange.from ? (customRange as DateRange) : undefined}
                   onSelect={(r: DateRange | undefined) => setCustomRange(r || {})}
+                  numberOfMonths={1}
+                  className="sm:hidden"
+                />
+                <Calendar
+                  mode="range"
+                  selected={customRange.from ? (customRange as DateRange) : undefined}
+                  onSelect={(r: DateRange | undefined) => setCustomRange(r || {})}
                   numberOfMonths={2}
+                  className="hidden sm:block"
                 />
                 <div className="flex justify-end gap-2">
                   <Button variant="ghost" size="sm" onClick={() => { setRangeOpen(false) }}>Cerrar</Button>
@@ -193,44 +201,44 @@ export default function DashboardCards({
               </div>
             </PopoverContent>
           </Popover>
-          <Button onClick={() => load()} disabled={loading}>
+          <Button onClick={() => load()} disabled={loading} className="w-full sm:w-auto">
             {loading ? "Cargando..." : "Actualizar"}
           </Button>
         </div>
       )}
 
       {/* KPI cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="rounded-lg border p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="rounded-lg border p-3 sm:p-4">
           <div className="text-xs text-muted-foreground">Ingresos</div>
-          <div className="text-2xl font-semibold">${" "}{profit ? profit.revenue.toFixed(2) : loading ? "…" : "0.00"}</div>
+          <div className="text-xl sm:text-2xl font-semibold">${" "}{profit ? profit.revenue.toFixed(2) : loading ? "…" : "0.00"}</div>
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-lg border p-3 sm:p-4">
           <div className="text-xs text-muted-foreground">Pedidos</div>
-          <div className="text-2xl font-semibold">{kpis ? kpis.orders : loading ? "…" : "0"}</div>
+          <div className="text-xl sm:text-2xl font-semibold">{kpis ? kpis.orders : loading ? "…" : "0"}</div>
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-lg border p-3 sm:p-4">
           <div className="text-xs text-muted-foreground">Ticket promedio</div>
-          <div className="text-2xl font-semibold">${" "}{kpis ? kpis.aov.toFixed(2) : loading ? "…" : "0.00"}</div>
+          <div className="text-xl sm:text-2xl font-semibold">${" "}{kpis ? kpis.aov.toFixed(2) : loading ? "…" : "0.00"}</div>
         </div>
       </div>
 
       {/* Time series chart - Removed, only shown in /admin/analytics */}
 
       {/* Revenue by channel list */}
-      <div className="rounded-lg border p-4">
-        <div className="mb-2 font-medium">Ingresos por canal</div>
+      <div className="rounded-lg border p-3 sm:p-4">
+        <div className="mb-2 text-sm sm:text-base font-medium">Ingresos por canal</div>
         <div className="space-y-2">
-          {revenueByChannel.length === 0 && <div className="text-sm text-muted-foreground">{loading ? "Cargando..." : "Sin datos"}</div>}
+          {revenueByChannel.length === 0 && <div className="text-xs sm:text-sm text-muted-foreground">{loading ? "Cargando..." : "Sin datos"}</div>}
           {revenueByChannel.map((r) => (
-            <div key={r.channel} className="flex justify-between text-sm">
+            <div key={r.channel} className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-3 text-xs sm:text-sm">
               <div>
-                <span className="inline-flex items-center rounded border px-2 py-0.5 text-[11px] uppercase tracking-wide text-muted-foreground">
+                <span className="inline-flex items-center rounded border px-2 py-0.5 text-[10px] sm:text-[11px] uppercase tracking-wide text-muted-foreground">
                   {r.channel}
                 </span>
               </div>
-              <div className="flex gap-3">
-                <span className="tabular-nums">{r.orders} pedidos</span>
+              <div className="flex gap-2 sm:gap-3">
+                <span className="tabular-nums text-muted-foreground">{r.orders} pedidos</span>
                 <span className="font-medium tabular-nums">${" "}{r.revenue.toFixed(2)}</span>
               </div>
             </div>

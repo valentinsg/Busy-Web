@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { updatePlaylist, deletePlaylist } from '@/lib/repo/playlists'
-import type { Playlist } from '@/types/blog'
+import type { Playlist } from '@/types/playlists'
 
 export async function PUT(
   request: Request,

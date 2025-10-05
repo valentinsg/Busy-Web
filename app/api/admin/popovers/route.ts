@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   const svc = getServiceClient()
   const { data, error } = await svc
     .from("popovers")
-    .select("id, title, enabled, priority, start_at, end_at, sections, paths, discount_code, updated_at")
+    .select("id, title, enabled, priority, start_at, end_at, sections, paths, discount_code, image_url, updated_at")
     .order("enabled", { ascending: false })
     .order("priority", { ascending: false })
     .order("updated_at", { ascending: false })
@@ -26,6 +26,13 @@ export async function POST(req: NextRequest) {
     title: String(body.title || "").trim(),
     body: body.body ?? null,
     discount_code: body.discount_code ?? null,
+    image_url: body.image_url ?? null,
+    type: body.type || 'simple',
+    require_email: body.require_email ?? false,
+    show_newsletter: body.show_newsletter ?? false,
+    cta_text: body.cta_text ?? null,
+    cta_url: body.cta_url ?? null,
+    delay_seconds: Number(body.delay_seconds ?? 0),
     enabled: body.enabled ?? true,
     priority: Number(body.priority ?? 0),
     start_at: body.start_at || null,

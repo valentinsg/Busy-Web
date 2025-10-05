@@ -26,6 +26,7 @@ import { getAvailableColors, getAvailableSizes, getCategories } from '@/lib/prod
 import { getProductsAsync, searchProductsAsync, type SortBy } from '@/lib/repo/products'
 import type { FilterOptions, Product } from '@/lib/types'
 import { Filter, Search, SlidersHorizontal } from 'lucide-react'
+import Image from 'next/image'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as React from 'react'
 
@@ -375,7 +376,7 @@ export default function ProductsClient({ initialCategory }: ProductsClientProps)
 
           {loading ? (
             <div className="flex items-center justify-center py-24">
-              <img src="/busy-charge.gif" alt="Cargando" className="w-[320px] h-[320px] object-contain opacity-90" />
+              <Image src="/busy-charge.gif" alt="Cargando" width={320} height={320} className="object-contain opacity-90" unoptimized />
             </div>
           ) : asyncProducts.length === 0 ? (
             <div className="text-center py-12">

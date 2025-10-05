@@ -1,120 +1,95 @@
-'use client'
-
-import { PlaylistCard } from '@/components/playlists/playlist-card'
+import { PlaylistCardWrapper } from '@/components/playlists/playlist-card-wrapper'
+import { ArtistSubmissionForm } from '@/components/playlists/artist-submission-form'
 import { Button } from '@/components/ui/button'
 import { getPublishedPlaylists } from '@/lib/repo/playlists'
-import type { Playlist } from '@/types/blog'
-import { motion } from 'framer-motion'
-import { Mail, Music2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Music2, Sparkles } from 'lucide-react'
+import Image from 'next/image'
+import type { Metadata } from 'next'
 
-export default function PlaylistsPage() {
-  const [playlists, setPlaylists] = useState<Playlist[]>([])
-  const [loading, setLoading] = useState(true)
+export const metadata: Metadata = {
+  title: 'Playlists',
+  description: 'Con nuestras playlists queremos compartir lo que mas nos gusta de la cultura urbana. Actualizadas y curadas semanalmente, vamos a ayudar y posicionar artistas emergentes desde nuestro espacio.',
+  keywords: ['playlists', 'spotify', 'música', 'hip hop', 'trap', 'r&b', 'busy', 'streetwear', 'cultura urbana', ],
+  openGraph: {
+    title: 'Playlists',
+    description: 'Con nuestras playlists queremos compartir lo que mas nos gusta de la cultura urbana. Actualizadas y curadas semanalmente, vamos a ayudar y posicionar artistas emergentes desde nuestro espacio.',
+    type: 'website',
+    url: 'https://busyclothing.com.ar/playlists',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Playlists',
+    description: 'Con nuestras playlists queremos compartir lo que mas nos gusta de la cultura urbana. Actualizadas y curadas semanalmente, vamos a ayudar y posicionar artistas emergentes desde nuestro espacio.',
+  },
+}
 
-  useEffect(() => {
-    let mounted = true
-    ;(async () => {
-      try {
-        const data = await getPublishedPlaylists()
-        if (mounted) {
-          setPlaylists(data)
-        }
-      } catch (error) {
-        console.error('Error loading playlists:', error)
-      } finally {
-        if (mounted) {
-          setLoading(false)
-        }
-      }
-    })()
-    return () => {
-      mounted = false
-    }
-  }, [])
+export default async function PlaylistsPage() {
+  const playlists = await getPublishedPlaylists()
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black font-body">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-black via-purple-950/20 to-black py-20 md:py-32">
+      <section className="relative overflow-hidden bg-gradient-to-b from-black via-[#1DB954]/10 to-black py-12 sm:py-16 md:py-24 lg:py-32">
         <div className="absolute inset-0 bg-[url('/pattern-black.jpg')] opacity-10" />
-        
-        <div className="container relative z-10 px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto"
-          >
-            <div className="inline-flex items-center justify-center p-3 rounded-full bg-purple-600/20 mb-6">
-              <Music2 className="h-8 w-8 text-purple-400" />
+
+        <div className="container relative z-10 px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto">
+            {/* Logo Busy Verde */}
+            <div className="mb-1 sm:mb-1 flex justify-center">
+              <div className="relative">
+                <Image
+                  src="/logo-busy-white.png"
+                  alt="Busy Playlists"
+                  width={120}
+                  height={120}
+                  className="object-contain sm:w-[120px] sm:h-[120px]"
+                  style={{ filter: 'brightness(0) saturate(100%) invert(65%) sepia(89%) saturate(2476%) hue-rotate(92deg) brightness(95%) contrast(80%)' }}
+                />
+              </div>
             </div>
-            
-            <h1 className="font-heading text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
+
+            <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-3 bg-gradient-to-r from-white via-[#1DB954] to-white bg-clip-text text-transparent px-4">
               Nuestras Playlists
             </h1>
-            
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-              Música cuidadosamente seleccionada para acompañar tu estilo de vida. 
-              Actualizamos nuestras playlists cada semana con los mejores tracks del momento 
-              y clásicos que nunca pasan de moda.
+
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 sm:mb-6 leading-relaxed px-4">
+              Actualizamos y curamos nuestras playlists todas las semanas.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
               <Button
                 asChild
                 size="lg"
-                className="bg-[#1DB954] hover:bg-[#1ed760] text-white font-semibold"
+                className="w-full sm:w-auto bg-[#1DB954] hover:bg-[#1ed760] text-white font-semibold"
               >
                 <a
-                  href="https://open.spotify.com/user/busyclothing"
+                  href={process.env.NEXT_PUBLIC_SPOTIFY_PROFILE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2"
+                  className="flex items-center justify-center gap-2"
                 >
                   <Music2 className="h-5 w-5" />
                   Seguinos en Spotify
                 </a>
               </Button>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Playlists Grid */}
-      <section className="py-16 md:py-24">
-        <div className="container px-4">
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="aspect-square rounded-2xl bg-muted animate-pulse"
-                />
+      <section className="py-8 sm:py-12 md:py-16 lg:py-24">
+        <div className="container px-4 sm:px-6">
+          {playlists.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+              {playlists.map((playlist, index) => (
+                <PlaylistCardWrapper key={playlist.id} playlist={playlist} index={index} />
               ))}
             </div>
-          ) : playlists.length > 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-            >
-              {playlists.map((playlist, index) => (
-                <motion.div
-                  key={playlist.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <PlaylistCard playlist={playlist} />
-                </motion.div>
-              ))}
-            </motion.div>
           ) : (
-            <div className="text-center py-16">
-              <Music2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground text-lg">
+            <div className="text-center py-12 sm:py-16">
+              <Music2 className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground text-base sm:text-lg px-4">
                 Próximamente nuevas playlists...
               </p>
             </div>
@@ -123,42 +98,35 @@ export default function PlaylistsPage() {
       </section>
 
       {/* CTA Section for Artists */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-black via-purple-950/20 to-black py-16 md:py-24">
+      <section className="relative overflow-hidden bg-gradient-to-b from-black via-[#1DB954]/10 to-black py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="absolute inset-0 bg-[url('/pattern-black.jpg')] opacity-10" />
-        
-        <div className="container relative z-10 px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="max-w-2xl mx-auto text-center"
-          >
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">
-              ¿Sos artista?
-            </h2>
-            
-            <p className="text-muted-foreground text-lg mb-8">
-              Si querés que tu música forme parte de nuestras playlists, 
-              envianos tu propuesta. Estamos siempre buscando nuevos talentos 
-              para compartir con nuestra comunidad.
-            </p>
 
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="font-semibold"
-            >
-              <a
-                href="/contact"
-                className="flex items-center gap-2"
-              >
-                <Mail className="h-5 w-5" />
-                Contactanos
-              </a>
-            </Button>
-          </motion.div>
+        <div className="container relative z-10 px-4 sm:px-6">
+          <div className="max-w-3xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-8 sm:mb-10 md:mb-12">
+              <div className="inline-flex items-center justify-center p-2.5 sm:p-3 mb-4 sm:mb-6">
+                <Sparkles className="h-12 w-12 sm:h-16 sm:w-16 text-[#1DB954]" />
+              </div>
+
+              <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
+                ¿Sos artista o tenes una banda?
+              </h2>
+
+              <p className="text-muted-foreground text-base sm:text-lg px-4">
+                Si querés que tu música esté en alguna de nuestras playlists,
+                completá el formulario.
+                <br />
+                Desde nuestro espacio en Busy
+                queremos ayudar talentos a crecer y posicionarse.
+              </p>
+            </div>
+
+            {/* Form */}
+            <div className="rounded-2xl p-4 sm:p-6 md:p-8 bg-gradient-to-br from-[#1DB954]/5 via-black to-[#1DB954]/5 border border-[#1DB954]/20 shadow-2xl hover:border-[#1DB954]/40 transition-all duration-300">
+              <ArtistSubmissionForm />
+            </div>
+          </div>
         </div>
       </section>
     </div>

@@ -5,7 +5,7 @@ export async function listPopovers(): Promise<Popover[]> {
   const sb = getServiceClient()
   const { data, error } = await sb
     .from("popovers")
-    .select("id, title, body, discount_code, enabled, priority, start_at, end_at, sections, paths, created_at, updated_at")
+    .select("id, title, body, discount_code, image_url, type, require_email, show_newsletter, cta_text, cta_url, delay_seconds, enabled, priority, start_at, end_at, sections, paths, created_at, updated_at")
     .order("enabled", { ascending: false })
     .order("priority", { ascending: false })
     .order("created_at", { ascending: false })
@@ -17,7 +17,7 @@ export async function getPopover(id: string): Promise<Popover | null> {
   const sb = getServiceClient()
   const { data, error } = await sb
     .from("popovers")
-    .select("id, title, body, discount_code, enabled, priority, start_at, end_at, sections, paths, created_at, updated_at")
+    .select("id, title, body, discount_code, image_url, type, require_email, show_newsletter, cta_text, cta_url, delay_seconds, enabled, priority, start_at, end_at, sections, paths, created_at, updated_at")
     .eq("id", id)
     .single()
   if (error) return null
@@ -32,6 +32,13 @@ export async function createPopover(input: SavePopoverInput): Promise<Popover> {
     title: input.title,
     body: input.body ?? null,
     discount_code: input.discount_code ?? null,
+    image_url: input.image_url ?? null,
+    type: input.type ?? 'simple',
+    require_email: input.require_email ?? false,
+    show_newsletter: input.show_newsletter ?? false,
+    cta_text: input.cta_text ?? null,
+    cta_url: input.cta_url ?? null,
+    delay_seconds: input.delay_seconds ?? 0,
     enabled: input.enabled ?? true,
     priority: input.priority ?? 0,
     start_at: input.start_at ?? null,
@@ -52,6 +59,13 @@ export async function updatePopover(id: string, input: Partial<SavePopoverInput>
       ...(input.title !== undefined ? { title: input.title } : {}),
       ...(input.body !== undefined ? { body: input.body } : {}),
       ...(input.discount_code !== undefined ? { discount_code: input.discount_code } : {}),
+      ...(input.image_url !== undefined ? { image_url: input.image_url } : {}),
+      ...(input.type !== undefined ? { type: input.type } : {}),
+      ...(input.require_email !== undefined ? { require_email: input.require_email } : {}),
+      ...(input.show_newsletter !== undefined ? { show_newsletter: input.show_newsletter } : {}),
+      ...(input.cta_text !== undefined ? { cta_text: input.cta_text } : {}),
+      ...(input.cta_url !== undefined ? { cta_url: input.cta_url } : {}),
+      ...(input.delay_seconds !== undefined ? { delay_seconds: input.delay_seconds } : {}),
       ...(input.enabled !== undefined ? { enabled: input.enabled } : {}),
       ...(input.priority !== undefined ? { priority: input.priority } : {}),
       ...(input.start_at !== undefined ? { start_at: input.start_at } : {}),
@@ -83,12 +97,10 @@ export async function getActivePopoverFor(pathname: string, section?: string | n
     .order("priority", { ascending: false })
   if (error) throw error
   const list = (data as Popover[]) || []
-  console.log(`[Popovers] Checking ${list.length} enabled popovers for path="${pathname}", section="${section}"`)
   
   const matches = list.filter((p) => {
     // time window
     const okTime = (!p.start_at || p.start_at <= now) && (!p.end_at || p.end_at >= now)
-    console.log(`[Popover ${p.id}] Time check: start=${p.start_at}, end=${p.end_at}, now=${now}, okTime=${okTime}`)
     if (!okTime) return false
     
     const sec = (p.sections || []) as string[]
@@ -96,12 +108,8 @@ export async function getActivePopoverFor(pathname: string, section?: string | n
     const secOk = !section || sec.length === 0 || sec.includes(section)
     const pathOk = pat.length === 0 || pat.some((prefix) => pathname.startsWith(prefix))
     
-    console.log(`[Popover ${p.id}] sections=${JSON.stringify(sec)}, paths=${JSON.stringify(pat)}`)
-    console.log(`[Popover ${p.id}] secOk=${secOk}, pathOk=${pathOk}, match=${secOk && pathOk}`)
-    
     return secOk && pathOk
   })
   
-  console.log(`[Popovers] Found ${matches.length} matching popovers`)
   return matches[0] ?? null
 }

@@ -14,12 +14,15 @@ import * as React from "react"
 import { BlogCategories, CategoryBadge } from "./blog-categories"
 import { MarketingSidebar } from "./marketing-sidebar"
 
+import type { Product } from "@/lib/types"
+
 interface BlogClientProps {
   allPosts: BlogPost[]
   latestPost?: BlogPost
+  featuredProducts?: Product[]
 }
 
-export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
+export default function BlogClient({ allPosts, latestPost, featuredProducts = [] }: BlogClientProps) {
   const { t, locale } = useI18n() as { t: (k: string) => string; locale: "en" | "es" }
   const dfnsLocale = locale === "es" ? esLocale : enUS
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -67,7 +70,7 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
   //const regularPosts = filteredPosts.length > 0 ? filteredPosts.slice(1) : allPosts.slice(1)
 
   return (
-    <div className="container mt-20 px-4 sm:px-3 py-6 sm:py-8 font-body">
+    <div className="container mt-24 sm:mt-28 px-4 sm:px-3 py-6 sm:py-8 font-body">
       <div className="mx-auto">
         {/* Header */}
         <div className="text-center mb-4 sm:mb-6">
@@ -221,7 +224,7 @@ export default function BlogClient({ allPosts, latestPost }: BlogClientProps) {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <MarketingSidebar latestPost={latestPost || allPosts[0]} />
+            <MarketingSidebar latestPost={latestPost || allPosts[0]} featuredProducts={featuredProducts} />
           </div>
         </div>
       </div>

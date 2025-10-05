@@ -19,6 +19,11 @@ create table if not exists public.products (
   tags text[] not null default '{}',
   rating numeric(3,2) not null default 0,
   reviews integer not null default 0,
+  -- Badge and discount fields
+  badge_text text, -- Custom badge text (e.g., "2x1", "NUEVO", "OFERTA")
+  badge_variant text default 'default', -- Badge style: default, destructive, secondary, outline
+  discount_percentage integer, -- Discount percentage (0-100)
+  discount_active boolean default false, -- Whether discount is active
   created_at timestamptz not null default now()
 );
 

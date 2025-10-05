@@ -10,18 +10,24 @@ export default async function LatestPostsSidebar({ currentSlug }: { currentSlug:
       <h4 className="font-heading text-lg font-semibold mb-4">Últimos posts</h4>
       <ul className="space-y-3">
         {posts.map((p) => (
-          <li key={p.slug} className="flex items-center gap-2">
-            {p.cover ? (
-              <Link href={`/blog/${p.slug}`}>
-                <Image src={p.cover} alt={p.coverAlt || p.title} width={64} height={56} className="h-14 w-16 object-cover rounded border" />
-              </Link>
-            ) : (
-              <Link href={`/blog/${p.slug}`}>
-                <div className="h-14 w-16 rounded border bg-muted" />
-              </Link>
-            )}
-            <div className="min-w-0">
-              <Link className="hover:underline text-accent-brand font-sm line-clamp-2 font-body" href={`/blog/${p.slug}`}>{p.title}</Link>
+          <li key={p.slug} className="flex items-start gap-3">
+            <Link href={`/blog/${p.slug}`} className="flex-shrink-0">
+              {p.cover ? (
+                <div className="relative w-20 h-20 rounded border overflow-hidden">
+                  <Image 
+                    src={p.cover} 
+                    alt={p.coverAlt || p.title} 
+                    fill
+                    sizes="80px"
+                    className="object-cover" 
+                  />
+                </div>
+              ) : (
+                <div className="w-20 h-20 rounded border bg-muted" />
+              )}
+            </Link>
+            <div className="min-w-0 flex-1">
+              <Link className="hover:underline text-accent-brand text-sm line-clamp-2 font-body" href={`/blog/${p.slug}`}>{p.title}</Link>
             </div>
           </li>
         ))}

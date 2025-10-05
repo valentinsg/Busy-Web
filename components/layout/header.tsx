@@ -17,6 +17,7 @@ import * as React from 'react'
 const navigation = [
   { label: 'Inicio', href: '/' },
   { label: 'Productos', href: '/products' },
+  { label: 'Playlists', href: '/playlists' },
   { label: 'Blog', href: '/blog' },
   { label: 'Cultura', href: '/about' },
   { label: 'Contactanos', href: '/contact' },
@@ -98,6 +99,7 @@ export function Header() {
 
   return (
     <header
+      style={{ minHeight: '56px' }}
       className={
         'fixed font-heading top-0 left-0 right-0 z-50 w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
         (showHeroVariant

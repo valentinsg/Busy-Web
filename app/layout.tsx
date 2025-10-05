@@ -11,7 +11,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
 import dynamic from 'next/dynamic'
-import { Abel, DM_Sans, Libre_Barcode_39_Text, Plus_Jakarta_Sans, Poppins, Space_Grotesk } from 'next/font/google'
+import { Space_Grotesk, Plus_Jakarta_Sans, Abel, DM_Sans, Poppins } from 'next/font/google'
 import { cookies } from 'next/headers'
 import type React from 'react'
 import './globals.css'
@@ -24,8 +24,9 @@ const SITE_URL = /^https?:\/\//.test(RAW_SITE_URL) && RAW_SITE_URL
 
 const AdminQuickFAB = dynamic(() => import('@/components/admin/admin-quick-fab'), {
   ssr: false,
-});
+})
 
+// Fuentes de Google (temporal hasta descargar locales)
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-space-grotesk',
@@ -38,7 +39,6 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: 'swap',
 })
 
-// Additional fonts migrated from <link> to next/font
 const abel = Abel({
   subsets: ['latin'],
   weight: '400',
@@ -52,27 +52,17 @@ const dmSans = DM_Sans({
   display: 'swap',
 })
 
-const libreBarcode39Text = Libre_Barcode_39_Text({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-libre-barcode-39-text',
-  display: 'swap',
-})
-
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: [
-    '100', '200', '300', '400', '500', '600', '700', '800', '900',
-  ],
+  weight: ['400', '500', '700'],
   variable: '--font-poppins',
-  style: ['normal', 'italic'],
   display: 'swap',
 })
 
 export const metadata: Metadata = {
   ...generateSEO({
     title: 'Busy Streetwear',
-    description: 'Somos Busy Streetwear, la marca que representa a los que hacen. Únite a nuestra comunidad que ofrece ropa streetwear de moda, contenido relacionado a la cultura urbana, playlists, eventos exclusivos y más.',
+    description: 'Busy hace para los que hacen. Únite a nuestra comunidad que ofrece ropa de moda, contenido sobre cultura urbana, playlists, eventos y más.',
     image: '/busy-streetwear.png',
     url: SITE_URL,
   }),
@@ -107,7 +97,7 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Busy Streetwear',
-    description: 'Somos Busy Streetwear, la marca que representa a los que hacen. Únite a nuestra comunidad que ofrece ropa streetwear de moda, contenido relacionado a la cultura urbana, playlists, eventos exclusivos y más.',
+    description: 'Busy hace para los que hacen. Únite a nuestra comunidad que ofrece ropa de moda, contenido sobre cultura urbana, playlists, eventos y más.',
     url: SITE_URL,
     logo: `${SITE_URL}/logo-busy-black.png`,
     sameAs: [
@@ -153,7 +143,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`bg-black/90 ${spaceGrotesk.variable} ${plusJakartaSans.variable} ${abel.variable} ${dmSans.variable} ${libreBarcode39Text.variable} ${poppins.variable} font-sans antialiased`}
+        className={`bg-black/90 ${spaceGrotesk.variable} ${plusJakartaSans.variable} ${abel.variable} ${dmSans.variable} ${poppins.variable} font-sans antialiased`}
       >
         <I18nProvider>
           <HtmlLang />
@@ -172,12 +162,12 @@ export default function RootLayout({
         </I18nProvider>
         {/* Custom cursor should be rendered within <body> to avoid removeChild null errors */}
         <CustomCursor />
-        {/* Vercel Web Analytics - only sends events in production */}
-        <Analytics />
-        {/* Vercel Speed Insights - Web Vitals reporting */}
-        <SpeedInsights />
         <AdminQuickFAB />
         <SitePopover />
+        {/* Vercel Web Analytics - only sends events in production, loaded after interactive */}
+        <Analytics mode="production" />
+        {/* Vercel Speed Insights - Web Vitals reporting, loaded after interactive */}
+        <SpeedInsights sampleRate={1.0} />
       </body>
     </html>
   )

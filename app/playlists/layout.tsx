@@ -1,22 +1,24 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Playlists | Busy Clothing - Música para tu estilo',
+  title: 'Playlists',
   description:
-    'Descubrí nuestras playlists de Spotify cuidadosamente seleccionadas. Hip hop old school, trap y más. Actualizadas semanalmente con los mejores tracks.',
+    'Con nuestras playlists queremos compartir lo que mas nos gusta de la cultura urbana. Actualizadas y curadas semanalmente, vamos a ayudar y posicionar artistas emergentes desde nuestro espacio.',
   keywords: [
-    'busy playlists',
-    'música busy',
-    'spotify busy',
-    'hip hop playlist',
-    'trap playlist',
-    'música urbana',
-    'playlists argentina',
+    'playlists',
+    'spotify',
+    'música',
+    'hip hop',
+    'trap',
+    'r&b',
+    'busy',
+    'streetwear',
+    'cultura urbana',
   ],
   openGraph: {
-    title: 'Playlists | Busy Clothing',
+    title: 'Playlists',
     description:
-      'Música cuidadosamente seleccionada para acompañar tu estilo. Actualizadas cada semana.',
+      'Con nuestras playlists queremos compartir lo que mas nos gusta de la cultura urbana. Actualizadas y curadas semanalmente, buscamos ayudar a posicionar artistas emergentes desde nuestro espacio.',
     type: 'website',
     images: [
       {
@@ -29,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Playlists | Busy Clothing',
+    title: 'Playlists',
     description:
-      'Música cuidadosamente seleccionada para acompañar tu estilo. Actualizadas cada semana.',
+      'Con nuestras playlists queremos compartir lo que mas nos gusta de la cultura urbana. Actualizadas y curadas semanalmente, buscamos ayudar a posicionar artistas emergentes desde nuestro espacio.',
     images: ['/spotify.png'],
   },
 }

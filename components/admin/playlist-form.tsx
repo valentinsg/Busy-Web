@@ -7,7 +7,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
-import type { Playlist } from '@/types/blog'
+import type { Playlist } from '@/types/playlists'
+import { supabase } from '@/lib/supabase/client'
+import Image from 'next/image'
 
 interface PlaylistFormProps {
   playlist?: Playlist
@@ -17,6 +19,7 @@ interface PlaylistFormProps {
 export function PlaylistForm({ playlist, mode }: PlaylistFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [formData, setFormData] = useState({
     slug: playlist?.slug || '',
     title: playlist?.title || '',
@@ -39,6 +42,68 @@ export function PlaylistForm({ playlist, mode }: PlaylistFormProps) {
     setFormData((prev) => ({ ...prev, is_published: checked }))
   }
 
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor selecciona una imagen válida')
+      return
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen no debe superar 5MB')
+      return
+    }
+
+    setIsUploading(true)
+
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${formData.slug || Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+      const filePath = `playlists/${fileName}`
+
+      console.log('Uploading to:', filePath)
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('media')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (error) {
+        console.error('Supabase storage error:', error)
+        throw new Error(`Error de Supabase: ${error.message}`)
+      }
+
+      console.log('Upload successful:', data)
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('media')
+        .getPublicUrl(filePath)
+
+      console.log('Public URL:', publicUrl)
+
+      // Update form data with the new image URL
+      setFormData((prev) => ({ ...prev, cover_image: publicUrl }))
+      alert('Imagen subida exitosamente!')
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+      alert(`Error al subir la imagen: ${errorMessage}\n\nAsegúrate de que el bucket 'media' existe en Supabase Storage y tiene permisos públicos.`)
+    } finally {
+      setIsUploading(false)
+      // Reset the input
+      e.target.value = ''
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setIsSubmitting(true)
@@ -50,6 +115,8 @@ export function PlaylistForm({ playlist, mode }: PlaylistFormProps) {
           : `/api/playlists/${playlist?.id}`
       const method = mode === 'create' ? 'POST' : 'PUT'
 
+      console.log('Saving playlist:', formData)
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -57,16 +124,21 @@ export function PlaylistForm({ playlist, mode }: PlaylistFormProps) {
       })
 
       const data = await res.json()
+      console.log('Response:', data)
 
       if (data.ok) {
+        alert('Playlist guardada exitosamente!')
         router.push('/admin/playlists')
         router.refresh()
       } else {
-        alert('Error al guardar la playlist')
+        const errorMsg = data.error || 'Error desconocido'
+        console.error('Error from API:', errorMsg)
+        alert(`Error al guardar la playlist: ${errorMsg}`)
       }
     } catch (error) {
       console.error('Error saving playlist:', error)
-      alert('Error al guardar la playlist')
+      const errorMsg = error instanceof Error ? error.message : 'Error desconocido'
+      alert(`Error al guardar la playlist: ${errorMsg}`)
     } finally {
       setIsSubmitting(false)
     }
@@ -130,25 +202,57 @@ export function PlaylistForm({ playlist, mode }: PlaylistFormProps) {
           />
         </div>
 
-        <div>
-          <Label htmlFor="cover_image">Imagen de portada (URL)</Label>
-          <Input
-            id="cover_image"
-            name="cover_image"
-            type="url"
-            value={formData.cover_image}
-            onChange={handleChange}
-            placeholder="https://..."
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Opcional. Si no se proporciona, se mostrará un ícono por defecto.
-          </p>
+        <div className="grid gap-2">
+          <Label htmlFor="cover_image">Imagen de portada (URL o ruta pública)</Label>
+          
+          <div className="flex items-center gap-2">
+            <Input
+              id="cover_image"
+              name="cover_image"
+              type="url"
+              value={formData.cover_image}
+              onChange={handleChange}
+              placeholder="/playlists/portada.jpg"
+              disabled={isUploading}
+            />
+            <input
+              type="file"
+              id="cover-upload"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={isUploading}
+              className="hidden"
+            />
+            <label
+              htmlFor="cover-upload"
+              className={`inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                isUploading
+                  ? 'opacity-50 cursor-not-allowed bg-muted'
+                  : 'hover:bg-accent hover:text-accent-foreground'
+              }`}
+            >
+              {isUploading ? 'Subiendo...' : 'Subir'}
+            </label>
+          </div>
+
+          {/* Preview de la imagen */}
+          {formData.cover_image && (
+            <div className="text-xs text-muted-foreground">Vista previa:</div>
+          )}
+          {formData.cover_image && (
+            <Image
+              src={formData.cover_image}
+              alt="Portada de la playlist"
+              width={448}
+              height={112}
+              className="h-28 w-auto rounded border"
+            />
+          )}
         </div>
 
         <div>
           <Label htmlFor="genre">Género</Label>
           <Input
-            id="genre"
             name="genre"
             value={formData.genre}
             onChange={handleChange}

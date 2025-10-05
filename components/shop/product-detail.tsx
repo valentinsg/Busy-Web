@@ -98,7 +98,12 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="font-body">{product.category}</Badge>
-              {product.stock < 10 && <Badge variant="destructive" className="font-body">Quedan solo {product.stock}</Badge>}
+              {product.badgeText && (
+                <Badge variant={(product.badgeVariant as 'default' | 'destructive' | 'secondary' | 'outline') || 'default'} className="font-body font-semibold">
+                  {product.badgeText}
+                </Badge>
+              )}
+              {!product.badgeText && product.stock < 10 && <Badge variant="destructive" className="font-body">Quedan solo {product.stock}</Badge>}
               {product.imported && <Badge variant="outline" className="font-body">Importado</Badge>}
             </div>
             <h1 className="font-heading text-3xl font-bold mb-2">{product.name}</h1>
@@ -112,7 +117,25 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                 <span>{reviews.length} reseñas de la comunidad</span>
               </div>
             </div>
-            <div className="text-3xl font-bold mb-6 font-heading">{formatPrice(product.price, product.currency)}</div>
+            <div className="mb-6">
+              {product.discountActive && product.discountPercentage && product.discountPercentage > 0 ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl font-bold font-heading text-red-500">
+                      {formatPrice(product.price * (1 - product.discountPercentage / 100), product.currency)}
+                    </span>
+                    <Badge variant="destructive" className="text-sm font-semibold px-2 py-1">
+                      -{product.discountPercentage}% OFF
+                    </Badge>
+                  </div>
+                  <div className="text-xl font-heading text-muted-foreground line-through">
+                    {formatPrice(product.price, product.currency)}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-3xl font-bold font-heading">{formatPrice(product.price, product.currency)}</div>
+              )}
+            </div>
           </div>
 
           <div>

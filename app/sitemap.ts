@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import getServiceClient from '@/lib/supabase/server'
 import { getAllPostsAsync } from '@/lib/blog'
+import { getPublishedPlaylists } from '@/lib/repo/playlists'
 
 const SITE_URL = process.env.SITE_URL || 'https://busy.com.ar'
 
@@ -18,6 +19,7 @@ function getStaticRoutes() {
     
     // Main pages - High priority
     { url: `${SITE_URL}/products`, lastModified: now, changeFrequency: weekly, priority: 0.9, alternates: { languages: createLang('/products') } },
+    { url: `${SITE_URL}/playlists`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/playlists') } },
     { url: `${SITE_URL}/blog`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/blog') } },
     { url: `${SITE_URL}/about`, lastModified: now, changeFrequency: monthly, priority: 0.7, alternates: { languages: createLang('/about') } },
     { url: `${SITE_URL}/contact`, lastModified: now, changeFrequency: monthly, priority: 0.7, alternates: { languages: createLang('/contact') } },
@@ -92,8 +94,30 @@ async function getProductRoutes() {
   }
 }
 
+async function getPlaylistRoutes() {
+  try {
+    const playlists = await getPublishedPlaylists()
+    return playlists.map((playlist) => {
+      const url = `${SITE_URL}/playlists/${playlist.slug}`
+      return {
+        url,
+        lastModified: playlist.updated_at || playlist.created_at,
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+        alternates: { languages: { 'es-AR': url, en: url } },
+      }
+    })
+  } catch {
+    return []
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [blog, products] = await Promise.all([getBlogRoutes(), getProductRoutes()])
-  const entries = [...getStaticRoutes(), ...blog, ...products]
+  const [blog, products, playlists] = await Promise.all([
+    getBlogRoutes(),
+    getProductRoutes(),
+    getPlaylistRoutes(),
+  ])
+  const entries = [...getStaticRoutes(), ...blog, ...products, ...playlists]
   return entries
 }

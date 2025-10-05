@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAllPlaylists, createPlaylist } from '@/lib/repo/playlists'
-import type { Playlist } from '@/types/blog'
+import type { Playlist } from '@/types/playlists'
 
 export async function GET() {
   try {

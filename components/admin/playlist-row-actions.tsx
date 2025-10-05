@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import type { Playlist } from '@/types/blog'
+import type { Playlist } from '@/types/playlists'
 
 interface PlaylistRowActionsProps {
   playlist: Playlist

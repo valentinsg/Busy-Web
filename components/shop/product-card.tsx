@@ -183,6 +183,7 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
               fill
               className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
+              loading="lazy"
             />
             <Image
               src={
@@ -193,10 +194,21 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
+              loading="lazy"
             />
 
-          {/* Stock badge */}
-          {product.stock < 10 && (
+          {/* Custom Badge */}
+          {product.badgeText && (
+            <Badge
+              variant={(product.badgeVariant as 'default' | 'destructive' | 'secondary' | 'outline') || 'default'}
+              className="absolute top-1 left-1 text-[10px] sm:text-xs font-body px-1.5 py-0.5 sm:px-2 sm:py-1 font-semibold"
+            >
+              {product.badgeText}
+            </Badge>
+          )}
+
+          {/* Stock badge - only show if no custom badge */}
+          {!product.badgeText && product.stock < 10 && (
             <Badge
               variant="destructive"
               className="absolute top-1 left-1 text-[10px] sm:text-xs font-body px-1.5 py-0.5 sm:px-2 sm:py-1"
@@ -405,9 +417,27 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="font-heading font-semibold text-sm sm:text-base">
-                {formatPrice(product.price, product.currency)}
-              </span>
+              <div className="flex flex-col gap-0.5">
+                {product.discountActive && product.discountPercentage && product.discountPercentage > 0 ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <span className="font-heading font-semibold text-sm sm:text-base text-red-500">
+                        {formatPrice(product.price * (1 - product.discountPercentage / 100), product.currency)}
+                      </span>
+                      <span className="text-[10px] sm:text-xs font-body font-semibold bg-red-500 text-white px-1.5 py-0.5 rounded">
+                        -{product.discountPercentage}%
+                      </span>
+                    </div>
+                    <span className="font-heading text-[10px] sm:text-xs text-muted-foreground line-through">
+                      {formatPrice(product.price, product.currency)}
+                    </span>
+                  </>
+                ) : (
+                  <span className="font-heading font-semibold text-sm sm:text-base">
+                    {formatPrice(product.price, product.currency)}
+                  </span>
+                )}
+              </div>
 
               {/* Color options */}
               <div className="flex space-x-0.5 sm:space-x-1">

@@ -1,6 +1,8 @@
 import ProductsClient from '@/components/products/ProductsClient'
 import type { Metadata } from 'next'
 
+export const revalidate = 1800 // Revalidar cada 30 minutos
+
 export function generateMetadata(): Metadata {
   const siteUrl = process.env.SITE_URL || 'https://busy.com.ar'
 

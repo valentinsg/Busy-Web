@@ -31,6 +31,14 @@ export interface Product {
   tags: string[]
   rating: number
   reviews: number
+  /** Optional badge text to display on product card (e.g., "2x1", "NUEVO", "OFERTA") */
+  badgeText?: string
+  /** Badge style variant */
+  badgeVariant?: 'default' | 'destructive' | 'secondary' | 'outline'
+  /** Discount percentage (0-100) */
+  discountPercentage?: number
+  /** Whether the discount is currently active */
+  discountActive?: boolean
 }
 
 export interface SizeMeasurement {
