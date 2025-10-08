@@ -3,9 +3,16 @@ create table if not exists public.popovers (
   title text not null,
   body text,
   discount_code text,
+  discount_percent int default 10 check (discount_percent between 1 and 100),
   image_url text,
+  type text not null default 'simple', -- simple, discount, email-gate, newsletter, custom
+  require_email boolean not null default false,
+  show_newsletter boolean not null default false,
+  cta_text text,
+  cta_url text,
   enabled boolean not null default true,
   priority int not null default 0,
+  delay_seconds int not null default 0, -- Seconds to wait before showing (0 = immediate)
   start_at timestamptz,
   end_at timestamptz,
   sections text[] default '{}', -- e.g. ['home','products','blog']

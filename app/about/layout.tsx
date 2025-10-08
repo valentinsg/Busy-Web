@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = generateSEO({
   title: 'Sobre Busy',
   description:
-    'Conocé nuestra historia, valores, el compromiso de Busy con la cultura streetwear y lo que fomentamos como comunidad.',
+    'Conocé nuestra historia, valores, el compromiso de Busy con la cultura de la moda y lo que fomentamos como comunidad.',
   url: `${process.env.SITE_URL || 'https://busy.com.ar'}/about`,
 })
 

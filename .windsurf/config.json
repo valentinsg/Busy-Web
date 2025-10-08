@@ -1,0 +1,229 @@
+{
+  "project": {
+    "name": "Busy Web",
+    "description": "E-commerce streetwear platform with admin panel, blog, playlists, and advanced animations",
+    "version": "1.0.0",
+    "type": "Next.js App Router"
+  },
+  "stack": {
+    "framework": "Next.js 14.2.16",
+    "runtime": "React 18",
+    "language": "TypeScript 5",
+    "styling": "Tailwind CSS 3.4.17",
+    "animations": ["Framer Motion 12.23.1", "GSAP 3.13.0"],
+    "database": "Supabase (PostgreSQL)",
+    "auth": "Supabase Auth",
+    "storage": "Supabase Storage",
+    "payments": "Mercado Pago 2.9.0",
+    "email": "Resend 6.0.3",
+    "ui_components": "Radix UI + shadcn/ui",
+    "state_management": "Zustand + Immer",
+    "forms": "React Hook Form + Zod",
+    "analytics": "Vercel Analytics + Speed Insights",
+    "content": "MDX + gray-matter"
+  },
+  "objectives": {
+    "internationalization": "All text must pass through locales (es.json, en.json) using useI18n() hook",
+    "animations": "Unified Motion Layer with Framer Motion (micro-interactions) and GSAP (scroll storytelling)",
+    "admin_panel": "All editable content must be manageable from admin panel",
+    "responsive": "Mobile-first approach with Tailwind breakpoints (sm, md, lg, xl, 2xl)",
+    "performance": "GPU-accelerated animations, lazy loading, code splitting, optimized images",
+    "accessibility": "100% respect for prefers-reduced-motion, keyboard navigation, ARIA labels",
+    "seo": "Complete metadata, automatic sitemap, canonical URLs, structured data"
+  },
+  "architecture": {
+    "motion_layer": {
+      "path": "motion/",
+      "tokens": "motion/tokens.ts",
+      "hooks": ["useGsap", "useGsapScrollTrigger"],
+      "components": {
+        "framer": ["FadeIn", "MotionButton", "MotionCard", "StaggerContainer", "StaggerItem"],
+        "gsap": ["ScrollSection", "ParallaxLayer", "DiagonalTimeline", "RevealOnView"],
+        "effects": ["Confetti", "AnimatedPopover"]
+      },
+      "providers": ["ReducedMotionProvider"]
+    },
+    "internationalization": {
+      "locales_path": "locales/",
+      "supported_languages": ["es", "en"],
+      "provider": "components/i18n-provider.tsx",
+      "hook": "useI18n()"
+    },
+    "admin_system": {
+      "base_path": "app/admin/",
+      "entities": ["products", "blog", "popovers", "playlists", "faqs", "coupons", "orders", "customers", "analytics", "artist-submissions"],
+      "guard": "components/admin/admin-guard.tsx"
+    },
+    "content_management": {
+      "blog": "content/blog/*.mdx",
+      "products": "Supabase products table",
+      "popovers": "Supabase popovers table (5 types: simple, discount, email-gate, newsletter, custom)",
+      "playlists": "Supabase playlists table with Spotify embed"
+    }
+  },
+  "standards": {
+    "typescript": {
+      "strict_mode": true,
+      "no_any": true,
+      "explicit_types": "Always define interfaces for props and data structures"
+    },
+    "animations": {
+      "use_tokens": "Always use motionTokens instead of hardcoded values",
+      "cleanup": "GSAP animations must use useGsapScrollTrigger for automatic cleanup",
+      "reduced_motion": "All animations must respect prefers-reduced-motion",
+      "gpu_only": "Only animate transform and opacity for 60fps performance",
+      "no_layout_shift": "Never animate width/height to avoid CLS"
+    },
+    "responsive": {
+      "mobile_first": true,
+      "breakpoints": {
+        "sm": "640px",
+        "md": "768px",
+        "lg": "1024px",
+        "xl": "1280px",
+        "2xl": "1536px"
+      },
+      "spacing_pattern": "px-3 sm:px-4 md:px-6 lg:px-8",
+      "typography_pattern": "text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
+    },
+    "internationalization": {
+      "mandatory": "All user-facing text must use t() from useI18n()",
+      "no_hardcoded_text": true,
+      "locale_structure": "Nested by section (home.hero.title)",
+      "fallback_required": "Always provide default value: t('key', { default: 'fallback' })"
+    },
+    "admin_content": {
+      "rule": "If content is editable or may change long-term, it must have an admin panel",
+      "pattern": "Schema SQL → Repository → API Route → Admin Page → Form Component"
+    },
+    "performance": {
+      "images": "Always use Next Image with width, height, and sizes",
+      "code_splitting": "Use dynamic imports for heavy components",
+      "lazy_loading": "GSAP lazy import already implemented in Motion Layer",
+      "will_change": "Apply temporarily only during animations"
+    },
+    "accessibility": {
+      "reduced_motion": "Components auto-respect via ReducedMotionProvider",
+      "keyboard_nav": "Ensure all interactive elements are keyboard accessible",
+      "aria_labels": "Provide descriptive labels for screen readers",
+      "focus_visible": "Never remove focus indicators"
+    }
+  },
+  "best_practices": {
+    "component_creation": {
+      "checklist": [
+        "All text passes through useI18n() and locales",
+        "Animations use Motion Layer components from @/motion",
+        "Use motionTokens for all animation values",
+        "Respect prefers-reduced-motion",
+        "Responsive with Tailwind breakpoints",
+        "TypeScript strict with interfaces",
+        "Images with Next Image optimized",
+        "If editable → create admin panel",
+        "Form validation with Zod",
+        "Error handling with try/catch and toast",
+        "SEO metadata if it's a page",
+        "Accessibility (aria-labels, keyboard nav)"
+      ]
+    },
+    "animation_patterns": {
+      "micro_interactions": "Use Framer Motion components (MotionButton, MotionCard, FadeIn)",
+      "scroll_storytelling": "Use GSAP components (ScrollSection, ParallaxLayer, DiagonalTimeline)",
+      "lists": "Use StaggerContainer + StaggerItem for animated lists",
+      "celebrations": "Use Confetti for success states (discounts, subscriptions)",
+      "modals": "Use AnimatedPopover for animated overlays"
+    },
+    "data_flow": {
+      "pattern": "Supabase → Repository (lib/repo/) → API Route (app/api/) → Component",
+      "error_handling": "Always wrap async operations in try/catch",
+      "loading_states": "Show loading UI during data fetching",
+      "optimistic_updates": "Update UI immediately, revert on error"
+    },
+    "file_structure": {
+      "components": "components/ organized by feature (ui/, admin/, shop/, blog/, layout/)",
+      "pages": "app/ with App Router structure",
+      "api": "app/api/ for backend routes",
+      "utils": "lib/ for utilities and helpers",
+      "types": "types/ for TypeScript definitions",
+      "content": "content/ for MDX blog posts",
+      "locales": "locales/ for i18n JSON files",
+      "motion": "motion/ for animation system"
+    }
+  },
+  "motion_tokens": {
+    "durations": {
+      "instant": "0.15s",
+      "fast": "0.25s",
+      "normal": "0.35s",
+      "slow": "0.5s",
+      "slower": "0.75s",
+      "slowest": "1.0s"
+    },
+    "easings": {
+      "easeOut": "[0.25, 0.1, 0.25, 1.0]",
+      "spring": "{ type: 'spring', stiffness: 300, damping: 30 }",
+      "gsapOut": "power2.out",
+      "gsapIn": "power2.in"
+    },
+    "stagger": {
+      "fast": "0.03",
+      "normal": "0.05",
+      "slow": "0.1"
+    },
+    "distance": {
+      "xs": "5px",
+      "sm": "10px",
+      "md": "20px",
+      "lg": "30px",
+      "xl": "50px"
+    },
+    "blur": {
+      "sm": "4px",
+      "md": "8px",
+      "lg": "12px",
+      "xl": "20px"
+    },
+    "scale": {
+      "sm": "0.95",
+      "md": "0.9",
+      "grow": "1.05",
+      "growLg": "1.2"
+    }
+  },
+  "popover_system": {
+    "types": ["simple", "discount", "email-gate", "newsletter", "custom"],
+    "features": [
+      "Animated entry (scale + blur)",
+      "Confetti on code copy",
+      "Confetti on subscription",
+      "Email-gate for lead capture",
+      "Segmentation by route, section, time",
+      "Priority system",
+      "localStorage to avoid annoyance"
+    ],
+    "admin_path": "/admin/popovers",
+    "storage": "Supabase Storage bucket: popovers"
+  },
+  "playlist_system": {
+    "features": [
+      "Spotify embed player",
+      "Artist submission form",
+      "Admin management",
+      "Submission states: pending, reviewed, approved, rejected"
+    ],
+    "public_routes": ["/playlists", "/playlists/[slug]"],
+    "admin_routes": ["/admin/playlists", "/admin/artist-submissions"]
+  },
+  "ecommerce": {
+    "flow": ["Products → Cart → Checkout → Payment (Mercado Pago) → Confirmation"],
+    "features": [
+      "Filters by category, price, size",
+      "Quick view",
+      "Coupon system",
+      "Shipping calculation",
+      "Multiple payment methods",
+      "Order tracking"
+    ],
+    "admin_entities": ["products", "orders", "coupons", "customers"]
+  }
+}

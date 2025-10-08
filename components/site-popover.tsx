@@ -4,6 +4,8 @@ import * as React from "react"
 import { usePathname } from "next/navigation"
 import { X, Copy, Check } from "lucide-react"
 import Image from "next/image"
+import { AnimatedPopover } from "@/motion/components/AnimatedPopover"
+import { Confetti } from "@/motion/components/Confetti"
 
 export default function SitePopover({ section }: { section?: string }) {
   const pathname = usePathname()
@@ -28,6 +30,7 @@ export default function SitePopover({ section }: { section?: string }) {
   const [emailSubmitted, setEmailSubmitted] = React.useState(false)
   const [submitting, setSubmitting] = React.useState(false)
   const [submitMessage, setSubmitMessage] = React.useState("")
+  const [showConfetti, setShowConfetti] = React.useState(false)
 
   React.useEffect(() => {
     let cancelled = false
@@ -101,7 +104,11 @@ export default function SitePopover({ section }: { section?: string }) {
     try {
       await navigator.clipboard.writeText(data.discount_code)
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      setShowConfetti(true)
+      setTimeout(() => {
+        setCopied(false)
+        setShowConfetti(false)
+      }, 3000)
     } catch {}
   }
 
@@ -125,6 +132,8 @@ export default function SitePopover({ section }: { section?: string }) {
       if (res.ok) {
         setEmailSubmitted(true)
         setSubmitMessage(data.show_newsletter ? "¡Gracias por suscribirte!" : "¡Código desbloqueado!")
+        setShowConfetti(true)
+        setTimeout(() => setShowConfetti(false), 3000)
       } else {
         setSubmitMessage(json?.error || "Error al procesar")
       }
@@ -140,20 +149,9 @@ export default function SitePopover({ section }: { section?: string }) {
 
   return (
     <>
-      {/* Backdrop overlay */}
-      <div 
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] transition-opacity duration-300 ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-        onClick={onDismiss}
-      />
+      <Confetti active={showConfetti} />
       
-      {/* Popover modal - Más grande */}
-      <div 
-        className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-[95%] max-w-2xl transition-all duration-300 ${
-          isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-        }`}
-      >
+      <AnimatedPopover isVisible={isVisible} onClose={onDismiss}>
         <div className="relative bg-background rounded-2xl shadow-2xl border border-border/50 overflow-hidden">
           {/* Gradient glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5 pointer-events-none" />
@@ -287,7 +285,7 @@ export default function SitePopover({ section }: { section?: string }) {
           {/* Bottom accent line */}
           <div className="h-1 bg-gradient-to-r from-primary via-purple-500 to-primary" />
         </div>
-      </div>
+      </AnimatedPopover>
     </>
   )
 }

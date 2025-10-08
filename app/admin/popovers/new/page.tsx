@@ -34,6 +34,7 @@ export default function NewPopoverPage() {
   const [title, setTitle] = useState("")
   const [body, setBody] = useState("")
   const [discount, setDiscount] = useState("")
+  const [discountPercent, setDiscountPercent] = useState(10)
   const [imageUrl, setImageUrl] = useState("")
   const [type, setType] = useState("simple")
   const [requireEmail, setRequireEmail] = useState(false)
@@ -64,6 +65,7 @@ export default function NewPopoverPage() {
           setTitle(p.title || "")
           setBody(p.body || "")
           setDiscount(p.discount_code || "")
+          setDiscountPercent(Number(p.discount_percent || 10))
           setImageUrl(p.image_url || "")
           setType(p.type || "simple")
           setRequireEmail(!!p.require_email)
@@ -107,6 +109,7 @@ export default function NewPopoverPage() {
               title: title.trim(),
               body: body.trim() || null,
               discount_code: discount.trim() || null,
+              discount_percent: Number(discountPercent),
               image_url: imageUrl.trim() || null,
               type,
               require_email: requireEmail,
@@ -219,11 +222,28 @@ export default function NewPopoverPage() {
           </p>
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-4">
+        <div className="grid gap-2 sm:grid-cols-2">
           <div className="grid gap-2">
             <label className="text-sm">Código de descuento (opcional)</label>
-            <input className="rounded-md border bg-background px-3 py-2 text-sm" placeholder="BUSY10" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+            <input className="rounded-md border bg-background px-3 py-2 text-sm" placeholder="BUSY10" value={discount} onChange={(e) => setDiscount(e.target.value.toUpperCase())} />
           </div>
+          <div className="grid gap-2">
+            <label className="text-sm">% Descuento (1-100)</label>
+            <input 
+              type="number" 
+              min="1" 
+              max="100" 
+              className="rounded-md border bg-background px-3 py-2 text-sm" 
+              value={discountPercent} 
+              onChange={(e) => setDiscountPercent(Number(e.target.value))} 
+            />
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          El código se creará automáticamente en la tabla de cupones si no existe
+        </p>
+
+        <div className="grid gap-2 sm:grid-cols-3">
           <div className="grid gap-2">
             <label className="text-sm">Delay (segundos)</label>
             <input 

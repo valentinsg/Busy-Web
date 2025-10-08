@@ -1,0 +1,283 @@
+{
+  "rules": [
+    {
+      "pattern": "**/*.{tsx,ts,jsx,js}",
+      "name": "Internationalization Required",
+      "actions": [
+        "All user-facing text MUST use useI18n() hook and locales",
+        "Import: import { useI18n } from '@/components/i18n-provider'",
+        "Usage: const { t } = useI18n(); <h1>{t('section.key')}</h1>",
+        "Never hardcode text strings in JSX",
+        "Always provide fallback: t('key', { default: 'fallback text' })",
+        "For HTML: dangerouslySetInnerHTML={{ __html: t('key') }}",
+        "Locale files: locales/es.json, locales/en.json",
+        "Structure: nested by section (home.hero.title)"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "Animation System - Motion Layer",
+      "actions": [
+        "ALWAYS import animations from @/motion",
+        "Import: import { FadeIn, MotionCard, useGsapScrollTrigger, motionTokens } from '@/motion'",
+        "NEVER use inline motion.div without tokens",
+        "NEVER hardcode animation values (duration, ease, delay)",
+        "ALWAYS use motionTokens.durations.*, motionTokens.easings.*, motionTokens.distance.*",
+        "For micro-interactions: use MotionButton, MotionCard, FadeIn",
+        "For scroll: use ScrollSection, ParallaxLayer, DiagonalTimeline, or useGsapScrollTrigger",
+        "For lists: use StaggerContainer + StaggerItem",
+        "GSAP MUST use useGsapScrollTrigger hook (never raw useEffect)",
+        "All animations MUST respect prefers-reduced-motion (auto-handled by components)"
+      ]
+    },
+    {
+      "pattern": "**/motion/**/*.{tsx,ts}",
+      "name": "Motion Layer Components",
+      "actions": [
+        "Use motionTokens for ALL values",
+        "Import tokens: import { motionTokens } from '../tokens'",
+        "Import ReducedMotionProvider: import { useReducedMotion } from '../providers/ReducedMotionProvider'",
+        "Check reduced motion: const prefersReducedMotion = useReducedMotion()",
+        "Disable complex animations if prefersReducedMotion is true",
+        "GSAP cleanup: use gsap.context() and return cleanup function",
+        "ScrollTrigger: always kill() on unmount"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "GSAP Animation Rules",
+      "actions": [
+        "NEVER use raw gsap imports in components",
+        "ALWAYS use useGsapScrollTrigger hook from @/motion",
+        "Pattern: useGsapScrollTrigger((gsap, ScrollTrigger) => { /* animations */ }, [])",
+        "Hook handles: lazy import, cleanup, ScrollTrigger.kill(), prefers-reduced-motion",
+        "Use tokens: duration: motionTokens.durations.slow, ease: motionTokens.easings.gsapOut",
+        "ScrollTrigger config: { trigger: ref.current, start: 'top 80%', toggleActions: 'play none none reverse' }",
+        "NEVER animate width/height (causes layout shift)",
+        "Only animate: transform, opacity, filter"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "Framer Motion Rules",
+      "actions": [
+        "Use Motion Layer components instead of raw motion.div",
+        "Available: FadeIn, MotionButton, MotionCard, StaggerContainer, StaggerItem",
+        "FadeIn props: direction ('up'|'down'|'left'|'right'), distance ('sm'|'md'|'lg'), delay (number)",
+        "MotionCard props: hoverY (number), hoverScale (number)",
+        "MotionButton props: hoverScale (number), tapScale (number)",
+        "StaggerContainer props: stagger ('fast'|'normal'|'slow')",
+        "For custom: import { motionVariants, motionTransitions } from '@/motion/tokens'",
+        "AnimatePresence: use for exit animations"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "Responsive Design",
+      "actions": [
+        "Mobile-first approach: base styles for mobile, then sm:, md:, lg:, xl:",
+        "Breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px), 2xl (1536px)",
+        "Spacing pattern: px-3 sm:px-4 md:px-6 lg:px-8",
+        "Typography pattern: text-3xl sm:text-4xl md:text-5xl lg:text-6xl",
+        "Grid pattern: grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+        "Container pattern: <div className='container px-3 sm:px-4 mx-auto'><div className='max-w-6xl mx-auto'>content</div></div>",
+        "Images: sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "Admin Content Management",
+      "actions": [
+        "If content is editable or may change → CREATE ADMIN PANEL",
+        "Pattern: Schema SQL → Repository (lib/repo/) → API Route (app/api/admin/) → Admin Page (app/admin/) → Form Component",
+        "Admin guard: wrap with <AdminGuard> from '@/components/admin/admin-guard'",
+        "Form validation: use React Hook Form + Zod schema",
+        "CRUD operations: GET, POST, PATCH, DELETE in API routes",
+        "Toast notifications: use toast() from '@/hooks/use-toast'",
+        "Loading states: show skeleton or spinner during operations",
+        "Error handling: try/catch with user-friendly messages"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "TypeScript Strict",
+      "actions": [
+        "ALWAYS define interfaces for component props",
+        "Pattern: interface ComponentProps { title: string; items: Item[]; onAction?: () => void }",
+        "NO 'any' type - use 'unknown' and type guards if needed",
+        "Import Supabase types: import { Database } from '@/types/supabase'",
+        "Type database rows: type Product = Database['public']['Tables']['products']['Row']",
+        "Explicit return types for functions",
+        "Use const assertions for readonly objects: as const"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "Performance Optimization",
+      "actions": [
+        "Images: ALWAYS use next/image with width, height, sizes, priority (if above fold)",
+        "Code splitting: dynamic imports for heavy components: const Heavy = dynamic(() => import('./Heavy'), { ssr: false })",
+        "Lazy loading: defer non-critical components",
+        "Memoization: use useMemo for expensive calculations, useCallback for functions passed as props",
+        "will-change: apply only during animations, remove after",
+        "Animations: only transform and opacity (GPU-accelerated)",
+        "Avoid: animating width/height, layout properties, box-shadow (use filter: drop-shadow)"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "Accessibility",
+      "actions": [
+        "prefers-reduced-motion: auto-respected by Motion Layer components",
+        "Keyboard navigation: ensure all interactive elements are keyboard accessible",
+        "ARIA labels: <button aria-label='Close menu'>, <img alt='Description'>",
+        "Focus visible: NEVER remove focus indicators (outline)",
+        "Semantic HTML: use <button> for actions, <a> for navigation",
+        "Color contrast: ensure WCAG AA compliance (4.5:1 for text)",
+        "Screen readers: provide descriptive labels and context"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "Error Handling",
+      "actions": [
+        "ALWAYS wrap async operations in try/catch",
+        "Pattern: try { await action() } catch (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }) }",
+        "Use toast for user feedback: import { toast } from '@/hooks/use-toast'",
+        "Loading states: const [loading, setLoading] = useState(false)",
+        "Disable buttons during loading: <Button disabled={loading}>",
+        "Optimistic updates: update UI immediately, revert on error",
+        "Error boundaries: wrap critical sections with ErrorBoundary"
+      ]
+    },
+    {
+      "pattern": "**/app/**/page.{tsx,ts}",
+      "name": "SEO & Metadata",
+      "actions": [
+        "ALWAYS export metadata for pages",
+        "Use helper: import { generateSEO } from '@/lib/seo'",
+        "Pattern: export const metadata = generateSEO({ title, description, image, url })",
+        "Canonical URLs: export const metadata = { alternates: { canonical: 'https://...' } }",
+        "Dynamic metadata: export async function generateMetadata({ params }): Promise<Metadata>",
+        "OpenGraph: include og:image, og:title, og:description",
+        "Twitter Card: include twitter:card, twitter:image"
+      ]
+    },
+    {
+      "pattern": "**/components/**/*.{tsx,ts}",
+      "name": "Component Best Practices",
+      "actions": [
+        "Single responsibility: one component, one purpose",
+        "Composition over inheritance: use children and render props",
+        "Props interface: always define at top of file",
+        "Default props: use destructuring with defaults: { title = 'Default' }",
+        "Controlled components: manage state in parent when needed",
+        "Event handlers: prefix with 'handle' (handleClick, handleSubmit)",
+        "Async handlers: wrap in try/catch, show loading state",
+        "Clean up: return cleanup function from useEffect when needed"
+      ]
+    },
+    {
+      "pattern": "**/app/api/**/*.{ts,tsx}",
+      "name": "API Routes",
+      "actions": [
+        "Use NextResponse: import { NextResponse } from 'next/server'",
+        "Success: return NextResponse.json({ data })",
+        "Error: return NextResponse.json({ error: message }, { status: 400 })",
+        "Auth check: verify user before operations",
+        "Validation: use Zod schema to validate request body",
+        "CORS: set headers if needed for external access",
+        "Rate limiting: implement for public endpoints",
+        "Logging: log errors for debugging"
+      ]
+    },
+    {
+      "pattern": "**/lib/repo/**/*.{ts,tsx}",
+      "name": "Repository Pattern",
+      "actions": [
+        "Data access layer: all Supabase queries in lib/repo/",
+        "Import: import { createClient } from '@/lib/supabase/client'",
+        "Error handling: throw errors, let caller handle",
+        "Type safety: use Supabase generated types",
+        "Reusable queries: create functions for common operations",
+        "Pattern: export async function getEntity(id: string) { const { data, error } = await supabase.from('table').select().eq('id', id).single(); if (error) throw error; return data; }"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "Form Validation",
+      "actions": [
+        "Use React Hook Form + Zod",
+        "Import: import { useForm } from 'react-hook-form'; import { zodResolver } from '@hookform/resolvers/zod'; import { z } from 'zod'",
+        "Schema: const schema = z.object({ email: z.string().email(), name: z.string().min(2) })",
+        "Hook: const form = useForm({ resolver: zodResolver(schema), defaultValues })",
+        "Submit: <form onSubmit={form.handleSubmit(onSubmit)}>",
+        "Field: <input {...form.register('email')} />",
+        "Errors: {form.formState.errors.email?.message}",
+        "Loading: disabled={form.formState.isSubmitting}"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "State Management",
+      "actions": [
+        "Local state: useState for component-specific state",
+        "Global state: Zustand store in lib/store/",
+        "Server state: SWR or React Query for data fetching",
+        "Form state: React Hook Form",
+        "URL state: useSearchParams for filters/pagination",
+        "Zustand pattern: create((set) => ({ items: [], addItem: (item) => set((state) => ({ items: [...state.items, item] })) }))",
+        "Immer: use for complex state updates"
+      ]
+    },
+    {
+      "pattern": "**/content/blog/**/*.mdx",
+      "name": "MDX Blog Posts",
+      "actions": [
+        "Frontmatter required: title, description, date, author, category, image, tags",
+        "Pattern: ---\ntitle: 'Post Title'\ndescription: 'SEO description'\ndate: '2025-01-15'\nauthor: 'busy-team'\ncategory: 'streetwear'\nimage: '/blog/image.jpg'\ntags: ['moda', 'estilo']\n---",
+        "Use custom components: <BlogImage />, <CodeBlock />, <Callout />, <VideoEmbed />",
+        "Images: always use BlogImage component for optimization",
+        "Code blocks: specify language for syntax highlighting"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "Popover System",
+      "actions": [
+        "5 types available: simple, discount, email-gate, newsletter, custom",
+        "Create from admin: /admin/popovers/new",
+        "Segmentation: target_path (route), section, start_date, end_date, priority",
+        "Features: animated entry, confetti on copy/subscribe, email-gate, localStorage",
+        "Component: components/site-popover.tsx (auto-loaded)",
+        "Storage: Supabase Storage bucket 'popovers' for images",
+        "Priority: 1-10 (higher = more important)"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "Playlist System",
+      "actions": [
+        "Spotify embed: use spotify_playlist_id in database",
+        "Public routes: /playlists (list), /playlists/[slug] (player)",
+        "Admin routes: /admin/playlists (manage), /admin/artist-submissions (review)",
+        "Artist submissions: form fields (name, email, phone, genre, track_url, spotify_artist_url, instagram, youtube, message)",
+        "States: pending, reviewed, approved, rejected",
+        "Components: PlaylistCard, ArtistSubmissionForm, ArtistSubmissionsTable"
+      ]
+    },
+    {
+      "pattern": "**/*.{tsx,ts}",
+      "name": "E-commerce Patterns",
+      "actions": [
+        "Flow: Products → Cart → Checkout → Payment (Mercado Pago) → Confirmation",
+        "Product filters: category, price range, size, color",
+        "Cart: use Zustand store for cart state",
+        "Checkout: validate with Zod, calculate shipping, apply coupons",
+        "Payment: Mercado Pago integration in app/api/checkout/",
+        "Order tracking: store in Supabase orders table",
+        "Admin: manage products, orders, coupons, customers from /admin"
+      ]
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import SitePopover from '@/components/site-popover'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 import { generateSEO } from '@/lib/seo'
+import { ReducedMotionProvider } from '@/motion/providers/ReducedMotionProvider'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
@@ -86,10 +87,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' },
-  ],
+  themeColor: '#000000',
 }
 
 const jsonLd = [
@@ -135,8 +133,13 @@ export default function RootLayout({
   const cookieLocale = cookieStore.get('busy_locale')?.value
   const htmlLang = cookieLocale === 'es' || cookieLocale === 'en' ? cookieLocale : 'es'
   return (
-    <html lang={htmlLang} suppressHydrationWarning>
+    <html lang={htmlLang} suppressHydrationWarning className="dark">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){document.documentElement.classList.add('dark')})()`,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -145,21 +148,23 @@ export default function RootLayout({
       <body
         className={`bg-black/90 ${spaceGrotesk.variable} ${plusJakartaSans.variable} ${abel.variable} ${dmSans.variable} ${poppins.variable} font-sans antialiased`}
       >
-        <I18nProvider>
-          <HtmlLang />
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <SplashGate />
-            <SiteFrame>
-              {children}
-            </SiteFrame>
-            <Toaster />
-          </ThemeProvider>
-        </I18nProvider>
+        <ReducedMotionProvider>
+          <I18nProvider>
+            <HtmlLang />
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              forcedTheme="dark"
+              disableTransitionOnChange
+            >
+              <SplashGate />
+              <SiteFrame>
+                {children}
+              </SiteFrame>
+              <Toaster />
+            </ThemeProvider>
+          </I18nProvider>
+        </ReducedMotionProvider>
         {/* Custom cursor should be rendered within <body> to avoid removeChild null errors */}
         <CustomCursor />
         <AdminQuickFAB />
