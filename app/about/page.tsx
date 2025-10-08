@@ -296,9 +296,9 @@ function AboutContent() {
   }, [])
 
   return (
-    <div className="flex flex-col font-body">
+    <div className="flex flex-col font-body overflow-x-hidden">
       {/* Hero Section */}
-      <section ref={heroRef} className="relative overflow-hidden">
+      <section ref={heroRef} className="relative overflow-hidden w-full">
         {/* Pattern background limited to this hero section */}
         <div
           className="pointer-events-none absolute bg-repeat bg-cover opacity-80"
@@ -309,7 +309,7 @@ function AboutContent() {
             height: '100%',
           }}
         />
-        <div className="container px-3 sm:px-4 relative z-10 py-12 md:py-16 lg:py-20">
+        <div className="container px-3 sm:px-4 relative z-10 py-16 md:py-16 lg:py-20">
           <div className="max-w-4xl mx-auto text-center">
             <div className="hero-logo flex flex-row items-center justify-center gap-3 mb-2 md:mb-2">
               <div className="relative h-20 w-20 md:h-28 md:w-28">
@@ -333,7 +333,7 @@ function AboutContent() {
       </section>
 
       {/* Story Section */}
-      <section ref={storyRef} className="py-16 md:py-24 bg-muted/50">
+      <section ref={storyRef} className="py-16 md:py-24 bg-muted/50 w-full overflow-hidden">
         <div className="container px-3 sm:px-4">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
@@ -371,7 +371,7 @@ function AboutContent() {
       </section>
 
       {/* Showcase Section - Bento Box Layout Creativo */}
-      <section ref={showcaseRef} className="relative bg-black overflow-hidden py-12 md:py-16">
+      <section ref={showcaseRef} className="relative bg-black overflow-hidden py-12 md:py-16 w-full">
         {/* Pattern background */}
         <div
           className="pointer-events-none absolute bg-repeat bg-cover opacity-30"
@@ -487,7 +487,7 @@ function AboutContent() {
       </section>
 
       {/* Roadmap Section - Zigzag Timeline con más recorrido */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-muted/50 to-background relative overflow-hidden">
+      <section className="py-16 md:py-24 bg-gradient-to-b from-muted/50 to-background relative overflow-hidden w-full">
         {/* Decorative diagonal lines */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-0 left-0 w-full h-full" style={{
@@ -511,11 +511,11 @@ function AboutContent() {
             </div>
 
             {/* Roadmap Items - Zigzag Layout con más separación */}
-            <div ref={roadmapRef} className="relative max-w-7xl mx-auto px-2">
+            <div ref={roadmapRef} className="relative max-w-7xl mx-auto px-2 overflow-hidden">
               {/* SVG Zigzag Line - Path dinámico que se calcula automáticamente */}
               <svg
                 className="absolute left-0 top-0 w-full h-full pointer-events-none hidden md:block"
-                style={{ overflow: 'visible' }}
+                style={{ overflow: 'hidden' }}
               >
                 <defs>
                   {/* Gradiente para línea pasado/presente (blanco brillante) */}
@@ -648,7 +648,7 @@ function AboutContent() {
                           {/* Connector dot */}
                           <div
                             ref={(el) => { roadmapDotsRef.current[index] = el }}
-                            className={`absolute top-10 w-4 h-4 bg-accent-brand rounded-full border-4 border-background hidden md:block ${isLast ? 'left-1/2 -translate-x-1/2' : (alignment === 'left' ? '-right-8' : '-left-8')}`}
+                            className={`absolute top-10 w-4 h-4 bg-accent-brand rounded-full border-4 border-background hidden lg:block ${isLast ? 'left-1/2 -translate-x-1/2' : (alignment === 'left' ? '-right-8' : '-left-8')}`}
                           />
                         </div>
                       </div>
@@ -662,7 +662,7 @@ function AboutContent() {
       </section>
 
       {/* CTA Section */}
-      <section ref={ctaRef} className="py-16 md:py-24">
+      <section ref={ctaRef} className="py-16 md:py-24 w-full overflow-hidden">
         <div className="container px-3 sm:px-4">
           <div className="cta-content max-w-4xl mx-auto text-center">
             <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 px-4">
