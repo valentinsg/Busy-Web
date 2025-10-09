@@ -122,6 +122,63 @@ const jsonLd = [
     },
     inLanguage: 'es-AR',
   },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Secciones principales de Busy Streetwear',
+    description: 'Navegación principal del sitio',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Productos',
+        description: 'Tienda de ropa streetwear: hoodies, remeras, pantalones y más',
+        url: `${SITE_URL}/products`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Sobre Nosotros',
+        description: 'Conocé la historia, valores y roadmap de Busy Streetwear',
+        url: `${SITE_URL}/about`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Playlists',
+        description: 'Playlists curadas de música urbana y cultura streetwear',
+        url: `${SITE_URL}/playlists`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: 'Blog',
+        description: 'Artículos sobre cultura urbana, moda y streetwear',
+        url: `${SITE_URL}/blog`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 5,
+        name: 'Contacto',
+        description: 'Ponete en contacto con Busy Streetwear',
+        url: `${SITE_URL}/contact`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 6,
+        name: 'Calculadora de Talles',
+        description: 'Encontrá tu talle perfecto con nuestra calculadora',
+        url: `${SITE_URL}/size-calculator`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 7,
+        name: 'Preguntas Frecuentes',
+        description: 'Respuestas a las preguntas más comunes sobre Busy',
+        url: `${SITE_URL}/faq`,
+      },
+    ],
+  },
 ]
 
 export default function RootLayout({

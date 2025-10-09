@@ -5,37 +5,38 @@ import { gsap } from 'gsap'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
+import NewsletterSignup from '@/components/blog/newsletter-signup'
 
 // Roadmap con hitos clave
 const roadmap = [
   {
     year: '2023',
     title: 'Nace la idea',
-    desc: 'Empezamos a imaginar Busy como un espacio de streetwear auténtico, con una mirada propia y cerca de la comunidad.',
+    desc: 'Empezamos a imaginar a Busy un concepto diferente para crear nuestro propio espacio sobre moda, tratando de darle un trasfondo personal y cercano para que más personas puedan sentirse identificadas.',
     icon: 'lightbulb',
   },
   {
-    year: 'Dic 2024',
-    title: 'Primeros básicos',
+    year: 'Noviembre 2024',
+    title: 'Primera Colección',
     desc: 'Creamos la primera tanda de básicos: remeras y hoodies que sentaron la base de nuestra identidad.',
     icon: 'shirt',
   },
   {
-    year: 'Feb 2025',
-    title: 'Sold out',
-    desc: 'Algunos productos se agotan en días. Confirmamos que vamos por buen camino y redoblamos la apuesta.',
+    year: 'Febrero 2025',
+    title: 'Sold out y problemas',
+    desc: 'Algunos productos se agotaron en días, no lo podíamos creer porque nos movimos e invertimos mucho. Confirmamos que ibamos por buen camino, pero hubo problemas personales y trabas que nos imposibilitaron continuar con la marca.',
     icon: 'flame',
   },
   {
-    year: 'Oct 2025',
+    year: 'Septiembre 2025',
     title: 'Comunidad y marcas amigas',
-    desc: 'Sumamos productos de marcas amigas y comenzamos a crear artículos importantes junto a nuestra comunidad.',
+    desc: 'Decidimos volver porque sabíamos que algo habíamos hecho bien, entonces pensamos que la mejor manera y la más rápida, era sumando productos de marcas amigas, sumado a algunas cosas que nos habían quedado de nuestro primer drop.',
     icon: 'users',
   },
   {
     year: '2026',
-    title: 'Próximo paso: showroom',
-    desc: 'Nuestro plan es abrir el primer showroom para encontrarnos cara a cara y vivir Busy offline.',
+    title: 'Próximo paso: local',
+    desc: 'Nuestro plan es abrir el primer showroom o local de la marca y poder conectar aún mejor personalmente, con nuestro espacio ya definido queremos empezar a armar nuestros primeros eventos y un accionar más constante.',
     icon: 'store',
   },
 ]
@@ -44,13 +45,25 @@ const roadmap = [
 const RoadmapIcon = ({ name }: { name: string }) => {
   const icons: Record<string, JSX.Element> = {
     lightbulb: (
-      <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="w-full h-full"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M9 18h6M10 22h4M15 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
         <path d="M12 3v1M6.6 6.6l.7.7M3 12h1M6.6 17.4l.7-.7M17.4 6.6l-.7.7M21 12h-1M17.4 17.4l-.7-.7" />
       </svg>
     ),
     shirt: (
-      <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="w-full h-full"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
       </svg>
     ),
@@ -60,14 +73,26 @@ const RoadmapIcon = ({ name }: { name: string }) => {
       </svg>
     ),
     users: (
-      <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="w-full h-full"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
       </svg>
     ),
     store: (
-      <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="w-full h-full"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
         <path d="M3 9V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3M9 22V12h6v10" />
       </svg>
@@ -90,10 +115,15 @@ function AboutContent() {
   useEffect(() => {
     // Calcular y dibujar el path dinámicamente basado en las posiciones reales de los dots
     const updateRoadmapPath = () => {
-      if (!roadmapRef.current || !roadmapPathRef.current || !roadmapPathFutureRef.current) return
+      if (
+        !roadmapRef.current ||
+        !roadmapPathRef.current ||
+        !roadmapPathFutureRef.current
+      )
+        return
 
       const containerRect = roadmapRef.current.getBoundingClientRect()
-      const dots = roadmapDotsRef.current.filter(dot => dot !== null)
+      const dots = roadmapDotsRef.current.filter((dot) => dot !== null)
 
       if (dots.length === 0) {
         console.log('No dots found yet')
@@ -103,11 +133,11 @@ function AboutContent() {
       console.log(`Found ${dots.length} dots`)
 
       // Obtener posiciones relativas de cada dot
-      const positions = dots.map(dot => {
+      const positions = dots.map((dot) => {
         const rect = dot!.getBoundingClientRect()
         const pos = {
           x: rect.left + rect.width / 2 - containerRect.left,
-          y: rect.top + rect.height / 2 - containerRect.top
+          y: rect.top + rect.height / 2 - containerRect.top,
         }
         console.log('Dot position:', pos)
         return pos
@@ -269,7 +299,7 @@ function AboutContent() {
         onComplete: () => {
           // Actualizar path después de que las animaciones terminen
           setTimeout(updateRoadmapPath, 100)
-        }
+        },
       })
 
       // CTA Section
@@ -309,7 +339,7 @@ function AboutContent() {
             height: '100%',
           }}
         />
-        <div className="container px-3 sm:px-4 relative z-10 py-16 md:py-16 lg:py-20">
+        <div className="container px-3 sm:px-4 relative z-10 pb-12 md:py-12 lg:pb-12 pt-20 md:pt-20 lg:pt-20 ">
           <div className="max-w-4xl mx-auto text-center">
             <div className="hero-logo flex flex-row items-center justify-center gap-3 mb-2 md:mb-2">
               <div className="relative h-20 w-20 md:h-28 md:w-28">
@@ -333,7 +363,10 @@ function AboutContent() {
       </section>
 
       {/* Story Section */}
-      <section ref={storyRef} className="py-16 md:py-24 bg-muted/50 w-full overflow-hidden">
+      <section
+        ref={storyRef}
+        className="py-16 md:py-24 bg-muted/50 w-full overflow-hidden"
+      >
         <div className="container px-3 sm:px-4">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
@@ -346,7 +379,11 @@ function AboutContent() {
                   <p>{t('about.story.p2')}</p>
                   <p>{t('about.story.p3')}</p>
                 </div>
-                <Button asChild className="mt-6 md:mt-8 w-full sm:w-auto" size="lg">
+                <Button
+                  asChild
+                  className="mt-6 md:mt-8 w-full sm:w-auto"
+                  size="lg"
+                >
                   <Link href="/products">{t('about.story.cta')}</Link>
                 </Button>
               </div>
@@ -371,7 +408,10 @@ function AboutContent() {
       </section>
 
       {/* Showcase Section - Bento Box Layout Creativo */}
-      <section ref={showcaseRef} className="relative bg-black overflow-hidden py-12 md:py-16 w-full">
+      <section
+        ref={showcaseRef}
+        className="relative bg-black overflow-hidden py-12 md:py-16 w-full"
+      >
         {/* Pattern background */}
         <div
           className="pointer-events-none absolute bg-repeat bg-cover opacity-30"
@@ -408,8 +448,12 @@ function AboutContent() {
                     />
                   </div>
                   <div className="absolute bottom-6 left-6 right-6">
-                    <h3 className="font-heading text-2xl md:text-3xl font-bold text-white mb-2">Nuestra Identidad</h3>
-                    <p className="text-white/80 text-sm md:text-base">Streetwear auténtico desde Mar del Plata</p>
+                    <h3 className="font-heading text-2xl md:text-3xl font-bold text-white mb-2">
+                      Nuestra Identidad
+                    </h3>
+                    <p className="text-white/80 text-sm md:text-base">
+                      Streetwear auténtico desde Mar del Plata
+                    </p>
                   </div>
                 </div>
               </div>
@@ -436,8 +480,12 @@ function AboutContent() {
                     />
                   </div>
                   <div className="absolute bottom-6 left-6 right-6">
-                    <h3 className="font-heading text-2xl md:text-3xl font-bold text-white mb-2">Colección 2024</h3>
-                    <p className="text-white/80 text-sm md:text-base">Diseños que representan la cultura urbana</p>
+                    <h3 className="font-heading text-2xl md:text-3xl font-bold text-white mb-2">
+                      Colección 2024
+                    </h3>
+                    <p className="text-white/80 text-sm md:text-base">
+                      Diseños que representan la cultura urbana
+                    </p>
                   </div>
                 </div>
               </div>
@@ -463,8 +511,12 @@ function AboutContent() {
                     />
                   </div>
                   <div className="absolute bottom-6 left-6 right-6">
-                    <h3 className="font-heading text-xl md:text-2xl font-bold text-white mb-2">Comunidad</h3>
-                    <p className="text-white/80 text-sm">Unidos por la cultura</p>
+                    <h3 className="font-heading text-xl md:text-2xl font-bold text-white mb-2">
+                      Comunidad
+                    </h3>
+                    <p className="text-white/80 text-sm">
+                      Unidos por la cultura
+                    </p>
                   </div>
                 </div>
               </div>
@@ -490,9 +542,13 @@ function AboutContent() {
       <section className="py-16 md:py-24 bg-gradient-to-b from-muted/50 to-background relative overflow-hidden w-full">
         {/* Decorative diagonal lines */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-0 left-0 w-full h-full" style={{
-            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 35px, currentColor 35px, currentColor 36px)',
-          }} />
+          <div
+            className="absolute top-0 left-0 w-full h-full"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(45deg, transparent, transparent 35px, currentColor 35px, currentColor 36px)',
+            }}
+          />
         </div>
 
         <div className="container px-3 sm:px-4 relative z-10">
@@ -511,7 +567,10 @@ function AboutContent() {
             </div>
 
             {/* Roadmap Items - Zigzag Layout con más separación */}
-            <div ref={roadmapRef} className="relative max-w-7xl mx-auto px-2 overflow-hidden">
+            <div
+              ref={roadmapRef}
+              className="relative max-w-7xl mx-auto px-2 pt-16"
+            >
               {/* SVG Zigzag Line - Path dinámico que se calcula automáticamente */}
               <svg
                 className="absolute left-0 top-0 w-full h-full pointer-events-none hidden md:block"
@@ -519,15 +578,47 @@ function AboutContent() {
               >
                 <defs>
                   {/* Gradiente para línea pasado/presente (blanco brillante) */}
-                  <linearGradient id="roadmap-gradient-present" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="hsl(var(--accent-brand))" stopOpacity="1" />
-                    <stop offset="50%" stopColor="hsl(var(--accent-brand))" stopOpacity="0.9" />
-                    <stop offset="100%" stopColor="hsl(var(--accent-brand))" stopOpacity="0.8" />
+                  <linearGradient
+                    id="roadmap-gradient-present"
+                    x1="0%"
+                    y1="0%"
+                    x2="0%"
+                    y2="100%"
+                  >
+                    <stop
+                      offset="0%"
+                      stopColor="hsl(var(--accent-brand))"
+                      stopOpacity="1"
+                    />
+                    <stop
+                      offset="50%"
+                      stopColor="hsl(var(--accent-brand))"
+                      stopOpacity="0.9"
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor="hsl(var(--accent-brand))"
+                      stopOpacity="0.8"
+                    />
                   </linearGradient>
                   {/* Gradiente para línea futuro (gris apagado) */}
-                  <linearGradient id="roadmap-gradient-future" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="hsl(var(--muted-foreground))" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="hsl(var(--muted-foreground))" stopOpacity="0.2" />
+                  <linearGradient
+                    id="roadmap-gradient-future"
+                    x1="0%"
+                    y1="0%"
+                    x2="0%"
+                    y2="100%"
+                  >
+                    <stop
+                      offset="0%"
+                      stopColor="hsl(var(--muted-foreground))"
+                      stopOpacity="0.3"
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor="hsl(var(--muted-foreground))"
+                      stopOpacity="0.2"
+                    />
                   </linearGradient>
                 </defs>
                 {/* Path PASADO/PRESENTE - Blanco brillante */}
@@ -567,8 +658,8 @@ function AboutContent() {
                       key={index}
                       className={`roadmap-item ${isLast ? 'mx-auto' : ''}`}
                       style={{
-                        marginLeft: isLast ? 'auto' : (isLeft ? '0' : 'auto'),
-                        marginRight: isLast ? 'auto' : (isLeft ? 'auto' : '0'),
+                        marginLeft: isLast ? 'auto' : isLeft ? '0' : 'auto',
+                        marginRight: isLast ? 'auto' : isLeft ? 'auto' : '0',
                         maxWidth: '480px',
                       }}
                     >
@@ -587,7 +678,7 @@ function AboutContent() {
                         )}
 
                         {/* Card */}
-                        <div className="relative bg-card border-2 border-border rounded-2xl p-6 md:p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:border-accent-brand/50">
+                        <div className="relative bg-card border-2 border-border rounded-2xl p-6 md:p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:border-accent-brand/50">
                           {/* Glow effect con accent-brand */}
                           <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-brand to-accent-brand/50 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
 
@@ -647,8 +738,16 @@ function AboutContent() {
 
                           {/* Connector dot */}
                           <div
-                            ref={(el) => { roadmapDotsRef.current[index] = el }}
-                            className={`absolute top-10 w-4 h-4 bg-accent-brand rounded-full border-4 border-background hidden lg:block ${isLast ? 'left-1/2 -translate-x-1/2' : (alignment === 'left' ? '-right-8' : '-left-8')}`}
+                            ref={(el) => {
+                              roadmapDotsRef.current[index] = el
+                            }}
+                            className={`absolute top-10 w-4 h-4 bg-accent-brand rounded-full border-4 border-background hidden lg:block ${
+                              isLast
+                                ? 'left-1/2 -translate-x-1/2'
+                                : alignment === 'left'
+                                ? '-right-8'
+                                : '-left-8'
+                            }`}
                           />
                         </div>
                       </div>
@@ -662,24 +761,10 @@ function AboutContent() {
       </section>
 
       {/* CTA Section */}
-      <section ref={ctaRef} className="py-16 md:py-24 w-full overflow-hidden">
-        <div className="container px-3 sm:px-4">
-          <div className="cta-content max-w-4xl mx-auto text-center">
-            <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 px-4">
-              {t('about.cta.title')}
-            </h2>
-            <p className="font-body text-muted-foreground text-base md:text-lg mb-6 md:mb-8 leading-relaxed px-4">
-              {t('about.cta.subtitle')}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center px-4">
-              <Button asChild size="lg" className="w-full sm:w-auto">
-                <Link href="/products">{t('about.cta.primary')}</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
-                <Link href="/contact">{t('about.cta.secondary')}</Link>
-              </Button>
-            </div>
-          </div>
+      <section ref={ctaRef} className="py-12 md:py-16 w-full overflow-hidden">
+        {/* Newsletter Signup */}
+        <div className="max-w-3xl mx-auto px-4">
+          <NewsletterSignup size="large" />
         </div>
       </section>
     </div>
@@ -687,7 +772,5 @@ function AboutContent() {
 }
 
 export default function AboutPage() {
-  return (
-    <AboutContent />
-  )
+  return <AboutContent />
 }

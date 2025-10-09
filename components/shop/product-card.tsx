@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Star } from 'lucide-react'
+import { Star, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
@@ -26,12 +26,21 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0)
   const [isHovered, setIsHovered] = React.useState(false)
   const [showAllSizes, setShowAllSizes] = React.useState(false)
+  const [isMobile, setIsMobile] = React.useState(false)
 
   const { addItem, openCart } = useCart()
   const router = useRouter()
   const overlayRef = React.useRef<HTMLDivElement | null>(null)
 
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   const handleMouseEnter = () => {
+    if (isMobile) return // No auto-change on mobile
     setIsHovered(true)
     if (product.images.length > 1) {
       setCurrentImageIndex(1)
@@ -39,9 +48,26 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
   }
 
   const handleMouseLeave = () => {
+    if (isMobile) return
     setIsHovered(false)
     setCurrentImageIndex(0)
     setShowAllSizes(false)
+  }
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? product.images.length - 1 : prev - 1
+    )
+  }
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => 
+      prev === product.images.length - 1 ? 0 : prev + 1
+    )
   }
 
   const handleAddToCartWithSize = (
@@ -196,6 +222,39 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
               loading="lazy"
             />
+
+          {/* Image navigation arrows - mobile only */}
+          {isMobile && product.images.length > 1 && (
+            <>
+              <button
+                onClick={handlePrevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 backdrop-blur-sm transition-all"
+                aria-label="Imagen anterior"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleNextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 backdrop-blur-sm transition-all"
+                aria-label="Siguiente imagen"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              {/* Image indicator dots */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+                {product.images.map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${
+                      idx === currentImageIndex
+                        ? 'bg-white w-4'
+                        : 'bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
 
           {/* Custom Badge */}
           {product.badgeText && (

@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { getServiceClient } from "@/lib/supabase/server"
+import { DeletePopoverButton } from "@/components/admin/delete-popover-button"
 
 export const dynamic = "force-dynamic"
 
@@ -47,7 +48,8 @@ export default async function AdminPopoversPage() {
               <p className="text-xs text-muted-foreground truncate">Rutas: {(p.paths || []).join(', ') || 'Todas'}</p>
             </div>
             <div className="flex items-center gap-2">
-              <Link href={`/admin/popovers/new?id=${p.id}`} className="text-sm underline text-muted-foreground">Editar</Link>
+              <Link href={`/admin/popovers/new?id=${p.id}`} className="text-sm underline text-muted-foreground hover:text-foreground">Editar</Link>
+              <DeletePopoverButton id={p.id} title={p.title} />
             </div>
           </div>
         ))}

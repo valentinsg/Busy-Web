@@ -44,45 +44,68 @@ export const metadata: Metadata = {
 }
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Inicio',
+        item: siteUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Contacto',
+        item: `${siteUrl}/contact`,
+      },
+    ],
+  }
+
+  const contactPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name: 'Contacto - Busy Streetwear',
+    url: `${siteUrl}/contact`,
+    mainEntity: {
+      '@type': 'Organization',
+      name: 'Busy Streetwear',
+      url: siteUrl,
+      logo: `${siteUrl}/logo-busy-black.png`,
+      contactPoint: [
+        {
+          '@type': 'ContactPoint',
+          telephone: '+54-9-223-668-0041',
+          contactType: 'Customer Service',
+          email: 'busy.streetwear@gmail.com',
+          availableLanguage: ['Spanish', 'English'],
+          areaServed: 'AR',
+        },
+      ],
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Mar del Plata',
+        addressRegion: 'Buenos Aires',
+        addressCountry: 'AR',
+      },
+      sameAs: [
+        'https://instagram.com/busy.streetwear',
+        'https://www.facebook.com/profile.php?id=61581696441351',
+        'https://www.tiktok.com/@busy.streetwear',
+      ],
+    },
+  }
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'ContactPage',
-            name: 'Contacto - Busy Streetwear',
-            url: `${siteUrl}/contact`,
-            mainEntity: {
-              '@type': 'Organization',
-              name: 'Busy Streetwear',
-              url: siteUrl,
-              logo: `${siteUrl}/logo-busy-black.png`,
-              contactPoint: [
-                {
-                  '@type': 'ContactPoint',
-                  telephone: '+54-9-223-668-0041',
-                  contactType: 'Customer Service',
-                  email: 'busy.streetwear@gmail.com',
-                  availableLanguage: ['Spanish', 'English'],
-                  areaServed: 'AR',
-                },
-              ],
-              address: {
-                '@type': 'PostalAddress',
-                addressLocality: 'Mar del Plata',
-                addressRegion: 'Buenos Aires',
-                addressCountry: 'AR',
-              },
-              sameAs: [
-                'https://instagram.com/busy.streetwear',
-                'https://www.facebook.com/profile.php?id=61581696441351',
-                'https://www.tiktok.com/@busy.streetwear',
-              ],
-            },
-          }),
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactPageSchema) }}
       />
       {children}
     </>

@@ -43,8 +43,8 @@ export default function HomeLatestBlog() {
 
   return (
     <section className="py-10 md:py-16">
-      <div className="container px-3 sm:px-4">
-        <h2 className="font-heading text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold text-center mb-6 sm:mb-10">
+      <div className="container px-6 sm:px-4">
+        <h2 className="font-heading text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold text-center my-6 sm:my-10">
           Últimas entradas del Blog
         </h2>
 

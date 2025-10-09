@@ -4,7 +4,11 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-export default function NewsletterSignup() {
+interface NewsletterSignupProps {
+  size?: 'default' | 'large'
+}
+
+export default function NewsletterSignup({ size = 'default' }: NewsletterSignupProps) {
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "exists" | "error">("idle")
   const [message, setMessage] = useState<string>("")
@@ -40,26 +44,44 @@ export default function NewsletterSignup() {
     }
   }
 
+  const isLarge = size === 'large'
+
   return (
-    <div className="rounded-lg border bg-transparent p-4 md:p-5 my-10">
-      <h3 className="font-heading text-lg font-semibold mb-1">Suscribite a nuestra newsletter y enterate de las últimas novedades sobre Busy</h3>
-      <form onSubmit={onSubmit} className="grid gap-2 sm:grid-cols-[1fr,auto] mt-4 w-full">
+    <div className={`rounded-lg border bg-transparent ${
+      isLarge ? 'p-8 md:p-12 my-12' : 'p-4 md:p-5 my-10'
+    }`}>
+      <h3 className={`font-heading font-semibold mb-1 ${
+        isLarge ? 'text-2xl md:text-3xl mb-3' : 'text-lg'
+      }`}>
+        Suscribite a nuestra newsletter y enterate de las últimas novedades sobre Busy
+      </h3>
+      <form onSubmit={onSubmit} className={`grid gap-3 sm:grid-cols-[1fr,auto] w-full ${
+        isLarge ? 'mt-6' : 'mt-4'
+      }`}>
         <Input
           required
           type="email"
           placeholder="Tu email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="font-body"
+          className={`font-body ${
+            isLarge ? 'h-14 text-lg' : ''
+          }`}
           disabled={status === "loading" || status === "done" || status === "exists"}
         />
-        <Button disabled={status === "loading" || status === "done"} className="font-body w-full sm:w-auto">
+        <Button 
+          disabled={status === "loading" || status === "done"} 
+          className="font-body w-full sm:w-auto"
+          size={isLarge ? 'lg' : 'default'}
+        >
           {status === "loading" ? "Enviando…" : status === "done" ? "¡Listo!" : "Suscribirme"}
         </Button>
       </form>
       {message && (
         <p
-          className={`text-sm mt-3 ${
+          className={`mt-3 ${
+            isLarge ? 'text-base' : 'text-sm'
+          } ${
             status === "error" ? "text-red-500" : status === "exists" ? "text-yellow-500" : "text-muted-foreground"
           }`}
           aria-live="polite"

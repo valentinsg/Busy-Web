@@ -66,6 +66,10 @@ export function Header() {
       setHeroInView(false)
       return
     }
+    
+    // Reset to true when entering home page
+    setHeroInView(true)
+    
     const el = document.getElementById('hero-banner')
     if (!el) {
       // fallback: if no hero element, use scroll position
@@ -101,7 +105,7 @@ export function Header() {
     <header
       style={{ minHeight: '56px' }}
       className={
-        'fixed font-heading top-0 left-0 right-0 z-50 w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
+        'fixed font-heading top-0 left-0 right-0 z-[100] w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
         (showHeroVariant
           ? '!border-0 py-2 sm:p-2 !bg-transparent supports-[backdrop-filter]:!bg-transparent !backdrop-blur-0 !shadow-none'
           : 'border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-2 sm:py-0')
@@ -117,7 +121,7 @@ export function Header() {
         {/* Centered B logo (hero) */}
         <div
           className={
-            'fixed top-0 left-0 right-0 h-20 z-50 flex items-center justify-center pointer-events-none transition-[opacity,transform,filter] duration-500 ease-out transform-gpu ' +
+            'fixed top-0 left-0 right-0 h-20 z-[101] flex items-center justify-center pointer-events-none transition-[opacity,transform,filter] duration-500 ease-out transform-gpu ' +
             (showHeroVariant
               ? 'opacity-100 scale-100 blur-0'
               : 'opacity-0 scale-95 blur-[2px]')
@@ -164,7 +168,7 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav
           className={
-            'hidden md:flex items-center z-30 space-x-6 font-heading transition-opacity duration-500 ease-out transform-gpu will-change-[opacity] ' +
+            'hidden md:flex items-center relative z-10 space-x-6 font-heading transition-opacity duration-500 ease-out transform-gpu will-change-[opacity] ' +
             (showHeroVariant ? 'opacity-0 pointer-events-none' : 'opacity-100')
           }
         >

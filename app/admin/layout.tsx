@@ -22,6 +22,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname() || ""
   const isSignIn = pathname.startsWith("/admin/sign-in")
   const [allSectionsOpen, setAllSectionsOpen] = useState(true)
+  
+  // Read sidebar state from cookie - initialize with cookie value if available
+  const [sidebarDefaultOpen, setSidebarDefaultOpen] = useState(() => {
+    if (typeof window === 'undefined') return false
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`
+      const parts = value.split(`; ${name}=`)
+      if (parts.length === 2) return parts.pop()?.split(';').shift()
+      return null
+    }
+    const savedState = getCookie('sidebar:state')
+    return savedState === 'true'
+  })
 
   const toggleAllSections = () => {
     setAllSectionsOpen(!allSectionsOpen)
@@ -46,7 +59,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <AdminLayoutGuard>
-      <SidebarProvider defaultOpen={false}>
+      <SidebarProvider defaultOpen={sidebarDefaultOpen}>
         <Sidebar collapsible="icon" className="font-body">
           <SidebarHeader className="border-b border-border/50 bg-black relative z-20">
             <div className="flex items-center justify-between gap-2 px-2 py-3 pt-4 sm:pt-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">

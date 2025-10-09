@@ -15,9 +15,35 @@ export const metadata: Metadata = generateSEO({
 })
 
 export default function FAQPage() {
+  const SITE_URL = process.env.SITE_URL || 'https://busy.com.ar'
+  
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Inicio',
+        item: SITE_URL,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Preguntas Frecuentes',
+        item: `${SITE_URL}/faq`,
+      },
+    ],
+  }
+
   return (
     <div className="container px-4 py-8 pt-28 font-body">
       <div className="max-w-4xl mx-auto">
+        {/* BreadcrumbList JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
         {/* FAQPage JSON-LD */}
         <script
           type="application/ld+json"

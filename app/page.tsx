@@ -66,7 +66,7 @@ export default function Home() {
           aria-hidden
           className="pointer-events-none absolute inset-x-0 -top-10 h-16 bg-gradient-to-b from-transparent to-black"
         />
-        <div className="relative container px-3 sm:px-4">
+        <div className="relative container px-6 sm:px-4">
           <motion.div className="text-center mb-12">
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
               {t('home.latest.title', { default: 'Últimos lanzamientos' })}
@@ -100,7 +100,7 @@ export default function Home() {
       </section>
 
       <section className="relative py-14 sm:py-16 md:py-24 lg:py-28">
-        <div className="container px-3 sm:px-4">
+        <div className="container px-6 sm:px-4">
           <motion.div className="text-center mb-12">
             <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
               {t('home.categories.title', { default: 'Categorías' })}
@@ -179,17 +179,19 @@ export default function Home() {
       </section>
 
       <section className="relative overflow-hidden bg-black">
-        <div className="relative z-10 container px-3 sm:px-4 mx-auto py-16 md:py-24 ">
+        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 sm:px-10 md:px-16 lg:px-24 py-16 md:py-24">
           <div
             className="pointer-events-none absolute inset-0 -z-10 bg-repeat opacity-25"
             style={{
               backgroundImage: 'url(/pattern-black.jpg)',
             }}
           />
-          <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center justify-center justify-items-center place-content-center">
-            <motion.div
-              className="w-full max-w-xl mx-auto text-center"
-            >
+          {/* Fade lateral izquierdo */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-32 md:w-48 lg:w-64 bg-gradient-to-r from-black to-transparent z-0" />
+          {/* Fade lateral derecho */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-32 md:w-48 lg:w-64 bg-gradient-to-l from-black to-transparent z-0" />
+          <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center justify-center justify-items-center place-content-center">
+            <motion.div className="w-full max-w-xl mx-auto text-center">
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
                 {t('home.about.title', {
                   default: 'Hecho para la vida urbana',
@@ -216,7 +218,7 @@ export default function Home() {
 
             <motion.div className="relative ml-auto w-full">
               {/* Creative border frame with subtle white glow */}
-              <div className="group relative w-full max-w-sm sm:max-w-md md:max-w-lg aspect-[11/19] rounded-2xl p-[4px] bg-gradient-to-br from-white/45 via-white/20 to-transparent shadow-[0_0_50px_rgba(35,35,35,0.3)] ring-2 ring-white/30">
+              <div className="group relative w-full max-w-md sm:max-w-lg md:max-w-xl aspect-[11/19] rounded-2xl p-[4px] bg-gradient-to-br from-white/45 via-white/20 to-transparent shadow-[0_0_50px_rgba(35,35,35,0.3)] ring-2 ring-white/30">
                 {/* soft external glow */}
                 <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5" />
 
@@ -250,7 +252,7 @@ export default function Home() {
       </section>
 
       {/* Social Proof - Contracultura */}
-      <section className="relative bg-black py-16 md:py-28">
+      <section className="relative py-16 md:py-28">
         {/* Removed top fade - section is now fully black to blend seamlessly */}
         <div className="relative z-10 container px-3 sm:px-4">
           <motion.div className="text-center mb-24">
@@ -264,9 +266,7 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
-          >
+          <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {[
               {
                 iconSrc: '/blog.png',
@@ -308,10 +308,7 @@ export default function Home() {
                 },
                 index
               ) => (
-                <motion.div
-                  key={index}
-                  className="text-center"
-                >
+                <motion.div key={index} className="text-center">
                   {item.href.startsWith('http') ? (
                     <>
                       <a

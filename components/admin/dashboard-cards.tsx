@@ -66,18 +66,19 @@ export default function DashboardCards({
     [externalFrom, externalTo, from, to, groupBy, showComparison, toast],
   )
 
-  useEffect(() => {
-    void load({ quiet: true })
-  }, [load])
-
-  // Keep in sync with external props (when provided)
+  // Keep in sync with external props (when provided) and load data
   useEffect(() => {
     if (typeof externalFrom !== 'undefined') setFrom(externalFrom)
     if (typeof externalTo !== 'undefined') setTo(externalTo)
-    if (typeof externalFrom !== 'undefined' || typeof externalTo !== 'undefined') {
+  }, [externalFrom, externalTo])
+
+  // Load data with debounce to avoid multiple calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
       void load({ quiet: true })
-    }
-  }, [load, externalFrom, externalTo])
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [load])
 
   // Presets handler
   useEffect(() => {

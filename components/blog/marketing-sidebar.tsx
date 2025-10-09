@@ -19,9 +19,6 @@ export function MarketingSidebar({ latestPost, featuredProducts = [] }: Marketin
 
   return (
     <div className="space-y-6 mt-6 md:mt-12 font-body">
-      {/* Newsletter Subscription (shared component) */}
-      <NewsletterSignup />
-
       {/* Latest post CTA */}
       {latestPost && (
         <Card className="overflow-hidden">
@@ -78,6 +75,9 @@ export function MarketingSidebar({ latestPost, featuredProducts = [] }: Marketin
 
       {/* Playlists */}
       <LatestPlaylistsSidebarClient />
+
+      {/* Newsletter Subscription (shared component) */}
+      <NewsletterSignup />
 
       {/* Social Links */}
       <SocialLinksInline />

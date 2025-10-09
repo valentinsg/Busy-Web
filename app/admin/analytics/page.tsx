@@ -3,10 +3,10 @@ export const dynamic = "force-dynamic"
 
 import React, { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import DashboardCards from "@/components/admin/dashboard-cards"
 import { useToast } from "@/hooks/use-toast"
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { motion, AnimatePresence } from "framer-motion"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
+import { AnalyticsSkeleton } from "@/components/admin/analytics-skeleton"
+import { cn } from "@/lib/utils"
 
 // Helper para generar todos los días entre dos fechas
 function getAllDatesInRange(from: string, to: string): string[] {
@@ -56,9 +56,9 @@ export default function AnalyticsPage() {
   const { toast } = useToast()
   const analyticsUrl = process.env.NEXT_PUBLIC_VERCEL_ANALYTICS_URL
   const [popular, setPopular] = useState<Array<{ product_id: string; name: string; revenue: number; orders_count: number }>>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [activePreset, setActivePreset] = useState<string>('30d')
 
-  // Advanced analytics state
   // Default: últimos 30 días
   const [from, setFrom] = useState<string>(() => {
     const today = new Date()
@@ -66,6 +66,37 @@ export default function AnalyticsPage() {
     return fromD.toISOString().slice(0,10)
   })
   const [to, setTo] = useState<string>(() => new Date().toISOString().slice(0,10))
+  
+  // Preset handlers
+  const handlePreset = (preset: string) => {
+    setActivePreset(preset)
+    const today = new Date()
+    const iso = (d: Date) => d.toISOString().slice(0,10)
+    
+    switch(preset) {
+      case '7d':
+        setFrom(iso(new Date(today.getTime() - 6*24*3600*1000)))
+        setTo(iso(today))
+        setGroupBy('day')
+        break
+      case '30d':
+        setFrom(iso(new Date(today.getTime() - 29*24*3600*1000)))
+        setTo(iso(today))
+        setGroupBy('day')
+        break
+      case 'ytd':
+        setFrom(iso(new Date(today.getFullYear(), 0, 1)))
+        setTo(iso(today))
+        setGroupBy('month') // Agrupar por mes para YTD
+        break
+      case 'all':
+        setFrom('')
+        setTo('')
+        setGroupBy('month') // Agrupar por mes para todo el tiempo
+        break
+    }
+  }
+  
   const [groupBy, setGroupBy] = useState<'day'|'week'|'month'>("day")
   const [comparePrev, setComparePrev] = useState<boolean>(false)
   const [summary, setSummary] = useState<{
@@ -78,15 +109,12 @@ export default function AnalyticsPage() {
   const loadPopular = useMemo(
     () => async () => {
       try {
-        setLoading(true)
         const res = await fetch("/api/admin/analytics/product-popularity?limit=20")
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || "Error")
         setPopular((json.data || []).map((r: { product_id: string; name: string; revenue: number; orders_count: number }) => ({ product_id: r.product_id, name: r.name, revenue: Number(r.revenue || 0), orders_count: Number(r.orders_count || 0) })))
       } catch (e: unknown ) {
         toast({ title: "Error al cargar populares", description: e?.toString() || "", variant: "destructive" })
-      } finally {
-        setLoading(false)
       }
     },
     [toast],
@@ -118,26 +146,22 @@ export default function AnalyticsPage() {
     }, [from, to, groupBy, comparePrev, toast]
   )
 
+  // Load popular products only once on mount
   useEffect(() => {
     void loadPopular()
-    void loadSummary()
-  }, [loadPopular, loadSummary ])
+  }, [loadPopular])
 
-  // Helpers to build comparison series (previous period)
-  const prevRange = useMemo(() => {
-    if (!from || !to) return null
-    const start = new Date(from)
-    const end = new Date(to)
-    const diffMs = end.getTime() - start.getTime()
-    const prevEnd = new Date(start.getTime() - 24*3600*1000)
-    const prevStart = new Date(prevEnd.getTime() - diffMs)
-    return { from: prevStart.toISOString().slice(0,10), to: prevEnd.toISOString().slice(0,10) }
-  }, [from, to])
+  // Auto-update summary with debounce when inputs change
+  useEffect(() => {
+    const t = setTimeout(() => {
+      void loadSummary()
+    }, 400)
+    return () => clearTimeout(t)
+  }, [from, to, groupBy, comparePrev, loadSummary])
 
   // Preparar datos del chart con todos los días
   const chartData = useMemo(() => {
     if (groupBy !== 'day') {
-      // Para week/month, usar los datos tal cual
       return summary.timeSeries.map(d => ({
         date: d.bucket,
         label: formatDateLabel(d.bucket, groupBy),
@@ -146,7 +170,6 @@ export default function AnalyticsPage() {
       }))
     }
     
-    // Para días, llenar todos los días del rango
     const allDates = getAllDatesInRange(from, to)
     const dataMap = new Map(summary.timeSeries.map(d => [d.bucket, d]))
     
@@ -161,14 +184,13 @@ export default function AnalyticsPage() {
     })
   }, [summary.timeSeries, from, to, groupBy])
 
-
-  // Auto-update current summary with debounce when inputs change
-  useEffect(() => {
-    const t = setTimeout(() => {
-      void loadSummary()
-    }, 400)
-    return () => clearTimeout(t)
-  }, [from, to, groupBy, loadSummary])
+  const CHANNEL_COLORS = [
+    'hsl(142, 76%, 36%)', // Verde
+    'hsl(217, 91%, 60%)', // Azul
+    'hsl(47, 96%, 53%)',  // Amarillo
+    'hsl(0, 84%, 60%)',   // Rojo
+    'hsl(280, 67%, 55%)'  // Púrpura
+  ]
 
   return (
     <div className="space-y-6">
@@ -192,326 +214,224 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Controles unificados */}
-      <motion.section 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-3"
-      >
-        <div className="rounded-lg border bg-card p-4 shadow-sm">
-          <div className="flex flex-wrap gap-4 items-end">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground" title="Fecha de inicio del análisis">Desde</label>
-              <input 
-                type="date" 
-                value={from} 
-                onChange={(e) => setFrom(e.target.value)} 
-                className="border rounded-md px-3 py-2 bg-background hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" 
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground" title="Fecha de fin del análisis">Hasta</label>
-              <input 
-                type="date" 
-                value={to} 
-                onChange={(e) => setTo(e.target.value)} 
-                className="border rounded-md px-3 py-2 bg-background hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" 
-              />
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <button 
-                className="rounded-md border px-3 py-2 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors" 
-                onClick={() => {
-                  const today = new Date()
-                  const fromD = new Date(today.getTime() - 6*24*3600*1000)
-                  setFrom(fromD.toISOString().slice(0,10)); setTo(today.toISOString().slice(0,10))
-                }}
-              >
-                Últimos 7 días
-              </button>
-              <button 
-                className="rounded-md border px-3 py-2 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors" 
-                onClick={() => {
-                  const today = new Date(); const fromD = new Date(today.getTime() - 29*24*3600*1000)
-                  setFrom(fromD.toISOString().slice(0,10)); setTo(today.toISOString().slice(0,10))
-                }}
-              >
-                Últimos 30 días
-              </button>
-              <button 
-                className="rounded-md border px-3 py-2 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors" 
-                onClick={() => {
-                  const today = new Date(); const y = today.getFullYear(); const fromD = new Date(y,0,1)
-                  setFrom(fromD.toISOString().slice(0,10)); setTo(today.toISOString().slice(0,10))
-                }}
-              >
-                YTD
-              </button>
-              <button 
-                className="rounded-md border px-3 py-2 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors" 
-                onClick={() => { setFrom(""); setTo("") }}
-              >
-                Todos
-              </button>
-            </div>
-            <details className="ml-auto">
-              <summary className="cursor-pointer text-sm font-medium text-muted-foreground select-none hover:text-foreground transition-colors">Avanzado ▼</summary>
-              <div className="mt-3 flex flex-wrap gap-3 items-end">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-muted-foreground" title="Agrupar la serie temporal por día, semana o mes">Agrupar por</label>
-                  <select 
-                    value={groupBy} 
-                    onChange={(e) => setGroupBy(e.target.value as 'day' | 'week' | 'month')} 
-                    className="border rounded-md px-3 py-2 bg-background hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  >
-                    <option value="day">Día</option>
-                    <option value="week">Semana</option>
-                    <option value="month">Mes</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="checkbox" 
-                    id="compare-prev" 
-                    checked={comparePrev} 
-                    onChange={(e) => setComparePrev(e.target.checked)} 
-                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary/20"
-                  />
-                  <label htmlFor="compare-prev" className="text-xs font-medium cursor-pointer" title="Compara la serie actual contra un período previo de igual duración">Comparar período previo</label>
-                </div>
-                <button 
-                  onClick={loadSummary} 
-                  disabled={loading} 
-                  className="rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90 disabled:opacity-60 transition-colors"
-                >
-                  {loading ? 'Cargando…' : 'Actualizar'}
-                </button>
-              </div>
-            </details>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* Resumen principal dependiente del mismo rango */}
-      <DashboardCards variant="full" from={from} to={to} showControls={false} />
-
-      {/* KPIs */}
-      <motion.section 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-4"
-      >
-        <motion.div 
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="rounded-lg border bg-card p-6 shadow-sm hover:shadow-md transition-shadow" 
-          title="Cantidad de pedidos en el período seleccionado"
-        >
-          <div className="text-xs font-medium text-muted-foreground mb-2">Pedidos</div>
-          <div className="text-3xl font-bold">{summary.kpis ? summary.kpis.orders : (loading ? '…' : '0')}</div>
-        </motion.div>
-        <motion.div 
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="rounded-lg border bg-card p-6 shadow-sm hover:shadow-md transition-shadow" 
-          title="Average Order Value: Ingresos / número de pedidos en el período"
-        >
-          <div className="text-xs font-medium text-muted-foreground mb-2">Ticket promedio (AOV)</div>
-          <div className="text-3xl font-bold">${" "}{summary.kpis ? summary.kpis.aov.toFixed(2) : (loading ? '…' : '0.00')}</div>
-        </motion.div>
-        <motion.div 
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="rounded-lg border bg-card p-6 shadow-sm hover:shadow-md transition-shadow" 
-          title="Cantidad de clientes creados en el período seleccionado"
-        >
-          <div className="text-xs font-medium text-muted-foreground mb-2">Clientes nuevos</div>
-          <div className="text-3xl font-bold">{summary.kpis ? summary.kpis.new_customers : (loading ? '…' : '0')}</div>
-        </motion.div>
-      </motion.section>
-
-      {/* Time series chart */}
-      <motion.section 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="rounded-lg border bg-card p-6 shadow-sm space-y-4"
-      >
-        <div className="flex justify-between items-center">
-          <div className="font-semibold text-lg">Evolución de ingresos</div>
-          {comparePrev && prevRange && (
-            <div className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">Comparando con {prevRange.from} → {prevRange.to}</div>
+      {/* Controles minimal */}
+      <section className="flex flex-wrap items-center gap-2">
+        <button
+          onClick={() => handlePreset('7d')}
+          className={cn(
+            "px-4 py-2 text-sm font-medium rounded-lg transition-all",
+            activePreset === '7d'
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
           )}
+        >
+          Últimos 7 días
+        </button>
+        <button
+          onClick={() => handlePreset('30d')}
+          className={cn(
+            "px-4 py-2 text-sm font-medium rounded-lg transition-all",
+            activePreset === '30d'
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Últimos 30 días
+        </button>
+        <button
+          onClick={() => handlePreset('ytd')}
+          className={cn(
+            "px-4 py-2 text-sm font-medium rounded-lg transition-all",
+            activePreset === 'ytd'
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
+          )}
+        >
+          YTD
+        </button>
+        <button
+          onClick={() => handlePreset('all')}
+          className={cn(
+            "px-4 py-2 text-sm font-medium rounded-lg transition-all",
+            activePreset === 'all'
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Todo el tiempo
+        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <input
+            type="date"
+            value={from}
+            onChange={(e) => { setFrom(e.target.value); setActivePreset('') }}
+            className="px-3 py-2 text-sm border rounded-lg bg-background"
+          />
+          <span className="text-muted-foreground">→</span>
+          <input
+            type="date"
+            value={to}
+            onChange={(e) => { setTo(e.target.value); setActivePreset('') }}
+            className="px-3 py-2 text-sm border rounded-lg bg-background"
+          />
         </div>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`${from}-${to}-${groupBy}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="w-full h-[320px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(142, 76%, 36%)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="hsl(142, 76%, 36%)" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorPrev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                <XAxis 
-                  dataKey="label" 
-                  tickLine={false} 
-                  axisLine={false} 
-                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis 
-                  tickLine={false} 
-                  axisLine={false} 
-                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                  width={60}
-                  tickFormatter={(value) => `$${value.toLocaleString()}`}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend 
-                  wrapperStyle={{ paddingTop: '20px' }}
-                  iconType="line"
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="Ingresos" 
-                  stroke="hsl(142, 76%, 36%)" 
-                  strokeWidth={2}
-                  fill="url(#colorIngresos)"
-                  animationDuration={800}
-                  animationEasing="ease-out"
-                />
-                {comparePrev && (
+      </section>
+
+      {loading ? (
+        <AnalyticsSkeleton />
+      ) : (
+        <>
+          {/* KPIs */}
+          <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="rounded-lg border bg-card p-6 shadow-sm">
+              <div className="text-xs font-medium text-muted-foreground mb-2">Ingresos</div>
+              <div className="text-3xl font-bold">${summary.profit ? summary.profit.revenue.toLocaleString() : '0'}</div>
+            </div>
+            <div className="rounded-lg border bg-card p-6 shadow-sm">
+              <div className="text-xs font-medium text-muted-foreground mb-2">Pedidos</div>
+              <div className="text-3xl font-bold">{summary.kpis?.orders || 0}</div>
+            </div>
+            <div className="rounded-lg border bg-card p-6 shadow-sm">
+              <div className="text-xs font-medium text-muted-foreground mb-2">Ticket promedio</div>
+              <div className="text-3xl font-bold">${summary.kpis?.aov.toFixed(2) || '0.00'}</div>
+            </div>
+            <div className="rounded-lg border bg-card p-6 shadow-sm">
+              <div className="text-xs font-medium text-muted-foreground mb-2">Clientes nuevos</div>
+              <div className="text-3xl font-bold">{summary.kpis?.new_customers || 0}</div>
+            </div>
+          </section>
+
+          {/* Time series chart */}
+          <section className="rounded-lg border bg-card p-6 shadow-sm space-y-4">
+            <div className="font-semibold text-lg">Evolución de ingresos</div>
+            <div className="w-full h-[320px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(142, 76%, 36%)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(142, 76%, 36%)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis 
+                    dataKey="label" 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                    width={60}
+                    tickFormatter={(value) => `$${value.toLocaleString()}`}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ paddingTop: '20px' }} iconType="line" />
                   <Area 
                     type="monotone" 
-                    dataKey="Período anterior" 
-                    stroke="hsl(0, 84%, 60%)" 
+                    dataKey="Ingresos" 
+                    stroke="hsl(142, 76%, 36%)" 
                     strokeWidth={2}
-                    strokeDasharray="5 5"
-                    fill="url(#colorPrev)"
-                    animationDuration={800}
-                    animationEasing="ease-out"
+                    fill="url(#colorIngresos)"
                   />
-                )}
-              </AreaChart>
-            </ResponsiveContainer>
-          </motion.div>
-        </AnimatePresence>
-      </motion.section>
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
 
-      {/* Revenue by channel chart */}
-      <motion.section 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="rounded-lg border bg-card p-6 shadow-sm space-y-4"
-      >
-        <div className="font-semibold text-lg">Ingresos por canal</div>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`${from}-${to}-channels`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="w-full h-[320px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart 
-                data={summary.revenueByChannel.map(r => ({ 
-                  canal: r.channel, 
-                  Ingresos: r.revenue,
-                  Pedidos: r.orders 
-                }))} 
-                margin={{ left: 0, right: 0, top: 10, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                <XAxis 
-                  dataKey="canal" 
-                  tickLine={false} 
-                  axisLine={false} 
-                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                />
-                <YAxis 
-                  tickLine={false} 
-                  axisLine={false} 
-                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                  width={60}
-                  tickFormatter={(value) => `$${value.toLocaleString()}`}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                <Bar 
-                  dataKey="Ingresos" 
-                  fill="hsl(217, 91%, 60%)" 
-                  radius={[8, 8, 0, 0]}
-                  animationDuration={800}
-                  animationEasing="ease-out"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </motion.div>
-        </AnimatePresence>
-        <div className="text-xs text-muted-foreground" title="Suma de ingresos (ordenes) agrupados por canal dentro del período">Suma de ingresos por canal en el período seleccionado</div>
-      </motion.section>
-      <motion.section 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="space-y-4"
-      >
-        <div className="flex items-center justify-between">
-          <h2 className="font-heading text-xl font-semibold">Productos populares</h2>
-          <button 
-            onClick={loadPopular} 
-            disabled={loading} 
-            className="rounded-md bg-muted hover:bg-muted/80 px-4 py-2 text-sm font-medium transition-colors"
-          >
-            {loading ? "Cargando..." : "Actualizar"}
-          </button>
-        </div>
-        <div className="overflow-x-auto rounded-lg border bg-card shadow-sm">
-          <table className="min-w-full text-sm">
-            <thead className="bg-muted/40">
-              <tr>
-                <th className="text-left px-4 py-3 font-semibold">Producto</th>
-                <th className="text-left px-4 py-3 font-semibold">Pedidos</th>
-                <th className="text-left px-4 py-3 font-semibold">Ingresos</th>
-              </tr>
-            </thead>
-            <tbody>
-              {popular.length === 0 && (
-                <tr>
-                  <td className="px-4 py-8 text-center text-muted-foreground" colSpan={3}>{loading ? "Cargando..." : "Sin datos"}</td>
-                </tr>
-              )}
-              {popular.map((p, idx) => (
-                <motion.tr 
-                  key={p.product_id} 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="border-t hover:bg-muted/20 transition-colors"
-                >
-                  <td className="px-4 py-3 font-medium">{p.name || p.product_id}</td>
-                  <td className="px-4 py-3">{p.orders_count}</td>
-                  <td className="px-4 py-3 font-semibold">${" "}{p.revenue.toFixed(2)}</td>
-                </motion.tr>
+          {/* Revenue by channel - Donut Chart */}
+          <section className="rounded-lg border bg-card p-6 shadow-sm space-y-4">
+            <div className="font-semibold text-lg">Distribución por canal</div>
+            <div className="w-full h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={summary.revenueByChannel.map(r => ({
+                      name: r.channel,
+                      value: r.revenue
+                    }))}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {summary.revenueByChannel.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={CHANNEL_COLORS[index % 5]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number) => `$${value.toLocaleString()}`}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+              {summary.revenueByChannel.map((channel, idx) => (
+                <div key={channel.channel} className="flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: CHANNEL_COLORS[idx % 5] }}
+                  />
+                  <span className="text-muted-foreground">{channel.channel}:</span>
+                  <span className="font-semibold">${channel.revenue.toLocaleString()}</span>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </motion.section>
+            </div>
+          </section>
+
+          {/* Productos populares */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading text-xl font-semibold">Productos populares</h2>
+              <button 
+                onClick={loadPopular} 
+                className="rounded-md bg-muted hover:bg-muted/80 px-4 py-2 text-sm font-medium transition-colors"
+              >
+                Actualizar
+              </button>
+            </div>
+            <div className="overflow-x-auto rounded-lg border bg-card shadow-sm">
+              <table className="min-w-full text-sm">
+                <thead className="bg-muted/40">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-semibold">Producto</th>
+                    <th className="text-left px-4 py-3 font-semibold">Pedidos</th>
+                    <th className="text-left px-4 py-3 font-semibold">Ingresos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {popular.length === 0 && (
+                    <tr>
+                      <td className="px-4 py-8 text-center text-muted-foreground" colSpan={3}>Sin datos</td>
+                    </tr>
+                  )}
+                  {popular.map((p) => (
+                    <tr 
+                      key={p.product_id} 
+                      className="border-t hover:bg-muted/20 transition-colors"
+                    >
+                      <td className="px-4 py-3 font-medium">{p.name || p.product_id}</td>
+                      <td className="px-4 py-3">{p.orders_count}</td>
+                      <td className="px-4 py-3 font-semibold">${p.revenue.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </>
+      )}
     </div>
   )
 }

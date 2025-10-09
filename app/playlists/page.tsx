@@ -27,12 +27,12 @@ export default async function PlaylistsPage() {
   const playlists = await getPublishedPlaylists()
 
   return (
-    <div className="min-h-screen bg-black font-body">
+    <div className="min-h-screen bg-black font-body overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-black via-[#1DB954]/10 to-black py-12 sm:py-16 md:py-24 lg:py-32">
+      <section className="relative overflow-hidden bg-gradient-to-b from-black via-[#1DB954]/10 to-black py-20 sm:py-20 md:py-24 lg:py-32">
         <div className="absolute inset-0 bg-[url('/pattern-black.jpg')] opacity-10" />
 
-        <div className="container relative z-10 px-4 sm:px-6">
+        <div className="container relative z-0 px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             {/* Logo Busy Verde */}
             <div className="mb-1 sm:mb-1 flex justify-center">
@@ -101,7 +101,7 @@ export default async function PlaylistsPage() {
       <section className="relative overflow-hidden bg-gradient-to-b from-black via-[#1DB954]/10 to-black py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="absolute inset-0 bg-[url('/pattern-black.jpg')] opacity-10" />
 
-        <div className="container relative z-10 px-4 sm:px-6">
+        <div className="container relative z-0 px-4 sm:px-6">
           <div className="max-w-3xl mx-auto">
             {/* Header */}
             <div className="text-center mb-8 sm:mb-10 md:mb-12">
