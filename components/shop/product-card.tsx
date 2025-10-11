@@ -20,9 +20,11 @@ interface ProductCardProps {
   product: Product
   /** When provided, clicking the card navigates to this admin edit URL instead of the public product page. */
   adminEditHref?: string
+  /** Set to true for above-the-fold images to improve LCP */
+  priority?: boolean
 }
 
-export function ProductCard({ product, adminEditHref }: ProductCardProps) {
+export function ProductCard({ product, adminEditHref, priority = false }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0)
   const [isHovered, setIsHovered] = React.useState(false)
   const [showAllSizes, setShowAllSizes] = React.useState(false)
@@ -203,14 +205,7 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
             {/* gentle sheen on hover */}
             <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-15 transition-opacity duration-500" />
 
-            <Image
-              src={'/product-bg.jpg'}
-              alt={"Busy Pattern white, diseñado por @agus.mxlina"}
-              fill
-              className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
-              loading="lazy"
-            />
+            {/* Eliminada imagen de background para reducir requests */}
             <Image
               src={
                 product.images[currentImageIndex] ||
@@ -220,7 +215,8 @@ export function ProductCard({ product, adminEditHref }: ProductCardProps) {
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
-              loading="lazy"
+              priority={priority}
+              loading={priority ? "eager" : "lazy"}
             />
 
           {/* Image navigation arrows - mobile only */}

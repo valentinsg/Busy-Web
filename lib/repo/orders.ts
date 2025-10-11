@@ -1,6 +1,31 @@
 import getServiceClient from "@/lib/supabase/server"
 import type { Order, OrderItem } from "@/types/commerce"
 
+export type OrderWithDetails = Order & {
+  customer?: {
+    full_name: string | null
+    email: string | null
+    phone: string | null
+  }
+  items?: Array<{
+    product_name: string
+    quantity: number
+    unit_price: number
+    variant_size: string | null
+    variant_color: string | null
+    total: number
+  }>
+}
+
+export type OrderFilters = {
+  status?: string
+  channel?: string
+  customer_id?: string
+  payment_method?: string
+  limit?: number
+  offset?: number
+}
+
 export type CreateManualOrderInput = {
   customer_id?: string | null
   customer_name?: string | null
@@ -133,4 +158,138 @@ export async function createManualOrder(input: CreateManualOrderInput): Promise<
   }
 
   return { order: createdOrder, items: (items ?? []) as OrderItem[] }
+}
+
+/**
+ * Fetch orders with optional filters and pagination
+ */
+export async function getOrders(filters: OrderFilters = {}): Promise<{
+  orders: OrderWithDetails[]
+  total: number
+}> {
+  const supabase = getServiceClient()
+  const { status, channel, customer_id, payment_method, limit = 50, offset = 0 } = filters
+
+  // Build query
+  let query = supabase
+    .from("orders")
+    .select(`
+      id,
+      customer_id,
+      total,
+      subtotal,
+      shipping,
+      discount,
+      tax,
+      placed_at,
+      updated_at,
+      status,
+      channel,
+      payment_method,
+      notes,
+      is_barter,
+      currency,
+      customers:customer_id (
+        full_name,
+        email,
+        phone
+      )
+    `, { count: 'exact' })
+    .order("placed_at", { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  // Apply filters
+  if (status) query = query.eq("status", status)
+  if (channel) query = query.eq("channel", channel)
+  if (customer_id) query = query.eq("customer_id", customer_id)
+  if (payment_method) query = query.eq("payment_method", payment_method)
+
+  const { data: orders, error: ordersErr, count } = await query
+
+  if (ordersErr) throw ordersErr
+
+  // Fetch items for each order
+  const ordersWithItems = await Promise.all(
+    (orders || []).map(async (order) => {
+      const { data: items } = await supabase
+        .from("order_items")
+        .select("product_name, quantity, unit_price, variant_size, variant_color, total")
+        .eq("order_id", order.id)
+
+      return {
+        ...order,
+        customer: Array.isArray(order.customers) ? order.customers[0] : order.customers,
+        items: items || [],
+      } as OrderWithDetails
+    })
+  )
+
+  return {
+    orders: ordersWithItems,
+    total: count || 0,
+  }
+}
+
+/**
+ * Get a single order by ID with all details
+ */
+export async function getOrderById(orderId: string): Promise<OrderWithDetails | null> {
+  const supabase = getServiceClient()
+
+  const { data: order, error: orderErr } = await supabase
+    .from("orders")
+    .select(`
+      *,
+      customers:customer_id (
+        full_name,
+        email,
+        phone
+      )
+    `)
+    .eq("id", orderId)
+    .single()
+
+  if (orderErr) throw orderErr
+  if (!order) return null
+
+  const { data: items } = await supabase
+    .from("order_items")
+    .select("*")
+    .eq("order_id", orderId)
+
+  return {
+    ...order,
+    customer: Array.isArray(order.customers) ? order.customers[0] : order.customers,
+    items: items || [],
+  } as OrderWithDetails
+}
+
+/**
+ * Get pending orders (status = 'pending')
+ */
+export async function getPendingOrders(): Promise<OrderWithDetails[]> {
+  const { orders } = await getOrders({ status: 'pending', limit: 100 })
+  return orders
+}
+
+/**
+ * Update order
+ */
+export async function updateOrder(
+  orderId: string,
+  data: { status?: string; notes?: string }
+): Promise<boolean> {
+  const supabase = getServiceClient()
+  
+  const { error } = await supabase
+    .from("orders")
+    .update(data)
+    .eq("id", orderId)
+
+  if (error) {
+    console.error("Error updating order:", error)
+    return false
+  }
+
+  return true
 }

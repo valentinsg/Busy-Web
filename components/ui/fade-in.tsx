@@ -1,7 +1,7 @@
 "use client"
 
-import { motion, HTMLMotionProps } from "framer-motion"
-import { ReactNode } from "react"
+import { motion, HTMLMotionProps, useReducedMotion } from "framer-motion"
+import { ReactNode, useState, useEffect } from "react"
 
 interface FadeInProps extends Omit<HTMLMotionProps<"div">, "children"> {
   children: ReactNode
@@ -17,6 +17,18 @@ export function FadeIn({
   blur = true,
   ...props 
 }: FadeInProps) {
+  const shouldReduceMotion = useReducedMotion()
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // If not mounted yet or reduced motion, skip animation
+  if (!isMounted || shouldReduceMotion) {
+    return <div className={props.className}>{children}</div>
+  }
+
   return (
     <motion.div
       initial={{ 

@@ -1,7 +1,42 @@
 [
-  { "id": "default", "name": "Equipo Busy", "email": "", "avatar": "/busy-gothic.png", "instagram": "https://www.instagram.com/busy.streetwear/", "bio": "Equipo de Busy, creadores de la marca y entusiastas de la moda." },
-  { "id": "agus-molina", "name": "Agustín Molina", "email": "", "avatar": "", "instagram": "https://www.instagram.com/agus.mxlina/", "bio": "Co-Founder y Diseñador de Busy, creador de la estética de la marca y entusiasta de la moda." },
-  { "id": "eze-molina", "name": "Ezequiel Molina", "email": "", "avatar": "", "instagram": "https://www.instagram.com/zekee.187/" },
-  { "id": "juampi-pavone", "name": "Juán Pablo Pavone", "email": "", "avatar": "", "instagram": "https://www.instagram.com/juampi.pq/", "bio": "Co-Founder, Director Operativo y Logística de Busy, encargado de conectar y hacer funcionar todas las áreas de la marca." },
-  { "id": "valentin-sg", "name": "Valentín Sánchez Guevara", "email": "", "avatar": "", "instagram": "https://www.instagram.com/valensanchez.g/", "twitter": "https://x.com/valentainn__", "bio": "Co-Founder de Busy, Desarrollador de Software y Director Creativo de la marca. Valentín creció en un entorno creativo, entre computadoras e historias en el estudio de su papá, además viene de una familia de emprendedores. Un entusiasta de la tecnología y el emprendimiento, con un fuerte interés en marketing digital." }
+  {
+    "id": "default",
+    "name": "Equipo Busy",
+    "email": "",
+    "avatar": "/busy-gothic.png",
+    "instagram": "https://www.instagram.com/busy.streetwear/",
+    "bio": "Equipo de Busy, creadores de la marca y entusiastas de la moda."
+  },
+  {
+    "id": "agus-molina",
+    "name": "Agustín Molina",
+    "email": "",
+    "avatar": "/authors/agustin-molina.jpg",
+    "instagram": "https://www.instagram.com/agus.mxlina/",
+    "bio": "Co-Founder y Diseñador de Busy, creador de la estética de la marca y un entusiasta de la moda."
+  },
+  {
+    "id": "eze-molina",
+    "name": "Ezequiel Molina",
+    "email": "",
+    "avatar": "",
+    "instagram": "https://www.instagram.com/zekee.187/"
+  },
+  {
+    "id": "juampi-pavone",
+    "name": "Juán Pablo Pavone",
+    "email": "",
+    "avatar": "",
+    "instagram": "https://www.instagram.com/juampi.pq/",
+    "bio": "Co-Founder, Director Operativo y Logística de Busy, encargado de conectar y hacer funcionar todas las áreas de la marca."
+  },
+  {
+    "id": "valentin-sg",
+    "name": "Valentín Sánchez Guevara",
+    "email": "",
+    "avatar": "/authors/valentin-sg.jpg",
+    "instagram": "https://www.instagram.com/valensanchez.g/",
+    "twitter": "https://x.com/valentainn__",
+    "bio": "Co-Founder de Busy, Desarrollador de Software y Director Creativo de la marca. Valentín viene de una familia de emprendedores, crecido en entornos creativos entre computadoras, instrumentos musicales, diseñadores y locutores en el estudio de marketing de su papá. Hoy se considera un entusiasta de la tecnología y los emprendimientos. Estos últimos años desarrolló un mayor interés en el mundo del marketing digital."
+  }
 ]

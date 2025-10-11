@@ -66,62 +66,80 @@ export function Header() {
       setHeroInView(false)
       return
     }
-    
-    // Reset to true when entering home page
+
+    // Force reset to true when entering home page
     setHeroInView(true)
-    
-    const el = document.getElementById('hero-banner')
-    if (!el) {
-      // fallback: if no hero element, use scroll position
-      const onScroll = () => setHeroInView(window.scrollY < 80)
-      onScroll()
-      window.addEventListener('scroll', onScroll, { passive: true })
-      return () => window.removeEventListener('scroll', onScroll)
+
+    let observer: IntersectionObserver | null = null
+    let scrollHandler: (() => void) | null = null
+
+    // Small delay to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      const el = document.getElementById('hero-banner')
+      if (!el) {
+        // fallback: if no hero element, use scroll position
+        scrollHandler = () => setHeroInView(window.scrollY < 80)
+        scrollHandler()
+        window.addEventListener('scroll', scrollHandler, { passive: true })
+        return
+      }
+      
+      // Check initial position immediately
+      const rect = el.getBoundingClientRect()
+      const initialRatio = Math.max(0, Math.min(1, rect.height > 0 ? 
+        (Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0)) / rect.height : 0
+      ))
+      setHeroInView(initialRatio > 0.7)
+
+      // Hysteresis to avoid flicker at the threshold
+      const ENTER_STANDARD_AT = 0.7
+      const RETURN_HERO_AT = 0.9
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          const ratio = entry.intersectionRatio ?? 0
+          setHeroInView((prev) => {
+            if (prev) {
+              // currently hero; leave hero only when ratio drops clearly below 0.8
+              return ratio > ENTER_STANDARD_AT
+            } else {
+              // currently standard; return to hero only when ratio rises above 0.9
+              return ratio > RETURN_HERO_AT
+            }
+          })
+        },
+        { root: null, threshold: Array.from({ length: 21 }, (_, i) => i / 20) }
+      )
+      observer.observe(el)
+    }, 50)
+
+    return () => {
+      clearTimeout(timeoutId)
+      if (observer) observer.disconnect()
+      if (scrollHandler) window.removeEventListener('scroll', scrollHandler)
     }
-    // Hysteresis to avoid flicker at the threshold
-    // Start transition a bit later (more scroll): 0.7 instead of 0.8
-    const ENTER_STANDARD_AT = 0.7
-    const RETURN_HERO_AT = 0.9
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const ratio = entry.intersectionRatio ?? 0
-        setHeroInView((prev) => {
-          if (prev) {
-            // currently hero; leave hero only when ratio drops clearly below 0.8
-            return ratio > ENTER_STANDARD_AT
-          } else {
-            // currently standard; return to hero only when ratio rises above 0.9
-            return ratio > RETURN_HERO_AT
-          }
-        })
-      },
-      { root: null, threshold: Array.from({ length: 21 }, (_, i) => i / 20) }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [isHome])
+  }, [isHome, pathname])
 
   return (
     <header
-      style={{ minHeight: '56px' }}
+      style={{ minHeight: '72px' }}
       className={
-        'fixed font-heading top-0 left-0 right-0 z-[100] w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
+        'fixed font-heading top-0 left-0 right-0 z-40 w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
         (showHeroVariant
-          ? '!border-0 py-2 sm:p-2 !bg-transparent supports-[backdrop-filter]:!bg-transparent !backdrop-blur-0 !shadow-none'
-          : 'border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-2 sm:py-0')
+          ? '!border-0 py-3 sm:p-3 !bg-transparent supports-[backdrop-filter]:!bg-transparent !backdrop-blur-0 !shadow-none'
+          : 'border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-3 sm:py-0')
       }
     >
       <div
         className={
           showHeroVariant
-            ? 'container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4 transition-opacity duration-300'
-            : 'container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4 transition-opacity duration-300'
+            ? 'container flex h-16 sm:h-20 items-center justify-between px-3 sm:px-4 transition-opacity duration-300'
+            : 'container flex h-16 sm:h-20 items-center justify-between px-3 sm:px-4 transition-opacity duration-300'
         }
       >
         {/* Centered B logo (hero) */}
         <div
           className={
-            'fixed top-0 left-0 right-0 h-20 z-[101] flex items-center justify-center pointer-events-none transition-[opacity,transform,filter] duration-500 ease-out transform-gpu ' +
+            'fixed top-0 left-0 right-0 h-24 z-[41] flex items-center justify-center pointer-events-none transition-[opacity,transform,filter] duration-500 ease-out transform-gpu ' +
             (showHeroVariant
               ? 'opacity-100 scale-100 blur-0'
               : 'opacity-0 scale-95 blur-[2px]')
@@ -138,8 +156,8 @@ export function Header() {
             <Image
               src="/logo-busy-white.png"
               alt="Busy"
-              width={90}
-              height={30}
+              width={100}
+              height={35}
               className="object-contain"
             />
           </Link>
@@ -159,8 +177,8 @@ export function Header() {
           <Image
             src="/busy-gothic.png"
             alt="Busy"
-            width={90}
-            height={20}
+            width={100}
+            height={24}
             className="object-contain"
           />
         </Link>
@@ -168,7 +186,7 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav
           className={
-            'hidden md:flex items-center relative z-10 space-x-6 font-heading transition-opacity duration-500 ease-out transform-gpu will-change-[opacity] ' +
+            'hidden md:flex items-center relative z-10 space-x-6 lg:space-x-8 font-heading transition-opacity duration-500 ease-out transform-gpu will-change-[opacity] ' +
             (showHeroVariant ? 'opacity-0 pointer-events-none' : 'opacity-100')
           }
         >
@@ -177,9 +195,10 @@ export function Header() {
               key={item.href}
               href={item.href}
               prefetch={false}
-              className="text-sm transition-colors hover:text-accent-brand"
+              className="text-sm font-medium transition-all hover:text-accent-brand relative group"
             >
               {item.label}
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent-brand transition-all group-hover:w-full" />
             </Link>
           ))}
         </nav>
@@ -205,8 +224,6 @@ export function Header() {
               />
             </div>
           </div>
-
-          {/* Theme Toggle */}
 
           {/* Cart */}
           <CartSheet>
@@ -243,8 +260,8 @@ export function Header() {
               `}</style>
             </Button>
           </CartSheet>
-          
-          <div className="hidden md:flex ">
+
+          <div className="hidden md:flex">
             <LanguageToggle />
           </div>
 

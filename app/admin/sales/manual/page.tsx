@@ -154,193 +154,21 @@ export default function ManualSalePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-2xl font-semibold">Venta manual</h1>
-          <p className="text-sm text-muted-foreground">Registra ventas fuera de la web y descuenta stock.</p>
-        </div>
-        <Link href="/admin" className="text-sm text-primary underline-offset-2 hover:underline">
-          Volver al panel
-        </Link>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded border p-4 space-y-3 md:col-span-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
-            <div className="flex flex-col">
-              <label className="text-xs text-muted-foreground">Canal</label>
-              <select value={channel} onChange={(e) => setChannel(e.target.value as (typeof channels)[number])} className="border rounded px-2 py-1 bg-background">
-                {channels.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-xs text-muted-foreground">Cliente</label>
-              <CustomerSearchInput
-                value={{ id: customerId, name: customerName, email: customerEmail }}
-                onChange={(c) => {
-                  setCustomerId(c?.id || "")
-                  setCustomerName(c?.name || "")
-                  setCustomerEmail(c?.email || "")
-                }}
-              />
-            </div>
-            <div className="flex flex-col">
-              <label className="text-xs text-muted-foreground">Fecha</label>
-              <div className="flex gap-2">
-                <input type="datetime-local" value={placedAt} onChange={(e) => setPlacedAt(e.target.value)} className="border rounded px-2 py-1 bg-background" />
-                <button type="button" onClick={() => setPlacedAt(new Date().toISOString().slice(0,16))} className="rounded bg-muted px-2 text-xs">Ahora</button>
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-xs text-muted-foreground">Nombre cliente (opcional)</label>
-              <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="border rounded px-2 py-1 bg-background" />
-            </div>
-            <div className="flex flex-col">
-              <label className="text-xs text-muted-foreground">Email cliente (opcional)</label>
-              <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className="border rounded px-2 py-1 bg-background" />
+    <div className="min-h-screen bg-muted/30">
+      {/* Header */}
+      <div className="border-b bg-background">
+        <div className="container max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/admin" className="text-muted-foreground hover:text-foreground transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </Link>
+            <div>
+              <h1 className="font-heading text-xl font-semibold">Crear venta manual</h1>
+              <p className="text-xs text-muted-foreground">Registra ventas offline y gestiona inventario</p>
             </div>
           </div>
-
-          <div className="space-y-3">
-            <div className="font-medium">Ítems</div>
-            {items.map((it, idx) => (
-              <div key={idx} className="grid md:grid-cols-6 gap-2 border rounded p-3 items-end bg-muted/5">
-                <div className="md:col-span-3">
-                  <label className="text-xs text-muted-foreground">Producto</label>
-                  <ProductSearchInput
-                    value={it.product_id}
-                    autoFocus={!it.product_id}
-                    onChange={(pid, product) => {
-                      updateItem(idx, {
-                        product_id: pid,
-                        product_name: product?.name,
-                        unit_price: Number(product?.price || 0),
-                        available_sizes: product?.sizes || undefined,
-                      })
-                      // Auto-select first size with stock > 0 using freshly fetched data
-                      if (product?.sizes && product.sizes.length) {
-                        void (async () => {
-                          const res = await fetchItemStock(idx, pid)
-                          const sizes = (product.sizes as string[]) || []
-                          const sizeStocks = res?.sizeStocks || {}
-                          let picked: string | undefined
-                          for (const s of sizes) {
-                            const st = sizeStocks[s]
-                            if (typeof st === 'number' && st > 0) {
-                              picked = s
-                              break
-                            }
-                          }
-                          updateItem(idx, { variant_size: picked || sizes[0] })
-                          void fetchItemStock(idx, pid, picked || sizes[0])
-                        })()
-                      } else {
-                        void fetchItemStock(idx, pid, undefined)
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground">Nombre (opcional)</label>
-                  <input value={it.product_name || ""} onChange={(e) => updateItem(idx, { product_name: e.target.value })} className="w-full border rounded px-2 py-1 bg-background" />
-                </div>
-                {/* Color removido según pedido */}
-                <div>
-                  <label className="text-xs text-muted-foreground">Talle</label>
-                  {it.available_sizes && it.available_sizes.length ? (
-                    <div className="flex flex-wrap gap-2">
-                      {it.available_sizes.map((s) => {
-                        const raw = (it.size_stocks && typeof it.size_stocks[s] === 'number') ? it.size_stocks[s] : undefined
-                        const key = `${it.product_id}__${s}`
-                        const alreadySelected = selectedCounts.get(key) || 0
-                        const thisRowCounts = it.variant_size === s ? 1 : 0
-                        // Treat undefined stock for a size as 0 (no stock)
-                        const remaining = typeof raw === 'number' ? Math.max(0, raw - (alreadySelected - thisRowCounts)) : 0
-                        // Disable if loading or if there is no remaining stock for that size
-                        const disabled = (it.size_loading || !it.size_stocks)
-                          ? true
-                          : (remaining <= 0)
-                        const active = it.variant_size === s
-                        return (
-                          <button
-                            type="button"
-                            key={s}
-                            disabled={disabled}
-                            onClick={() => { updateItem(idx, { variant_size: s }); void fetchItemStock(idx, it.product_id, s) }}
-                            className={`px-2 py-1 rounded border text-xs ${active ? 'bg-primary text-primary-foreground' : 'bg-background'} ${disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-muted'}`}
-                            title={it.size_loading ? 'Cargando stock...' : `Stock ${s}: ${remaining}`}
-                          >
-                            {s}{it.size_loading ? ' • ...' : ` • ${remaining}`}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  ) : (
-                    <input value={it.variant_size || ""} onChange={(e) => updateItem(idx, { variant_size: e.target.value })} placeholder="p.ej. M" className="w-full border rounded px-2 py-1 bg-background" />
-                  )}
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground">Precio</label>
-                  <input type="number" step="0.01" value={it.unit_price} onChange={(e) => updateItem(idx, { unit_price: Number(e.target.value) })} className="w-full border rounded px-2 py-1 bg-background" />
-                  {typeof it.stock_available === 'number' && (
-                    <div className="text-[11px] text-muted-foreground mt-1">Stock {it.variant_size ? `(${it.variant_size})` : ''}: {it.stock_available}</div>
-                  )}
-                </div>
-                <div className="md:col-span-7 flex justify-between">
-                  <div className="flex items-center gap-3">
-                    <button onClick={() => removeItem(idx)} className="text-sm text-red-600 hover:underline" disabled={items.length === 1}>Eliminar</button>
-                    <button onClick={() => setItems((arr) => {
-                      const copy = [...arr]
-                      const base = copy[idx]
-                      copy.splice(idx + 1, 0, { ...base })
-                      return copy
-                    })} className="text-sm text-muted-foreground hover:underline">Duplicar</button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            <button onClick={addItem} className="rounded bg-muted px-3 py-1 text-sm hover:bg-muted/80">Agregar ítem</button>
-          </div>
-        </div>
-
-        <div className="rounded border p-4 space-y-3">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <label className="text-xs text-muted-foreground">Moneda</label>
-              <input value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full border rounded px-2 py-1 bg-background" />
-            </div>
-            <div className="flex-1">
-              <label className="text-xs text-muted-foreground">Descuento</label>
-              <input type="number" step="0.01" value={discount} onChange={(e) => setDiscount(Number(e.target.value))} className="w-full border rounded px-2 py-1 bg-background" />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <label className="text-xs text-muted-foreground">Envío</label>
-              <input type="number" step="0.01" value={shipping} onChange={(e) => setShipping(Number(e.target.value))} className="w-full border rounded px-2 py-1 bg-background" />
-            </div>
-            <div className="flex-1">
-              <label className="text-xs text-muted-foreground">Impuesto</label>
-              <input type="number" step="0.01" value={tax} onChange={(e) => setTax(Number(e.target.value))} className="w-full border rounded px-2 py-1 bg-background" />
-            </div>
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground">Notas</label>
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full border rounded px-2 py-1 bg-background min-h-[80px]" />
-          </div>
-          <div className="flex items-center gap-2">
-            <input id="barter" type="checkbox" checked={isBarter} onChange={(e) => setIsBarter(e.target.checked)} />
-            <label htmlFor="barter" className="text-sm">Fue canje</label>
-          </div>
-
-          <div className="border-t pt-3 text-sm">
-            <div className="flex justify-between"><span>Subtotal</span><span className="tabular-nums">${" "}{subtotal.toFixed(2)}</span></div>
-            <div className="flex justify-between"><span>Total</span><span className="tabular-nums font-medium">${" "}{total.toFixed(2)}</span></div>
-          </div>
-
           <button
             onClick={submit}
             disabled={
@@ -348,13 +176,366 @@ export default function ManualSalePage() {
               items.some((i) => (i.available_sizes?.length ? !i.variant_size : false) || (typeof i.stock_available === 'number' && i.stock_available <= 0)) ||
               anyOverStock
             }
-            className="w-full rounded bg-primary text-primary-foreground px-3 py-2 text-sm disabled:opacity-60"
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            {loading ? "Creando..." : "Crear venta"}
+            {loading ? "Guardando..." : "Guardar venta"}
           </button>
-          {anyOverStock && (
-            <div className="text-xs text-red-500">Hay más ítems seleccionados que stock disponible para algún talle.</div>
-          )}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container max-w-5xl mx-auto px-6 py-8 space-y-6">
+        
+        {/* Detalles de la venta */}
+        <div className="bg-background rounded-lg border shadow-sm">
+          <div className="px-6 py-4 border-b">
+            <h2 className="font-semibold text-base">Detalles de la venta</h2>
+          </div>
+          <div className="p-6 space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Canal de venta</label>
+                <select 
+                  value={channel} 
+                  onChange={(e) => setChannel(e.target.value as (typeof channels)[number])} 
+                  className="w-full border rounded-lg px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                >
+                  {channels.map((c) => (
+                    <option key={c} value={c}>{c.replace(/_/g, ' ').charAt(0).toUpperCase() + c.replace(/_/g, ' ').slice(1)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Fecha y hora</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="datetime-local" 
+                    value={placedAt} 
+                    onChange={(e) => setPlacedAt(e.target.value)} 
+                    className="flex-1 border rounded-lg px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setPlacedAt(new Date().toISOString().slice(0,16))} 
+                    className="px-3 rounded-lg bg-muted hover:bg-muted/80 text-sm font-medium transition-colors"
+                  >
+                    Ahora
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Moneda</label>
+                <input 
+                  value={currency} 
+                  onChange={(e) => setCurrency(e.target.value)} 
+                  className="w-full border rounded-lg px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Cliente</label>
+                <CustomerSearchInput
+                  value={{ id: customerId, name: customerName, email: customerEmail }}
+                  onChange={(c) => {
+                    setCustomerId(c?.id || "")
+                    setCustomerName(c?.name || "")
+                    setCustomerEmail(c?.email || "")
+                  }}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Email <span className="text-muted-foreground font-normal">(opcional)</span></label>
+                <input 
+                  type="email" 
+                  value={customerEmail} 
+                  onChange={(e) => setCustomerEmail(e.target.value)} 
+                  placeholder="cliente@ejemplo.com"
+                  className="w-full border rounded-lg px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Productos */}
+        <div className="bg-background rounded-lg border shadow-sm">
+          <div className="px-6 py-4 border-b flex items-center justify-between">
+            <h2 className="font-semibold text-base">Productos</h2>
+            <span className="text-sm text-muted-foreground">{items.length} {items.length === 1 ? 'producto' : 'productos'}</span>
+          </div>
+          <div className="p-6 space-y-4">
+            {items.map((it, idx) => (
+              <div key={idx} className="border rounded-lg p-5 space-y-4 bg-muted/30 hover:bg-muted/40 transition-colors">
+                <div className="flex items-start justify-between">
+                  <span className="text-sm font-medium">Producto {idx + 1}</span>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => setItems((arr) => {
+                        const copy = [...arr]
+                        const base = copy[idx]
+                        copy.splice(idx + 1, 0, { ...base })
+                        return copy
+                      })} 
+                      className="text-xs text-primary hover:underline font-medium"
+                    >
+                      Duplicar
+                    </button>
+                    <button 
+                      onClick={() => removeItem(idx)} 
+                      className="text-xs text-destructive hover:underline font-medium" 
+                      disabled={items.length === 1}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Buscar producto</label>
+                    <ProductSearchInput
+                      value={it.product_id}
+                      autoFocus={!it.product_id}
+                      onChange={(pid, product) => {
+                        updateItem(idx, {
+                          product_id: pid,
+                          product_name: product?.name,
+                          unit_price: Number(product?.price || 0),
+                          available_sizes: product?.sizes || undefined,
+                        })
+                        if (product?.sizes && product.sizes.length) {
+                          void (async () => {
+                            const res = await fetchItemStock(idx, pid)
+                            const sizes = (product.sizes as string[]) || []
+                            const sizeStocks = res?.sizeStocks || {}
+                            let picked: string | undefined
+                            for (const s of sizes) {
+                              const st = sizeStocks[s]
+                              if (typeof st === 'number' && st > 0) {
+                                picked = s
+                                break
+                              }
+                            }
+                            updateItem(idx, { variant_size: picked || sizes[0] })
+                            void fetchItemStock(idx, pid, picked || sizes[0])
+                          })()
+                        } else {
+                          void fetchItemStock(idx, pid, undefined)
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">Talle</label>
+                      {it.available_sizes && it.available_sizes.length ? (
+                        <div className="flex flex-wrap gap-2">
+                          {it.available_sizes.map((s) => {
+                            const raw = (it.size_stocks && typeof it.size_stocks[s] === 'number') ? it.size_stocks[s] : undefined
+                            const key = `${it.product_id}__${s}`
+                            const alreadySelected = selectedCounts.get(key) || 0
+                            const thisRowCounts = it.variant_size === s ? 1 : 0
+                            const remaining = typeof raw === 'number' ? Math.max(0, raw - (alreadySelected - thisRowCounts)) : 0
+                            const disabled = (it.size_loading || !it.size_stocks) ? true : (remaining <= 0)
+                            const active = it.variant_size === s
+                            return (
+                              <button
+                                type="button"
+                                key={s}
+                                disabled={disabled}
+                                onClick={() => { updateItem(idx, { variant_size: s }); void fetchItemStock(idx, it.product_id, s) }}
+                                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
+                                  active 
+                                    ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
+                                    : 'bg-background hover:bg-muted'
+                                } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                title={it.size_loading ? 'Cargando stock...' : `Stock ${s}: ${remaining}`}
+                              >
+                                {s} {it.size_loading ? '...' : `(${remaining})`}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <input 
+                          value={it.variant_size || ""} 
+                          onChange={(e) => updateItem(idx, { variant_size: e.target.value })} 
+                          placeholder="Ej: M, L, XL" 
+                          className="w-full border rounded-lg px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                        />
+                      )}
+                      {typeof it.stock_available === 'number' && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Stock disponible {it.variant_size ? `(${it.variant_size})` : ''}: <span className="font-semibold text-foreground">{it.stock_available}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">Precio unitario</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                        <input 
+                          type="number" 
+                          step="0.01" 
+                          value={it.unit_price} 
+                          onChange={(e) => updateItem(idx, { unit_price: Number(e.target.value) })} 
+                          className="w-full border rounded-lg pl-8 pr-3 py-2.5 bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            <button 
+              onClick={addItem} 
+              className="w-full border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 rounded-lg px-4 py-4 text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Agregar otro producto
+            </button>
+          </div>
+        </div>
+
+        {/* Ajustes y Resumen */}
+        <div className="bg-background rounded-lg border shadow-sm">
+          <div className="px-6 py-4 border-b">
+            <h2 className="font-semibold text-base">Ajustes adicionales</h2>
+          </div>
+          <div className="p-6 space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Descuento</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    value={discount} 
+                    onChange={(e) => setDiscount(Number(e.target.value))} 
+                    placeholder="0.00"
+                    className="w-full border rounded-lg pl-8 pr-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Envío</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    value={shipping} 
+                    onChange={(e) => setShipping(Number(e.target.value))} 
+                    placeholder="0.00"
+                    className="w-full border rounded-lg pl-8 pr-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Impuesto</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    value={tax} 
+                    onChange={(e) => setTax(Number(e.target.value))} 
+                    placeholder="0.00"
+                    className="w-full border rounded-lg pl-8 pr-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Notas internas</label>
+              <textarea 
+                value={notes} 
+                onChange={(e) => setNotes(e.target.value)} 
+                placeholder="Agrega información adicional sobre esta venta..."
+                className="w-full border rounded-lg px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all min-h-[100px] resize-none" 
+              />
+            </div>
+
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50 border">
+              <input 
+                id="barter" 
+                type="checkbox" 
+                checked={isBarter} 
+                onChange={(e) => setIsBarter(e.target.checked)} 
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <label htmlFor="barter" className="text-sm font-medium cursor-pointer">Esta venta fue un canje (sin pago monetario)</label>
+            </div>
+          </div>
+        </div>
+
+        {/* Resumen Final */}
+        <div className="bg-background rounded-lg border shadow-sm">
+          <div className="px-6 py-4 border-b">
+            <h2 className="font-semibold text-base">Resumen de la venta</h2>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal ({items.length} {items.length === 1 ? 'producto' : 'productos'})</span>
+                <span className="font-medium tabular-nums">${subtotal.toFixed(2)}</span>
+              </div>
+              
+              {discount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Descuento</span>
+                  <span className="font-medium tabular-nums text-green-600">-${discount.toFixed(2)}</span>
+                </div>
+              )}
+              
+              {shipping > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Envío</span>
+                  <span className="font-medium tabular-nums">+${shipping.toFixed(2)}</span>
+                </div>
+              )}
+              
+              {tax > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Impuesto</span>
+                  <span className="font-medium tabular-nums">+${tax.toFixed(2)}</span>
+                </div>
+              )}
+              
+              <div className="border-t pt-3 flex justify-between items-center">
+                <span className="text-lg font-semibold">Total</span>
+                <span className="text-2xl font-bold tabular-nums">${total.toFixed(2)} <span className="text-base font-normal text-muted-foreground">{currency}</span></span>
+              </div>
+            </div>
+
+            {anyOverStock && (
+              <div className="mt-4 rounded-lg bg-destructive/10 border border-destructive/20 p-4">
+                <div className="flex gap-3">
+                  <svg className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-destructive">Stock insuficiente</p>
+                    <p className="text-xs text-destructive/80 mt-1">Hay más productos seleccionados que stock disponible para algunos talles.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -373,10 +554,16 @@ function CustomerSearchInput({
   const [q, setQ] = useState("")
   const [list, setList] = useState<CustomerLite[]>([])
   const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const ctrl = new AbortController()
     const timer = setTimeout(async () => {
+      if (!q.trim()) {
+        setList([])
+        setOpen(false)
+        return
+      }
       try {
         const params = new URLSearchParams({ q, limit: "10" })
         const res = await fetch(`/api/admin/customers/search?${params.toString()}`, { signal: ctrl.signal })
@@ -390,21 +577,42 @@ function CustomerSearchInput({
     }
   }, [q])
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <input
         value={value.name || value.email || q}
         onChange={(e) => {
           setQ(e.target.value)
-          setOpen(true)
+          if (e.target.value.trim()) {
+            setOpen(true)
+          }
           onChange(undefined)
         }}
         placeholder="Buscar por nombre o email"
-        className="w-full border rounded px-2 py-1 bg-background"
-        onFocus={() => setOpen(true)}
+        className="w-full border rounded-lg px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+        onFocus={() => {
+          if (q.trim() && list.length > 0) {
+            setOpen(true)
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            setOpen(false)
+          }
+        }}
       />
       {open && list.length > 0 && (
-        <div className="absolute z-10 mt-1 w-full rounded border bg-background shadow">
+        <div className="absolute z-10 mt-2 w-full rounded-lg border bg-background shadow-lg max-h-60 overflow-auto">
           {list.map((c) => (
             <button
               type="button"
@@ -414,10 +622,10 @@ function CustomerSearchInput({
                 setQ(c.name || c.email)
                 setOpen(false)
               }}
-              className="w-full text-left px-2 py-1 hover:bg-muted text-sm"
+              className="w-full text-left px-4 py-3 hover:bg-muted text-sm border-b last:border-b-0 transition-colors"
             >
               <div className="font-medium">{c.name || c.email || c.id}</div>
-              {c.email && <div className="text-xs text-muted-foreground">{c.email}</div>}
+              {c.email && <div className="text-xs text-muted-foreground mt-0.5">{c.email}</div>}
             </button>
           ))}
         </div>
@@ -426,7 +634,7 @@ function CustomerSearchInput({
   )
 }
 
-type ProductLite = { id: string; name: string; price: number; currency: string; sizes?: string[]; stock?: number }
+type ProductLite = { id: string; name: string; price: number; currency: string; sizes?: string[]; stock?: number; category?: string }
 
 function ProductSearchInput({
   value,
@@ -441,20 +649,21 @@ function ProductSearchInput({
   const [list, setList] = useState<ProductLite[]>([])
   const [open, setOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const ctrl = new AbortController()
     const timer = setTimeout(async () => {
+      if (!q.trim()) {
+        setList([])
+        setOpen(false)
+        return
+      }
       try {
         const params = new URLSearchParams({ q, limit: "10" })
         const res = await fetch(`/api/admin/products/search?${params.toString()}`, { signal: ctrl.signal })
         const json = await res.json()
         if (res.ok) setList(json.products || [])
-        // If user typed exact id/sku/name and the first result id matches exactly, auto-pick on Enter-like behavior
-        const first = (json.products || [])[0]
-        if (first && q && (first.id === q || String(first.sku || "") === q)) {
-          // do not auto pick immediately; wait for Enter. We'll store list and handle onKeyDown
-        }
       } catch {}
     }, 200)
     return () => {
@@ -469,19 +678,35 @@ function ProductSearchInput({
     }
   }, [autoFocus])
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <input
         ref={inputRef}
         value={value || q}
         onChange={(e) => {
           setQ(e.target.value)
-          setOpen(true)
+          if (e.target.value.trim()) {
+            setOpen(true)
+          }
           onChange("")
         }}
-        placeholder="Buscar por id, nombre o sku"
-        className="w-full border rounded px-2 py-1 bg-background"
-        onFocus={() => setOpen(true)}
+        placeholder="Buscar por nombre, categoría, id o sku"
+        className="w-full border rounded-lg px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+        onFocus={() => {
+          if (q.trim() && list.length > 0) {
+            setOpen(true)
+          }
+        }}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && open) {
             e.preventDefault()
@@ -492,10 +717,13 @@ function ProductSearchInput({
               setOpen(false)
             }
           }
+          if (e.key === 'Escape') {
+            setOpen(false)
+          }
         }}
       />
       {open && list.length > 0 && (
-        <div className="absolute z-10 mt-1 w-full rounded border bg-background shadow">
+        <div className="absolute z-10 mt-2 w-full rounded-lg border bg-background shadow-lg max-h-60 overflow-auto">
           {list.map((p) => (
             <button
               type="button"
@@ -505,10 +733,21 @@ function ProductSearchInput({
                 setQ(p.name)
                 setOpen(false)
               }}
-              className="w-full text-left px-2 py-1 hover:bg-muted text-sm"
+              className="w-full text-left px-4 py-3 hover:bg-muted text-sm border-b last:border-b-0 transition-colors"
             >
-              <div className="font-medium">{p.name}</div>
-              <div className="text-xs text-muted-foreground">{p.id} · ${" "}{Number(p.price || 0).toFixed(2)} {p.currency}</div>
+              <div className="flex items-center justify-between">
+                <div className="font-medium">{p.name}</div>
+                {p.category && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                    {p.category}
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+                <span className="text-muted-foreground/60">{p.id}</span>
+                <span>·</span>
+                <span className="font-semibold text-foreground">${Number(p.price || 0).toFixed(2)} {p.currency}</span>
+              </div>
             </button>
           ))}
         </div>

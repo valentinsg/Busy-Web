@@ -1,25 +1,31 @@
 import { NextRequest, NextResponse } from "next/server"
-import crypto from "crypto"
 import getServiceClient from "@/lib/supabase/server"
 
-function supabaseAvailable() {
+function isSupabaseConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
 }
 
-function ipHash(ip: string | null | undefined, slug: string) {
-  try {
-    return crypto.createHash("sha256").update(`${ip ?? ""}|${slug}`).digest("hex").slice(0, 32)
-  } catch {
-    return null
+function ipHash(ip: string | null, slug: string): string | null {
+  if (!ip) return null
+  // Simple hash function for IP + slug
+  const str = `${ip}-${slug}`
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32bit integer
   }
+  return hash.toString(36)
 }
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const slug = searchParams.get("slug") || ""
   if (!slug) return NextResponse.json({ avg: null, count: 0 }, { status: 200 })
 
-  if (!supabaseAvailable()) {
+  if (!isSupabaseConfigured()) {
     return NextResponse.json({ avg: null, count: 0 }, { status: 200 })
   }
 
@@ -43,7 +49,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 })
   }
 
-  if (!supabaseAvailable()) {
+  if (!isSupabaseConfigured()) {
     // Soft-success without persistence
     return NextResponse.json({ ok: true, avg: rating, count: 1 })
   }

@@ -5,9 +5,11 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 
+// Usar imágenes estáticas locales en lugar de GIFs externos
 const images = [
-  "https://64.media.tumblr.com/db8472cfbb89a155148003b053d5f3de/4d6d987e0cee7307-8e/s400x225/158142e8e876044a6191733a02f6ee5ac1643b58.gif",
-  "https://i.pinimg.com/originals/14/f4/35/14f435eaaf8d107cca5055ce150eaf47.gif",
+  "/hero-1.gif", // Reemplazar con imagen local optimizada
+  "/hero-2.gif", // Reemplazar con imagen local optimizada
+  "/hero-3.gif"
 ]
 
 export function AutoSliderBanner() {
@@ -44,7 +46,7 @@ export function AutoSliderBanner() {
             sizes="100vw"
             priority={index === 0}
             loading={index === 0 ? "eager" : "lazy"}
-            unoptimized
+            quality={90}
           />
         </div>
       ))}

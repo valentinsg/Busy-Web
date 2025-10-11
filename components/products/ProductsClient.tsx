@@ -32,14 +32,15 @@ import * as React from 'react'
 
 type ProductsClientProps = {
   initialCategory?: string
+  initialProducts?: Product[]
 }
 
-export default function ProductsClient({ initialCategory }: ProductsClientProps) {
+export default function ProductsClient({ initialCategory, initialProducts = [] }: ProductsClientProps) {
   const { t } = useI18n()
   const [searchQuery, setSearchQuery] = React.useState('')
   const [filters, setFilters] = React.useState<FilterOptions>({})
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
-  const [asyncProducts, setAsyncProducts] = React.useState<Product[]>([])
+  const [asyncProducts, setAsyncProducts] = React.useState<Product[]>(initialProducts)
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const router = useRouter()
@@ -395,8 +396,8 @@ export default function ProductsClient({ initialCategory }: ProductsClientProps)
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4 xl:gap-6">
-              {asyncProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {asyncProducts.map((product, index) => (
+                <ProductCard key={product.id} product={product} priority={index < 4} />
               ))}
             </div>
           )}

@@ -12,7 +12,12 @@ create table if not exists public.expenses (
 );
 
 alter table public.expenses enable row level security;
+
+-- Políticas RLS
 create policy if not exists expenses_read for select on public.expenses using (true);
+create policy if not exists expenses_insert for insert on public.expenses with check (true);
+create policy if not exists expenses_update for update on public.expenses using (true) with check (true);
+create policy if not exists expenses_delete for delete on public.expenses using (true);
 
 create index if not exists idx_expenses_category on public.expenses(category);
 create index if not exists idx_expenses_supplier on public.expenses(supplier_id);

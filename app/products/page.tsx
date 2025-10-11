@@ -1,4 +1,5 @@
 import ProductsClient from '@/components/products/ProductsClient'
+import { getProductsAsync } from '@/lib/repo/products'
 import type { Metadata } from 'next'
 
 export const revalidate = 1800 // Revalidar cada 30 minutos
@@ -56,6 +57,10 @@ export function generateMetadata(): Metadata {
 
 export default async function ProductsPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
   const siteUrl = process.env.SITE_URL || 'https://busy.com.ar'
+  
+  // Pre-fetch products on server for better LCP
+  const initialProducts = await getProductsAsync().catch(() => [])
+  
   return (
     <div className="container px-4 py-8 pt-28">
       {/* JSON-LD: CollectionPage + BreadcrumbList (static SSR) */}
@@ -97,7 +102,10 @@ export default async function ProductsPage({ searchParams }: { searchParams?: { 
       />
 
       <div className="max-w-7xl mx-auto">
-        <ProductsClient initialCategory={typeof searchParams?.category === 'string' ? searchParams?.category : undefined} />
+        <ProductsClient 
+          initialCategory={typeof searchParams?.category === 'string' ? searchParams?.category : undefined}
+          initialProducts={initialProducts}
+        />
       </div>
     </div>
   )

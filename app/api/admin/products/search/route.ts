@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import getServiceClient from "@/lib/supabase/server"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
@@ -8,10 +10,11 @@ export async function GET(req: Request) {
     const limit = Number(searchParams.get("limit") || 10)
 
     const supabase = getServiceClient()
-    let query = supabase.from("products").select("id,name,price,currency,colors,sizes,stock").order("created_at", { ascending: false }).limit(limit)
+    let query = supabase.from("products").select("id,name,price,currency,colors,sizes,stock,category").order("created_at", { ascending: false }).limit(limit)
     if (q) {
       const like = `%${q}%`
-      query = query.or(`id.ilike.${like},name.ilike.${like},sku.ilike.${like}`)
+      // Buscar por id, nombre, sku O categoría
+      query = query.or(`id.ilike.${like},name.ilike.${like},sku.ilike.${like},category.ilike.${like}`)
     }
     const { data, error } = await query
     if (error) throw error

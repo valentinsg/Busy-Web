@@ -22,7 +22,10 @@ import {
   ShoppingBag,
   Megaphone,
   DollarSign,
-  Settings
+  Settings,
+  Bell,
+  ShoppingCart,
+  List
 } from "lucide-react"
 import {
   SidebarContent,
@@ -35,12 +38,16 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useState, useEffect } from "react"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen: boolean }) {
   const pathname = usePathname()
+  const { state } = useSidebar()
+  const isCollapsed = state === "collapsed"
   const isActive = (href: string) => pathname === href || pathname?.startsWith(href + "/")
 
   // Estado para controlar qué secciones están abiertas
@@ -62,29 +69,20 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
   }, [allSectionsOpen])
 
   return (
-    <>
-      {/* Background con overlay que se extiende con el contenido */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        backgroundImage: 'url(/product-bg.jpg)',
-        backgroundSize: '400px',
-        backgroundRepeat: 'repeat',
-        backgroundPosition: 'center',
-      }}>
-        <div className="absolute inset-0 bg-black/90" />
-      </div>
+    <div className="sticky h-[calc(100vh-4rem)]">
 
-      <SidebarContent className="gap-0 py-2 relative">
-      <div className="relative z-10">
+      <SidebarContent className="gap-0 py-0 relative">
+      <div className="relative z-10 px-2 py-3">
       {/* Dashboard - siempre visible */}
-      <SidebarGroup className="py-0">
+      <SidebarGroup className="py-0 px-0">
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
               <Link href="/admin" legacyBehavior>
-                <SidebarMenuButton asChild isActive={pathname === "/admin"} className="font-heading hover:bg-accent hover:text-accent-foreground h-10">
+                <SidebarMenuButton asChild isActive={pathname === "/admin"} className="font-heading hover:bg-white/10 hover:text-white h-11 rounded-lg transition-all duration-200">
                   <a className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
                     <LayoutDashboard className="h-5 w-5 group-data-[collapsible=icon]:mx-auto" />
-                    <span className="font-semibold text-[15px] uppercase tracking-wide group-data-[collapsible=icon]:hidden">Dashboard</span>
+                    <span className="font-semibold text-[15px] uppercase tracking-wider group-data-[collapsible=icon]:hidden">Dashboard</span>
                   </a>
                 </SidebarMenuButton>
               </Link>
@@ -94,38 +92,54 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
       </SidebarGroup>
 
       {/* Separador */}
-      <div className="h-px bg-border/40 mx-3 my-3" />
+      <div className="h-px bg-white/10 mx-0 my-4" />
 
       {/* Productos & Stock */}
-      <SidebarGroup className="py-0">
+      <SidebarGroup className="py-0 px-0">
+        {isCollapsed ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/admin/products">
+                  <SidebarMenuButton className="h-10 w-10 p-0 mx-auto hover:bg-white/10 rounded-lg">
+                    <ShoppingBag className="h-5 w-5" />
+                  </SidebarMenuButton>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Inventario</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
         <Collapsible
           open={openSections.products}
           onOpenChange={(open) => setOpenSections(prev => ({ ...prev, products: open }))}
         >
           <SidebarGroupLabel className="font-heading flex items-center justify-between cursor-pointer group h-10" asChild>
-            <CollapsibleTrigger className="w-full flex items-center gap-3 hover:bg-accent/50 rounded-md px-3 py-2 transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-              <ShoppingBag className="h-5 w-5 transition-transform duration-200 group-hover:scale-110 group-data-[collapsible=icon]:mx-auto" />
-              <span className="flex-1 text-left font-semibold text-[15px] uppercase tracking-wide group-data-[collapsible=icon]:hidden">Inventario</span>
-              <ChevronRight className={`h-4 w-4 transition-transform duration-300 group-data-[collapsible=icon]:hidden ${openSections.products ? 'rotate-90' : ''}`} />
+            <CollapsibleTrigger className="w-full flex items-center gap-3 hover:bg-white/5 rounded-lg px-3 py-2.5 transition-all duration-200">
+              <ShoppingBag className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
+              <span className="flex-1 text-left font-semibold text-[13px] uppercase tracking-wider text-white/90">Inventario</span>
+              <ChevronRight className={`h-4 w-4 transition-transform duration-300 ${openSections.products ? 'rotate-90' : ''}`} />
             </CollapsibleTrigger>
           </SidebarGroupLabel>
           <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2">
-            <SidebarGroupContent className="pl-2 pt-1">
-              <SidebarMenu className="gap-1.5">
+            <SidebarGroupContent className="pl-0 pt-2">
+              <SidebarMenu className="gap-1">
                 <Collapsible>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton isActive={isActive("/admin/products")} className="font-body hover:bg-accent hover:text-accent-foreground">
+                      <SidebarMenuButton isActive={isActive("/admin/products")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                         <Package className="h-4 w-4" />
                         <span>Productos</span>
                         <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:slide-in-from-top-1">
-                      <SidebarMenuSub className="gap-1 ml-0 mt-1 mb-1 border-l border-border/30 pl-3">
+                      <SidebarMenuSub className="gap-1 ml-3 mt-1.5 mb-1.5 border-l-2 border-white/10 pl-3">
                         <SidebarMenuSubItem>
                           <Link href="/admin/products" legacyBehavior>
-                            <SidebarMenuSubButton asChild className="font-body hover:bg-accent hover:text-accent-foreground">
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
                                 <Package className="h-3.5 w-3.5" /> Ver todos
                               </a>
@@ -134,7 +148,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <Link href="/admin/products/new" legacyBehavior>
-                            <SidebarMenuSubButton asChild className="font-body hover:bg-accent hover:text-accent-foreground">
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
                                 <Plus className="h-3.5 w-3.5" /> Crear nuevo
                               </a>
@@ -148,7 +162,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
 
                 <SidebarMenuItem>
                   <Link href="/admin/stock" legacyBehavior>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/stock")} className="font-body hover:bg-accent hover:text-accent-foreground">
+                    <SidebarMenuButton asChild isActive={isActive("/admin/stock")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                       <a className="flex items-center gap-2">
                         <Boxes className="h-4 w-4" /> Stock
                       </a>
@@ -159,31 +173,48 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
             </SidebarGroupContent>
           </CollapsibleContent>
         </Collapsible>
+        )}
       </SidebarGroup>
 
       {/* Separador */}
-      <div className="h-px bg-border/40 mx-3 my-3" />
+      <div className="h-px bg-white/10 mx-0 my-4" />
 
       {/* Marketing & Contenido */}
-      <SidebarGroup className="py-0">
+      <SidebarGroup className="py-0 px-0">
+        {isCollapsed ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/admin/blog">
+                  <SidebarMenuButton className="h-10 w-10 p-0 mx-auto hover:bg-white/10 rounded-lg">
+                    <Megaphone className="h-5 w-5" />
+                  </SidebarMenuButton>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Marketing</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
         <Collapsible
           open={openSections.marketing}
           onOpenChange={(open) => setOpenSections(prev => ({ ...prev, marketing: open }))}
         >
           <SidebarGroupLabel className="font-heading flex items-center justify-between cursor-pointer group h-10" asChild>
-            <CollapsibleTrigger className="w-full flex items-center gap-3 hover:bg-accent/50 rounded-md px-3 py-2 transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+            <CollapsibleTrigger className="w-full flex items-center gap-3 hover:bg-white/5 rounded-lg px-3 py-2.5 transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
               <Megaphone className="h-5 w-5 transition-transform duration-200 group-hover:scale-110 group-data-[collapsible=icon]:mx-auto" />
-              <span className="flex-1 text-left font-semibold text-[15px] uppercase tracking-wide group-data-[collapsible=icon]:hidden">Marketing</span>
+              <span className="flex-1 text-left font-semibold text-[13px] uppercase tracking-wider text-white/90 group-data-[collapsible=icon]:hidden">Marketing</span>
               <ChevronRight className={`h-4 w-4 transition-transform duration-300 group-data-[collapsible=icon]:hidden ${openSections.marketing ? 'rotate-90' : ''}`} />
             </CollapsibleTrigger>
           </SidebarGroupLabel>
           <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2">
-            <SidebarGroupContent className="pl-2 pt-1">
-              <SidebarMenu className="gap-1.5">
+            <SidebarGroupContent className="pl-0 pt-2">
+              <SidebarMenu className="gap-1">
                 <Collapsible>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton isActive={isActive("/admin/blog")} className="font-body hover:bg-accent hover:text-accent-foreground transition-all duration-200">
+                      <SidebarMenuButton isActive={isActive("/admin/blog")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                         <FileText className="h-4 w-4" />
                         <span>Blog</span>
                         <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
@@ -193,7 +224,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                       <SidebarMenuSub className="gap-1 ml-2 mt-1 mb-1 border-l border-border/30 pl-2">
                         <SidebarMenuSubItem>
                           <Link href="/admin/blog" legacyBehavior>
-                            <SidebarMenuSubButton asChild className="font-body hover:bg-accent hover:text-accent-foreground">
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
                                 <FileText className="h-3.5 w-3.5" /> Ver artículos
                               </a>
@@ -202,7 +233,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <Link href="/admin/blog/new" legacyBehavior>
-                            <SidebarMenuSubButton asChild className="font-body hover:bg-accent hover:text-accent-foreground">
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
                                 <Plus className="h-3.5 w-3.5" /> Nuevo artículo
                               </a>
@@ -217,17 +248,17 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                 <Collapsible>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton isActive={isActive("/admin/playlists") || isActive("/admin/artist-submissions")} className="font-body hover:bg-accent hover:text-accent-foreground">
+                      <SidebarMenuButton isActive={isActive("/admin/playlists") || isActive("/admin/artist-submissions")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                         <Music2 className="h-4 w-4" />
                         <span>Playlists</span>
                         <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:slide-in-from-top-1">
-                      <SidebarMenuSub className="gap-1 ml-0 mt-1 mb-1 border-l border-border/30 pl-3">
+                      <SidebarMenuSub className="gap-1 ml-3 mt-1.5 mb-1.5 border-l-2 border-white/10 pl-3">
                         <SidebarMenuSubItem>
                           <Link href="/admin/playlists" legacyBehavior>
-                            <SidebarMenuSubButton asChild className="font-body hover:bg-accent hover:text-accent-foreground">
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
                                 <Music2 className="h-3.5 w-3.5" /> Ver playlists
                               </a>
@@ -236,7 +267,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <Link href="/admin/playlists/new" legacyBehavior>
-                            <SidebarMenuSubButton asChild className="font-body hover:bg-accent hover:text-accent-foreground">
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
                                 <Plus className="h-3.5 w-3.5" /> Nueva playlist
                               </a>
@@ -245,7 +276,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <Link href="/admin/artist-submissions" legacyBehavior>
-                            <SidebarMenuSubButton asChild className="font-body hover:bg-accent hover:text-accent-foreground">
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
                                 <Users className="h-3.5 w-3.5" /> Propuestas de artistas
                               </a>
@@ -260,17 +291,17 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                 <Collapsible>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton isActive={isActive("/admin/newsletter")} className="font-body hover:bg-accent hover:text-accent-foreground">
+                      <SidebarMenuButton isActive={isActive("/admin/newsletter")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                         <Mail className="h-4 w-4" />
                         <span>Newsletter</span>
                         <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:slide-in-from-top-1">
-                      <SidebarMenuSub className="gap-1 ml-0 mt-1 mb-1 border-l border-border/30 pl-3">
+                      <SidebarMenuSub className="gap-1 ml-3 mt-1.5 mb-1.5 border-l-2 border-white/10 pl-3">
                         <SidebarMenuSubItem>
                           <Link href="/admin/newsletter" legacyBehavior>
-                            <SidebarMenuSubButton asChild className="font-body hover:bg-accent hover:text-accent-foreground">
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
                                 <Mail className="h-3.5 w-3.5" /> Suscriptores
                               </a>
@@ -279,7 +310,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <Link href="/admin/newsletter/campaigns" legacyBehavior>
-                            <SidebarMenuSubButton asChild className="font-body hover:bg-accent hover:text-accent-foreground">
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
                                 <Plus className="h-3.5 w-3.5" /> Campañas
                               </a>
@@ -293,7 +324,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
 
                 <SidebarMenuItem>
                   <Link href="/admin/popovers" legacyBehavior>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/popovers")} className="font-body hover:bg-accent hover:text-accent-foreground">
+                    <SidebarMenuButton asChild isActive={isActive("/admin/popovers")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                       <a className="flex items-center gap-2">
                         <MessageCircle className="h-4 w-4" /> Popovers
                       </a>
@@ -303,7 +334,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
 
                 <SidebarMenuItem>
                   <Link href="/admin/coupons" legacyBehavior>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/coupons")} className="font-body hover:bg-accent hover:text-accent-foreground">
+                    <SidebarMenuButton asChild isActive={isActive("/admin/coupons")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                       <a className="flex items-center gap-2">
                         <BadgePercent className="h-4 w-4" /> Cupones
                       </a>
@@ -314,30 +345,47 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
             </SidebarGroupContent>
           </CollapsibleContent>
         </Collapsible>
+        )}
       </SidebarGroup>
 
       {/* Separador */}
-      <div className="h-px bg-border/40 mx-3 my-3" />
+      <div className="h-px bg-white/10 mx-0 my-4" />
 
       {/* Ventas & Clientes */}
-      <SidebarGroup className="py-0">
+      <SidebarGroup className="py-0 px-0">
+        {isCollapsed ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/admin/analytics">
+                  <SidebarMenuButton className="h-10 w-10 p-0 mx-auto hover:bg-white/10 rounded-lg">
+                    <DollarSign className="h-5 w-5" />
+                  </SidebarMenuButton>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Ventas</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
         <Collapsible
           open={openSections.sales}
           onOpenChange={(open) => setOpenSections(prev => ({ ...prev, sales: open }))}
         >
           <SidebarGroupLabel className="font-heading flex items-center justify-between cursor-pointer group h-10" asChild>
-            <CollapsibleTrigger className="w-full flex items-center gap-3 hover:bg-accent/50 rounded-md px-3 py-2 transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+            <CollapsibleTrigger className="w-full flex items-center gap-3 hover:bg-white/5 rounded-lg px-3 py-2.5 transition-all duration-200">
               <DollarSign className="h-5 w-5 transition-transform duration-200 group-hover:scale-110 group-data-[collapsible=icon]:mx-auto" />
-              <span className="flex-1 text-left font-semibold text-[15px] uppercase tracking-wide group-data-[collapsible=icon]:hidden">Ventas</span>
+              <span className="flex-1 text-left font-semibold text-[13px] uppercase tracking-wider text-white/90 group-data-[collapsible=icon]:hidden">Ventas</span>
               <ChevronRight className={`h-4 w-4 transition-transform duration-300 group-data-[collapsible=icon]:hidden ${openSections.sales ? 'rotate-90' : ''}`} />
             </CollapsibleTrigger>
           </SidebarGroupLabel>
           <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2">
-            <SidebarGroupContent className="pl-2 pt-1">
-              <SidebarMenu className="gap-1.5">
+            <SidebarGroupContent className="pl-0 pt-2">
+              <SidebarMenu className="gap-1">
                 <SidebarMenuItem>
                   <Link href="/admin/analytics" legacyBehavior>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/analytics")} className="font-body hover:bg-accent hover:text-accent-foreground">
+                    <SidebarMenuButton asChild isActive={isActive("/admin/analytics")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                       <a className="flex items-center gap-2">
                         <BarChart2 className="h-4 w-4" /> Inteligencia comercial
                       </a>
@@ -345,29 +393,52 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                   </Link>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
-                  <Link href="/admin/orders/pending" legacyBehavior>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/orders/pending")} className="font-body hover:bg-accent hover:text-accent-foreground">
-                      <a className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" /> Transferencias pendientes
-                      </a>
-                    </SidebarMenuButton>
-                  </Link>
-                </SidebarMenuItem>
-
-                <SidebarMenuItem>
-                  <Link href="/admin/sales/manual" legacyBehavior>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/sales/manual")} className="font-body hover:bg-accent hover:text-accent-foreground">
-                      <a className="flex items-center gap-2">
-                        <HandCoins className="h-4 w-4" /> Ventas manuales
-                      </a>
-                    </SidebarMenuButton>
-                  </Link>
-                </SidebarMenuItem>
+                <Collapsible>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton isActive={isActive("/admin/orders") || isActive("/admin/sales/manual")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
+                        <ShoppingCart className="h-4 w-4" />
+                        <span>Pedidos</span>
+                        <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:slide-in-from-top-1">
+                      <SidebarMenuSub className="gap-1 ml-3 mt-1.5 mb-1.5 border-l-2 border-white/10 pl-3">
+                        <SidebarMenuSubItem>
+                          <Link href="/admin/orders" legacyBehavior>
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
+                              <a className="flex items-center gap-2">
+                                <List className="h-3.5 w-3.5" /> Lista de pedidos
+                              </a>
+                            </SidebarMenuSubButton>
+                          </Link>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <Link href="/admin/orders/pending" legacyBehavior>
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
+                              <a className="flex items-center gap-2">
+                                <Clock className="h-3.5 w-3.5" /> Transferencias pendientes
+                              </a>
+                            </SidebarMenuSubButton>
+                          </Link>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <Link href="/admin/sales/manual" legacyBehavior>
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
+                              <a className="flex items-center gap-2">
+                                <HandCoins className="h-3.5 w-3.5" /> Ventas manuales
+                              </a>
+                            </SidebarMenuSubButton>
+                          </Link>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
 
                 <SidebarMenuItem>
                   <Link href="/admin/customers/ranking" legacyBehavior>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/customers/ranking")} className="font-body hover:bg-accent hover:text-accent-foreground">
+                    <SidebarMenuButton asChild isActive={isActive("/admin/customers/ranking")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                       <a className="flex items-center gap-2">
                         <Users className="h-4 w-4" /> Ranking de clientes
                       </a>
@@ -378,30 +449,47 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
             </SidebarGroupContent>
           </CollapsibleContent>
         </Collapsible>
+        )}
       </SidebarGroup>
 
       {/* Separador */}
-      <div className="h-px bg-border/40 mx-3 my-3" />
+      <div className="h-px bg-white/10 mx-0 my-4" />
 
       {/* Operación */}
-      <SidebarGroup className="py-0">
+      <SidebarGroup className="py-0 px-0">
+        {isCollapsed ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/admin/suppliers">
+                  <SidebarMenuButton className="h-10 w-10 p-0 mx-auto hover:bg-white/10 rounded-lg">
+                    <Settings className="h-5 w-5" />
+                  </SidebarMenuButton>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Operaciones</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
         <Collapsible
           open={openSections.operations}
           onOpenChange={(open) => setOpenSections(prev => ({ ...prev, operations: open }))}
         >
           <SidebarGroupLabel className="font-heading flex items-center justify-between cursor-pointer group h-10" asChild>
-            <CollapsibleTrigger className="w-full flex items-center gap-3 hover:bg-accent/50 rounded-md px-3 py-2 transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+            <CollapsibleTrigger className="w-full flex items-center gap-3 hover:bg-white/5 rounded-lg px-3 py-2.5 transition-all duration-200">
               <Settings className="h-5 w-5 transition-transform duration-200 group-hover:scale-110 group-data-[collapsible=icon]:mx-auto" />
-              <span className="flex-1 text-left font-semibold text-[15px] uppercase tracking-wide group-data-[collapsible=icon]:hidden">Operaciones</span>
+              <span className="flex-1 text-left font-semibold text-[13px] uppercase tracking-wider text-white/90 group-data-[collapsible=icon]:hidden">Operaciones</span>
               <ChevronRight className={`h-4 w-4 transition-transform duration-300 group-data-[collapsible=icon]:hidden ${openSections.operations ? 'rotate-90' : ''}`} />
             </CollapsibleTrigger>
           </SidebarGroupLabel>
           <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2">
-            <SidebarGroupContent className="pl-2 pt-1">
-              <SidebarMenu className="gap-1.5">
+            <SidebarGroupContent className="pl-0 pt-2">
+              <SidebarMenu className="gap-1">
                 <SidebarMenuItem>
                   <Link href="/admin/suppliers" legacyBehavior>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/suppliers")} className="font-body hover:bg-accent hover:text-accent-foreground">
+                    <SidebarMenuButton asChild isActive={isActive("/admin/suppliers")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                       <a className="flex items-center gap-2">
                         <Factory className="h-4 w-4" /> Proveedores
                       </a>
@@ -411,7 +499,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
 
                 <SidebarMenuItem>
                   <Link href="/admin/expenses" legacyBehavior>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/expenses")} className="font-body hover:bg-accent hover:text-accent-foreground">
+                    <SidebarMenuButton asChild isActive={isActive("/admin/expenses")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                       <a className="flex items-center gap-2">
                         <Wallet className="h-4 w-4" /> Gastos
                       </a>
@@ -422,9 +510,47 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
             </SidebarGroupContent>
           </CollapsibleContent>
         </Collapsible>
+        )}
+      </SidebarGroup>
+
+      {/* Separador */}
+      <div className="h-px bg-white/10 mx-0 my-4" />
+
+      {/* Notificaciones */}
+      <SidebarGroup className="py-0 px-0 mb-3">
+        {isCollapsed ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/admin/notifications">
+                  <SidebarMenuButton className="h-10 w-10 p-0 mx-auto hover:bg-white/10 rounded-lg">
+                    <Bell className="h-5 w-5" />
+                  </SidebarMenuButton>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Notificaciones</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Link href="/admin/notifications" legacyBehavior>
+                <SidebarMenuButton asChild isActive={isActive("/admin/notifications")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
+                  <a className="flex items-center gap-2">
+                    <Bell className="h-4 w-4" /> Notificaciones
+                  </a>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+        )}
       </SidebarGroup>
       </div>
       </SidebarContent>
-    </>
+    </div>
   )
 }

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import getServiceClient from "@/lib/supabase/server"
 import { getPaymentClient } from "@/lib/mp/client"
 import { logError, logInfo } from "@/lib/checkout/logger"
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)

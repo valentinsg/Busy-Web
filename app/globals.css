@@ -361,6 +361,25 @@ html {
   background: hsl(var(--foreground) / 0.6);
 }
 
+/* ===== Sidebar Custom Scrollbar ===== */
+[data-sidebar="content"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+[data-sidebar="content"]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-sidebar="content"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  border: none;
+}
+
+[data-sidebar="content"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 /* ===== Utilities migrated from styles/globals.css ===== */
 @layer utilities {
   .text-balance {

@@ -1,6 +1,54 @@
 import getServiceClient from "@/lib/supabase/server"
 import type { CustomerStats, ProductPopularity } from "@/types/commerce"
 
+// Get historical balance (all-time or filtered by date)
+export async function getHistoricalBalance(params?: {
+  from?: string
+  to?: string
+}): Promise<{
+  total_revenue: number
+  total_expenses: number
+  balance: number
+  orders_count: number
+}> {
+  const supabase = getServiceClient()
+  
+  // Get total revenue (exclude pending orders)
+  let revenueQuery = supabase
+    .from('orders')
+    .select('total')
+    .neq('status', 'pending')
+  
+  if (params?.from) revenueQuery = revenueQuery.gte('placed_at', params.from)
+  if (params?.to) revenueQuery = revenueQuery.lte('placed_at', params.to)
+  
+  const { data: orders, error: ordersErr } = await revenueQuery
+  if (ordersErr) throw ordersErr
+  
+  const total_revenue = (orders || []).reduce((sum, o) => sum + Number(o.total || 0), 0)
+  const orders_count = (orders || []).length
+  
+  // Get total expenses
+  let expensesQuery = supabase
+    .from('expenses')
+    .select('amount')
+  
+  if (params?.from) expensesQuery = expensesQuery.gte('incurred_at', params.from)
+  if (params?.to) expensesQuery = expensesQuery.lte('incurred_at', params.to)
+  
+  const { data: expenses, error: expensesErr } = await expensesQuery
+  if (expensesErr) throw expensesErr
+  
+  const total_expenses = (expenses || []).reduce((sum, e) => sum + Number(e.amount || 0), 0)
+  
+  return {
+    total_revenue,
+    total_expenses,
+    balance: total_revenue - total_expenses,
+    orders_count
+  }
+}
+
 // Customer ranking helpers
 export async function getCustomerRanking(params: {
   metric: "spend" | "frequency" | "recency"
@@ -114,25 +162,89 @@ export async function getTimeSeries(params: {
   to?: string
   groupBy?: 'day'|'week'|'month'
   includeComparison?: boolean
-}): Promise<Array<{ bucket: string; revenue: number; revenue_prev?: number }>> {
+  category?: string
+}): Promise<Array<{ bucket: string; revenue: number; expenses: number; revenue_prev?: number }>> {
   const groupBy = params.groupBy || 'day'
   const supabase = getServiceClient()
-  type TSOrderRow = { total: number; placed_at: string }
+  type TSOrderRow = { total: number; placed_at: string; id: string }
+  type TSExpenseRow = { amount: number; incurred_at: string }
   
   // fetch orders for current period (exclude pending)
-  let ordersQB = supabase.from('orders').select('total,placed_at').neq('status', 'pending')
+  let ordersQB = supabase.from('orders').select('id,total,placed_at').neq('status', 'pending')
   if (params.from) ordersQB = ordersQB.gte('placed_at', params.from)
   if (params.to) ordersQB = ordersQB.lte('placed_at', params.to)
   const { data: orderRows, error: oErr } = await ordersQB
   if (oErr) throw oErr
 
-  const agg = new Map<string, { revenue: number; revenue_prev?: number }>()
-  for (const r of ((orderRows as TSOrderRow[] | null) ?? [])) {
+  // If category filter is applied, filter orders by category
+  let filteredOrderRows = orderRows
+  if (params.category && params.category !== 'all' && orderRows) {
+    const orderIds = orderRows.map(o => o.id)
+    
+    // Get order items with product category
+    const { data: orderItems } = await supabase
+      .from('order_items')
+      .select('order_id, products!inner(category)')
+      .in('order_id', orderIds)
+    
+    if (orderItems) {
+      // Get unique order IDs that match the category
+      const matchingOrderIds = new Set(
+        orderItems
+          .filter((item: any) => {
+            const productCategory = item.products?.category?.toLowerCase() || ''
+            return productCategory.includes(params.category!.toLowerCase())
+          })
+          .map((item: any) => item.order_id)
+      )
+      
+      // Filter orders to only those with matching category
+      filteredOrderRows = orderRows.filter(o => matchingOrderIds.has(o.id))
+    }
+  }
+
+  // fetch expenses for current period (always fetch, regardless of category filter)
+  let expensesQB = supabase.from('expenses').select('amount,incurred_at')
+  if (params.from) expensesQB = expensesQB.gte('incurred_at', params.from)
+  if (params.to) expensesQB = expensesQB.lte('incurred_at', params.to)
+  const { data: expenseRows, error: eErr } = await expensesQB
+  if (eErr) throw eErr
+
+  // Get all dates from both revenue and expenses to ensure complete timeline
+  const allDates = new Set<string>()
+  
+  // Add dates from filtered revenue
+  for (const r of ((filteredOrderRows as TSOrderRow[] | null) ?? [])) {
+    const d = new Date(String(r.placed_at))
+    allDates.add(toDateKey(d, groupBy))
+  }
+  
+  // Add dates from expenses
+  for (const e of ((expenseRows as TSExpenseRow[] | null) ?? [])) {
+    const d = new Date(String(e.incurred_at))
+    allDates.add(toDateKey(d, groupBy))
+  }
+
+  // Initialize aggregation map with all dates
+  const agg = new Map<string, { revenue: number; expenses: number; revenue_prev?: number }>()
+  for (const date of allDates) {
+    agg.set(date, { revenue: 0, expenses: 0 })
+  }
+  
+  // Aggregate revenue (use filtered orders)
+  for (const r of ((filteredOrderRows as TSOrderRow[] | null) ?? [])) {
     const d = new Date(String(r.placed_at))
     const key = toDateKey(d, groupBy)
-    const a = agg.get(key) || { revenue: 0 }
+    const a = agg.get(key)!
     a.revenue += Number(r.total || 0)
-    agg.set(key, a)
+  }
+
+  // Aggregate expenses (always show all expenses, not filtered by category)
+  for (const e of ((expenseRows as TSExpenseRow[] | null) ?? [])) {
+    const d = new Date(String(e.incurred_at))
+    const key = toDateKey(d, groupBy)
+    const a = agg.get(key)!
+    a.expenses += Number(e.amount || 0)
   }
 
   // If comparison requested, fetch previous period
@@ -168,7 +280,7 @@ export async function getTimeSeries(params: {
   }
 
   const out = Array.from(agg.entries())
-    .map(([bucket, v]) => ({ bucket, revenue: v.revenue, revenue_prev: v.revenue_prev }))
+    .map(([bucket, v]) => ({ bucket, revenue: v.revenue, expenses: v.expenses, revenue_prev: v.revenue_prev }))
     .sort((a, b) => a.bucket.localeCompare(b.bucket))
   return out
 }

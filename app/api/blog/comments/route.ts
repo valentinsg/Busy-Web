@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import getServiceClient from "@/lib/supabase/server"
 
-function supabaseAvailable() {
+function isSupabaseConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
 }
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const slug = searchParams.get("slug") || ""
   if (!slug) return NextResponse.json({ items: [] }, { status: 200 })
 
-  if (!supabaseAvailable()) {
+  if (!isSupabaseConfigured()) {
     return NextResponse.json({ items: [] }, { status: 200 })
   }
 
@@ -36,7 +38,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 })
   }
 
-  if (!supabaseAvailable()) {
+  if (!isSupabaseConfigured()) {
     // Soft-success without persistence
     return NextResponse.json({ ok: true })
   }

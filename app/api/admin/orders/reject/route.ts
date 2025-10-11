@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = getServiceClient()
 
-    // Get order details before cancelling (to restore stock)
+    // Get order details before deleting (to restore stock)
     const { data: orderItems, error: itemsErr } = await supabase
       .from("order_items")
       .select("product_id, variant_size, quantity")
@@ -20,27 +20,7 @@ export async function POST(req: NextRequest) {
 
     if (itemsErr) throw itemsErr
 
-    // Update order status to 'cancelled'
-    const { data: order, error: updateErr } = await supabase
-      .from("orders")
-      .update({
-        status: "cancelled",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", order_id)
-      .eq("status", "pending") // Only update if still pending
-      .select()
-      .single()
-
-    if (updateErr) throw updateErr
-    if (!order) {
-      return NextResponse.json(
-        { error: "Order not found or already processed" },
-        { status: 404 }
-      )
-    }
-
-    // Restore stock for cancelled items
+    // Restore stock for rejected items
     if (orderItems && orderItems.length > 0) {
       for (const item of orderItems) {
         // Increment stock back
@@ -57,12 +37,34 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // TODO: Send cancellation email to customer
+    // Delete order items first (foreign key constraint)
+    const { error: deleteItemsErr } = await supabase
+      .from("order_items")
+      .delete()
+      .eq("order_id", order_id)
+
+    if (deleteItemsErr) {
+      console.error("Error deleting order items:", deleteItemsErr)
+      throw deleteItemsErr
+    }
+
+    // Delete the order itself (sin restricción de status)
+    const { error: deleteOrderErr, count } = await supabase
+      .from("orders")
+      .delete()
+      .eq("id", order_id)
+
+    if (deleteOrderErr) {
+      console.error("Error deleting order:", deleteOrderErr)
+      throw deleteOrderErr
+    }
+
+    console.log(`Order ${order_id} deleted successfully. Rows affected: ${count}`)
 
     return NextResponse.json({ 
-      success: true, 
-      order,
-      message: "Order cancelled successfully" 
+      success: true,
+      message: "Order rejected and deleted successfully",
+      deleted: true
     })
   } catch (error: unknown) {
     console.error("Error rejecting order:", error)

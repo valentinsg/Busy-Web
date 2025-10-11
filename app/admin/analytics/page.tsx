@@ -3,10 +3,12 @@ export const dynamic = "force-dynamic"
 
 import React, { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { Card } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
-import { AnalyticsSkeleton } from "@/components/admin/analytics-skeleton"
 import { cn } from "@/lib/utils"
+import { BalanceKPIs } from "@/components/admin/balance-kpis"
+import { CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell } from "recharts"
+import { AnalyticsSkeleton } from "@/components/admin/analytics-skeleton"
 
 // Helper para generar todos los días entre dos fechas
 function getAllDatesInRange(from: string, to: string): string[] {
@@ -43,7 +45,7 @@ function CustomTooltip({ active, payload, label }: any) {
         <p className="text-sm font-medium mb-2">{label}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {entry.name}: ${entry.value.toLocaleString()}
+            {entry.name}: ${Math.abs(entry.value).toLocaleString()}
           </p>
         ))}
       </div>
@@ -56,8 +58,10 @@ export default function AnalyticsPage() {
   const { toast } = useToast()
   const analyticsUrl = process.env.NEXT_PUBLIC_VERCEL_ANALYTICS_URL
   const [popular, setPopular] = useState<Array<{ product_id: string; name: string; revenue: number; orders_count: number }>>([])
+  const [topCustomers, setTopCustomers] = useState<Array<{ id: string; name: string; email: string; total_spent: number; orders_count: number }>>([])
   const [loading, setLoading] = useState(true)
   const [activePreset, setActivePreset] = useState<string>('30d')
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
 
   // Default: últimos 30 días
   const [from, setFrom] = useState<string>(() => {
@@ -102,7 +106,7 @@ export default function AnalyticsPage() {
   const [summary, setSummary] = useState<{
     profit: { revenue: number; expenses: number; profit: number } | null
     revenueByChannel: Array<{ channel: string; orders: number; revenue: number }>
-    timeSeries: Array<{ bucket: string; revenue: number; revenue_prev?: number }>
+    timeSeries: Array<{ bucket: string; revenue: number; expenses: number; revenue_prev?: number }>
     kpis: { orders: number; aov: number; new_customers: number } | null
   }>({ profit: null, revenueByChannel: [], timeSeries: [], kpis: null })
 
@@ -120,6 +124,23 @@ export default function AnalyticsPage() {
     [toast],
   )
 
+  const loadTopCustomers = useMemo(
+    () => async () => {
+      try {
+        const params = new URLSearchParams({ limit: "3" })
+        if (from) params.set('from', from)
+        if (to) params.set('to', to)
+        const res = await fetch(`/api/admin/analytics/top-customers?${params.toString()}`)
+        const json = await res.json()
+        if (!res.ok) throw new Error(json?.error || "Error")
+        setTopCustomers(json.customers || [])
+      } catch (e: unknown) {
+        toast({ title: "Error al cargar top clientes", description: e?.toString() || "", variant: "destructive" })
+      }
+    },
+    [from, to, toast],
+  )
+
   const loadSummary = useMemo(
     () => async () => {
       try {
@@ -129,6 +150,7 @@ export default function AnalyticsPage() {
         if (to) params.set('to', to)
         if (groupBy) params.set('groupBy', groupBy)
         if (comparePrev) params.set('comparison', 'true')
+        if (categoryFilter && categoryFilter !== 'all') params.set('category', categoryFilter)
         const res = await fetch(`/api/admin/analytics/summary?${params.toString()}`)
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || 'Error')
@@ -143,13 +165,18 @@ export default function AnalyticsPage() {
       } finally {
         setLoading(false)
       }
-    }, [from, to, groupBy, comparePrev, toast]
+    }, [from, to, groupBy, comparePrev, categoryFilter, toast]
   )
 
   // Load popular products only once on mount
   useEffect(() => {
     void loadPopular()
   }, [loadPopular])
+
+  // Load top customers when date range changes
+  useEffect(() => {
+    void loadTopCustomers()
+  }, [loadTopCustomers])
 
   // Auto-update summary with debounce when inputs change
   useEffect(() => {
@@ -213,6 +240,14 @@ export default function AnalyticsPage() {
           <Link href="/admin" className="text-sm text-primary underline-offset-2 hover:underline">Volver al panel</Link>
         </div>
       </div>
+
+      {/* Balance Actual (sin filtros) */}
+      <section>
+        <BalanceKPIs 
+          title="Balance Actual" 
+          showOrdersCount={false} 
+        />
+      </section>
 
       {/* Controles minimal */}
       <section className="flex flex-wrap items-center gap-2">
@@ -281,29 +316,86 @@ export default function AnalyticsPage() {
         <AnalyticsSkeleton />
       ) : (
         <>
-          {/* KPIs */}
-          <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
-              <div className="text-xs font-medium text-muted-foreground mb-2">Ingresos</div>
-              <div className="text-3xl font-bold">${summary.profit ? summary.profit.revenue.toLocaleString() : '0'}</div>
-            </div>
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
-              <div className="text-xs font-medium text-muted-foreground mb-2">Pedidos</div>
-              <div className="text-3xl font-bold">{summary.kpis?.orders || 0}</div>
-            </div>
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
-              <div className="text-xs font-medium text-muted-foreground mb-2">Ticket promedio</div>
-              <div className="text-3xl font-bold">${summary.kpis?.aov.toFixed(2) || '0.00'}</div>
-            </div>
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
-              <div className="text-xs font-medium text-muted-foreground mb-2">Clientes nuevos</div>
-              <div className="text-3xl font-bold">{summary.kpis?.new_customers || 0}</div>
-            </div>
+          {/* Balance del Período Seleccionado */}
+          <section>
+            <BalanceKPIs 
+              from={from} 
+              to={to} 
+              title="Balance del Período Seleccionado" 
+              showOrdersCount={true} 
+            />
           </section>
 
           {/* Time series chart */}
           <section className="rounded-lg border bg-card p-6 shadow-sm space-y-4">
-            <div className="font-semibold text-lg">Evolución de ingresos</div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-semibold text-lg">Evolución de ingresos</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Visualiza el crecimiento de tus ingresos en el período seleccionado
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Filtrar ingresos:</span>
+                <button
+                  onClick={() => setCategoryFilter('all')}
+                  className={cn(
+                    "px-3 py-1 text-xs rounded-md transition-colors",
+                    categoryFilter === 'all'
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted hover:bg-muted/80"
+                  )}
+                >
+                  Todo
+                </button>
+                <button
+                  onClick={() => setCategoryFilter('remera')}
+                  className={cn(
+                    "px-3 py-1 text-xs rounded-md transition-colors",
+                    categoryFilter === 'remera'
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted hover:bg-muted/80"
+                  )}
+                >
+                  Remeras
+                </button>
+                <button
+                  onClick={() => setCategoryFilter('buzo')}
+                  className={cn(
+                    "px-3 py-1 text-xs rounded-md transition-colors",
+                    categoryFilter === 'buzo'
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted hover:bg-muted/80"
+                  )}
+                >
+                  Buzos
+                </button>
+                <button
+                  onClick={() => setCategoryFilter('pantalon')}
+                  className={cn(
+                    "px-3 py-1 text-xs rounded-md transition-colors",
+                    categoryFilter === 'pantalon'
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted hover:bg-muted/80"
+                  )}
+                >
+                  Pantalones
+                </button>
+                <button
+                  onClick={() => setCategoryFilter('accesorio')}
+                  className={cn(
+                    "px-3 py-1 text-xs rounded-md transition-colors",
+                    categoryFilter === 'accesorio'
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted hover:bg-muted/80"
+                  )}
+                >
+                  Accesorios
+                </button>
+              </div>
+            </div>
             <div className="w-full h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
@@ -329,7 +421,10 @@ export default function AnalyticsPage() {
                     tickFormatter={(value) => `$${value.toLocaleString()}`}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Legend wrapperStyle={{ paddingTop: '20px' }} iconType="line" />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '20px' }} 
+                    iconType="square"
+                  />
                   <Area 
                     type="monotone" 
                     dataKey="Ingresos" 
@@ -390,46 +485,90 @@ export default function AnalyticsPage() {
             </div>
           </section>
 
-          {/* Productos populares */}
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-heading text-xl font-semibold">Productos populares</h2>
-              <button 
-                onClick={loadPopular} 
-                className="rounded-md bg-muted hover:bg-muted/80 px-4 py-2 text-sm font-medium transition-colors"
-              >
-                Actualizar
-              </button>
-            </div>
-            <div className="overflow-x-auto rounded-lg border bg-card shadow-sm">
-              <table className="min-w-full text-sm">
-                <thead className="bg-muted/40">
-                  <tr>
-                    <th className="text-left px-4 py-3 font-semibold">Producto</th>
-                    <th className="text-left px-4 py-3 font-semibold">Pedidos</th>
-                    <th className="text-left px-4 py-3 font-semibold">Ingresos</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {popular.length === 0 && (
-                    <tr>
-                      <td className="px-4 py-8 text-center text-muted-foreground" colSpan={3}>Sin datos</td>
-                    </tr>
-                  )}
-                  {popular.map((p) => (
-                    <tr 
-                      key={p.product_id} 
-                      className="border-t hover:bg-muted/20 transition-colors"
+          {/* Grid: Top Clientes + Productos Populares */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Top 3 Clientes */}
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-heading text-xl font-semibold">Top 3 Clientes</h2>
+              </div>
+              <div className="space-y-3">
+                {topCustomers.length === 0 ? (
+                  <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground shadow-sm">
+                    Sin datos
+                  </div>
+                ) : (
+                  topCustomers.map((customer, index) => (
+                    <div 
+                      key={customer.id}
+                      className="rounded-lg border bg-card p-4 shadow-sm hover:shadow-md transition-shadow"
                     >
-                      <td className="px-4 py-3 font-medium">{p.name || p.product_id}</td>
-                      <td className="px-4 py-3">{p.orders_count}</td>
-                      <td className="px-4 py-3 font-semibold">${p.revenue.toFixed(2)}</td>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-bold text-lg">
+                            {index + 1}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-base">{customer.name}</div>
+                            <div className="text-xs text-muted-foreground">{customer.email}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-green-600">
+                            ${customer.total_spent.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {customer.orders_count} {customer.orders_count === 1 ? 'pedido' : 'pedidos'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+
+            {/* Productos populares */}
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-heading text-xl font-semibold">Productos populares</h2>
+                <button 
+                  onClick={loadPopular} 
+                  className="rounded-md bg-muted hover:bg-muted/80 px-4 py-2 text-sm font-medium transition-colors"
+                >
+                  Actualizar
+                </button>
+              </div>
+              <div className="overflow-x-auto rounded-lg border bg-card shadow-sm">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-muted/40">
+                    <tr>
+                      <th className="text-left px-4 py-3 font-semibold">Producto</th>
+                      <th className="text-left px-4 py-3 font-semibold">Pedidos</th>
+                      <th className="text-left px-4 py-3 font-semibold">Ingresos</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+                  </thead>
+                  <tbody>
+                    {popular.length === 0 && (
+                      <tr>
+                        <td className="px-4 py-8 text-center text-muted-foreground" colSpan={3}>Sin datos</td>
+                      </tr>
+                    )}
+                    {popular.map((p) => (
+                      <tr 
+                        key={p.product_id} 
+                        className="border-t hover:bg-muted/20 transition-colors"
+                      >
+                        <td className="px-4 py-3 font-medium">{p.name || p.product_id}</td>
+                        <td className="px-4 py-3">{p.orders_count}</td>
+                        <td className="px-4 py-3 font-semibold">${p.revenue.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
         </>
       )}
     </div>

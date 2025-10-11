@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server"
 import getServiceClient from "@/lib/supabase/server"
 
+// Disable caching for this endpoint
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET() {
   try {
     const supabase = getServiceClient()
@@ -45,7 +49,16 @@ export async function GET() {
       })
     )
 
-    return NextResponse.json({ orders: ordersWithItems })
+    return NextResponse.json(
+      { orders: ordersWithItems },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        }
+      }
+    )
   } catch (error: unknown) {
     console.error("Error fetching pending orders:", error)
     return NextResponse.json(
