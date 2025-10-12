@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Settings, Bell, BellOff, Save, TestTube } from 'lucide-react'
+import { useEffect, useState, useCallback } from 'react'
+import { Settings, TestTube } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
@@ -20,17 +20,11 @@ import { Input } from '@/components/ui/input'
 export default function NotificationPreferencesPage() {
   const [preferences, setPreferences] = useState<NotificationPreference[]>([])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const { toast } = useToast()
   const { supported, permission, subscribed, loading: pushLoading, subscribe, unsubscribe } =
     usePushNotifications()
 
-  // Fetch preferences
-  useEffect(() => {
-    fetchPreferences()
-  }, [])
-
-  const fetchPreferences = async () => {
+  const fetchPreferences = useCallback(async () => {
     try {
       const response = await fetch('/api/notifications/preferences')
       const data = await response.json()
@@ -48,7 +42,12 @@ export default function NotificationPreferencesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
+
+  // Fetch preferences
+  useEffect(() => {
+    fetchPreferences()
+  }, [fetchPreferences])
 
   // Update preference
   const updatePreference = async (
@@ -126,10 +125,10 @@ export default function NotificationPreferencesPage() {
           description: 'Ahora recibirás notificaciones push',
         })
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       toast({
         title: 'Error',
-        description: error.message || 'Error al gestionar suscripción',
+        description: error instanceof Error ? error.message : 'Error al gestionar suscripción',
         variant: 'destructive',
       })
     }

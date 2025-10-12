@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getNotifications, getUnreadCount, markAllNotificationsRead } from '@/lib/repo/notifications'
-import { z } from 'zod'
+import type { NotificationType } from '@/types/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       limit,
       offset,
       unreadOnly,
-      type: type as any,
+      type: type as NotificationType | undefined,
     })
 
     const unreadCount = await getUnreadCount()
@@ -35,10 +35,10 @@ export async function GET(req: NextRequest) {
         total: notifications.length,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching notifications:', error)
     return NextResponse.json(
-      { ok: false, error: error.message },
+      { ok: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
  * PATCH /api/notifications
  * Mark all notifications as read
  */
-export async function PATCH(req: NextRequest) {
+export async function PATCH() {
   try {
     const success = await markAllNotificationsRead()
 
@@ -57,10 +57,10 @@ export async function PATCH(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error marking all notifications as read:', error)
     return NextResponse.json(
-      { ok: false, error: error.message },
+      { ok: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

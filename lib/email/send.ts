@@ -45,7 +45,7 @@ export function getAdminEmail(): string {
 // EMAIL SUBJECT MAPPING
 // =====================================================
 
-const EMAIL_SUBJECTS: Record<EmailTemplate, (data: any) => string> = {
+const EMAIL_SUBJECTS: Record<EmailTemplate, (data: never) => string> = {
   new_order: (data: NewOrderEmailData) => `🛍️ Nueva Orden #${data.orderNumber} - ${data.currency} ${data.total.toFixed(2)}`,
   pending_transfer: (data: PendingTransferEmailData) => `💳 Transferencia Pendiente - Orden #${data.orderNumber}`,
   artist_submission: (data: ArtistSubmissionEmailData) => `🎵 Nueva Propuesta: ${data.artistName}`,
@@ -62,7 +62,7 @@ const EMAIL_SUBJECTS: Record<EmailTemplate, (data: any) => string> = {
 /**
  * Render email template based on type and data
  */
-function renderEmailTemplate(template: EmailTemplate, data: any): string {
+function renderEmailTemplate(template: EmailTemplate, data: unknown): string {
   switch (template) {
     case 'new_order':
       return createNewOrderEmail(data as NewOrderEmailData)
@@ -93,7 +93,7 @@ function renderEmailTemplate(template: EmailTemplate, data: any): string {
 export async function sendEmail(params: {
   to: string
   template: EmailTemplate
-  data: any
+  data: unknown
   notificationId?: string
   notificationType?: NotificationType | 'newsletter_welcome' | 'test'
 }): Promise<EmailSendResult> {
@@ -117,7 +117,7 @@ export async function sendEmail(params: {
   try {
     // Render template
     const html = renderEmailTemplate(params.template, params.data)
-    const subject = EMAIL_SUBJECTS[params.template](params.data)
+    const subject = EMAIL_SUBJECTS[params.template](params.data as never)
     const config = getEmailConfig()
 
     // Send email
@@ -151,7 +151,7 @@ export async function sendEmail(params: {
       success: true,
       messageId: result.data?.id,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Error sending email:', error)
 
     // Log failure
@@ -160,15 +160,15 @@ export async function sendEmail(params: {
         notification_id: params.notificationId,
         notification_type: params.notificationType || 'test',
         recipient: params.to,
-        subject: EMAIL_SUBJECTS[params.template](params.data),
+        subject: EMAIL_SUBJECTS[params.template](params.data as never),
         status: 'failed',
-        error_message: error.message || 'Unknown error',
+        error_message: error instanceof Error ? error.message : 'Unknown error',
       })
     }
 
     return {
       success: false,
-      error: error.message || 'Unknown error',
+      error: error instanceof Error ? error.message : 'Unknown error',
     }
   }
 }
@@ -178,7 +178,7 @@ export async function sendEmail(params: {
  */
 export async function sendAdminEmail(params: {
   template: EmailTemplate
-  data: any
+  data: unknown
   notificationId?: string
   notificationType: NotificationType
 }): Promise<EmailSendResult> {

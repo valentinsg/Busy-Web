@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server"
-import { getServiceClient } from "@/lib/supabase/server"
 import { getRevenueByChannel, getProfitSummary, getTimeSeries, getKPIs } from "@/lib/repo/analytics"
 
 export const dynamic = 'force-dynamic'

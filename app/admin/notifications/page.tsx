@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Bell, Filter, Trash2, CheckCheck, Settings } from 'lucide-react'
+import { Bell, CheckCheck, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -114,7 +114,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* Filters */}
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as any)}>
+      <Tabs value={filter} onValueChange={(v) => setFilter(v as 'all' | 'unread')}>
         <TabsList>
           <TabsTrigger value="all">
             Todas ({notifications.length})

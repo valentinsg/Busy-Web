@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getPaymentClient } from "@/lib/mp/client"
 import { logError, logInfo } from "@/lib/checkout/logger"
+import getServiceClient from "@/lib/supabase/server"
 
 export const dynamic = 'force-dynamic'
 

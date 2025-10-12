@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import {
   getNotificationPreferences,
   updateNotificationPreference,
 } from '@/lib/repo/notifications'
-import { z } from 'zod'
-
+import type { NotificationType } from '@/types/notifications'
 /**
  * GET /api/notifications/preferences
  * Get all notification preferences
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const preferences = await getNotificationPreferences()
     return NextResponse.json({ ok: true, preferences })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching notification preferences:', error)
     return NextResponse.json(
-      { ok: false, error: error.message },
+      { ok: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
@@ -40,17 +40,17 @@ export async function PATCH(req: NextRequest) {
 
     const { notification_type, ...updates } = schema.parse(body)
 
-    const success = await updateNotificationPreference(notification_type as any, updates)
+    const success = await updateNotificationPreference(notification_type as NotificationType, updates)
 
     if (!success) {
       throw new Error('Failed to update notification preference')
     }
 
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating notification preference:', error)
     return NextResponse.json(
-      { ok: false, error: error.message },
+      { ok: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 }
     )
   }

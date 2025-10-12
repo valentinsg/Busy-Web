@@ -49,12 +49,12 @@ export async function sendPushNotification(
 
       await webpush.sendNotification(pushSubscription, JSON.stringify(payload))
       success++
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error sending push notification:', error)
       failed++
 
       // If subscription is invalid (410 Gone), delete it
-      if (error.statusCode === 410) {
+      if ((error as { statusCode?: number }).statusCode === 410) {
         // TODO: Delete invalid subscription from database
         console.log('Subscription expired, should delete:', sub.endpoint)
       }

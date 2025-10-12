@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
@@ -151,9 +152,9 @@ export default function NewPopoverPage() {
         <div className="grid gap-2">
           <label className="text-sm">Imagen (opcional)</label>
           <div className="flex gap-2">
-            <input 
-              type="file" 
-              accept="image/*" 
+            <input
+              type="file"
+              accept="image/*"
               className="rounded-md border bg-background px-3 py-2 text-sm flex-1"
               onChange={async (e) => {
                 const file = e.target.files?.[0]
@@ -187,7 +188,7 @@ export default function NewPopoverPage() {
           </div>
           {imageUrl && (
             <div className="relative w-full h-32 rounded-md overflow-hidden border">
-              <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+              <Image src={imageUrl} alt="Preview" fill className="object-cover" />
               <button
                 type="button"
                 onClick={() => setImageUrl("")}
@@ -202,7 +203,7 @@ export default function NewPopoverPage() {
         {/* Tipo de popover */}
         <div className="grid gap-2">
           <label className="text-sm font-medium">Tipo de Popover</label>
-          <select 
+          <select
             className="rounded-md border bg-background px-3 py-2 text-sm"
             value={type}
             onChange={(e) => setType(e.target.value)}
@@ -229,13 +230,13 @@ export default function NewPopoverPage() {
           </div>
           <div className="grid gap-2">
             <label className="text-sm">% Descuento (1-100)</label>
-            <input 
-              type="number" 
-              min="1" 
-              max="100" 
-              className="rounded-md border bg-background px-3 py-2 text-sm" 
-              value={discountPercent} 
-              onChange={(e) => setDiscountPercent(Number(e.target.value))} 
+            <input
+              type="number"
+              min="1"
+              max="100"
+              className="rounded-md border bg-background px-3 py-2 text-sm"
+              value={discountPercent}
+              onChange={(e) => setDiscountPercent(Number(e.target.value))}
             />
           </div>
         </div>
@@ -246,13 +247,13 @@ export default function NewPopoverPage() {
         <div className="grid gap-2 sm:grid-cols-3">
           <div className="grid gap-2">
             <label className="text-sm">Delay (segundos)</label>
-            <input 
-              type="number" 
-              min="0" 
-              max="60" 
-              className="rounded-md border bg-background px-3 py-2 text-sm" 
-              value={delaySeconds} 
-              onChange={(e) => setDelaySeconds(Number(e.target.value))} 
+            <input
+              type="number"
+              min="0"
+              max="60"
+              className="rounded-md border bg-background px-3 py-2 text-sm"
+              value={delaySeconds}
+              onChange={(e) => setDelaySeconds(Number(e.target.value))}
             />
           </div>
           <label className="flex items-center gap-2 text-sm pt-6">
@@ -272,24 +273,24 @@ export default function NewPopoverPage() {
           <h4 className="text-sm font-medium">Opciones de Interacción</h4>
           <div className="grid gap-2 sm:grid-cols-2">
             <label className="flex items-center gap-2 text-sm">
-              <input 
-                type="checkbox" 
-                checked={requireEmail} 
-                onChange={(e) => setRequireEmail(e.target.checked)} 
-              /> 
+              <input
+                type="checkbox"
+                checked={requireEmail}
+                onChange={(e) => setRequireEmail(e.target.checked)}
+              />
               Requiere email para ver código
             </label>
             <label className="flex items-center gap-2 text-sm">
-              <input 
-                type="checkbox" 
-                checked={showNewsletter} 
-                onChange={(e) => setShowNewsletter(e.target.checked)} 
-              /> 
+              <input
+                type="checkbox"
+                checked={showNewsletter}
+                onChange={(e) => setShowNewsletter(e.target.checked)}
+              />
               Mostrar formulario de newsletter
             </label>
           </div>
           <p className="text-xs text-muted-foreground">
-            Si marcas "Requiere email", el código se mostrará solo después de que el usuario ingrese su email.
+            Si marcas &quot;Requiere email&quot;, el código se mostrará solo después de que el usuario ingrese su email.
           </p>
         </div>
 
@@ -297,20 +298,20 @@ export default function NewPopoverPage() {
         <div className="grid gap-2 sm:grid-cols-2">
           <div className="grid gap-2">
             <label className="text-sm">Texto del botón CTA (opcional)</label>
-            <input 
-              className="rounded-md border bg-background px-3 py-2 text-sm" 
-              placeholder="Ver productos" 
-              value={ctaText} 
-              onChange={(e) => setCtaText(e.target.value)} 
+            <input
+              className="rounded-md border bg-background px-3 py-2 text-sm"
+              placeholder="Ver productos"
+              value={ctaText}
+              onChange={(e) => setCtaText(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
             <label className="text-sm">URL del botón CTA (opcional)</label>
-            <input 
-              className="rounded-md border bg-background px-3 py-2 text-sm" 
-              placeholder="/products" 
-              value={ctaUrl} 
-              onChange={(e) => setCtaUrl(e.target.value)} 
+            <input
+              className="rounded-md border bg-background px-3 py-2 text-sm"
+              placeholder="/products"
+              value={ctaUrl}
+              onChange={(e) => setCtaUrl(e.target.value)}
             />
           </div>
         </div>

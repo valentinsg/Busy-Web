@@ -5,10 +5,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  RefreshCw, 
+import {
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
   Filter,
   CreditCard,
   Clock,
@@ -68,14 +68,14 @@ function parseCustomerFromNotes(notes: string | null): {
   paymentMethod: string | null
 } {
   if (!notes) return { full_name: null, email: null, phone: null, dni: null, address: null, paymentMethod: null }
-  
+
   const emailMatch = notes.match(/Email:\s*([^\s,]+@[^\s,]+)/i)
   const phoneMatch = notes.match(/Tel:\s*([0-9]+)/i)
   const dniMatch = notes.match(/DNI:\s*([0-9]+)/i)
   const nameMatch = notes.match(/Cliente:\s*([^,\.]+)/i)
   const addressMatch = notes.match(/Dirección:\s*([^\.]+)/i)
   const paymentMatch = notes.match(/Pago por\s+([^\.]+)/i)
-  
+
   return {
     full_name: nameMatch ? nameMatch[1].trim() : null,
     email: emailMatch ? emailMatch[1].trim() : null,
@@ -87,18 +87,18 @@ function parseCustomerFromNotes(notes: string | null): {
 }
 
 const statusConfig = {
-  pending: { 
-    label: "Pendiente", 
+  pending: {
+    label: "Pendiente",
     color: "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
     icon: Clock
   },
-  paid: { 
-    label: "Pagado", 
+  paid: {
+    label: "Pagado",
     color: "bg-green-500/10 text-green-700 border-green-500/20",
     icon: CheckCircle2
   },
-  cancelled: { 
-    label: "Cancelado", 
+  cancelled: {
+    label: "Cancelado",
     color: "bg-red-500/10 text-red-700 border-red-500/20",
     icon: XCircle
   },
@@ -136,35 +136,35 @@ export default function OrdersListPage() {
     try {
       const timestamp = new Date().getTime()
       const params = new URLSearchParams({ t: timestamp.toString() })
-      
+
       if (statusFilter !== "all") {
         params.append("status", statusFilter)
       }
-      
+
       if (channelFilter !== "all") {
         params.append("channel", channelFilter)
       }
-      
+
       if (paymentFilter === "pending_transfer") {
         params.append("status", "pending")
         params.append("payment_method", "transfer")
       } else if (paymentFilter !== "all") {
         params.append("payment_method", paymentFilter)
       }
-      
+
       const res = await fetch(`/api/admin/orders?${params.toString()}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache',
         }
       })
-      
+
       if (!res.ok) throw new Error("Error cargando órdenes")
-      
+
       const data = await res.json()
       setOrders(data.orders || [])
       setTotalCount(data.total || 0)
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "No se pudieron cargar las órdenes",
@@ -232,7 +232,7 @@ export default function OrdersListPage() {
             {totalCount} pedido{totalCount !== 1 ? 's' : ''} en total
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3 flex-wrap">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px]">
@@ -285,7 +285,7 @@ export default function OrdersListPage() {
               <SelectItem value="other">Otro</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Button onClick={fetchOrders} disabled={loading} variant="outline">
             <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             Actualizar
@@ -307,7 +307,7 @@ export default function OrdersListPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -319,7 +319,7 @@ export default function OrdersListPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -336,7 +336,7 @@ export default function OrdersListPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -359,7 +359,7 @@ export default function OrdersListPage() {
             <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">No hay pedidos</h3>
             <p className="text-muted-foreground">
-              {statusFilter !== "all" 
+              {statusFilter !== "all"
                 ? `No hay pedidos con estado "${statusFilter}"`
                 : "No se encontraron pedidos"}
             </p>
@@ -373,7 +373,7 @@ export default function OrdersListPage() {
             const channelInfo = channelConfig[order.channel as keyof typeof channelConfig] || channelConfig.web
             const StatusIcon = statusInfo.icon
             const ChannelIcon = channelInfo.icon
-            
+
             return (
               <Card key={order.id} className={cn("border-l-4 overflow-hidden", getStatusBorderColor(order.status))}>
                 <CardContent className="p-0">
@@ -414,7 +414,7 @@ export default function OrdersListPage() {
                         {formatDate(order.placed_at)} • {getTimeSince(order.placed_at)}
                       </p>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <div className="text-right">
                         <div className="text-2xl font-bold">{formatPrice(order.total)}</div>
@@ -438,7 +438,7 @@ export default function OrdersListPage() {
                         const parsedCustomer = parseCustomerFromNotes(order.notes)
                         const customerData = order.customer || parsedCustomer
                         const hasCustomerInfo = customerData.full_name || customerData.email || customerData.phone
-                        
+
                         return hasCustomerInfo ? (
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground mb-2">CLIENTE</h4>

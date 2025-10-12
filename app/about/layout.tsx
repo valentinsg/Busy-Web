@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   ...generateSEO({
     title: 'Sobre Busy - Historia y Valores',
     description:
-      'Conocé nuestra historia, valores, el compromiso de Busy con la cultura de la moda y lo que fomentamos como comunidad. Roadmap 2023-2026.',
+      'Conocé nuestra historia, valores, el compromiso de Busy con la cultura de la moda y lo que fomentamos como comunidad. Roadmap 2024 -2026.',
     url: `${SITE_URL}/about`,
   }),
   alternates: {
@@ -30,12 +30,12 @@ export default function AboutLayout({ children }: { children: React.ReactNode })
             '@context': 'https://schema.org',
             '@type': 'AboutPage',
             name: 'Sobre Busy Streetwear',
-            description: 'Historia, valores y roadmap de Busy Streetwear desde 2023',
+            description: 'Historia, valores y roadmap de Busy Streetwear desde 2024',
             url: `${SITE_URL}/about`,
             mainEntity: {
               '@type': 'Organization',
               name: 'Busy Streetwear',
-              foundingDate: '2023',
+              foundingDate: '2024',
               foundingLocation: {
                 '@type': 'Place',
                 address: {

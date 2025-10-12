@@ -111,7 +111,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isSignIn = pathname.startsWith("/admin/sign-in")
 
   // Read sidebar state from cookie - initialize with cookie value if available
-  const [sidebarDefaultOpen, setSidebarDefaultOpen] = useState(() => {
+  const sidebarDefaultOpen = (() => {
     if (typeof window === 'undefined') return false
     const getCookie = (name: string) => {
       const value = `; ${document.cookie}`
@@ -121,7 +121,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
     const savedState = getCookie('sidebar:state')
     return savedState === 'true'
-  })
+  })()
 
   // For the sign-in page, we must not show the sidebar at all.
   if (isSignIn) {

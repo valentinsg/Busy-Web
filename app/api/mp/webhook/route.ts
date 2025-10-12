@@ -1,8 +1,10 @@
-import { getPaymentClient } from "@/lib/mp/client"
-import getServiceClient from "@/lib/supabase/server"
 import { validateCouponPercent } from "@/lib/checkout/coupons"
 import { logError, logInfo } from "@/lib/checkout/logger"
 import { computeShipping, computeTax } from "@/lib/checkout/totals"
+import { sendInvoiceEmail } from "@/lib/email/resend"
+import { getPaymentClient } from "@/lib/mp/client"
+import { getSettingsServer } from "@/lib/repo/settings"
+import getServiceClient from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 
 export const dynamic = 'force-dynamic'

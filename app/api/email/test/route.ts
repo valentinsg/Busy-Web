@@ -53,12 +53,12 @@ export async function GET(request: NextRequest) {
       recipient: to || 'admin',
       stats,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in test email endpoint:', error)
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Internal server error',
+        error: error instanceof Error ? error.message : 'Internal server error',
       },
       { status: 500 }
     )
@@ -114,12 +114,12 @@ export async function POST(request: NextRequest) {
       message: `Test email sent to ${to}`,
       messageId: result.messageId,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in test email endpoint:', error)
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Internal server error',
+        error: error instanceof Error ? error.message : 'Internal server error',
       },
       { status: 500 }
     )

@@ -173,43 +173,43 @@ export async function sendOrderCancelledEmail(params: {
 export async function handleNotificationEmail(params: {
   notificationId: string
   notificationType: string
-  metadata: any
+  metadata: unknown
 }) {
   try {
     switch (params.notificationType) {
       case 'new_order':
         await sendNewOrderEmail({
           notificationId: params.notificationId,
-          metadata: params.metadata,
+          metadata: params.metadata as never,
         })
         break
 
       case 'pending_transfer':
         await sendPendingTransferEmail({
           notificationId: params.notificationId,
-          metadata: params.metadata,
+          metadata: params.metadata as never,
         })
         break
 
       case 'artist_submission':
         await sendArtistSubmissionEmail({
           notificationId: params.notificationId,
-          metadata: params.metadata,
+          metadata: params.metadata as never,
         })
         break
 
       case 'low_stock':
         await sendLowStockEmail({
           notificationId: params.notificationId,
-          metadata: params.metadata,
-          threshold: params.metadata.threshold,
+          metadata: params.metadata as never,
+          threshold: (params.metadata as { threshold?: number }).threshold,
         })
         break
 
       case 'order_cancelled':
         await sendOrderCancelledEmail({
           notificationId: params.notificationId,
-          metadata: params.metadata,
+          metadata: params.metadata as never,
         })
         break
 

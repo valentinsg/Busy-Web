@@ -277,7 +277,7 @@ export async function createNotification(params: {
   type: NotificationType
   title: string
   message: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   action_url?: string
   priority?: NotificationPriority
 }): Promise<string | null> {

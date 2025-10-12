@@ -26,10 +26,10 @@ export async function GET(
     }
 
     return NextResponse.json(order)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching order:", error)
     return NextResponse.json(
-      { error: error.message },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
@@ -57,10 +57,10 @@ export async function PATCH(
     }
 
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating order:", error)
     return NextResponse.json(
-      { error: error.message },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 }
     )
   }

@@ -8,7 +8,6 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { CheckCircle2, XCircle, Clock, RefreshCw, ChevronDown, ChevronUp } from "lucide-react"
 import { formatPrice } from "@/lib/format"
 import { useToast } from "@/hooks/use-toast"
-import { cn } from "@/lib/utils"
 
 type PendingOrder = {
   id: string
@@ -42,14 +41,14 @@ function parseCustomerFromNotes(notes: string | null): {
   paymentMethod: string | null
 } {
   if (!notes) return { full_name: null, email: null, phone: null, dni: null, address: null, paymentMethod: null }
-  
+
   const emailMatch = notes.match(/Email:\s*([^\s,]+@[^\s,]+)/i)
   const phoneMatch = notes.match(/Tel:\s*([0-9]+)/i)
   const dniMatch = notes.match(/DNI:\s*([0-9]+)/i)
   const nameMatch = notes.match(/Cliente:\s*([^,\.]+)/i)
   const addressMatch = notes.match(/Dirección:\s*([^\.]+)/i)
   const paymentMatch = notes.match(/Pago por\s+([^\.]+)/i)
-  
+
   return {
     full_name: nameMatch ? nameMatch[1].trim() : null,
     email: emailMatch ? emailMatch[1].trim() : null,
@@ -81,7 +80,7 @@ export default function PendingTransfersPage() {
       if (!res.ok) throw new Error("Error cargando órdenes")
       const data = await res.json()
       setOrders(data.orders || [])
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "No se pudieron cargar las órdenes pendientes",
@@ -125,7 +124,7 @@ export default function PendingTransfersPage() {
       })
 
       fetchOrders()
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "No se pudo confirmar la orden",
@@ -153,7 +152,7 @@ export default function PendingTransfersPage() {
       })
 
       fetchOrders()
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "No se pudo rechazar la orden",
@@ -219,7 +218,7 @@ export default function PendingTransfersPage() {
           {orders.map((order) => {
             const isExpanded = expandedOrders.has(order.id)
             const isLoading = actionLoading === order.id
-            
+
             return (
               <Card key={order.id} className="border-l-4 border-l-yellow-500/70 overflow-hidden">
                 <CardContent className="p-0">
@@ -238,7 +237,7 @@ export default function PendingTransfersPage() {
                         {formatDate(order.placed_at)} • {getTimeSince(order.placed_at)}
                       </p>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <div className="text-right">
                         <div className="text-2xl font-bold">{formatPrice(order.total)}</div>
@@ -262,7 +261,7 @@ export default function PendingTransfersPage() {
                         const parsedCustomer = parseCustomerFromNotes(order.notes)
                         const customerData = order.customer || parsedCustomer
                         const hasCustomerInfo = customerData.full_name || customerData.email || customerData.phone
-                        
+
                         return hasCustomerInfo ? (
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground mb-2">CLIENTE</h4>

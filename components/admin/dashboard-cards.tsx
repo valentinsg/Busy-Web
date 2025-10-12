@@ -9,7 +9,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import type { DateRange } from "react-day-picker"
 // Chart UI helpers removed; charts now rendered via client-only component
-import RevenueAreaChart from "@/components/admin/RevenueAreaChart"
 
 type Variant = "compact" | "full"
 
@@ -30,11 +29,9 @@ export default function DashboardCards({
   const [loading, setLoading] = useState<boolean>(false)
   const [profit, setProfit] = useState<{ revenue: number; expenses: number; profit: number } | null>(null)
   const [revenueByChannel, setRevenueByChannel] = useState<Array<{ channel: string; orders: number; revenue: number }>>([])
-  const [timeSeries, setTimeSeries] = useState<Array<{ bucket: string; revenue: number; revenue_prev?: number }>>([])
   const [kpis, setKpis] = useState<{ orders: number; aov: number; new_customers: number } | null>(null)
   const [groupBy, setGroupBy] = useState<'day'|'week'|'month'>("day")
   const [preset, setPreset] = useState<string>("last30")
-  const [showComparison, setShowComparison] = useState(false)
   const [rangeOpen, setRangeOpen] = useState(false)
   const [customRange, setCustomRange] = useState<Partial<DateRange>>({})
 
@@ -48,13 +45,11 @@ export default function DashboardCards({
         if (effFrom) params.set("from", effFrom)
         if (effTo) params.set("to", effTo)
         if (groupBy) params.set("groupBy", groupBy)
-        if (showComparison) params.set("comparison", "true")
         const res = await fetch(`/api/admin/analytics/summary?${params.toString()}`)
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || "Error")
         setProfit(json.profit)
         setRevenueByChannel(json.revenueByChannel || [])
-        setTimeSeries(json.timeSeries || [])
         setKpis(json.kpis || null)
         if (!opts?.quiet) toast({ title: "Resumen actualizado" })
       } catch (e: unknown) {
@@ -63,7 +58,7 @@ export default function DashboardCards({
         setLoading(false)
       }
     },
-    [externalFrom, externalTo, from, to, groupBy, showComparison, toast],
+    [externalFrom, externalTo, from, to, groupBy, toast],
   )
 
   // Keep in sync with external props (when provided) and load data

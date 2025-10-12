@@ -96,7 +96,7 @@ export default async function BlogPage() {
     Array.isArray(allPosts) && allPosts.length
       ? {
           '@type': 'ItemList',
-          itemListElement: allPosts.slice(0, 20).map((p: any, i: number) => ({
+          itemListElement: allPosts.slice(0, 20).map((p: { slug?: string }, i: number) => ({
             '@type': 'ListItem',
             position: i + 1,
             url: `${siteUrlStr}${

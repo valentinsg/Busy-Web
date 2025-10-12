@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic"
 
 import React, { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { Card } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { BalanceKPIs } from "@/components/admin/balance-kpis"
@@ -17,7 +16,7 @@ function getAllDatesInRange(from: string, to: string): string[] {
   const start = new Date(from)
   const end = new Date(to)
   const current = new Date(start)
-  
+
   while (current <= end) {
     dates.push(current.toISOString().slice(0, 10))
     current.setDate(current.getDate() + 1)
@@ -29,7 +28,7 @@ function getAllDatesInRange(from: string, to: string): string[] {
 function formatDateLabel(dateStr: string, groupBy: 'day' | 'week' | 'month'): string {
   if (groupBy === 'week') return dateStr
   if (groupBy === 'month') return dateStr
-  
+
   // Para días, mostrar formato corto
   const date = new Date(dateStr)
   const day = date.getDate()
@@ -38,12 +37,24 @@ function formatDateLabel(dateStr: string, groupBy: 'day' | 'week' | 'month'): st
 }
 
 // Tooltip personalizado
-function CustomTooltip({ active, payload, label }: any) {
+interface TooltipPayload {
+  name: string
+  value: number
+  color: string
+}
+
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: TooltipPayload[]
+  label?: string
+}
+
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (active && payload && payload.length) {
     return (
       <div className="bg-background border rounded-lg shadow-lg p-3">
         <p className="text-sm font-medium mb-2">{label}</p>
-        {payload.map((entry: any, index: number) => (
+        {payload.map((entry, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
             {entry.name}: ${Math.abs(entry.value).toLocaleString()}
           </p>
@@ -70,13 +81,13 @@ export default function AnalyticsPage() {
     return fromD.toISOString().slice(0,10)
   })
   const [to, setTo] = useState<string>(() => new Date().toISOString().slice(0,10))
-  
+
   // Preset handlers
   const handlePreset = (preset: string) => {
     setActivePreset(preset)
     const today = new Date()
     const iso = (d: Date) => d.toISOString().slice(0,10)
-    
+
     switch(preset) {
       case '7d':
         setFrom(iso(new Date(today.getTime() - 6*24*3600*1000)))
@@ -100,9 +111,9 @@ export default function AnalyticsPage() {
         break
     }
   }
-  
+
   const [groupBy, setGroupBy] = useState<'day'|'week'|'month'>("day")
-  const [comparePrev, setComparePrev] = useState<boolean>(false)
+  const comparePrev = false // Comparison feature disabled for now
   const [summary, setSummary] = useState<{
     profit: { revenue: number; expenses: number; profit: number } | null
     revenueByChannel: Array<{ channel: string; orders: number; revenue: number }>
@@ -196,10 +207,10 @@ export default function AnalyticsPage() {
         'Período anterior': d.revenue_prev || 0
       }))
     }
-    
+
     const allDates = getAllDatesInRange(from, to)
     const dataMap = new Map(summary.timeSeries.map(d => [d.bucket, d]))
-    
+
     return allDates.map(date => {
       const existing = dataMap.get(date)
       return {
@@ -243,9 +254,9 @@ export default function AnalyticsPage() {
 
       {/* Balance Actual (sin filtros) */}
       <section>
-        <BalanceKPIs 
-          title="Balance Actual" 
-          showOrdersCount={false} 
+        <BalanceKPIs
+          title="Balance Actual"
+          showOrdersCount={false}
         />
       </section>
 
@@ -318,11 +329,11 @@ export default function AnalyticsPage() {
         <>
           {/* Balance del Período Seleccionado */}
           <section>
-            <BalanceKPIs 
-              from={from} 
-              to={to} 
-              title="Balance del Período Seleccionado" 
-              showOrdersCount={true} 
+            <BalanceKPIs
+              from={from}
+              to={to}
+              title="Balance del Período Seleccionado"
+              showOrdersCount={true}
             />
           </section>
 
@@ -406,29 +417,29 @@ export default function AnalyticsPage() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                  <XAxis 
-                    dataKey="label" 
-                    tickLine={false} 
-                    axisLine={false} 
+                  <XAxis
+                    dataKey="label"
+                    tickLine={false}
+                    axisLine={false}
                     tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                     interval="preserveStartEnd"
                   />
-                  <YAxis 
-                    tickLine={false} 
-                    axisLine={false} 
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
                     tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                     width={60}
                     tickFormatter={(value) => `$${value.toLocaleString()}`}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Legend 
-                    wrapperStyle={{ paddingTop: '20px' }} 
+                  <Legend
+                    wrapperStyle={{ paddingTop: '20px' }}
                     iconType="square"
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="Ingresos" 
-                    stroke="hsl(142, 76%, 36%)" 
+                  <Area
+                    type="monotone"
+                    dataKey="Ingresos"
+                    stroke="hsl(142, 76%, 36%)"
                     strokeWidth={2}
                     fill="url(#colorIngresos)"
                   />
@@ -460,9 +471,9 @@ export default function AnalyticsPage() {
                       <Cell key={`cell-${index}`} fill={CHANNEL_COLORS[index % 5]} />
                     ))}
                   </Pie>
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: number) => `$${value.toLocaleString()}`}
-                    contentStyle={{ 
+                    contentStyle={{
                       backgroundColor: 'hsl(var(--background))',
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px'
@@ -474,8 +485,8 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
               {summary.revenueByChannel.map((channel, idx) => (
                 <div key={channel.channel} className="flex items-center gap-2">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
+                  <div
+                    className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: CHANNEL_COLORS[idx % 5] }}
                   />
                   <span className="text-muted-foreground">{channel.channel}:</span>
@@ -499,7 +510,7 @@ export default function AnalyticsPage() {
                   </div>
                 ) : (
                   topCustomers.map((customer, index) => (
-                    <div 
+                    <div
                       key={customer.id}
                       className="rounded-lg border bg-card p-4 shadow-sm hover:shadow-md transition-shadow"
                     >
@@ -532,8 +543,8 @@ export default function AnalyticsPage() {
             <section className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="font-heading text-xl font-semibold">Productos populares</h2>
-                <button 
-                  onClick={loadPopular} 
+                <button
+                  onClick={loadPopular}
                   className="rounded-md bg-muted hover:bg-muted/80 px-4 py-2 text-sm font-medium transition-colors"
                 >
                   Actualizar
@@ -555,8 +566,8 @@ export default function AnalyticsPage() {
                       </tr>
                     )}
                     {popular.map((p) => (
-                      <tr 
-                        key={p.product_id} 
+                      <tr
+                        key={p.product_id}
                         className="border-t hover:bg-muted/20 transition-colors"
                       >
                         <td className="px-4 py-3 font-medium">{p.name || p.product_id}</td>

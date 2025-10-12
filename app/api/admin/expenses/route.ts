@@ -52,8 +52,8 @@ export async function POST(req: Request) {
     // Log detallado del error para debugging
     console.error("Error creating expense:", error)
     const errorMessage = error instanceof Error ? error.message : "Unexpected error"
-    const errorDetails = error instanceof Error && "details" in error ? (error as any).details : null
-    const errorHint = error instanceof Error && "hint" in error ? (error as any).hint : null
+    const errorDetails = error instanceof Error && "details" in error ? (error as Error & { details?: unknown }).details : null
+    const errorHint = error instanceof Error && "hint" in error ? (error as Error & { hint?: unknown }).hint : null
     
     return NextResponse.json({ 
       error: errorMessage,

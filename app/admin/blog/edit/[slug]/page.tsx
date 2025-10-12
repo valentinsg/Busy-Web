@@ -160,7 +160,7 @@ export default function AdminBlogEditPage() {
     const end = el.selectionEnd || 0
 
     // Trim whitespace from selection
-    let selected = content.slice(start, end) || "texto"
+    const selected = content.slice(start, end) || "texto"
     let trimStart = 0
     let trimEnd = 0
 

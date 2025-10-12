@@ -114,35 +114,35 @@ export default function AdminBlogNewPage() {
     if (!el) return
     const start = el.selectionStart || 0
     const end = el.selectionEnd || 0
-    
+
     // Trim whitespace from selection
-    let selected = content.slice(start, end) || "texto"
+    const selected = content.slice(start, end) || "texto"
     let trimStart = 0
     let trimEnd = 0
-    
+
     // Count leading whitespace
     while (trimStart < selected.length && /\s/.test(selected[trimStart])) {
       trimStart++
     }
-    
+
     // Count trailing whitespace
     while (trimEnd < selected.length && /\s/.test(selected[selected.length - 1 - trimEnd])) {
       trimEnd++
     }
-    
+
     // Extract trimmed text
     const trimmedSelected = selected.slice(trimStart, selected.length - trimEnd)
-    
+
     // Build new text with formatting only on trimmed selection
-    const newText = 
-      content.slice(0, start) + 
+    const newText =
+      content.slice(0, start) +
       selected.slice(0, trimStart) + // leading whitespace
-      before + trimmedSelected + after + 
+      before + trimmedSelected + after +
       selected.slice(selected.length - trimEnd) + // trailing whitespace
       content.slice(end)
-    
+
     setContent(newText)
-    
+
     // Restore focus
     requestAnimationFrame(() => {
       el.focus()
@@ -314,7 +314,7 @@ export default function AdminBlogNewPage() {
                   </PopoverContent>
                 </Popover>
               </div>
-              
+
               {/* Editor WYSIWYG con preview en tiempo real */}
               <div>
                 <label className="text-sm font-medium mb-2 block">Contenido del artículo</label>

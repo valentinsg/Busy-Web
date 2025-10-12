@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     // Coupon validation
     const discount_percent = await validateCouponPercent(body.coupon_code)
-    
+
     // Calculate totals (NO TAX for transfers)
     const subtotal = itemsDetailed.reduce((acc, i) => acc + i.unit_price * i.quantity, 0)
     const discount = discount_percent ? Number((subtotal * (discount_percent / 100)).toFixed(2)) : 0
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     // Create or find customer
     let customer_id: string | null = null
     const customer = body.customer
-    
+
     if (customer?.email) {
       // Try to find existing customer
       const { data: existing } = await supabase
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         .select("id")
         .eq("email", customer.email)
         .maybeSingle()
-      
+
       if (existing?.id) {
         customer_id = existing.id
         // Update customer info
@@ -119,11 +119,11 @@ export async function POST(req: NextRequest) {
 
     // Create order with status "pending" for transfers
     const order_id = crypto.randomUUID()
-    
+
     // Try to insert with payment_method, fallback if column doesn't exist
-    let order: any = null
-    let orderErr: any = null
-    
+    let order: { id: string } | null = null
+    let orderErr: Error | null = null
+
     const orderPayload = {
       id: order_id,
       customer_id,
@@ -138,17 +138,17 @@ export async function POST(req: NextRequest) {
       notes: `Pago por transferencia. Cliente: ${customer?.first_name} ${customer?.last_name}. Email: ${customer?.email}. Tel: ${customer?.phone}. DNI: ${customer?.dni || "N/A"}. Dirección: ${customer?.address || ""}, ${customer?.city || ""}, ${customer?.state || ""}, CP: ${customer?.zip || ""}`,
       placed_at: new Date().toISOString(),
     }
-    
+
     // Try with payment_method first
     const firstTry = await supabase
       .from("orders")
       .insert({ ...orderPayload, payment_method: "transfer" })
       .select("*")
       .single()
-    
+
     order = firstTry.data
     orderErr = firstTry.error
-    
+
     // If payment_method column doesn't exist, retry without it
     if (orderErr && String(orderErr.message || "").toLowerCase().includes("payment_method")) {
       const secondTry = await supabase
@@ -163,9 +163,12 @@ export async function POST(req: NextRequest) {
     if (orderErr) throw orderErr
     if (!order) throw new Error("Failed to create order")
 
+    // TypeScript narrowing: order is guaranteed to be non-null here
+    const createdOrder = order
+
     // Insert order items
     const itemsPayload = itemsDetailed.map((it) => ({
-      order_id: order.id,
+      order_id: createdOrder.id,
       product_id: it.product_id,
       product_name: it.product_name,
       variant_size: it.variant_size,
@@ -207,7 +210,7 @@ export async function POST(req: NextRequest) {
 
     logInfo("Transfer order created", { order_id, customer_id, total })
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       order_id,
       total,
       customer_email: customer?.email,

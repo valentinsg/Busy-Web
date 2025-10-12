@@ -35,7 +35,7 @@ export async function GET(req: Request) {
     if (error) throw error
 
     // Agrupar por customer_id y sumar totales
-    const customerMap = new Map<string, { 
+    const customerMap = new Map<string, {
       id: string
       name: string
       email: string
@@ -43,7 +43,17 @@ export async function GET(req: Request) {
       orders_count: number
     }>()
 
-    orders?.forEach((order: any) => {
+    interface OrderWithCustomer {
+      customer_id: string
+      total: number
+      customers: {
+        id: string
+        full_name: string | null
+        email: string | null
+      }
+    }
+
+    (orders as unknown as OrderWithCustomer[] | null)?.forEach((order) => {
       const customerId = order.customer_id
       if (!customerId) return
 
@@ -70,9 +80,9 @@ export async function GET(req: Request) {
       .sort((a, b) => b.total_spent - a.total_spent)
       .slice(0, limit)
 
-    return NextResponse.json({ 
-      ok: true, 
-      customers: topCustomers 
+    return NextResponse.json({
+      ok: true,
+      customers: topCustomers
     })
   } catch (error: unknown) {
     console.error("Error fetching top customers:", error)

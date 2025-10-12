@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from 'react'
 import dynamic from "next/dynamic"
 import "@uiw/react-md-editor/markdown-editor.css"
 import "@uiw/react-markdown-preview/markdown.css"
@@ -18,7 +18,6 @@ interface WYSIWYGEditorProps {
 
 export default function WYSIWYGEditor({ value, onChange, placeholder }: WYSIWYGEditorProps) {
   const [mounted, setMounted] = useState(false)
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
     setMounted(true)

@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { useI18n } from '@/components/i18n-provider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SizeCalculatorForm } from '@/components/size-calculator/size-calculator-form'
@@ -12,7 +11,6 @@ import { calculateAllCategories } from '@/lib/size-calculator/calculator'
 import { Ruler, Shirt, TrendingUp } from 'lucide-react'
 
 export default function SizeCalculatorPage() {
-  const { t } = useI18n()
   const [step, setStep] = useState<'intro' | 'form' | 'results'>('intro')
   const [userMeasurements, setUserMeasurements] = useState<UserMeasurements | null>(null)
   const [results, setResults] = useState<CalculatorResult | null>(null)

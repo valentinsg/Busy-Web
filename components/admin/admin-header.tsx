@@ -28,27 +28,32 @@ export function AdminHeader() {
       const email = user?.email || null
       setUserEmail(email)
 
-      // Try to get avatar from user metadata first
-      let avatar = user?.user_metadata?.avatar_url || null
+      let avatarUrl: string | null = null
 
+      // Try to get avatar from user metadata first
       // If no avatar in metadata, try to match with authors.json
-      if (!avatar && email) {
+      if (email) {
         try {
           const response = await fetch('/data/authors.json')
           const authors = await response.json()
-          const author = authors.find((a: any) =>
+          interface Author {
+            id: string
+            email: string
+            avatar?: string
+          }
+          const author = (authors as Author[]).find((a) =>
             a.email === email ||
             email.includes(a.id.replace('-', ''))
           )
           if (author?.avatar) {
-            avatar = author.avatar
+            avatarUrl = author.avatar
           }
-        } catch (error) {
+        } catch {
           // Ignore errors, will use fallback
         }
       }
 
-      setUserAvatar(avatar)
+      setUserAvatar(avatarUrl)
       setLoading(false)
     }
     getUser()

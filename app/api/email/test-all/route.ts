@@ -3,7 +3,7 @@
 // Endpoint para probar todos los tipos de emails
 // =====================================================
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import {
   sendNewOrderEmail,
   sendPendingTransferEmail,
@@ -20,9 +20,9 @@ export const dynamic = 'force-dynamic'
  * GET /api/email/test-all
  * Send test emails for all notification types
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const results: any[] = []
+    const results: Array<{ type: string; success: boolean; error?: string }> = []
 
     // 1. Nueva Orden
     console.log('📧 Enviando: Nueva Orden...')
@@ -133,12 +133,12 @@ export async function GET(request: NextRequest) {
         failed,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in test-all email endpoint:', error)
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Internal server error',
+        error: error instanceof Error ? error.message : 'Internal server error',
       },
       { status: 500 }
     )

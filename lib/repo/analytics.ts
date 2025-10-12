@@ -191,11 +191,12 @@ export async function getTimeSeries(params: {
       // Get unique order IDs that match the category
       const matchingOrderIds = new Set(
         orderItems
-          .filter((item: any) => {
-            const productCategory = item.products?.category?.toLowerCase() || ''
+          .filter((item: unknown) => {
+            const typedItem = item as { products?: { category?: string }; order_id: string }
+            const productCategory = typedItem.products?.category?.toLowerCase() || ''
             return productCategory.includes(params.category!.toLowerCase())
           })
-          .map((item: any) => item.order_id)
+          .map((item: unknown) => (item as { order_id: string }).order_id)
       )
       
       // Filter orders to only those with matching category
@@ -255,7 +256,7 @@ export async function getTimeSeries(params: {
     const prevFrom = new Date(fromDate.getTime() - diff)
     const prevTo = new Date(fromDate.getTime() - 1)
     
-    let prevOrdersQB = supabase.from('orders').select('total,placed_at')
+    const prevOrdersQB = supabase.from('orders').select('total,placed_at')
       .neq('status', 'pending')
       .gte('placed_at', prevFrom.toISOString().slice(0, 10))
       .lte('placed_at', prevTo.toISOString().slice(0, 10))

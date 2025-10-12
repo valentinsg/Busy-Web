@@ -18,7 +18,6 @@ export default function TransferConfirmationPage() {
     total: number
     customer_email: string
   } | null>(null)
-  const [loading, setLoading] = React.useState(true)
 
   // Datos bancarios de Mercado Pago
   const bankData = {
@@ -32,7 +31,6 @@ export default function TransferConfirmationPage() {
 
   React.useEffect(() => {
     if (!orderId) {
-      setLoading(false)
       return
     }
 
@@ -44,7 +42,6 @@ export default function TransferConfirmationPage() {
       total,
       customer_email: "",
     })
-    setLoading(false)
   }, [orderId, searchParams])
 
   const copyToClipboard = (text: string, label: string) => {

@@ -1,7 +1,6 @@
 import type {
   UserMeasurements,
   ProductMeasurements,
-  SizeRecommendation,
   CalculatorResult,
 } from '@/types/size-calculator'
 
@@ -144,8 +143,7 @@ function findBaseSize(
 function generateReasons(
   user: UserMeasurements,
   recommendedSize: string,
-  measurements: ProductMeasurements,
-  estimatedChest: number
+  measurements: ProductMeasurements
 ): string[] {
   const reasons: string[] = []
   const bmi = calculateBMI(user.height, user.weight)
@@ -215,8 +213,7 @@ function getAlternativeSizes(
  * Calcula la confianza de la recomendación
  */
 function calculateConfidence(
-  user: UserMeasurements,
-  recommendedMeasurements: ProductMeasurements
+  user: UserMeasurements
 ): 'high' | 'medium' | 'low' {
   let score = 100
   
@@ -269,13 +266,13 @@ export function calculateSizeRecommendation(
   const recommendedMeasurements = measurements[recommendedSize]
   
   // Generar razones
-  const reasons = generateReasons(user, recommendedSize, recommendedMeasurements, userChest)
+  const reasons = generateReasons(user, recommendedSize, recommendedMeasurements)
   
   // Obtener talles alternativos
   const alternativeSizes = getAlternativeSizes(recommendedSize, availableSizes)
   
   // Calcular confianza
-  const confidence = calculateConfidence(user, recommendedMeasurements)
+  const confidence = calculateConfidence(user)
   
   return {
     recommendedSize: {

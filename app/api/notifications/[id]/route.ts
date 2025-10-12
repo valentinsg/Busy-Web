@@ -24,10 +24,10 @@ export async function GET(
     }
 
     return NextResponse.json({ ok: true, notification })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching notification:', error)
     return NextResponse.json(
-      { ok: false, error: error.message },
+      { ok: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
@@ -49,10 +49,10 @@ export async function PATCH(
     }
 
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error marking notification as read:', error)
     return NextResponse.json(
-      { ok: false, error: error.message },
+      { ok: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
@@ -74,10 +74,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting notification:', error)
     return NextResponse.json(
-      { ok: false, error: error.message },
+      { ok: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

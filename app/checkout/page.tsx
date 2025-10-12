@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowLeft, CreditCard, Mail, MessageCircle } from "lucide-react"
+import { ArrowLeft, CreditCard, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -18,8 +18,6 @@ import { useToast } from "@/hooks/use-toast"
 import PayWithMercadoPago from "@/components/checkout/pay-with-mercadopago"
 import PayWithTransfer from "@/components/checkout/pay-with-transfer"
 import { Checkbox } from "@/components/ui/checkbox"
-
-const CHECKOUT_MODE = process.env.NEXT_PUBLIC_CHECKOUT_MODE || "mailto"
 
 export default function CheckoutPage() {
   const { items, getTotalItems, getSubtotal, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon } = useCart()

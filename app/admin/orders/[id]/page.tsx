@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Image from "next/image"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -10,6 +11,24 @@ import { ArrowLeft, Package, Truck, CheckCircle2, XCircle, Clock, MapPin, User, 
 import { formatCurrency } from "@/lib/utils"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
+
+type ShippingAddress = {
+  street?: string
+  city?: string
+  postal_code?: string
+  state?: string
+  country?: string
+}
+
+type OrderItem = {
+  id: string
+  product_id: string
+  name: string
+  variant?: string
+  quantity: number
+  price: number
+  image_url?: string
+}
 
 type Order = {
   id: string
@@ -26,8 +45,8 @@ type Order = {
   customer_name: string | null
   customer_email: string | null
   customer_phone: string | null
-  shipping_address: any
-  items: any[]
+  shipping_address: ShippingAddress | null
+  items: OrderItem[]
   notes: string | null
 }
 
@@ -60,11 +79,7 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadOrder()
-  }, [params.id])
-
-  async function loadOrder() {
+  const loadOrder = useCallback(async () => {
     try {
       const res = await fetch(`/api/admin/orders/${params.id}`)
       if (!res.ok) throw new Error("Order not found")
@@ -75,7 +90,11 @@ export default function OrderDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id])
+
+  useEffect(() => {
+    loadOrder()
+  }, [loadOrder])
 
   async function updateStatus(newStatus: string) {
     try {
@@ -146,12 +165,14 @@ export default function OrderDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {order.items?.map((item: any, idx: number) => (
+                {order.items?.map((item, idx: number) => (
                   <div key={idx} className="flex items-center gap-4">
                     {item.image_url && (
-                      <img
+                      <Image
                         src={item.image_url}
                         alt={item.name}
+                        width={64}
+                        height={64}
                         className="w-16 h-16 object-cover rounded-md"
                       />
                     )}

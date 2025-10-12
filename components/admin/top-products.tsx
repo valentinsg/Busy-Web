@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
+import Image from "next/image"
 
 type Row = {
   product_id: string
@@ -42,11 +43,14 @@ export default function TopProducts({ limit = 5 }: { limit?: number }) {
         {rows.map((r) => (
           <div key={r.product_id} className="flex items-center gap-3 text-sm">
             {r.image_url && (
-              <img 
-                src={r.image_url} 
-                alt={r.name} 
-                className="w-12 h-12 object-cover rounded border"
-              />
+              <div className="relative w-12 h-12 rounded border overflow-hidden flex-shrink-0">
+                <Image 
+                  src={r.image_url} 
+                  alt={r.name} 
+                  fill
+                  className="object-cover"
+                />
+              </div>
             )}
             <div className="flex-1 min-w-0">
               <div className="truncate font-medium" title={r.name}>{r.name}</div>

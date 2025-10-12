@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase/client"
 import { getProductsAsync } from "@/lib/repo/products"
 import type { Product } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 type StockMap = Record<string, number>
 
@@ -67,22 +68,111 @@ export default function AdminStockPage() {
     }
   }
 
-  const allSizes = React.useMemo(() => {
+  // Separate products and accessories
+  const regularProducts = React.useMemo(() => 
+    products.filter(p => p.category !== "Accesorios"),
+    [products]
+  )
+  
+  const accessories = React.useMemo(() => 
+    products.filter(p => p.category === "Accesorios"),
+    [products]
+  )
+
+  const allSizesRegular = React.useMemo(() => {
     const set = new Set<string>()
-    for (const p of products) {
+    for (const p of regularProducts) {
       for (const s of p.sizes || []) set.add(s)
     }
     return Array.from(set)
-  }, [products])
+  }, [regularProducts])
+  
+  const allSizesAccessories = React.useMemo(() => {
+    const set = new Set<string>()
+    for (const p of accessories) {
+      for (const s of p.sizes || []) set.add(s)
+    }
+    return Array.from(set)
+  }, [accessories])
 
-  const filtered = React.useMemo(() => {
+  const filteredRegular = React.useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return products
-    return products.filter((p) =>
+    if (!q) return regularProducts
+    return regularProducts.filter((p) =>
       p.name.toLowerCase().includes(q) ||
       (p.sku || "").toLowerCase().includes(q)
     )
-  }, [products, query])
+  }, [regularProducts, query])
+  
+  const filteredAccessories = React.useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return accessories
+    return accessories.filter((p) =>
+      p.name.toLowerCase().includes(q) ||
+      (p.sku || "").toLowerCase().includes(q)
+    )
+  }, [accessories, query])
+
+  const renderStockTable = (productList: Product[], allSizes: string[], emptyMessage: string) => (
+    <div className="overflow-x-auto border rounded">
+      <table className="w-full text-base">
+        <thead>
+          <tr className="bg-muted">
+            <th className="p-3 text-left">Producto</th>
+            <th className="p-3 text-left">SKU</th>
+            {allSizes.map((s) => (
+              <th key={s} className="p-3 text-left">{s}</th>
+            ))}
+            <th className="p-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {loading && (
+            <tr><td className="p-4 text-muted-foreground" colSpan={3 + allSizes.length}>Cargando...</td></tr>
+          )}
+          {!loading && productList.length === 0 && (
+            <tr><td className="p-4 text-muted-foreground" colSpan={3 + allSizes.length}>{emptyMessage}</td></tr>
+          )}
+          {productList.map((p) => {
+            const row = stocks[p.id] || {}
+            return (
+              <tr
+                key={p.id}
+                onClick={()=> setSelectedId(p.id)}
+                className={`border-t border-border cursor-pointer transition-all ${selectedId===p.id ? "ring-4 ring-accent/60 bg-accent/10 shadow-lg" : "hover:bg-accent/5"}`}
+              >
+                <td className="p-3 min-w-[260px]">
+                  <div className="font-medium">{p.name}</div>
+                  <div className="text-sm text-muted-foreground">{p.category}</div>
+                </td>
+                <td className="p-3">{p.sku || "-"}</td>
+                {allSizes.map((s) => (
+                  <td key={s} className="p-3">
+                    <input
+                      type="number"
+                      value={row[s] ?? 0}
+                      onChange={(e)=> onChangeStock(p.id, s, Number(e.target.value))}
+                      onFocus={()=> setSelectedId(p.id)}
+                      className="w-24 border rounded px-3 py-2 bg-transparent text-base"
+                    />
+                  </td>
+                ))}
+                <td className="p-3 text-right min-w-[140px]">
+                  <button
+                    onClick={()=> saveRow(p.id)}
+                    className="rounded px-4 py-2 border bg-black text-white disabled:opacity-60 text-base"
+                    disabled={savingId === p.id}
+                  >
+                    {savingId === p.id ? "Guardando..." : "Guardar"}
+                  </button>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
 
   return (
     <div className="space-y-6">
@@ -102,64 +192,35 @@ export default function AdminStockPage() {
         </div>
       </section>
 
-      <div className="overflow-x-auto border rounded">
-        <table className="w-full text-base">
-          <thead>
-            <tr className="bg-muted">
-              <th className="p-3 text-left">Producto</th>
-              <th className="p-3 text-left">SKU</th>
-              {allSizes.map((s) => (
-                <th key={s} className="p-3 text-left">{s}</th>
-              ))}
-              <th className="p-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading && (
-              <tr><td className="p-4 text-muted-foreground" colSpan={3 + allSizes.length}>Cargando...</td></tr>
-            )}
-            {!loading && filtered.length === 0 && (
-              <tr><td className="p-4 text-muted-foreground" colSpan={3 + allSizes.length}>Sin productos</td></tr>
-            )}
-            {filtered.map((p) => {
-              const row = stocks[p.id] || {}
-              return (
-                <tr
-                  key={p.id}
-                  onClick={()=> setSelectedId(p.id)}
-                  className={`border-t border-border cursor-pointer transition-all ${selectedId===p.id ? "ring-4 ring-accent/60 bg-accent/10 shadow-lg" : "hover:bg-accent/5"}`}
-                >
-                  <td className="p-3 min-w-[260px]">
-                    <div className="font-medium">{p.name}</div>
-                    <div className="text-sm text-muted-foreground">{p.category}</div>
-                  </td>
-                  <td className="p-3">{p.sku || "-"}</td>
-                  {allSizes.map((s) => (
-                    <td key={s} className="p-3">
-                      <input
-                        type="number"
-                        value={row[s] ?? 0}
-                        onChange={(e)=> onChangeStock(p.id, s, Number(e.target.value))}
-                        onFocus={()=> setSelectedId(p.id)}
-                        className="w-24 border rounded px-3 py-2 bg-transparent text-base"
-                      />
-                    </td>
-                  ))}
-                  <td className="p-3 text-right min-w-[140px]">
-                    <button
-                      onClick={()=> saveRow(p.id)}
-                      className="rounded px-4 py-2 border bg-black text-white disabled:opacity-60 text-base"
-                      disabled={savingId === p.id}
-                    >
-                      {savingId === p.id ? "Guardando..." : "Guardar"}
-                    </button>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+      <Tabs defaultValue="products" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="products">
+            Productos ({regularProducts.length})
+          </TabsTrigger>
+          <TabsTrigger value="accessories">
+            Accesorios ({accessories.length})
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="products" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Gestiona el stock de remeras, buzos y otros productos de indumentaria
+            </p>
+          </div>
+          {renderStockTable(filteredRegular, allSizesRegular, "Sin productos")}
+        </TabsContent>
+        
+        <TabsContent value="accessories" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Gestiona el stock de gorras, stickers y otros accesorios
+            </p>
+          </div>
+          {renderStockTable(filteredAccessories, allSizesAccessories, "Sin accesorios")}
+        </TabsContent>
+      </Tabs>
+      
       <p className="text-sm text-muted-foreground">Tip: haz click en una fila para seleccionarla. La fila seleccionada se resalta.</p>
     </div>
   )

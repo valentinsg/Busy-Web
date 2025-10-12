@@ -61,10 +61,10 @@ export async function POST(req: NextRequest) {
       notificationId,
       pushResult,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error sending test notification:', error)
     return NextResponse.json(
-      { ok: false, error: error.message },
+      { ok: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 }
     )
   }

@@ -72,8 +72,6 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
   const isPin = hasTag('pin')
   const isAccessory = hasTag('accessory') || /accesor/i.test(product.category || '')
   const showSizing = !isPin && !isAccessory && (!!product.measurementsBySize || (product.sizes && product.sizes.length > 0))
-  const tabsCount = 2 + (showCare ? 1 : 0) + (showSizing ? 1 : 0)
-  const colsClass = tabsCount === 4 ? 'grid-cols-4' : tabsCount === 3 ? 'grid-cols-3' : 'grid-cols-2'
 
   return (
     <div className="max-w-7xl mx-auto">

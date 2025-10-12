@@ -22,7 +22,6 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { capitalize } from '@/lib/format'
-import { getAvailableColors, getAvailableSizes, getCategories } from '@/lib/products'
 import { getProductsAsync, searchProductsAsync, type SortBy } from '@/lib/repo/products'
 import type { FilterOptions, Product } from '@/lib/types'
 import { Filter, Search, SlidersHorizontal } from 'lucide-react'
@@ -49,8 +48,6 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
 
   // Show categories in ES as requested
   const categories = React.useMemo(() => ['buzos', 'remeras', 'accesorios'] as const, [])
-  const colors = getAvailableColors()
-  const sizes = getAvailableSizes()
   // Local inputs to avoid filtering while typing
   const [minPriceInput, setMinPriceInput] = React.useState('')
   const [maxPriceInput, setMaxPriceInput] = React.useState('')

@@ -1,16 +1,16 @@
 'use client'
+import NewsletterSignup from '@/components/blog/newsletter-signup'
 import { useI18n } from '@/components/i18n-provider'
 import { Button } from '@/components/ui/button'
 import { gsap } from 'gsap'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
-import NewsletterSignup from '@/components/blog/newsletter-signup'
 
 // Roadmap con hitos clave
 const roadmap = [
   {
-    year: '2023',
+    year: '2024',
     title: 'Nace la idea',
     desc: 'Empezamos a imaginar a Busy un concepto diferente para crear nuestro propio espacio sobre moda, tratando de darle un trasfondo personal y cercano para que más personas puedan sentirse identificadas.',
     icon: 'lightbulb',

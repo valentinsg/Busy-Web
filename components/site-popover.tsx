@@ -137,7 +137,7 @@ export default function SitePopover({ section }: { section?: string }) {
       } else {
         setSubmitMessage(json?.error || "Error al procesar")
       }
-    } catch (err) {
+    } catch {
       setSubmitMessage("Error de conexión")
     } finally {
       setSubmitting(false)
