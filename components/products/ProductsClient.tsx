@@ -47,7 +47,15 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
   const searchParams = useSearchParams()
 
   // Show categories in ES as requested
-  const categories = React.useMemo(() => ['buzos', 'remeras', 'accesorios'] as const, [])
+  const categories = React.useMemo(() => ['buzos', 'remeras', 'accesorios', 'ofertas'] as const, [])
+  
+  // Category display names
+  const categoryNames: Record<string, string> = {
+    'buzos': 'Buzos',
+    'remeras': 'Remeras',
+    'accesorios': 'Accesorios',
+    'ofertas': 'Ofertas'
+  }
   // Local inputs to avoid filtering while typing
   const [minPriceInput, setMinPriceInput] = React.useState('')
   const [maxPriceInput, setMaxPriceInput] = React.useState('')
@@ -95,7 +103,13 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
         if (searchQuery.trim()) {
           const list = await searchProductsAsync(searchQuery.trim())
           const filtered = list.filter((p) => {
-            if (filters.category && p.category !== filters.category) return false
+            if (filters.category === 'ofertas') {
+              // Filter only products with active discount
+              const hasDiscount = (p as any).discountActive && (p as any).discountPercentage && (p as any).discountPercentage > 0
+              if (!hasDiscount) return false
+            } else if (filters.category && p.category !== filters.category) {
+              return false
+            }
             if (filters.color && !p.colors.includes(filters.color)) return false
             if (filters.size && !p.sizes.includes(filters.size)) return false
             if (filters.minPrice !== undefined && p.price < filters.minPrice) return false
@@ -105,7 +119,14 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
           if (!cancelled) setAsyncProducts(filtered)
         } else {
           const list = await getProductsAsync(params)
-          if (!cancelled) setAsyncProducts(list)
+          // Filter for "ofertas" category
+          const finalList = filters.category === 'ofertas' 
+            ? list.filter((p) => {
+                const hasDiscount = (p as any).discountActive && (p as any).discountPercentage && (p as any).discountPercentage > 0
+                return hasDiscount
+              })
+            : list
+          if (!cancelled) setAsyncProducts(finalList)
         }
       } catch {
         if (!cancelled) {
@@ -203,7 +224,7 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
                 }
               />
               <Label htmlFor={category} className="text-sm font-body">
-                {capitalize(category)}
+                {categoryNames[category] || capitalize(category)}
               </Label>
             </div>
           ))}

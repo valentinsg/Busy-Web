@@ -70,7 +70,7 @@ export default function BlogClient({ allPosts, latestPost, featuredProducts = []
   //const regularPosts = filteredPosts.length > 0 ? filteredPosts.slice(1) : allPosts.slice(1)
 
   return (
-    <div className="container mt-24 sm:mt-28 px-4 sm:px-3 py-6 sm:py-8 font-body">
+    <div className="container mt-24 sm:mt-24 px-4 sm:px-3 py-6 sm:py-8 font-body">
       <div className="mx-auto">
         {/* Header */}
         <div className="text-center mb-4 sm:mb-6">

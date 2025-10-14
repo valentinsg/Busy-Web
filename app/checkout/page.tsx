@@ -20,7 +20,7 @@ import PayWithTransfer from "@/components/checkout/pay-with-transfer"
 import { Checkbox } from "@/components/ui/checkbox"
 
 export default function CheckoutPage() {
-  const { items, getTotalItems, getSubtotal, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon } = useCart()
+  const { items, getTotalItems, getSubtotal, getPromoDiscount, getAppliedPromos, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon } = useCart()
   const { t } = useI18n()
   const { toast } = useToast()
   const [shippingData, setShippingData] = React.useState({
@@ -42,6 +42,8 @@ export default function CheckoutPage() {
 
   const totalItems = getTotalItems()
   const subtotal = getSubtotal()
+  const promoDiscount = getPromoDiscount()
+  const appliedPromos = getAppliedPromos()
   const discount = getDiscount()
   const discountedSubtotal = getSubtotalAfterDiscount()
   // Location-aware shipping: Mar del Plata 10k, otherwise 8k. Free over 100k.
@@ -361,16 +363,38 @@ export default function CheckoutPage() {
                     <span>{t("checkout.summary.subtotal_items").replace("{count}", String(totalItems))}</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
-                  {discount > 0 && (
-                    <div className="flex justify-between text-green-600 dark:text-green-400">
-                      <span>{t("cart.coupon.discount")}</span>
-                      <span>-{formatPrice(discount)}</span>
+                  
+                  {/* Promociones aplicadas */}
+                  {promoDiscount > 0 && (
+                    <div className="space-y-1">
+                      {appliedPromos.map((promo, idx) => (
+                        <div key={idx} className="flex justify-between text-green-600 dark:text-green-400">
+                          <span className="flex items-center gap-1.5">
+                            <span className="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900/30 rounded-md font-semibold">
+                              {promo.promotion_name}
+                            </span>
+                            {promo.details && <span className="text-xs">({promo.details})</span>}
+                          </span>
+                          <span>-{formatPrice(promo.discount_amount)}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span>{t("cart.subtotal_after_discount")}</span>
-                    <span>{formatPrice(discountedSubtotal)}</span>
-                  </div>
+                  
+                  {/* Descuento de cupón */}
+                  {coupon && discount > promoDiscount && (
+                    <div className="flex justify-between text-green-600 dark:text-green-400">
+                      <span>{t("cart.coupon.discount")} ({coupon.code})</span>
+                      <span>-{formatPrice(discount - promoDiscount)}</span>
+                    </div>
+                  )}
+                  
+                  {discount > 0 && (
+                    <div className="flex justify-between font-medium">
+                      <span>{t("cart.subtotal_after_discount")}</span>
+                      <span>{formatPrice(discountedSubtotal)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span>{t("checkout.summary.shipping")}</span>
                     <span>{estimatedShipping === 0 ? t("cart.shipping_free") : formatPrice(estimatedShipping)}</span>

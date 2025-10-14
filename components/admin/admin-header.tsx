@@ -15,6 +15,7 @@ import { LogOut, Settings, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import supabase from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
+import authorsJson from "@/data/authors.json"
 
 export function AdminHeader() {
   const router = useRouter()
@@ -34,14 +35,12 @@ export function AdminHeader() {
       // If no avatar in metadata, try to match with authors.json
       if (email) {
         try {
-          const response = await fetch('/data/authors.json')
-          const authors = await response.json()
           interface Author {
             id: string
             email: string
             avatar?: string
           }
-          const author = (authors as Author[]).find((a) =>
+          const author = (authorsJson as Author[]).find((a) =>
             a.email === email ||
             email.includes(a.id.replace('-', ''))
           )

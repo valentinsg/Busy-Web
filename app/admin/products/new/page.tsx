@@ -19,6 +19,14 @@ export default function NewProductPage() {
     colors: "",
     sizes: "",
     images: [] as string[],
+    tags: "",
+    imported: false,
+    careInstructions: "",
+    benefitsText: "",
+    badgeText: "",
+    badgeVariant: "default",
+    discountPercentage: 0,
+    discountActive: false,
   })
   // Dynamic size rows for per-size stock and measurements
   const [sizeRows, setSizeRows] = React.useState<
@@ -99,6 +107,16 @@ export default function NewProductPage() {
         ? Object.fromEntries(sizeRows.filter((r) => r.size && typeof r.stock === 'number').map((r) => [r.size, Number(r.stock)]))
         : undefined
 
+      // Parse benefits text lines -> array
+      const benefits = String(form.benefitsText||"")
+        .split("\n")
+        .map((l)=>l.trim())
+        .filter(Boolean)
+        .map((l)=>{
+          const [title, subtitle] = l.split("|").map(s=>s.trim())
+          return subtitle ? { title, subtitle } : { title }
+        })
+
       const payload = {
         id: form.id,
         name: form.name,
@@ -112,7 +130,14 @@ export default function NewProductPage() {
         sku: form.sku,
         stock: Number(form.stock) || 0,
         description: form.description || "",
-        tags: [],
+        tags: form.tags.split(",").map((s) => s.trim()).filter(Boolean),
+        imported: !!form.imported,
+        care_instructions: form.careInstructions || undefined,
+        benefits: benefits.length ? benefits : undefined,
+        badge_text: form.badgeText?.trim() || null,
+        badge_variant: form.badgeVariant || "default",
+        discount_percentage: form.discountPercentage ? Math.floor(Number(form.discountPercentage)) : null,
+        discount_active: !!form.discountActive,
         stockBySize,
       }
       const res = await fetch("/api/admin/products", {
@@ -160,7 +185,7 @@ export default function NewProductPage() {
             <input type="number" value={form.stock} onChange={(e)=>setForm({...form, stock: Number(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>
           <label className="text-sm md:col-span-2">Descripción
-            <textarea value={form.description} onChange={(e)=>setForm({...form, description: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" rows={4} />
+            <textarea value={form.description} onChange={(e)=>setForm({...form, description: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} />
           </label>
           <label className="text-sm">Colores (coma)
             <input value={form.colors} onChange={(e)=>setForm({...form, colors: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
@@ -168,6 +193,49 @@ export default function NewProductPage() {
           <label className="text-sm">Talles (coma)
             <input value={form.sizes} onChange={(e)=>setForm({...form, sizes: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>
+          <div className="md:col-span-2 flex items-center gap-2">
+            <input id="imported" type="checkbox" checked={!!form.imported} onChange={(e)=>setForm({...form, imported: e.target.checked})} />
+            <label htmlFor="imported" className="text-sm">Producto importado</label>
+          </div>
+          <label className="text-sm md:col-span-2">Tags (coma)
+            <input value={form.tags} onChange={(e)=>setForm({...form, tags: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" placeholder="featured,pin,no-care,no-free-shipping,no-returns,no-quality,no-default-features" />
+          </label>
+          <label className="text-sm md:col-span-2">Cuidados (texto)
+            <textarea value={form.careInstructions} onChange={(e)=>setForm({...form, careInstructions: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} placeholder={"• Lavar a máquina con agua fría..."} />
+          </label>
+          <label className="text-sm md:col-span-2">Beneficios (uno por línea, usar &quot;Título|Subtítulo&quot; opcional)
+            <textarea value={form.benefitsText} onChange={(e)=>setForm({...form, benefitsText: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} placeholder={"Envío gratis|En compras superiores a $100.000\nGarantía de calidad|Materiales de primera calidad\nProducido en Argentina"} />
+          </label>
+
+          {/* Badge and Discount Section */}
+          <div className="md:col-span-2 border-t pt-4 mt-4">
+            <h3 className="font-heading font-medium mb-3 text-base">Badge y Descuentos</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className="text-sm">
+                Texto del Badge (ej: &quot;2x1&quot;, &quot;NUEVO&quot;, &quot;OFERTA&quot;)
+                <input value={form.badgeText} onChange={(e)=>setForm({...form, badgeText: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" placeholder="Producto Busy" />
+              </label>
+              <label className="text-sm">
+                Estilo del Badge
+                <select value={form.badgeVariant} onChange={(e)=>setForm({...form, badgeVariant: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent">
+                  <option value="default">Default</option>
+                  <option value="secondary">Secondary (Gris)</option>
+                  <option value="destructive">Destructive (Rojo)</option>
+                  <option value="outline">Outline</option>
+                </select>
+              </label>
+              <label className="text-sm">
+                Porcentaje de Descuento (0-100)
+                <input type="number" min="0" max="100" value={form.discountPercentage} onChange={(e)=>setForm({...form, discountPercentage: Number(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" />
+              </label>
+              <div className="flex items-center gap-2">
+                <input id="discountActive" type="checkbox" checked={!!form.discountActive} onChange={(e)=>setForm({...form, discountActive: e.target.checked})} />
+                <label htmlFor="discountActive" className="text-sm">Descuento activo</label>
+              </div>
+              <p className="text-xs text-muted-foreground md:col-span-2">💡 El badge se mostrará siempre si tiene texto. El descuento solo se aplicará si está activo y tiene un porcentaje mayor a 0.</p>
+            </div>
+          </div>
+
           <div className="md:col-span-2">
             <h3 className="font-heading font-medium mb-2">Talles, stock y medidas</h3>
             <div className="overflow-x-auto border rounded">

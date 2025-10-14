@@ -2,13 +2,15 @@
 
 import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
-import type { Product, CartItem } from "@/lib/types"
+import type { Product, CartItem, Promotion, AppliedPromo } from "@/lib/types"
 import { validateCoupon, type Coupon } from "@/lib/coupons"
+import { calculateAllPromotions } from "@/lib/checkout/promo-engine"
 
 interface CartStore {
   items: CartItem[]
   isOpen: boolean
   coupon: Coupon | null
+  promotions: Promotion[]
 
   // Actions
   addItem: (product: Product, selectedSize?: string, selectedColor?: string, quantity?: number) => void
@@ -19,6 +21,7 @@ interface CartStore {
   closeCart: () => void
   applyCoupon: (code: string) => Promise<{ ok: boolean; error?: string }>
   removeCoupon: () => void
+  setPromotions: (promotions: Promotion[]) => void
 
   // Computed values
   getTotalItems: () => number
@@ -26,9 +29,11 @@ interface CartStore {
   getTotalPrice: () => number
   // New getters
   getSubtotal: () => number
+  getPromoDiscount: () => number
   getDiscount: () => number
   getSubtotalAfterDiscount: () => number
   getItemCount: (productId: string, selectedSize?: string, selectedColor?: string) => number
+  getAppliedPromos: () => AppliedPromo[]
 }
 
 export const useCart = create<CartStore>()(
@@ -37,6 +42,7 @@ export const useCart = create<CartStore>()(
       items: [],
       isOpen: false,
       coupon: null,
+      promotions: [],
 
       addItem: (product, selectedSize = product.sizes[0], selectedColor = product.colors[0], quantity = 1) => {
         set((state) => {
@@ -133,6 +139,10 @@ export const useCart = create<CartStore>()(
         set({ coupon: null })
       },
 
+      setPromotions: (promotions: Promotion[]) => {
+        set({ promotions })
+      },
+
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0)
       },
@@ -146,12 +156,29 @@ export const useCart = create<CartStore>()(
         return get().items.reduce((total, item) => total + item.product.price * item.quantity, 0)
       },
 
+      getPromoDiscount: () => {
+        const { totalDiscount } = calculateAllPromotions(get().items, get().promotions)
+        return totalDiscount
+      },
+
+      getAppliedPromos: () => {
+        const { appliedPromos } = calculateAllPromotions(get().items, get().promotions)
+        return appliedPromos
+      },
+
       getDiscount: () => {
+        // Primero aplicamos descuentos de promociones (2x1, 3x2)
+        const promoDiscount = get().getPromoDiscount()
+        
+        // Luego aplicamos cupones sobre el subtotal después de promos
         const coupon = get().coupon
-        if (!coupon) return 0
+        if (!coupon) return promoDiscount
+        
         const subtotal = get().getSubtotal()
-        const discount = (subtotal * coupon.percent) / 100
-        return Math.max(0, Math.min(discount, subtotal))
+        const subtotalAfterPromo = Math.max(0, subtotal - promoDiscount)
+        const couponDiscount = (subtotalAfterPromo * coupon.percent) / 100
+        
+        return promoDiscount + Math.max(0, Math.min(couponDiscount, subtotalAfterPromo))
       },
 
       getSubtotalAfterDiscount: () => {

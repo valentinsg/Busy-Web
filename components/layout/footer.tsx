@@ -12,6 +12,7 @@ const footerSections = (t: (k: string) => string) => ({
     title: t("footer.sections.shop.title"),
     links: [
       { nameKey: "footer.sections.shop.links.all_products", href: "/products" },
+      { nameKey: "Ofertas", href: "/products/ofertas" },
       { nameKey: "footer.sections.shop.links.hoodies", href: "/products/category/buzos" },
       { nameKey: "footer.sections.shop.links.tshirts", href: "/products/category/remeras" },
       { nameKey: "footer.sections.shop.links.accessories", href: "/products/category/accesorios" },

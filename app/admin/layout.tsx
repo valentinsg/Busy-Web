@@ -90,11 +90,11 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           <AdminHeader />
         </div>
 
-        <div className="relative h-[auto] min-h-screen" key={pathname}>
+        <div className="relative min-h-screen" key={pathname}>
           {/* subtle pattern background */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.25] bg-repeat"
+            className="pointer-events-none fixed inset-0 opacity-[0.25] bg-repeat"
             style={{ backgroundImage: "url(/pattern-black.jpg)" }}
           />
           <div className="relative container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:pt-8 font-body">
@@ -126,11 +126,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // For the sign-in page, we must not show the sidebar at all.
   if (isSignIn) {
     return (
-      <div className="relative h-[auto] min-h-screen">
+      <div className="relative min-h-screen">
         {/* subtle pattern background */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.25] bg-repeat"
+          className="pointer-events-none fixed inset-0 opacity-[0.25] bg-repeat"
           style={{ backgroundImage: "url(/pattern-black.jpg)" }}
         />
         <div className="relative container mx-auto px-0 py-6 pt-24 md:pt-8 font-body">

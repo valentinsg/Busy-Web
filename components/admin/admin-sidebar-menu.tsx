@@ -25,7 +25,8 @@ import {
   Settings,
   Bell,
   ShoppingCart,
-  List
+  List,
+  Tag
 } from "lucide-react"
 import {
   SidebarContent,
@@ -337,6 +338,16 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                     <SidebarMenuButton asChild isActive={isActive("/admin/coupons")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                       <a className="flex items-center gap-2">
                         <BadgePercent className="h-4 w-4" /> Cupones
+                      </a>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <Link href="/admin/promotions" legacyBehavior>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/promotions")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
+                      <a className="flex items-center gap-2">
+                        <Tag className="h-4 w-4" /> Promociones
                       </a>
                     </SidebarMenuButton>
                   </Link>

@@ -32,7 +32,7 @@ function mapRowToProduct(row: unknown, stockBySize?: Record<string, number>): Pr
     rating: Number((row as { rating: string }).rating ?? 0),
     reviews: Number((row as { reviews: string }).reviews ?? 0),
     badgeText: (row as { badge_text?: string }).badge_text ?? undefined,
-    badgeVariant: (row as { badge_variant?: string }).badge_variant as 'default' | 'destructive' | 'secondary' | 'outline' | undefined,
+    badgeVariant: (row as { badge_variant?: string }).badge_variant as 'default' | 'destructive' | 'secondary' | 'outline' | 'success' | 'warning' | 'promo' | undefined,
     discountPercentage: (row as { discount_percentage?: number }).discount_percentage ?? undefined,
     discountActive: Boolean((row as { discount_active?: boolean }).discount_active),
   }

@@ -11,7 +11,7 @@ export function generateMetadata(): Metadata {
   return {
     title: 'Blog de Busy: Streetwear, Moda y Cultura',
     description:
-      'Descubrí guías útiles relacionadas con la moda, tendencias del streetwear y contenido relacionado a la cultura urbana. Todos los articulos están curados por Busy.',
+      'Descubrí guías útiles, artículos relacionadas con la moda, tendencias e historia de cultura. Todos los articulos están previamente investigados y curados por el equipo de Busy.',
     keywords: [
       'blog streetwear',
       'moda urbana',
@@ -83,7 +83,7 @@ export default async function BlogPage() {
     getAllPostsAsync(),
     getProductsAsync({ featuredOnly: true, sortBy: "newest" }).catch(() => [])
   ])
-  
+
   const latestPost = allPosts?.[0]
   const featuredProducts = (productsRes || []).slice(0, 3)
 

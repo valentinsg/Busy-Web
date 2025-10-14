@@ -205,7 +205,14 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
             {/* gentle sheen on hover */}
             <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-15 transition-opacity duration-500" />
 
-            {/* Eliminada imagen de background para reducir requests */}
+            {/* Background pattern */}
+            <Image
+              src={'/product-bg.jpg'}
+              alt={'Busy Pattern white, diseñado por @agus.mxlina'}
+              fill
+              className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
+            />
             <Image
               src={
                 product.images[currentImageIndex] ||
@@ -213,7 +220,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
               }
               alt={product.name}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
               priority={priority}
               loading={priority ? "eager" : "lazy"}
@@ -255,7 +262,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
           {/* Custom Badge */}
           {product.badgeText && (
             <Badge
-              variant={(product.badgeVariant as 'default' | 'destructive' | 'secondary' | 'outline') || 'default'}
+              variant={(product.badgeVariant as 'default' | 'destructive' | 'secondary' | 'outline' | 'success' | 'warning' | 'promo') || 'default'}
               className="absolute top-1 left-1 text-[10px] sm:text-xs font-body px-1.5 py-0.5 sm:px-2 sm:py-1 font-semibold"
             >
               {product.badgeText}
@@ -476,10 +483,10 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
                 {product.discountActive && product.discountPercentage && product.discountPercentage > 0 ? (
                   <>
                     <div className="flex items-center gap-2">
-                      <span className="font-heading font-semibold text-sm sm:text-base text-red-500">
+                      <span className="font-heading font-semibold text-sm sm:text-base">
                         {formatPrice(product.price * (1 - product.discountPercentage / 100), product.currency)}
                       </span>
-                      <span className="text-[10px] sm:text-xs font-body font-semibold bg-red-500 text-white px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] sm:text-xs font-body font-semibold bg-muted text-foreground px-1.5 py-0.5 rounded">
                         -{product.discountPercentage}%
                       </span>
                     </div>

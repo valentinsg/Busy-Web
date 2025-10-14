@@ -34,7 +34,7 @@ export interface Product {
   /** Optional badge text to display on product card (e.g., "2x1", "NUEVO", "OFERTA") */
   badgeText?: string
   /** Badge style variant */
-  badgeVariant?: 'default' | 'destructive' | 'secondary' | 'outline'
+  badgeVariant?: 'default' | 'destructive' | 'secondary' | 'outline' | 'success' | 'warning' | 'promo'
   /** Discount percentage (0-100) */
   discountPercentage?: number
   /** Whether the discount is currently active */
@@ -144,4 +144,74 @@ export interface Post {
   faqs: string[]
   cta: string
   seoKeywords: string[]
+}
+
+export type PromoType = 'nxm' | 'percentage_off' | 'fixed_amount' | 'combo' | 'bundle' | 'nth_unit_discount'
+
+export interface Promotion {
+  id: string
+  name: string
+  description?: string
+  active: boolean
+  promo_type: PromoType
+  config: PromoConfig
+  eligible_skus: string[]
+  sku_match_type: 'exact' | 'prefix'
+  min_quantity?: number
+  max_uses_per_customer?: number
+  max_total_uses?: number
+  current_uses: number
+  priority: number
+  starts_at?: string
+  ends_at?: string
+  created_at: string
+  updated_at: string
+}
+
+export type PromoConfig = 
+  | NxMConfig 
+  | PercentageOffConfig 
+  | FixedAmountConfig 
+  | ComboConfig 
+  | BundleConfig
+  | NthUnitDiscountConfig
+
+export interface NxMConfig {
+  buy: number // Cantidad a comprar
+  pay: number // Cantidad a pagar
+}
+
+export interface PercentageOffConfig {
+  discount_percent: number // Porcentaje de descuento (0-100)
+}
+
+export interface FixedAmountConfig {
+  discount_amount: number // Monto fijo de descuento
+}
+
+export interface ComboConfig {
+  required_skus: string[] // SKUs o prefijos requeridos
+  discount_percent?: number // Descuento en porcentaje
+  discount_amount?: number // O descuento en monto fijo
+  match_type?: 'exact' | 'prefix' // Tipo de match para required_skus
+}
+
+export interface BundleConfig {
+  sku_groups: string[][] // Grupos de SKUs (debe tener al menos 1 de cada grupo)
+  discount_percent?: number
+  discount_amount?: number
+}
+
+export interface NthUnitDiscountConfig {
+  nth_unit: number // Número de unidad con descuento (ej: 2 para "2da unidad")
+  discount_percent: number // Porcentaje de descuento en esa unidad
+}
+
+export interface AppliedPromo {
+  promotion_id: string
+  promotion_name: string
+  promo_type: PromoType
+  items_in_promo: number
+  discount_amount: number
+  details?: string
 }

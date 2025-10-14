@@ -1,7 +1,7 @@
 "use client"
 import * as React from "react"
 import Link from "next/link"
-import { ArrowLeft, Star, Truck, Shield, RotateCcw } from "lucide-react"
+import { ArrowLeft, Star, Truck, Shield, RotateCcw, Plane, Flag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -21,6 +21,29 @@ import { addReview, averageRating, getReviews, type Review } from "@/lib/reviews
 interface ProductDetailProps {
   product: Product
   relatedProducts: Product[]
+}
+
+// Helper function to get icon based on benefit text
+const getBenefitIcon = (title: string) => {
+  const text = title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  
+  if (text.includes("envio") || text.includes("gratis") || text.includes("shipping")) {
+    return Truck
+  }
+  if (text.includes("garantia") || text.includes("calidad") || text.includes("quality") || text.includes("materiales")) {
+    return Shield
+  }
+  if (text.includes("argentina") || text.includes("producido") || text.includes("hecho")) {
+    return Flag
+  }
+  if (text.includes("importado") || text.includes("internacional") || text.includes("import")) {
+    return Plane
+  }
+  if (text.includes("devolucion") || text.includes("return")) {
+    return RotateCcw
+  }
+  
+  return Shield // Default icon
 }
 
 export function ProductDetail({ product, relatedProducts }: ProductDetailProps) {
@@ -97,7 +120,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="font-body">{product.category}</Badge>
               {product.badgeText && (
-                <Badge variant={(product.badgeVariant as 'default' | 'destructive' | 'secondary' | 'outline') || 'default'} className="font-body font-semibold">
+                <Badge variant={(product.badgeVariant as 'default' | 'destructive' | 'secondary' | 'outline' | 'success' | 'warning' | 'promo') || 'default'} className="font-body font-semibold">
                   {product.badgeText}
                 </Badge>
               )}
@@ -160,19 +183,21 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           <div className="space-y-4">
             {(product.benefits && product.benefits.length > 0) ? (
               <>
-                {product.benefits.map((b, idx) => (
-                  <div key={idx} className="flex items-center space-x-3">
-                    {/* Icons could be improved using b.icon in the future */}
-                    <Shield className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <div className="font-medium font-heading">{b.title}</div>
-                      {b.subtitle && <div className="text-sm text-muted-foreground font-body">{b.subtitle}</div>}
+                {product.benefits.map((b, idx) => {
+                  const IconComponent = getBenefitIcon(b.title)
+                  return (
+                    <div key={idx} className="flex items-center space-x-3">
+                      <IconComponent className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <div className="font-medium font-heading">{b.title}</div>
+                        {b.subtitle && <div className="text-sm text-muted-foreground font-body">{b.subtitle}</div>}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
                 {product.imported && (
                   <div className="flex items-center space-x-3">
-                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    <Plane className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <div className="font-medium font-heading">Producto importado</div>
                       <div className="text-sm text-muted-foreground font-body">Origen internacional</div>
@@ -211,7 +236,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                 )}
                 {product.imported && (
                   <div className="flex items-center space-x-3">
-                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    <Plane className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <div className="font-medium font-heading">Producto importado</div>
                       <div className="text-sm text-muted-foreground font-body">Origen internacional</div>
@@ -238,13 +263,6 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           <TabsContent value="description" className="mt-6">
             <div className="prose prose-neutral dark:prose-invert max-w-none">
               <p className="leading-relaxed font-body whitespace-pre-line">{product.description}</p>
-              <h3 className="font-heading">Características</h3>
-              <ul>
-                <li>Tejido de algodón premium</li>
-                <li>Calce streetwear moderno</li>
-                <li>Construcción duradera</li>
-                <li>Apto para lavar a máquina</li>
-              </ul>
               <span className="libre-barcode-39-text-regular text-muted-foreground font-semibold text-xl">SKU: {product.sku}</span>
             </div>
           </TabsContent>

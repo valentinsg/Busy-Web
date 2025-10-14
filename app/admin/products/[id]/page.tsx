@@ -18,6 +18,7 @@ export default function EditProductPage({ params }: PageProps) {
   const [error, setError] = React.useState<string | null>(null)
   const [saving, setSaving] = React.useState(false)
   type FormState = {
+    id?: string
     name?: string
     price?: number
     currency?: string
@@ -96,6 +97,7 @@ export default function EditProductPage({ params }: PageProps) {
           setProduct(p || null)
           if (p) {
             setForm({
+              id: p.id,
               name: p.name,
               price: p.price,
               currency: p.currency,
@@ -185,6 +187,7 @@ export default function EditProductPage({ params }: PageProps) {
         })
 
       const payload = {
+        id: form.id,
         name: form.name,
         price: Number(form.price),
         currency: form.currency,
@@ -200,9 +203,9 @@ export default function EditProductPage({ params }: PageProps) {
         imported: !!form.imported,
         care_instructions: form.careInstructions || undefined,
         benefits: benefits.length ? benefits : undefined,
-        badge_text: form.badgeText || null,
+        badge_text: form.badgeText?.trim() || null,
         badge_variant: form.badgeVariant || "default",
-        discount_percentage: Number(form.discountPercentage) || null,
+        discount_percentage: form.discountPercentage ? Math.floor(Number(form.discountPercentage)) : null,
         discount_active: !!form.discountActive,
       }
       const res = await fetch(`/api/admin/products/${params.id}`, {
@@ -212,8 +215,9 @@ export default function EditProductPage({ params }: PageProps) {
       })
       const json = await res.json()
       if (!res.ok || !json.ok) throw new Error(json.error || "Error al guardar")
-      // Save stock by size
-      const res2 = await fetch(`/api/admin/stock/${params.id}`, {
+      // Save stock by size - use the new ID from form in case it was changed
+      const productId = form.id || params.id
+      const res2 = await fetch(`/api/admin/stock/${productId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ stockBySize: stockMap }),
@@ -221,6 +225,10 @@ export default function EditProductPage({ params }: PageProps) {
       const json2 = await res2.json()
       if (!res2.ok || !json2.ok) throw new Error(json2.error || "Error al guardar stock por talle")
       toast({ title: "Cambios guardados", description: "El producto fue actualizado correctamente." })
+      // If ID changed, redirect to the new URL
+      if (form.id && form.id !== params.id) {
+        router.replace(`/admin/products/${form.id}`)
+      }
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e)
       setError(message)
@@ -266,6 +274,9 @@ export default function EditProductPage({ params }: PageProps) {
       </div>
       <form onSubmit={saveProduct} className="space-y-4 max-w-2xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className="text-sm md:col-span-2">ID (slug)
+            <input value={form.id||""} onChange={(e)=>setForm({...form, id: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />
+          </label>
           <label className="text-sm md:col-span-2">Nombre
             <input value={form.name||""} onChange={(e)=>setForm({...form, name: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />
           </label>
@@ -285,7 +296,7 @@ export default function EditProductPage({ params }: PageProps) {
             <input type="number" value={form.stock||0} onChange={(e)=>setForm({...form, stock: Number(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>
           <label className="text-sm md:col-span-2">Descripción
-            <textarea value={form.description||""} onChange={(e)=>setForm({...form, description: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" rows={4} />
+            <textarea value={form.description||""} onChange={(e)=>setForm({...form, description: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} />
           </label>
           <div className="md:col-span-2 flex items-center gap-2">
             <input id="imported" type="checkbox" checked={!!form.imported} onChange={(e)=>setForm({...form, imported: e.target.checked})} />
@@ -301,10 +312,10 @@ export default function EditProductPage({ params }: PageProps) {
             <input value={form.tags||""} onChange={(e)=>setForm({...form, tags: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" placeholder="featured,pin,no-care,no-free-shipping,no-returns,no-quality,no-default-features" />
           </label>
           <label className="text-sm md:col-span-2">Cuidados (texto)
-            <textarea value={form.careInstructions||""} onChange={(e)=>setForm({...form, careInstructions: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" rows={4} placeholder={"• Lavar a máquina con agua fría..."} />
+            <textarea value={form.careInstructions||""} onChange={(e)=>setForm({...form, careInstructions: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} placeholder={"• Lavar a máquina con agua fría..."} />
           </label>
           <label className="text-sm md:col-span-2">Beneficios (uno por línea, usar &quot;Título|Subtítulo&quot; opcional)
-            <textarea value={form.benefitsText||""} onChange={(e)=>setForm({...form, benefitsText: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" rows={4} placeholder={"Envío gratis|En compras superiores a $80.000\nDevoluciones fáciles|Política de 30 días"} />
+            <textarea value={form.benefitsText||""} onChange={(e)=>setForm({...form, benefitsText: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} placeholder={"Envío gratis|En compras superiores a $80.000\nDevoluciones fáciles|Política de 30 días"} />
           </label>
 
           {/* Badge and Discount Section */}
@@ -325,12 +336,15 @@ export default function EditProductPage({ params }: PageProps) {
                 <select 
                   value={form.badgeVariant||"default"} 
                   onChange={(e)=>setForm({...form, badgeVariant: e.target.value})} 
-                  className="w-full border rounded px-3 py-2 bg-transparent"
+                  className="w-full border rounded px-3 py-2 bg-background text-foreground"
                 >
-                  <option value="default">Default (Gris)</option>
-                  <option value="destructive">Destructive (Rojo)</option>
-                  <option value="secondary">Secondary (Oscuro)</option>
-                  <option value="outline">Outline (Borde)</option>
+                  <option value="default" className="bg-background text-foreground">Default (Gris Oscuro)</option>
+                  <option value="secondary" className="bg-background text-foreground">Secondary (Gris)</option>
+                  <option value="destructive" className="bg-background text-foreground">Destructive (Rojo)</option>
+                  <option value="success" className="bg-background text-foreground">Success (Verde)</option>
+                  <option value="warning" className="bg-background text-foreground">Warning (Amarillo)</option>
+                  <option value="promo" className="bg-background text-foreground">Promo (Gradiente Púrpura/Rosa)</option>
+                  <option value="outline" className="bg-background text-foreground">Outline (Borde)</option>
                 </select>
               </label>
               <label className="text-sm">

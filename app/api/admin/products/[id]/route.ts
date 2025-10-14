@@ -3,6 +3,7 @@ import { z } from "zod"
 import { assertAdmin } from "../../_utils"
 
 const updateSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(1).optional(),
   price: z.number().nonnegative().optional(),
   currency: z.string().optional(),
@@ -20,7 +21,12 @@ const updateSchema = z.object({
   tags: z.array(z.string()).optional(),
   rating: z.number().optional(),
   reviews: z.number().optional(),
-})
+  badge_text: z.string().nullable().optional(),
+  badge_variant: z.string().optional(),
+  discount_percentage: z.number().nullable().optional(),
+  discount_active: z.boolean().optional(),
+  stockBySize: z.record(z.number()).optional(),
+}).passthrough()
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const admin = await assertAdmin(req)
@@ -33,7 +39,10 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     if (error) throw error
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
-    return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 400 })
+    // Log detailed error for debugging
+    console.error("PUT /api/admin/products/[id] error:", e)
+    const errorMessage = e instanceof Error ? e.message : String(e)
+    return NextResponse.json({ ok: false, error: errorMessage }, { status: 400 })
   }
 }
 

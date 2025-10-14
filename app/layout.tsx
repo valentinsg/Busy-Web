@@ -4,6 +4,7 @@ import { I18nProvider } from '@/components/i18n-provider'
 import { HtmlLang } from '@/components/layout/html-lang'
 import SiteFrame from '@/components/layout/site-frame'
 import SitePopover from '@/components/site-popover'
+import { PromotionsProvider } from '@/components/promotions-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 import { generateSEO } from '@/lib/seo'
@@ -214,6 +215,7 @@ export default function RootLayout({
               forcedTheme="dark"
               disableTransitionOnChange
             >
+              <PromotionsProvider />
               <SplashGate />
               <SiteFrame>
                 {children}

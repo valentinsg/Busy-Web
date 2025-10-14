@@ -29,7 +29,7 @@ interface CartSheetProps {
 }
 
 export function CartSheet({ children }: CartSheetProps) {
-  const { items, isOpen, openCart, closeCart, removeItem, updateQuantity, getTotalItems, clearCart, getSubtotal } = useCart()
+  const { items, isOpen, openCart, closeCart, removeItem, updateQuantity, getTotalItems, clearCart, getSubtotal, getPromoDiscount, getAppliedPromos } = useCart()
   const { t } = useI18n()
 
   // Hydration guard: ensure initial client render matches SSR
@@ -39,9 +39,12 @@ export function CartSheet({ children }: CartSheetProps) {
   // Use safe values before mount to match SSR (which can't see client cart)
   const totalItems = mounted ? getTotalItems() : 0
   const subtotal = mounted ? getSubtotal() : 0
-  const estimatedShipping = computeShipping(subtotal)
-  const estimatedTax = computeTax(Number((subtotal + estimatedShipping).toFixed(2)))
-  const finalTotal = subtotal + estimatedShipping + estimatedTax
+  const promoDiscount = mounted ? getPromoDiscount() : 0
+  const appliedPromos = mounted ? getAppliedPromos() : []
+  const subtotalAfterPromo = Math.max(0, subtotal - promoDiscount)
+  const estimatedShipping = computeShipping(subtotalAfterPromo)
+  const estimatedTax = computeTax(Number((subtotalAfterPromo + estimatedShipping).toFixed(2)))
+  const finalTotal = subtotalAfterPromo + estimatedShipping + estimatedTax
   const itemsForRender = mounted ? items : []
 
   const getSizeStock = (p: typeof itemsForRender[number]) => {
@@ -211,6 +214,24 @@ export function CartSheet({ children }: CartSheetProps) {
                   <span>{t("cart.subtotal")}</span>
                   <span>{formatPrice(subtotal)}</span>
                 </div>
+                
+                {/* Promociones aplicadas */}
+                {promoDiscount > 0 && (
+                  <div className="space-y-1">
+                    {appliedPromos.map((promo, idx) => (
+                      <div key={idx} className="flex justify-between text-green-600 dark:text-green-400">
+                        <span className="flex items-center gap-1">
+                          <span className="text-xs px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 rounded font-semibold">
+                            {promo.promotion_name}
+                          </span>
+                          {promo.details && <span className="text-xs">({promo.details})</span>}
+                        </span>
+                        <span>-{formatPrice(promo.discount_amount)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
                 <div className="flex justify-between">
                   <span>{t("cart.shipping")}</span>
                   <span>{estimatedShipping === 0 ? t("cart.shipping_free") : formatPrice(estimatedShipping)}</span>
