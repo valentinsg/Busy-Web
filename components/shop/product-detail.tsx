@@ -124,7 +124,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                   {product.badgeText}
                 </Badge>
               )}
-              {!product.badgeText && product.stock < 10 && <Badge variant="destructive" className="font-body">Quedan solo {product.stock}</Badge>}
+              {!product.badgeText && product.stock < 4 && product.stock > 0 && <Badge variant="destructive" className="font-body">Últimas Unidades</Badge>}
               {product.imported && <Badge variant="outline" className="font-body">Importado</Badge>}
             </div>
             <h1 className="font-heading text-3xl font-bold mb-2">{product.name}</h1>

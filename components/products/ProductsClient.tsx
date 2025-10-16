@@ -47,12 +47,13 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
   const searchParams = useSearchParams()
 
   // Show categories in ES as requested
-  const categories = React.useMemo(() => ['buzos', 'remeras', 'accesorios', 'ofertas'] as const, [])
+  const categories = React.useMemo(() => ['buzos', 'remeras', 'pantalones', 'accesorios', 'ofertas'] as const, [])
   
   // Category display names
   const categoryNames: Record<string, string> = {
     'buzos': 'Buzos',
     'remeras': 'Remeras',
+    'pantalones': 'Pantalones',
     'accesorios': 'Accesorios',
     'ofertas': 'Ofertas'
   }
@@ -74,6 +75,7 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
     const aliasMap: Record<string, FilterOptions['category']> = {
       hoodies: 'buzos',
       tshirts: 'remeras',
+      pants: 'pantalones',
       accessories: 'accesorios',
     }
     const raw = (initialCategory || fromPath || fromQuery) as string | undefined
@@ -236,7 +238,7 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
           <Separator />
           <div>
             <h3 className="font-heading font-medium mb-3">{t('products.filters.color')}</h3>
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
               {availableColors.map((color) => (
                 <div key={color} className="flex items-center space-x-2">
                   <Checkbox

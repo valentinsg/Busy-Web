@@ -8,6 +8,11 @@ import { useToast } from "@/hooks/use-toast"
 import { getProductByIdAsync } from "@/lib/repo/products"
 import type { Product } from "@/lib/types"
 
+// Format slug: lowercase and replace spaces with hyphens
+function formatSlug(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, '-')
+}
+
 interface PageProps { params: { id: string } }
 
 export default function EditProductPage({ params }: PageProps) {
@@ -251,11 +256,8 @@ export default function EditProductPage({ params }: PageProps) {
       const json = await res.json()
       if (!res.ok || !json.ok) throw new Error(json.error || "Error al eliminar")
       toast({ title: "Producto eliminado", description: "Se actualizó el listado." })
-      router.replace("/admin/products")
-      // Fuerza recarga del listado para evitar HTML en caché del history.back()
-      setTimeout(() => {
-        window.location.reload()
-      }, 50)
+      router.push("/admin/products")
+      router.refresh()
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e)
       setError(message)
@@ -275,7 +277,7 @@ export default function EditProductPage({ params }: PageProps) {
       <form onSubmit={saveProduct} className="space-y-4 max-w-2xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="text-sm md:col-span-2">ID (slug)
-            <input value={form.id||""} onChange={(e)=>setForm({...form, id: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />
+            <input value={form.id||""} onChange={(e)=>setForm({...form, id: formatSlug(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" required />
           </label>
           <label className="text-sm md:col-span-2">Nombre
             <input value={form.name||""} onChange={(e)=>setForm({...form, name: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />

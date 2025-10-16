@@ -270,12 +270,12 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
           )}
 
           {/* Stock badge - only show if no custom badge */}
-          {!product.badgeText && product.stock < 10 && (
+          {!product.badgeText && product.stock < 4 && product.stock > 0 && (
             <Badge
               variant="destructive"
               className="absolute top-1 left-1 text-[10px] sm:text-xs font-body px-1.5 py-0.5 sm:px-2 sm:py-1"
             >
-              Quedan solo {product.stock}
+              Últimas Unidades
             </Badge>
           )}
 

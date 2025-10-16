@@ -50,7 +50,7 @@ export function AddToCart({ product, className = "", sizeLabel = "Size" }: AddTo
   }
 
   const isOutOfStock = sizeStock === 0
-  const isLowStock = sizeStock < 10 && sizeStock > 0
+  const isLowStock = sizeStock < 4 && sizeStock > 0
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -137,7 +137,7 @@ export function AddToCart({ product, className = "", sizeLabel = "Size" }: AddTo
       {/* Stock Status */}
       {isLowStock && (
         <Badge variant="destructive" className="w-fit">
-          Only {sizeStock} left in stock
+          Últimas Unidades
         </Badge>
       )}
 

@@ -147,7 +147,7 @@
     "filters.clear_all": "Limpiar filtros",
     "empty.title": "No se encontraron productos",
     "empty.subtitle": "Probá ajustando tu búsqueda o filtros",
-    "badge.stock_low": "Quedan solo {count}",
+    "badge.stock_low": "Últimas Unidades",
     "badge.imported": "Importado",
     "discount.off": "-{percentage}% OFF",
     "discount.save": "Ahorrás {amount}",

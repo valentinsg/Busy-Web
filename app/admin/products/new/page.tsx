@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
 import Image from "next/image"
 
+// Format slug: lowercase and replace spaces with hyphens
+function formatSlug(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, '-')
+}
+
 export default function NewProductPage() {
   const router = useRouter()
   const [form, setForm] = React.useState({
@@ -164,7 +169,7 @@ export default function NewProductPage() {
       <form onSubmit={onSubmit} className="space-y-4 max-w-2xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="text-sm">ID (slug)
-            <input value={form.id} onChange={(e)=>setForm({...form, id: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />
+            <input value={form.id} onChange={(e)=>setForm({...form, id: formatSlug(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" required />
           </label>
           <label className="text-sm">SKU
             <input value={form.sku} onChange={(e)=>setForm({...form, sku: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />

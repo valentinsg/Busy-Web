@@ -3,6 +3,25 @@ import { assertAdmin } from "../_utils"
 
 export const runtime = "nodejs"
 
+// Sanitize filename: remove special chars, replace spaces with hyphens, lowercase
+function sanitizeFilename(filename: string): string {
+  const parts = filename.split('.')
+  const ext = parts.length > 1 ? parts.pop() : ''
+  const name = parts.join('.')
+  
+  // Replace spaces with hyphens, remove special chars except hyphens and underscores
+  const sanitized = name
+    .toLowerCase()
+    .normalize('NFD') // Normalize accents
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+    .replace(/\s+/g, '-') // Spaces to hyphens
+    .replace(/[^a-z0-9_-]/g, '') // Remove special chars
+    .replace(/-+/g, '-') // Multiple hyphens to single
+    .replace(/^-|-$/g, '') // Trim hyphens
+  
+  return ext ? `${sanitized}.${ext.toLowerCase()}` : sanitized
+}
+
 export async function POST(req: NextRequest) {
   const admin = await assertAdmin(req)
   if (!admin.ok) return admin.res
@@ -14,7 +33,8 @@ export async function POST(req: NextRequest) {
     if (!file) return NextResponse.json({ ok: false, error: "Missing file" }, { status: 400 })
 
     const bytes = await file.arrayBuffer()
-    const path = `${Date.now()}-${file.name}`
+    const sanitizedName = sanitizeFilename(file.name)
+    const path = `${Date.now()}-${sanitizedName}`
 
     // Ensure bucket exists and is public
     try {
