@@ -2,7 +2,7 @@
 // REPOSITORIO DE GUIONES
 // =====================================================
 
-import { createClient } from '@/lib/supabase/server';
+import { getServiceClient } from '@/lib/supabase/server';
 import type {
   Script,
   ScriptProject,
@@ -19,7 +19,7 @@ import type {
 // =====================================================
 
 export async function getProjects(teamId: string): Promise<ScriptProject[]> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('script_projects')
     .select('*')
@@ -31,7 +31,7 @@ export async function getProjects(teamId: string): Promise<ScriptProject[]> {
 }
 
 export async function getProjectById(id: string): Promise<ScriptProject | null> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('script_projects')
     .select('*')
@@ -47,7 +47,7 @@ export async function createProject(
   name: string,
   description?: string
 ): Promise<ScriptProject> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
@@ -70,7 +70,7 @@ export async function updateProject(
   id: string,
   updates: Partial<Pick<ScriptProject, 'name' | 'description'>>
 ): Promise<ScriptProject> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('script_projects')
     .update(updates)
@@ -83,7 +83,7 @@ export async function updateProject(
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { error } = await supabase
     .from('script_projects')
     .delete()
@@ -97,7 +97,7 @@ export async function deleteProject(id: string): Promise<void> {
 // =====================================================
 
 export async function getScripts(teamId: string): Promise<Script[]> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('scripts')
     .select('*')
@@ -109,7 +109,7 @@ export async function getScripts(teamId: string): Promise<Script[]> {
 }
 
 export async function getScriptById(id: string): Promise<Script | null> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('scripts')
     .select('*')
@@ -121,7 +121,7 @@ export async function getScriptById(id: string): Promise<Script | null> {
 }
 
 export async function getScriptBySlug(teamId: string, slug: string): Promise<Script | null> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('scripts')
     .select('*')
@@ -138,7 +138,7 @@ export async function createScript(
   title: string,
   projectId?: string
 ): Promise<Script> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
@@ -170,7 +170,7 @@ export async function updateScript(
   id: string,
   updates: Partial<Omit<Script, 'id' | 'team_id' | 'created_by' | 'created_at'>>
 ): Promise<Script> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
@@ -189,7 +189,7 @@ export async function updateScript(
 }
 
 export async function deleteScript(id: string): Promise<void> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { error } = await supabase
     .from('scripts')
     .delete()
@@ -202,7 +202,7 @@ export async function searchScripts(
   teamId: string,
   filters: ScriptSearchFilters
 ): Promise<ScriptSearchResult[]> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase.rpc('search_scripts', {
     p_team_id: teamId,
     p_query: filters.query || null,
@@ -221,7 +221,7 @@ export async function searchScripts(
 // =====================================================
 
 export async function getScenes(scriptId: string): Promise<ScriptScene[]> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('script_scenes')
     .select('*')
@@ -236,7 +236,7 @@ export async function createScene(
   scriptId: string,
   scene: Omit<ScriptScene, 'id' | 'script_id' | 'created_at' | 'updated_at'>
 ): Promise<ScriptScene> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('script_scenes')
     .insert({
@@ -254,7 +254,7 @@ export async function updateScene(
   id: string,
   updates: Partial<Omit<ScriptScene, 'id' | 'script_id' | 'created_at' | 'updated_at'>>
 ): Promise<ScriptScene> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('script_scenes')
     .update(updates)
@@ -270,7 +270,7 @@ export async function reorderScenes(
   scriptId: string,
   sceneIds: string[]
 ): Promise<void> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   
   // Actualizar índices en batch
   const updates = sceneIds.map((id, idx) => ({
@@ -288,7 +288,7 @@ export async function reorderScenes(
 }
 
 export async function deleteScene(id: string): Promise<void> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { error } = await supabase
     .from('script_scenes')
     .delete()
@@ -302,7 +302,7 @@ export async function deleteScene(id: string): Promise<void> {
 // =====================================================
 
 export async function getVersions(scriptId: string): Promise<ScriptVersion[]> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('script_versions')
     .select('*')
@@ -318,7 +318,7 @@ export async function createVersion(
   mdx: string,
   mdxFrontmatter: any
 ): Promise<ScriptVersion> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
@@ -357,7 +357,7 @@ export async function revertToVersion(
   scriptId: string,
   versionId: string
 ): Promise<Script> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   
   // Obtener la versión
   const { data: version, error: versionError } = await supabase
@@ -380,7 +380,7 @@ export async function revertToVersion(
 // =====================================================
 
 export async function getComments(scriptId: string): Promise<ScriptComment[]> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('script_comments')
     .select('*')
@@ -395,7 +395,7 @@ export async function createComment(
   scriptId: string,
   body: string
 ): Promise<ScriptComment> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
@@ -414,7 +414,7 @@ export async function createComment(
 }
 
 export async function resolveComment(id: string, resolved: boolean): Promise<ScriptComment> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('script_comments')
     .update({ resolved })
@@ -431,7 +431,7 @@ export async function resolveComment(id: string, resolved: boolean): Promise<Scr
 // =====================================================
 
 export async function getAssets(scriptId: string): Promise<ScriptAsset[]> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('script_assets')
     .select('*')
@@ -449,7 +449,7 @@ export async function createAsset(
   kind: string,
   sizeBytes?: number
 ): Promise<ScriptAsset> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
@@ -471,7 +471,7 @@ export async function createAsset(
 }
 
 export async function deleteAsset(id: string): Promise<void> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { error } = await supabase
     .from('script_assets')
     .delete()
@@ -484,7 +484,7 @@ export async function uploadAssetFile(
   file: File,
   scriptId: string
 ): Promise<string> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
