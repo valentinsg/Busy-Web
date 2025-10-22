@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updateCategory, deleteCategory, type UpdateCategoryInput } from '@/lib/repo/categories'
+import { getServiceClient } from '@/lib/supabase/server'
 
 /**
  * PATCH /api/admin/categories/[id]
@@ -18,7 +19,39 @@ export async function PATCH(
     if (body.slug !== undefined) input.slug = body.slug
     if (body.name !== undefined) input.name = body.name
     if (body.description !== undefined) input.description = body.description
-    if (body.display_order !== undefined) input.display_order = body.display_order
+    // If reordering, swap with the category currently occupying that position to avoid duplicates
+    if (body.display_order !== undefined) {
+      const supabase = getServiceClient()
+      // Fetch current category to know previous order
+      const { data: current } = await supabase
+        .from('product_categories')
+        .select('id, display_order')
+        .eq('id', id)
+        .maybeSingle()
+
+      const targetOrder = Number(body.display_order)
+      if (current && current.display_order !== targetOrder) {
+        // Find category with the target order
+        const { data: other } = await supabase
+          .from('product_categories')
+          .select('id, display_order')
+          .eq('display_order', targetOrder)
+          .neq('id', id)
+          .maybeSingle()
+
+        // Move the other category to current order first (if exists)
+        if (other?.id) {
+          await supabase
+            .from('product_categories')
+            .update({ display_order: current.display_order })
+            .eq('id', other.id)
+        }
+
+        input.display_order = targetOrder
+      } else {
+        input.display_order = targetOrder
+      }
+    }
     if (body.is_active !== undefined) input.is_active = body.is_active
     
     const category = await updateCategory(id, input)

@@ -157,6 +157,15 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                             </SidebarMenuSubButton>
                           </Link>
                         </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <Link href="/admin/categories" legacyBehavior>
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
+                              <a className="flex items-center gap-2">
+                                <Tag className="h-3.5 w-3.5" /> Categorías
+                              </a>
+                            </SidebarMenuSubButton>
+                          </Link>
+                        </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
@@ -167,6 +176,16 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                     <SidebarMenuButton asChild isActive={isActive("/admin/stock")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                       <a className="flex items-center gap-2">
                         <Boxes className="h-4 w-4" /> Stock
+                      </a>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <Link href="/admin/promotions" legacyBehavior>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/promotions")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
+                      <a className="flex items-center gap-2">
+                        <Tag className="h-4 w-4" /> Promociones
                       </a>
                     </SidebarMenuButton>
                   </Link>
@@ -344,15 +363,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                   </Link>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
-                  <Link href="/admin/promotions" legacyBehavior>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/promotions")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
-                      <a className="flex items-center gap-2">
-                        <Tag className="h-4 w-4" /> Promociones
-                      </a>
-                    </SidebarMenuButton>
-                  </Link>
-                </SidebarMenuItem>
+                
 
                 <Collapsible>
                   <SidebarMenuItem>

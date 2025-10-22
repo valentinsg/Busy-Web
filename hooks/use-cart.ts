@@ -49,6 +49,11 @@ export const useCart = create<CartStore>()(
           const sizeStock = product.stockBySize && Object.keys(product.stockBySize).length > 0
             ? (product.stockBySize[selectedSize] ?? 0)
             : product.stock
+
+          // If no stock for the selected size, do nothing
+          if (!sizeStock || sizeStock <= 0) {
+            return { items: state.items }
+          }
           const existingItemIndex = state.items.findIndex(
             (item) =>
               item.product.id === product.id &&
@@ -61,7 +66,7 @@ export const useCart = create<CartStore>()(
             const updatedItems = [...state.items]
             const current = updatedItems[existingItemIndex].quantity
             const next = Math.min(current + quantity, sizeStock)
-            updatedItems[existingItemIndex].quantity = Math.max(1, next)
+            updatedItems[existingItemIndex].quantity = Math.max(1, Math.min(next, sizeStock))
             return { items: updatedItems }
           } else {
             // Add new item

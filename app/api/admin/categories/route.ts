@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAllCategories, createCategory, type CreateCategoryInput } from '@/lib/repo/categories'
+import { getServiceClient } from '@/lib/supabase/server'
 
 /**
  * GET /api/admin/categories
@@ -34,11 +35,26 @@ export async function POST(request: NextRequest) {
       )
     }
     
+    // Compute next display_order if not provided
+    let nextOrder = 0
+    try {
+      const supabase = getServiceClient()
+      const { data: maxRow } = await supabase
+        .from('product_categories')
+        .select('display_order')
+        .order('display_order', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      nextOrder = (maxRow?.display_order ?? 0) + 1
+    } catch {
+      nextOrder = 0
+    }
+
     const input: CreateCategoryInput = {
       slug: body.slug,
       name: body.name,
       description: body.description || null,
-      display_order: body.display_order || 0,
+      display_order: (body.display_order ?? nextOrder),
       is_active: body.is_active !== undefined ? body.is_active : true,
     }
     

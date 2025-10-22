@@ -47,17 +47,43 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  // Show categories in ES as requested
-  const categories = React.useMemo(() => ['buzos', 'remeras', 'pantalones', 'accesorios', 'ofertas'] as const, [])
+  // Categories loaded from API (fallback to defaults if API not available)
+  const [allCategories, setAllCategories] = React.useState<{ slug: string; name: string }[]>([
+    { slug: 'buzos', name: 'Buzos' },
+    { slug: 'remeras', name: 'Remeras' },
+    { slug: 'pantalones', name: 'Pantalones' },
+    { slug: 'accesorios', name: 'Accesorios' },
+    { slug: 'ofertas', name: 'Ofertas' },
+  ])
+
+  React.useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch('/api/categories', { cache: 'no-store' })
+        if (!res.ok) return
+        const data: { slug: string; name: string; display_order?: number }[] = await res.json()
+        if (!cancelled && Array.isArray(data)) {
+          const sorted = [...data]
+            .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+            .map(({ slug, name }) => ({ slug, name }))
+          setAllCategories(sorted)
+        }
+      } catch {
+        // ignore, fallback to defaults
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+
+  const categories = React.useMemo(() => allCategories.map(c => c.slug) as string[], [allCategories])
   
   // Category display names
-  const categoryNames: Record<string, string> = {
-    'buzos': 'Buzos',
-    'remeras': 'Remeras',
-    'pantalones': 'Pantalones',
-    'accesorios': 'Accesorios',
-    'ofertas': 'Ofertas'
-  }
+  const categoryNames: Record<string, string> = React.useMemo(() => {
+    const map: Record<string, string> = {}
+    for (const c of allCategories) map[c.slug] = c.name
+    return map
+  }, [allCategories])
   // Local inputs to avoid filtering while typing
   const [minPriceInput, setMinPriceInput] = React.useState('')
   const [maxPriceInput, setMaxPriceInput] = React.useState('')

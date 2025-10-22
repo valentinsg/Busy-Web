@@ -97,7 +97,7 @@ export async function DELETE() {
 
     // Update author to remove avatar URL
     const updatedAuthor = await updateAuthor(supabase, currentAuthor.id, {
-      avatar_url: null,
+      avatar_url: null || undefined,
     })
 
     if (!updatedAuthor) {

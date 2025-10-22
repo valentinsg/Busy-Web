@@ -1,4 +1,4 @@
-import { getAuthorByEmail, updateAuthor, uploadAuthorAvatar } from '@/lib/repo/authors'
+ import { getAuthorByEmail, updateAuthor, uploadAuthorAvatar, createAuthor } from '@/lib/repo/authors'
 import getServiceClient from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -19,10 +19,27 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const author = await getAuthorByEmail(supabase, user.email)
+    let author = await getAuthorByEmail(supabase, user.email)
 
+    // Auto-create author profile if it doesn't exist
     if (!author) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+      const meta = (user as unknown as { user_metadata?: Record<string, unknown> })
+        .user_metadata
+      const displayName =
+        (typeof meta?.full_name === 'string' ? (meta.full_name as string) : undefined) ||
+        (typeof meta?.name === 'string' ? (meta.name as string) : undefined) ||
+        user.email.split('@')[0]
+
+      author = await createAuthor(supabase, {
+        id: user.id,
+        name: displayName,
+        email: user.email,
+        active: true,
+      })
+
+      if (!author) {
+        return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 })
+      }
     }
 
     return NextResponse.json(author)

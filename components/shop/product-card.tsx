@@ -103,6 +103,31 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
     return !!m && Object.keys(m).length > 0
   }, [product])
 
+  // Helpers: stock availability per size
+  const getSizeStock = React.useCallback(
+    (size: string): number => {
+      const bySize = (product as Product).stockBySize
+      if (bySize && Object.keys(bySize).length > 0) {
+        return Math.max(0, bySize[size] ?? 0)
+      }
+      // If there is no per-size stock, don't block specific sizes; use total stock as reference
+      return Math.max(0, product.stock ?? 0)
+    },
+    [product]
+  )
+
+  const isSizeAvailable = React.useCallback(
+    (size: string): boolean => {
+      const bySize = (product as Product).stockBySize
+      if (bySize && Object.keys(bySize).length > 0) {
+        return getSizeStock(size) > 0
+      }
+      // Without per-size stock, consider available if overall stock > 0
+      return (product.stock ?? 0) > 0
+    },
+    [getSizeStock, product]
+  )
+
   const formatSizeTooltip = (size: string) => {
     const m = (product as Product).measurementsBySize?.[size] as
       | Record<string, number>
@@ -344,14 +369,21 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
                           <TooltipTrigger asChild>
                             <button
                               type="button"
-                              onClick={(e) =>
+                              onClick={(e) => {
+                                if (!isSizeAvailable(String(product.sizes[0]))) return
                                 handleAddToCartWithSize(
                                   e,
                                   String(product.sizes[0])
                                 )
-                              }
+                              }}
                               data-overlay-control="true"
-                              className="w-full rounded-md px-3 py-2 text-sm font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                              aria-disabled={!isSizeAvailable(String(product.sizes[0]))}
+                              disabled={!isSizeAvailable(String(product.sizes[0]))}
+                              className={`w-full rounded-md px-3 py-2 text-sm font-body font-medium text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
+                                isSizeAvailable(String(product.sizes[0]))
+                                  ? 'hover:bg-white/20'
+                                  : 'opacity-40 cursor-not-allowed'
+                              }`}
                             >
                               {String(product.sizes[0])}
                             </button>
@@ -390,9 +422,18 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
                                   <button
                                     key={size}
                                     type="button"
-                                    onClick={(e) => handleAddToCartWithSize(e, size)}
+                                    onClick={(e) => {
+                                      if (!isSizeAvailable(size)) return
+                                      handleAddToCartWithSize(e, size)
+                                    }}
                                     data-overlay-control="true"
-                                    className="min-w-8 rounded-md px-2 py-1 text-sm font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                                    aria-disabled={!isSizeAvailable(size)}
+                                    disabled={!isSizeAvailable(size)}
+                                    className={`min-w-8 rounded-md px-2 py-1 text-sm font-body font-medium text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
+                                      isSizeAvailable(size)
+                                        ? 'hover:bg-white/20'
+                                        : 'opacity-40 cursor-not-allowed'
+                                    }`}
                                   >
                                     {size}
                                   </button>
@@ -401,9 +442,18 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
                                     <TooltipTrigger asChild>
                                       <button
                                         type="button"
-                                        onClick={(e) => handleAddToCartWithSize(e, size)}
+                                        onClick={(e) => {
+                                          if (!isSizeAvailable(size)) return
+                                          handleAddToCartWithSize(e, size)
+                                        }}
                                         data-overlay-control="true"
-                                        className="min-w-8 rounded-md px-2 py-1 text-sm font-body font-medium text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                                        aria-disabled={!isSizeAvailable(size)}
+                                        disabled={!isSizeAvailable(size)}
+                                        className={`min-w-8 rounded-md px-2 py-1 text-sm font-body font-medium text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
+                                          isSizeAvailable(size)
+                                            ? 'hover:bg-white/20'
+                                            : 'opacity-40 cursor-not-allowed'
+                                        }`}
                                       >
                                         {size}
                                       </button>

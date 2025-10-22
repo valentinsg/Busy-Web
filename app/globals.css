@@ -87,6 +87,8 @@
   }
   html {
     overflow-x: hidden;
+    /* Prevent layout shift when scrollbars appear/disappear (Windows) */
+    scrollbar-gutter: stable;
   }
   body {
     @apply bg-background text-foreground;
