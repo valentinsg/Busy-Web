@@ -24,6 +24,7 @@ import {
 import { capitalize } from '@/lib/format'
 import { getProductsAsync, searchProductsAsync, type SortBy } from '@/lib/repo/products'
 import type { FilterOptions, Product } from '@/lib/types'
+import { normalizeColors, getColorDisplayName, getColorHex, type StandardColor } from '@/lib/color-utils'
 import { Filter, Search, SlidersHorizontal } from 'lucide-react'
 import Image from 'next/image'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -112,7 +113,7 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
             } else if (filters.category && p.category !== filters.category) {
               return false
             }
-            if (filters.color && !p.colors.includes(filters.color)) return false
+            if (filters.color && !normalizeColors(p.colors).includes(filters.color as StandardColor)) return false
             if (filters.size && !p.sizes.includes(filters.size)) return false
             if (filters.minPrice !== undefined && p.price < filters.minPrice) return false
             if (filters.maxPrice !== undefined && p.price > filters.maxPrice) return false
@@ -191,12 +192,13 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
   }
 
   // Colors from current result set; hide section when empty
+  // Normalize colors to avoid duplicates (e.g., "blue", "azul", "navy" → "blue")
   const availableColors = React.useMemo(() => {
-    const set = new Set<string>()
+    const allColors: string[] = []
     for (const p of asyncProducts) {
-      for (const c of p.colors || []) set.add(c)
+      allColors.push(...(p.colors || []))
     }
-    return Array.from(set)
+    return normalizeColors(allColors)
   }, [asyncProducts])
 
   // Predefined sizes and mapping from product values to predefined
@@ -248,17 +250,14 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
                       updateFilter('color', checked ? color : undefined)
                     }
                   />
-                  <Label htmlFor={color} className="flex items-center text-sm font-body">
+                  <Label htmlFor={color} className="flex items-center gap-2 text-sm font-body cursor-pointer">
                     <div
-                      className="w-4 h-4 rounded-full border border-border"
+                      className="w-4 h-4 rounded-full border border-border flex-shrink-0"
                       style={{
-                        backgroundColor:
-                          color === 'black' ? '#000' :
-                          color === 'white' ? '#fff' :
-                          color === 'gray' ? '#6b7280' :
-                          color === 'navy' ? '#1e3a8a' : color,
+                        backgroundColor: getColorHex(color),
                       }}
                     />
+                    <span>{getColorDisplayName(color)}</span>
                   </Label>
                 </div>
               ))}
@@ -335,10 +334,10 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
               updateFilter('sortBy', (value || undefined) as FilterOptions['sortBy'] | undefined)
             }
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] font-body">
               <SelectValue placeholder={t('products.sort.placeholder')} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="font-body">
               <SelectItem value="newest">
                 {t('products.sort.newest')}
               </SelectItem>

@@ -15,7 +15,6 @@ import { LogOut, Settings, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import supabase from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
-import authorsJson from "@/data/authors.json"
 
 export function AdminHeader() {
   const router = useRouter()
@@ -31,21 +30,17 @@ export function AdminHeader() {
 
       let avatarUrl: string | null = null
 
-      // Try to get avatar from user metadata first
-      // If no avatar in metadata, try to match with authors.json
+      // Try to get avatar from authors table
       if (email) {
         try {
-          interface Author {
-            id: string
-            email: string
-            avatar?: string
-          }
-          const author = (authorsJson as Author[]).find((a) =>
-            a.email === email ||
-            email.includes(a.id.replace('-', ''))
-          )
-          if (author?.avatar) {
-            avatarUrl = author.avatar
+          const { data } = await supabase
+            .from('authors')
+            .select('avatar_url')
+            .eq('email', email)
+            .single()
+          
+          if (data?.avatar_url) {
+            avatarUrl = data.avatar_url
           }
         } catch {
           // Ignore errors, will use fallback

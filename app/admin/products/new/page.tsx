@@ -4,6 +4,7 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
 import Image from "next/image"
+import { CategorySelector } from "@/components/admin/category-selector"
 
 // Format slug: lowercase and replace spaces with hyphens
 function formatSlug(value: string): string {
@@ -183,9 +184,11 @@ export default function NewProductPage() {
           <label className="text-sm">Moneda
             <input value={form.currency} onChange={(e)=>setForm({...form, currency: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>
-          <label className="text-sm">Categoría
-            <input value={form.category} onChange={(e)=>setForm({...form, category: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />
-          </label>
+          <CategorySelector
+            value={form.category}
+            onChange={(value) => setForm({...form, category: value})}
+            required
+          />
           <label className="text-sm">Stock
             <input type="number" value={form.stock} onChange={(e)=>setForm({...form, stock: Number(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>

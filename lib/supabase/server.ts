@@ -18,4 +18,7 @@ export function getServiceClient() {
   })
 }
 
+// Re-export createClient for compatibility
+export { createClient }
+
 export default getServiceClient

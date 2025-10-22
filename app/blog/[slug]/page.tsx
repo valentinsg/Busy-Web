@@ -6,7 +6,6 @@ import MdxRenderer from '@/components/mdx/MdxRenderer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import authorsJson from '@/data/authors.json'
 import { getAllPostsAsync, getPostBySlugAsync } from '@/lib/blog'
 import getServiceClient from '@/lib/supabase/server'
 import { Author } from '@/lib/types'
@@ -166,18 +165,20 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     social.instagram = 'https://instagram.com/valensanchez.g'
   }
 
-  // Fallback to local authors.json if still missing any field
-  if (!social.instagram || !social.x || !social.linkedin || !social.medium || !social.bio) {
+  // Additional fallback: try to find by partial name match if still missing data
+  if ((!social.instagram || !social.x || !social.linkedin || !social.medium || !social.bio) && authorName) {
     try {
-      const list = authorsJson as Array<{ name?: string; instagram?: string; twitter?: string; linkedin?: string; medium?: string; bio?: string }>
-      const norm = (s: string) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
-      const found = list.find((a) => norm(a.name || '') === norm(authorName))
-      if (found) {
-        social.instagram = social.instagram || (found as Author).instagram || undefined
-        social.x = social.x || (found as Author).twitter || undefined
-        social.linkedin = social.linkedin || (found as Author).linkedin || undefined
-        social.medium = social.medium || (found as Author).medium || undefined
-        social.bio = social.bio || (found as Author).bio || undefined
+      const { data } = await supabase
+        .from('authors')
+        .select('instagram, linkedin, medium, twitter, bio')
+        .ilike('name', `%${authorName.split(' ')[0]}%`)
+        .maybeSingle()
+      if (data) {
+        social.instagram = social.instagram || (data as unknown as Author).instagram || undefined
+        social.x = social.x || (data as unknown as Author).twitter || undefined
+        social.linkedin = social.linkedin || (data as unknown as Author).linkedin || undefined
+        social.medium = social.medium || (data as unknown as Author).medium || undefined
+        social.bio = social.bio || (data as unknown as Author).bio || undefined
       }
     } catch {}
   }

@@ -1,4 +1,3 @@
-import { CustomCursor } from '@/components/custom-cursor'
 import { SplashGate } from '@/components/home/splash-gate'
 import { I18nProvider } from '@/components/i18n-provider'
 import { HtmlLang } from '@/components/layout/html-lang'
@@ -224,8 +223,6 @@ export default function RootLayout({
             </ThemeProvider>
           </I18nProvider>
         </ReducedMotionProvider>
-        {/* Custom cursor should be rendered within <body> to avoid removeChild null errors */}
-        <CustomCursor />
         <AdminQuickFAB />
         <SitePopover />
         {/* Vercel Web Analytics - only sends events in production, loaded after interactive */}

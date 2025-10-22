@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { getProductByIdAsync } from "@/lib/repo/products"
 import type { Product } from "@/lib/types"
+import { CategorySelector } from "@/components/admin/category-selector"
 
 // Format slug: lowercase and replace spaces with hyphens
 function formatSlug(value: string): string {
@@ -288,9 +289,11 @@ export default function EditProductPage({ params }: PageProps) {
           <label className="text-sm">Moneda
             <input value={form.currency||"USD"} onChange={(e)=>setForm({...form, currency: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>
-          <label className="text-sm">Categoría
-            <input value={form.category||""} onChange={(e)=>setForm({...form, category: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />
-          </label>
+          <CategorySelector
+            value={form.category || ""}
+            onChange={(value) => setForm({...form, category: value})}
+            required
+          />
           <label className="text-sm">SKU
             <input value={form.sku||""} onChange={(e)=>setForm({...form, sku: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />
           </label>
