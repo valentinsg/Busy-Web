@@ -42,6 +42,12 @@
     --font-secondary: "Poppins", sans-serif;
   }
 
+/* ===== TV-only adjustments (very large screens) ===== */
+@media (min-width: 1920px) {
+  .tv-hero-logo-wrapper { top: 80px !important; }
+  .tv-hero-logo-img { width: 200px !important; height: auto !important; }
+}
+
 
 /* Default headings use the secondary (Bank Gothic) */
 @layer base {

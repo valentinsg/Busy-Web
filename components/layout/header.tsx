@@ -361,12 +361,6 @@ export function Header() {
           </Sheet>
         </div>
       </div>
-      <style jsx global>{`
-        @media (min-width: 1920px) {
-          .tv-hero-logo-wrapper { top: 80px !important; }
-          .tv-hero-logo-img { width: 200px !important; height: auto !important; }
-        }
-      `}</style>
     </header>
   )
 }
