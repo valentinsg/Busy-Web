@@ -366,7 +366,7 @@ export function Header() {
         @media (min-width: 1920px) {
           /* Centered B logo wrapper on home hero */
           :global(.tv-hero-logo-wrapper) {
-            top: 2cm !important;
+            top: 80px !important;
           }
           /* Enlarge the B logo image */
           :global(.tv-hero-logo-img) {
