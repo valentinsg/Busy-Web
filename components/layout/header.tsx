@@ -139,7 +139,7 @@ export function Header() {
         {/* Centered B logo (hero) */}
         <div
           className={
-            'fixed top-0 left-0 right-0 h-24 z-[41] flex items-center justify-center pointer-events-none transition-[opacity,transform,filter] duration-500 ease-out transform-gpu ' +
+            'tv-hero-logo-wrapper fixed top-0 left-0 right-0 h-24 z-[41] flex items-center justify-center pointer-events-none transition-[opacity,transform,filter] duration-500 ease-out transform-gpu ' +
             (showHeroVariant
               ? 'opacity-100 scale-100 blur-0'
               : 'opacity-0 scale-95 blur-[2px]')
@@ -158,7 +158,7 @@ export function Header() {
               alt="Busy"
               width={100}
               height={35}
-              className="object-contain"
+              className="object-contain tv-hero-logo-img"
             />
           </Link>
         </div>
@@ -361,6 +361,20 @@ export function Header() {
           </Sheet>
         </div>
       </div>
+      {/* TV-specific styles (only on very large screens) */}
+      <style jsx>{`
+        @media (min-width: 1920px) {
+          /* Centered B logo wrapper on home hero */
+          :global(.tv-hero-logo-wrapper) {
+            top: 2cm !important;
+          }
+          /* Enlarge the B logo image */
+          :global(.tv-hero-logo-img) {
+            width: 200px !important;
+            height: auto !important;
+          }
+        }
+      `}</style>
     </header>
   )
 }

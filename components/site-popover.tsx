@@ -32,6 +32,14 @@ export default function SitePopover({ section }: { section?: string }) {
   const [submitMessage, setSubmitMessage] = React.useState("")
   const [showConfetti, setShowConfetti] = React.useState(false)
   const isInitializedRef = React.useRef(false)
+  const [emailTouched, setEmailTouched] = React.useState(false)
+
+  const isValidEmail = (val: string) => {
+    const v = val.trim()
+    if (!v) return false
+    const re = /^[A-Z0-9._%+-]{3,}@[A-Z0-9.-]+\.[A-Z]{2,}$/i
+    return re.test(v)
+  }
 
   React.useEffect(() => {
     // Prevenir doble ejecución en StrictMode
@@ -144,7 +152,11 @@ export default function SitePopover({ section }: { section?: string }) {
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim()) return
+    if (!isValidEmail(email)) {
+      setEmailTouched(true)
+      setSubmitMessage("Ingresa un email válido")
+      return
+    }
     
     setSubmitting(true)
     setSubmitMessage("")
@@ -176,6 +188,7 @@ export default function SitePopover({ section }: { section?: string }) {
 
   const showDiscountCode = data.discount_code && (!data.require_email || emailSubmitted)
   const needsEmail = (data.require_email || data.show_newsletter) && !emailSubmitted
+  const emailValid = isValidEmail(email)
 
   return (
     <>
@@ -197,7 +210,7 @@ export default function SitePopover({ section }: { section?: string }) {
 
           {/* Image section - Más compacto en móvil */}
           {data.image_url && (
-            <div className="relative w-full h-56 sm:h-72 md:h-96 bg-gradient-to-br from-muted/50 to-muted">
+            <div className="relative w-full h-44 sm:h-56 md:h-72 bg-gradient-to-br from-muted/50 to-muted">
               <Image
                 src={data.image_url}
                 alt={data.title}
@@ -207,13 +220,13 @@ export default function SitePopover({ section }: { section?: string }) {
                 priority
               />
               {/* Logo Busy en la esquina - más pequeño en móvil */}
-              <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 opacity-90">
+              <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 opacity-90">
                 <Image
                   src="/logo-busy-white.png"
                   alt="Busy"
-                  width={48}
-                  height={48}
-                  className="drop-shadow-lg md:w-[60px] md:h-[60px]"
+                  width={40}
+                  height={40}
+                  className="drop-shadow-lg md:w-[52px] md:h-[52px]"
                 />
               </div>
             </div>
@@ -230,7 +243,7 @@ export default function SitePopover({ section }: { section?: string }) {
                 {data.title}
               </h3>
               {data.body && (
-                <p className={`font-body text-zinc-300 leading-relaxed ${
+                <p className={`font-body text-zinc-300 leading-relaxed whitespace-pre-line ${
                   data.image_url 
                     ? 'text-sm sm:text-base' 
                     : 'text-base sm:text-lg'
@@ -255,6 +268,7 @@ export default function SitePopover({ section }: { section?: string }) {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      onBlur={() => setEmailTouched(true)}
                       placeholder="tu@email.com"
                       required
                       disabled={submitting}
@@ -262,12 +276,15 @@ export default function SitePopover({ section }: { section?: string }) {
                     />
                     <button
                       type="submit"
-                      disabled={submitting || !email.trim()}
+                      disabled={submitting || !emailValid}
                       className="font-body w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 font-medium shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-base"
                     >
                       {submitting ? "..." : data.show_newsletter ? "Suscribirme" : "Desbloquear"}
                     </button>
                   </div>
+                  {emailTouched && !emailValid && (
+                    <p className="font-body text-sm text-red-600">Ingresa un email válido</p>
+                  )}
                   {submitMessage && (
                     <p className={`font-body text-sm ${emailSubmitted ? 'text-green-600' : 'text-red-600'}`}>
                       {submitMessage}
