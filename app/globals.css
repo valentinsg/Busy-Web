@@ -45,8 +45,8 @@
 /* ===== TV-only adjustments (very large screens) ===== */
 @media (min-width: 1920px) {
   .tv-hero-logo-wrapper {
-    top: 120px !important;
-    padding-top: 24px; /* extra padding to evitar recorte superior en TVs */
+    top: 160px !important;
+    padding-top: 40px; /* extra padding to evitar recorte superior en TVs */
   }
   .tv-hero-logo-img {
     width: 200px !important;
