@@ -361,18 +361,10 @@ export function Header() {
           </Sheet>
         </div>
       </div>
-      {/* TV-specific styles (only on very large screens) */}
-      <style jsx>{`
+      <style jsx global>{`
         @media (min-width: 1920px) {
-          /* Centered B logo wrapper on home hero */
-          :global(.tv-hero-logo-wrapper) {
-            top: 80px !important;
-          }
-          /* Enlarge the B logo image */
-          :global(.tv-hero-logo-img) {
-            width: 200px !important;
-            height: auto !important;
-          }
+          .tv-hero-logo-wrapper { top: 80px !important; }
+          .tv-hero-logo-img { width: 200px !important; height: auto !important; }
         }
       `}</style>
     </header>
