@@ -1,13 +1,13 @@
 'use client'
 
 import { useI18n } from '@/components/i18n-provider'
-import { supabase } from '@/lib/supabase/client'
 import { LanguageToggle } from '@/components/layout/language-toggle'
 import { CartSheet } from '@/components/shop/cart-sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { useCart } from '@/hooks/use-cart'
+import { supabase } from '@/lib/supabase/client'
 import { Menu, Search } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -83,10 +83,10 @@ export function Header() {
         window.addEventListener('scroll', scrollHandler, { passive: true })
         return
       }
-      
+
       // Check initial position immediately
       const rect = el.getBoundingClientRect()
-      const initialRatio = Math.max(0, Math.min(1, rect.height > 0 ? 
+      const initialRatio = Math.max(0, Math.min(1, rect.height > 0 ?
         (Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0)) / rect.height : 0
       ))
       setHeroInView(initialRatio > 0.7)
@@ -135,35 +135,10 @@ export function Header() {
             ? 'container flex h-16 sm:h-20 items-center justify-between px-3 sm:px-4 transition-opacity duration-300'
             : 'container flex h-16 sm:h-20 items-center justify-between px-3 sm:px-4 transition-opacity duration-300'
         }
-      >
-        {/* Centered B logo (hero) */}
-        <div
-          className={
-            'tv-hero-logo-wrapper fixed top-0 left-0 right-0 h-24 z-[41] flex items-center justify-center pointer-events-none transition-[opacity,transform,filter] duration-500 ease-out transform-gpu ' +
-            (showHeroVariant
-              ? 'opacity-100 scale-100 blur-0'
-              : 'opacity-0 scale-95 blur-[2px]')
-          }
-          aria-hidden={!showHeroVariant}
-        >
-          <Link
-            href="/"
-            aria-label="Busy"
-            className={
-              showHeroVariant ? 'pointer-events-auto' : 'pointer-events-none'
-            }
-          >
-            <Image
-              src="/logo-busy-white.png"
-              alt="Busy"
-              width={100}
-              height={35}
-              className="object-contain tv-hero-logo-img"
-            />
-          </Link>
-        </div>
 
-        {/* Left logo (standard navbar) */}
+        >
+
+        {/* Left logo (standard navbar) */} 
         <Link
           href="/"
           className={
