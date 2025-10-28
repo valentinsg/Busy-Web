@@ -147,14 +147,22 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
           })
           if (!cancelled) setAsyncProducts(filtered)
         } else {
-          const list = await getProductsAsync(params)
+          const list = await getProductsAsync({
+            ...params,
+            // Do not send color to backend; we'll normalize client-side
+            color: undefined,
+          })
+          // Apply client-side filters that need normalization
+          const afterColor = filters.color
+            ? list.filter((p) => normalizeColors(p.colors).includes(filters.color as StandardColor))
+            : list
           // Filter for "ofertas" category
           const finalList = filters.category === 'ofertas' 
-            ? list.filter((p) => {
+            ? afterColor.filter((p) => {
                 const hasDiscount = (p as any).discountActive && (p as any).discountPercentage && (p as any).discountPercentage > 0
                 return hasDiscount
               })
-            : list
+            : afterColor
           if (!cancelled) setAsyncProducts(finalList)
         }
       } catch {

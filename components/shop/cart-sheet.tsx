@@ -19,6 +19,7 @@ import {
 import { useCart } from "@/hooks/use-cart"
 import { capitalize, formatPrice } from "@/lib/format"
 import { computeShipping, computeTax } from "@/lib/checkout/totals"
+import { getSettingsClient } from "@/lib/repo/settings"
 import { Minus, Plus, ShoppingBag, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -42,7 +43,24 @@ export function CartSheet({ children }: CartSheetProps) {
   const promoDiscount = mounted ? getPromoDiscount() : 0
   const appliedPromos = mounted ? getAppliedPromos() : []
   const subtotalAfterPromo = Math.max(0, subtotal - promoDiscount)
-  const estimatedShipping = computeShipping(subtotalAfterPromo)
+  const [freeThreshold, setFreeThreshold] = useState<number>(100000)
+  const [flatRate, setFlatRate] = useState<number>(8000)
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const s = await getSettingsClient()
+        if (!cancelled) {
+          setFreeThreshold(Number(s.shipping_free_threshold ?? 100000))
+          setFlatRate(Number(s.shipping_flat_rate ?? 8000))
+        }
+      } catch {
+        // ignore, keep defaults
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+  const estimatedShipping = computeShipping(subtotalAfterPromo, { flat_rate: flatRate, free_threshold: freeThreshold })
   const estimatedTax = computeTax(Number((subtotalAfterPromo + estimatedShipping).toFixed(2)))
   const finalTotal = subtotalAfterPromo + estimatedShipping + estimatedTax
   const itemsForRender = mounted ? items : []
@@ -262,9 +280,9 @@ export function CartSheet({ children }: CartSheetProps) {
               </div>
 
               {/* Free Shipping Notice */}
-              {subtotal < 100000 && (
+              {subtotal < freeThreshold && (
                 <div className="font-body text-xs text-center text-muted-foreground">
-                  {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100000 - subtotal))}
+                  {t("cart.free_shipping_notice").replace("{amount}", formatPrice(freeThreshold - subtotal))}
                 </div>
               )}
             </div>

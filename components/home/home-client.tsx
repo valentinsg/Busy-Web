@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getImageConfig } from '@/lib/imageConfig'
 
 export default function HomeClient() {
   const { t } = useI18n()
@@ -249,8 +250,9 @@ export default function HomeClient() {
                           <Image
                             src={item.iconSrc || ''}
                             alt={item.title}
-                            width={200}
-                            height={200}
+                            width={getImageConfig('socialIcon').width}
+                            height={getImageConfig('socialIcon').height}
+                            sizes={getImageConfig('socialIcon').sizes}
                             className="h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 lg:h-48 lg:w-48 rounded-full contrast-150 brightness-25 transition-transform duration-300 group-hover:scale-110"
                           />
                         </div>
@@ -273,8 +275,9 @@ export default function HomeClient() {
                           <Image
                             src={item.iconSrc || ''}
                             alt={item.title}
-                            width={200}
-                            height={200}
+                            width={getImageConfig('socialIcon').width}
+                            height={getImageConfig('socialIcon').height}
+                            sizes={getImageConfig('socialIcon').sizes}
                             className="h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 lg:h-48 lg:w-48 rounded-full contrast-150 brightness-25 transition-transform duration-300 group-hover:scale-110"
                           />
                         </div>

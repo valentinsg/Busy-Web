@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
 import Image from "next/image"
 import { CategorySelector } from "@/components/admin/category-selector"
+import { PREDEFINED_BENEFITS, buildBenefitsFromKeys } from "@/lib/benefits"
+import { COLOR_PALETTE } from "@/lib/color-utils"
 
 // Format slug: lowercase and replace spaces with hyphens
 function formatSlug(value: string): string {
@@ -23,12 +25,15 @@ export default function NewProductPage() {
     stock: 0,
     description: "",
     colors: "",
+    selectedColors: [] as string[],
     sizes: "",
     images: [] as string[],
     tags: "",
+    featured: false,
     imported: false,
     careInstructions: "",
     benefitsText: "",
+    selectedBenefitKeys: [] as string[],
     badgeText: "",
     badgeVariant: "default",
     discountPercentage: 0,
@@ -123,23 +128,34 @@ export default function NewProductPage() {
           return subtitle ? { title, subtitle } : { title }
         })
 
+      // Build from predefined selected keys
+      const predefined = buildBenefitsFromKeys(form.selectedBenefitKeys)
+      const combinedBenefits = [...predefined, ...benefits]
+
+      const baseTags = form.tags.split(",").map((s) => s.trim()).filter(Boolean)
+      const tags = form.featured
+        ? Array.from(new Set([...baseTags, "featured"]))
+        : baseTags.filter((t)=>t!=="featured")
+
       const payload = {
         id: form.id,
         name: form.name,
         price: Number(form.price),
         currency: form.currency,
         images: form.images,
-        colors: form.colors.split(",").map((s) => s.trim()).filter(Boolean),
+        colors: (form.selectedColors && form.selectedColors.length > 0)
+          ? Array.from(new Set(form.selectedColors))
+          : form.colors.split(",").map((s) => s.trim()).filter(Boolean),
         sizes: uniqueSizes,
         measurements_by_size,
         category: form.category,
         sku: form.sku,
         stock: Number(form.stock) || 0,
         description: form.description || "",
-        tags: form.tags.split(",").map((s) => s.trim()).filter(Boolean),
+        tags,
         imported: !!form.imported,
         care_instructions: form.careInstructions || undefined,
-        benefits: benefits.length ? benefits : undefined,
+        benefits: combinedBenefits.length ? combinedBenefits : undefined,
         badge_text: form.badgeText?.trim() || null,
         badge_variant: form.badgeVariant || "default",
         discount_percentage: form.discountPercentage ? Math.floor(Number(form.discountPercentage)) : null,
@@ -195,9 +211,37 @@ export default function NewProductPage() {
           <label className="text-sm md:col-span-2">Descripción
             <textarea value={form.description} onChange={(e)=>setForm({...form, description: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} />
           </label>
-          <label className="text-sm">Colores (coma)
-            <input value={form.colors} onChange={(e)=>setForm({...form, colors: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
-          </label>
+          <div className="text-sm">
+            <div className="mb-1">Colores</div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2">
+              {COLOR_PALETTE.map((c)=>{
+                const checked = (form.selectedColors||[]).includes(c.key)
+                return (
+                  <label key={c.key} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e)=>{
+                        const on = e.target.checked
+                        setForm((f)=>({
+                          ...f,
+                          selectedColors: on
+                            ? Array.from(new Set([...(f.selectedColors||[]), c.key]))
+                            : (f.selectedColors||[]).filter((k)=>k!==c.key)
+                        }))
+                      }}
+                    />
+                    <span className="flex items-center gap-2 text-xs">
+                      <span className="w-4 h-4 rounded-full border border-border inline-block" style={{ backgroundColor: c.hex }} />
+                      {c.name}
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+            <div className="text-xs text-muted-foreground mb-1">Opcional: ingresar manual (se usará solo si no seleccionás de la paleta)</div>
+            <input value={form.colors} onChange={(e)=>setForm({...form, colors: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" placeholder="negro, crema, #e8dccc" />
+          </div>
           <label className="text-sm">Talles (coma)
             <input value={form.sizes} onChange={(e)=>setForm({...form, sizes: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>
@@ -208,9 +252,42 @@ export default function NewProductPage() {
           <label className="text-sm md:col-span-2">Tags (coma)
             <input value={form.tags} onChange={(e)=>setForm({...form, tags: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" placeholder="featured,pin,no-care,no-free-shipping,no-returns,no-quality,no-default-features" />
           </label>
+          <div className="md:col-span-2 flex items-center gap-2">
+            <input id="featured" type="checkbox" checked={!!form.featured} onChange={(e)=>setForm({...form, featured: e.target.checked})} />
+            <label htmlFor="featured" className="text-sm">Mostrar en Novedades (featured)</label>
+          </div>
           <label className="text-sm md:col-span-2">Cuidados (texto)
             <textarea value={form.careInstructions} onChange={(e)=>setForm({...form, careInstructions: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} placeholder={"• Lavar a máquina con agua fría..."} />
           </label>
+          <div className="md:col-span-2 border rounded p-3">
+            <div className="font-medium text-sm mb-2">Beneficios predefinidos</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {PREDEFINED_BENEFITS.map((b)=>{
+                const checked = form.selectedBenefitKeys.includes(b.key)
+                return (
+                  <label key={b.key} className="flex items-start gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e)=>{
+                        const on = e.target.checked
+                        setForm((f)=>({
+                          ...f,
+                          selectedBenefitKeys: on
+                            ? Array.from(new Set([...(f.selectedBenefitKeys||[]), b.key]))
+                            : (f.selectedBenefitKeys||[]).filter((k)=>k!==b.key)
+                        }))
+                      }}
+                    />
+                    <span>
+                      <span className="font-medium">{b.title}</span>
+                      {b.subtitle && <span className="block text-muted-foreground">{b.subtitle}</span>}
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+          </div>
           <label className="text-sm md:col-span-2">Beneficios (uno por línea, usar &quot;Título|Subtítulo&quot; opcional)
             <textarea value={form.benefitsText} onChange={(e)=>setForm({...form, benefitsText: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} placeholder={"Envío gratis|En compras superiores a $100.000\nGarantía de calidad|Materiales de primera calidad\nProducido en Argentina"} />
           </label>

@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useCart } from "@/hooks/use-cart"
 import { formatPrice, capitalize } from "@/lib/format"
 import { computeShipping, computeTax } from "@/lib/checkout/totals"
+import { getSettingsClient } from "@/lib/repo/settings"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/hooks/use-toast"
 import PayWithMercadoPago from "@/components/checkout/pay-with-mercadopago"
@@ -46,11 +47,24 @@ export default function CheckoutPage() {
   const appliedPromos = getAppliedPromos()
   const discount = getDiscount()
   const discountedSubtotal = getSubtotalAfterDiscount()
-  // Location-aware shipping: Mar del Plata 10k, otherwise 8k. Free over 100k.
+  // Settings-based free shipping threshold + city-aware flat rate
+  const [freeThreshold, setFreeThreshold] = React.useState<number>(100000)
+  React.useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const s = await getSettingsClient()
+        if (!cancelled) setFreeThreshold(Number(s.shipping_free_threshold ?? 100000))
+      } catch {
+        // ignore
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
   const isMarDelPlata = (shippingData.city || "").trim().toLowerCase().includes("mar del plata")
   const estimatedShipping = computeShipping(discountedSubtotal, {
     flat_rate: isMarDelPlata ? 10000 : 8000,
-    free_threshold: 100000,
+    free_threshold: freeThreshold,
   })
   // Tax only applies to card payments (Mercado Pago), not to bank transfers
   const estimatedTax = paymentMethod === "card" 

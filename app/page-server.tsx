@@ -6,6 +6,7 @@ import { getProductsAsync } from '@/lib/repo/products'
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getImageConfig } from '@/lib/imageConfig'
 
 export const revalidate = 3600 // Revalidar cada hora
 
@@ -112,7 +113,7 @@ export default async function Home() {
                         src={category.image}
                         alt={category.name}
                         fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        sizes={getImageConfig('categoryCard').sizes}
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
@@ -184,7 +185,7 @@ export default async function Home() {
                     src="/ciro-gif.gif"
                     alt="Busy Streetwear"
                     fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
+                    sizes={getImageConfig('hero').sizes}
                     className="object-cover"
                     unoptimized
                   />
@@ -234,8 +235,9 @@ export default async function Home() {
                     <Image
                       src={item.iconSrc}
                       alt={item.title}
-                      width={200}
-                      height={200}
+                      width={getImageConfig('socialIcon').width}
+                      height={getImageConfig('socialIcon').height}
+                      sizes={getImageConfig('socialIcon').sizes}
                       className="h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 lg:h-48 lg:w-48 rounded-full contrast-150 brightness-25 transition-transform duration-300 group-hover:scale-110"
                     />
                   </div>

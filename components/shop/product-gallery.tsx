@@ -4,6 +4,7 @@ import * as React from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { getImageConfig, normalizeImageUrl } from '@/lib/imageConfig'
 
 interface ProductGalleryProps {
   images: string[]
@@ -29,6 +30,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           alt={'Busy Pattern white, diseñado por @agus.mxlina'}
           fill
           className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+          sizes={getImageConfig('pattern').sizes}
         />
         <span className="text-muted-foreground">No image available</span>
       </div>
@@ -44,21 +46,24 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           alt={'Busy Pattern white, diseñado por @agus.mxlina'}
           fill
           className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+          sizes={getImageConfig('pattern').sizes}
         />
         <Image
           src={'/product-bg.jpg'}
           alt={productName}
           fill
           className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+          sizes={getImageConfig('pattern').sizes}
         />
         <Image
-          src={
+          src={normalizeImageUrl(
             images[currentImage] ||
             '/busy-streetwear.png'
-          }
+          )}
           alt={`${productName} - Image ${currentImage + 1}`}
           fill
           className="object-cover"
+          sizes={getImageConfig('productGallery').sizes}
           priority
         />
 
@@ -109,14 +114,16 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 alt={"Busy Pattern white, diseñado por @agus.mxlina"}
                 fill
                 className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+                sizes={getImageConfig('productThumbnail').sizes}
               />
               <Image
-                src={
+                src={normalizeImageUrl(
                   image || '/busy-streetwear.png'
-                }
+                )}
                 alt={`${productName} - Thumbnail ${index + 1}`}
                 fill
                 className="object-cover"
+                sizes={getImageConfig('productThumbnail').sizes}
               />
             </button>
           ))}

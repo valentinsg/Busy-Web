@@ -73,10 +73,39 @@ export const metadata: Metadata = {
     template: '%s - Busy Streetwear',
   },
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      // Android/Chrome
+      { rel: 'icon', type: 'image/png', sizes: '192x192', url: '/android-chrome-192x192.png' },
+      { rel: 'icon', type: 'image/png', sizes: '512x512', url: '/android-chrome-512x512.png' },
+      // Safari
+      { rel: 'mask-icon', url: '/safari-pinned-tab.svg', color: '#000000' },
+      // Microsoft Tiles
+      { rel: 'msapplication-TileImage', url: '/mstile-150x150.png' },
+      // PWA
+      { rel: 'manifest', url: '/site.webmanifest' },
+    ],
   },
+  // Configuración de Microsoft Tiles
+  other: {
+    'msapplication-TileColor': '#000000',
+    'msapplication-TileImage': '/mstile-150x150.png',
+    'msapplication-config': '/browserconfig.xml',
+    'theme-color': '#000000',
+    'apple-mobile-web-app-title': 'Busy Streetwear',
+    'application-name': 'Busy Streetwear',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+  },
+  manifest: '/site.webmanifest',
+  
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,
   },

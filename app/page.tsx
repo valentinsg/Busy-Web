@@ -8,8 +8,7 @@ export const revalidate = 3600 // Revalidar cada hora
 
 export default async function Home() {
   // Pre-fetch products on server for better LCP
-  const allProducts = await getProductsAsync().catch(() => [])
-  const featuredProducts = allProducts.slice(0, 4)
+  const featuredProducts = await getProductsAsync({ featuredOnly: true, sortBy: 'newest' }).then(list => list.slice(0,4)).catch(() => [])
 
   return (
     <div className="flex flex-col overflow-x-hidden">

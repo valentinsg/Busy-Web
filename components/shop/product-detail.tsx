@@ -11,6 +11,7 @@ import { AddToCart } from "@/components/shop/add-to-cart"
 import { ProductCard } from "@/components/shop/product-card"
 import type { Product } from "@/lib/types"
 import { formatPrice, formatRating } from "@/lib/format"
+import { getSettingsClient } from "@/lib/repo/settings"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -54,12 +55,26 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
   const [rating, setRating] = React.useState<string>("5")
   const [comment, setComment] = React.useState("")
   const [submitting, setSubmitting] = React.useState(false)
+  const [freeThreshold, setFreeThreshold] = React.useState<number>(100000)
 
   React.useEffect(() => {
     const list = getReviews(product.id)
     setReviews(list)
     setAvg(averageRating(product.id))
   }, [product.id])
+
+  React.useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const s = await getSettingsClient()
+        if (!cancelled) setFreeThreshold(Number(s.shipping_free_threshold ?? 100000))
+      } catch {
+        // ignore
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -212,7 +227,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                     <Truck className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <div className="font-medium font-heading">Envío gratis</div>
-                      <div className="text-sm text-muted-foreground font-body">En compras superiores a $80.000</div>
+                      <div className="text-sm text-muted-foreground font-body">En compras superiores a {formatPrice(freeThreshold)}</div>
                     </div>
                   </div>
                 )}

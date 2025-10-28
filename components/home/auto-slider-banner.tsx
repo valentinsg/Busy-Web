@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { useEffect, useState } from "react"
+import { getImageConfig } from "@/lib/imageConfig"
 
 // Usar imágenes estáticas locales en lugar de GIFs externos
 const images = [
@@ -43,7 +44,7 @@ export function AutoSliderBanner() {
             alt={`Banner ${index + 1}`}
             fill
             style={{ objectFit: "cover" }}
-            sizes="100vw"
+            sizes={getImageConfig('hero').sizes}
             priority={index === 0}
             loading={index === 0 ? "eager" : "lazy"}
             quality={90}
@@ -54,7 +55,14 @@ export function AutoSliderBanner() {
         className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center"
       >
         <motion.div>
-          <Image src="/busy-streetwear.png" alt="Busy Streetwear" width={325} height={325} priority />
+          <Image 
+            src="/busy-streetwear.png" 
+            alt="Busy Streetwear" 
+            width={325} 
+            height={325} 
+            sizes="325px"
+            priority 
+          />
         </motion.div>
         <motion.a
           href="/contact"

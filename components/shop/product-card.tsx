@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
 import { formatPrice, formatRating } from '@/lib/format'
 import { useCart } from '@/hooks/use-cart'
+import { getImageConfig, normalizeImageUrl } from '@/lib/imageConfig'
 import {
   Tooltip,
   TooltipContent,
@@ -236,17 +237,17 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
               alt={'Busy Pattern white, diseñado por @agus.mxlina'}
               fill
               className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
+              sizes={getImageConfig('pattern').sizes}
             />
             <Image
-              src={
+              src={normalizeImageUrl(
                 product.images[currentImageIndex] ||
                 '/busy-streetwear.png'
-              }
+              )}
               alt={product.name}
               fill
               className="object-cover"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
+              sizes={getImageConfig('productCard').sizes}
               priority={priority}
               loading={priority ? "eager" : "lazy"}
             />
@@ -403,6 +404,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
                                   width={16}
                                   height={16}
                                   className="opacity-95 shrink-0"
+                                  unoptimized
                                 />
                                 <div className="leading-snug opacity-90 text-sm">
                                   {formatSizeTooltip(String(product.sizes[0]))}
@@ -471,6 +473,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
                                           width={16}
                                           height={16}
                                           className="opacity-95 shrink-0"
+                                          unoptimized
                                         />
                                         <div className="leading-snug opacity-90 text-sm">
                                           {formatSizeTooltip(size)}

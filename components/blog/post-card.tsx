@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
+import { getImageConfig, normalizeImageUrl } from "@/lib/imageConfig"
 
 export interface PostCardData {
   slug: string
@@ -33,11 +34,12 @@ export default function PostCard({ post, aspectRatio = "4/3", showExcerpt = true
         <div className={`${ar} w-full overflow-hidden rounded-lg border bg-muted ring-1 ring-border transition-all duration-300 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.25)]`}>
           {post.cover ? (
             <Image
-              src={post.cover}
+              src={normalizeImageUrl(post.cover)}
               alt={post.coverAlt || post.title}
-              width={800}
-              height={aspectRatio === "16/9" ? 450 : aspectRatio === "1/1" ? 800 : 600}
+              width={getImageConfig('blogCard').width}
+              height={aspectRatio === "16/9" ? 466 : aspectRatio === "1/1" ? 828 : getImageConfig('blogCard').height}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+              sizes={getImageConfig('blogCard').sizes}
               loading="lazy"
             />
           ) : (

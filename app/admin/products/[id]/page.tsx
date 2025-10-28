@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast"
 import { getProductByIdAsync } from "@/lib/repo/products"
 import type { Product } from "@/lib/types"
 import { CategorySelector } from "@/components/admin/category-selector"
+import { COLOR_PALETTE } from "@/lib/color-utils"
+import { PREDEFINED_BENEFITS, buildBenefitsFromKeys } from "@/lib/benefits"
 
 // Format slug: lowercase and replace spaces with hyphens
 function formatSlug(value: string): string {
@@ -30,8 +32,10 @@ export default function EditProductPage({ params }: PageProps) {
     currency?: string
     images?: string[]
     colors?: string
+    selectedColors?: string[]
     sizes?: string
     tags?: string
+    featured?: boolean
     category?: string
     sku?: string
     stock?: number
@@ -39,6 +43,7 @@ export default function EditProductPage({ params }: PageProps) {
     imported?: boolean
     careInstructions?: string
     benefitsText?: string // one per line: Title|Subtitle
+    selectedBenefitKeys?: string[]
     badgeText?: string
     badgeVariant?: string
     discountPercentage?: number
@@ -102,6 +107,22 @@ export default function EditProductPage({ params }: PageProps) {
         if (!cancelled) {
           setProduct(p || null)
           if (p) {
+            // Split product benefits into predefined vs custom to prefill the form nicely
+            const rawBenefits: Array<{ title: string; subtitle?: string }> = Array.isArray((p as unknown as { benefits?: Array<{title:string; subtitle?:string}> }).benefits)
+              ? ((p as unknown as { benefits?: Array<{title:string; subtitle?:string}> }).benefits as Array<{title:string; subtitle?:string}>)
+              : []
+            const predefinedKeys = new Set(PREDEFINED_BENEFITS.map(b=>b.key))
+            const titleToKey = new Map(PREDEFINED_BENEFITS.map(b=>[b.title.toLowerCase(), b.key]))
+            const selectedKeys: string[] = []
+            const customLines: string[] = []
+            for (const b of rawBenefits) {
+              const k = titleToKey.get(b.title.toLowerCase())
+              if (k && predefinedKeys.has(k)) {
+                selectedKeys.push(k)
+              } else {
+                customLines.push(b.subtitle ? `${b.title}|${b.subtitle}` : b.title)
+              }
+            }
             setForm({
               id: p.id,
               name: p.name,
@@ -109,15 +130,18 @@ export default function EditProductPage({ params }: PageProps) {
               currency: p.currency,
               images: p.images,
               colors: p.colors.join(","),
+              selectedColors: Array.isArray(p.colors) ? p.colors : [],
               sizes: p.sizes.join(","),
               tags: (p.tags || []).join(","),
+              featured: Array.isArray(p.tags) ? p.tags.includes('featured') : false,
               category: p.category,
               sku: p.sku,
               stock: p.stock,
               description: p.description ?? "",
               imported: !!(p as unknown as { imported?: boolean }).imported,
               careInstructions: (p as unknown as { careInstructions?: string }).careInstructions || "",
-              benefitsText: Array.isArray((p as unknown as { benefits?: Array<{title:string; subtitle?:string}> }).benefits) ? ((p as unknown as { benefits?: Array<{title:string; subtitle?:string}> }).benefits as Array<{title:string; subtitle?:string}>).map(b=> b.subtitle? `${b.title}|${b.subtitle}`: b.title).join("\n") : "",
+              benefitsText: customLines.join("\n"),
+              selectedBenefitKeys: Array.from(new Set(selectedKeys)),
               badgeText: (p as unknown as { badgeText?: string }).badgeText || "",
               badgeVariant: (p as unknown as { badgeVariant?: string }).badgeVariant || "default",
               discountPercentage: (p as unknown as { discountPercentage?: number }).discountPercentage || 0,
@@ -192,23 +216,34 @@ export default function EditProductPage({ params }: PageProps) {
           return subtitle ? { title, subtitle } : { title }
         })
 
+      // Build from predefined selected keys
+      const predefined = buildBenefitsFromKeys(form.selectedBenefitKeys||[])
+      const combinedBenefits = [...predefined, ...benefits]
+
+      const baseTags = String(form.tags||"").split(",").map((s)=>s.trim()).filter(Boolean)
+      const tags = form.featured
+        ? Array.from(new Set([...baseTags, 'featured']))
+        : baseTags.filter((t)=>t!=='featured')
+
       const payload = {
         id: form.id,
         name: form.name,
         price: Number(form.price),
         currency: form.currency,
         images: form.images,
-        colors: String(form.colors).split(",").map((s)=>s.trim()).filter(Boolean),
+        colors: (form.selectedColors && form.selectedColors.length > 0)
+          ? Array.from(new Set(form.selectedColors))
+          : String(form.colors).split(",").map((s)=>s.trim()).filter(Boolean),
         sizes: uniqueSizes,
         measurements_by_size,
-        tags: String(form.tags||"").split(",").map((s)=>s.trim()).filter(Boolean),
+        tags,
         category: form.category,
         sku: form.sku,
         stock: Number(form.stock) || 0,
         description: form.description || "",
         imported: !!form.imported,
         care_instructions: form.careInstructions || undefined,
-        benefits: benefits.length ? benefits : undefined,
+        benefits: combinedBenefits.length ? combinedBenefits : undefined,
         badge_text: form.badgeText?.trim() || null,
         badge_variant: form.badgeVariant || "default",
         discount_percentage: form.discountPercentage ? Math.floor(Number(form.discountPercentage)) : null,
@@ -307,18 +342,79 @@ export default function EditProductPage({ params }: PageProps) {
             <input id="imported" type="checkbox" checked={!!form.imported} onChange={(e)=>setForm({...form, imported: e.target.checked})} />
             <label htmlFor="imported" className="text-sm">Producto importado</label>
           </div>
-          <label className="text-sm">Colores (coma)
-            <input value={form.colors||""} onChange={(e)=>setForm({...form, colors: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
-          </label>
+          <div className="text-sm md:col-span-2">
+            <div className="mb-1">Colores</div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2">
+              {COLOR_PALETTE.map((c)=>{
+                const checked = (form.selectedColors||[]).includes(c.key)
+                return (
+                  <label key={c.key} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e)=>{
+                        const on = e.target.checked
+                        setForm((f)=>({
+                          ...f,
+                          selectedColors: on
+                            ? Array.from(new Set([...(f.selectedColors||[]), c.key]))
+                            : (f.selectedColors||[]).filter((k)=>k!==c.key)
+                        }))
+                      }}
+                    />
+                    <span className="flex items-center gap-2 text-xs">
+                      <span className="w-4 h-4 rounded-full border border-border inline-block" style={{ backgroundColor: c.hex }} />
+                      {c.name}
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+            <div className="text-xs text-muted-foreground mb-1">Opcional: ingresar manual (se usará solo si no seleccionás de la paleta)</div>
+            <input value={form.colors||""} onChange={(e)=>setForm({...form, colors: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" placeholder="negro, crema, #e8dccc" />
+          </div>
           <label className="text-sm">Talles (coma)
             <input value={form.sizes||""} onChange={(e)=>setForm({...form, sizes: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>
           <label className="text-sm md:col-span-2">Tags (coma)
             <input value={form.tags||""} onChange={(e)=>setForm({...form, tags: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" placeholder="featured,pin,no-care,no-free-shipping,no-returns,no-quality,no-default-features" />
           </label>
+          <div className="md:col-span-2 flex items-center gap-2">
+            <input id="featured" type="checkbox" checked={!!form.featured} onChange={(e)=>setForm({...form, featured: e.target.checked})} />
+            <label htmlFor="featured" className="text-sm">Mostrar en Novedades (featured)</label>
+          </div>
           <label className="text-sm md:col-span-2">Cuidados (texto)
             <textarea value={form.careInstructions||""} onChange={(e)=>setForm({...form, careInstructions: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} placeholder={"• Lavar a máquina con agua fría..."} />
           </label>
+          <div className="md:col-span-2 border rounded p-3">
+            <div className="font-medium text-sm mb-2">Beneficios predefinidos</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {PREDEFINED_BENEFITS.map((b)=>{
+                const checked = (form.selectedBenefitKeys||[]).includes(b.key)
+                return (
+                  <label key={b.key} className="flex items-start gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e)=>{
+                        const on = e.target.checked
+                        setForm((f)=>({
+                          ...f,
+                          selectedBenefitKeys: on
+                            ? Array.from(new Set([...(f.selectedBenefitKeys||[]), b.key]))
+                            : (f.selectedBenefitKeys||[]).filter((k)=>k!==b.key)
+                        }))
+                      }}
+                    />
+                    <span>
+                      <span className="font-medium">{b.title}</span>
+                      {b.subtitle && <span className="block text-muted-foreground">{b.subtitle}</span>}
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+          </div>
           <label className="text-sm md:col-span-2">Beneficios (uno por línea, usar &quot;Título|Subtítulo&quot; opcional)
             <textarea value={form.benefitsText||""} onChange={(e)=>setForm({...form, benefitsText: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} placeholder={"Envío gratis|En compras superiores a $80.000\nDevoluciones fáciles|Política de 30 días"} />
           </label>
