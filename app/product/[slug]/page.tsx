@@ -81,6 +81,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
     relatedProducts = sameCategory.filter((p) => p.id !== currentProduct.id).slice(0, 4)
   } catch {}
 
+  // Fallback: if there are not enough related items, fill with newest products
+  if (!relatedProducts || relatedProducts.length === 0) {
+    try {
+      const newest = await getProductsAsync({})
+      relatedProducts = newest.filter((p) => p.id !== currentProduct.id).slice(0, 4)
+    } catch {}
+  }
+
   return (
     <div className="container px-4 py-6 pt-20 sm:py-8 sm:pt-28 font-body">
       {/* JSON-LD Product */}

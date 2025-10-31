@@ -121,6 +121,13 @@ export const useCart = create<CartStore>()(
 
       clearCart: () => {
         set({ items: [], coupon: null })
+        // Force immediate sync to localStorage
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem('busy-cart-storage', JSON.stringify({
+            state: { items: [], coupon: null, isOpen: false, promotions: get().promotions },
+            version: 0
+          }))
+        }
       },
 
       openCart: () => {

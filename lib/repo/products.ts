@@ -2,6 +2,22 @@ import { supabase } from "@/lib/supabase/client"
 import type { Product, SizeMeasurement, BenefitItem } from "@/lib/types"
 
 function mapRowToProduct(row: unknown, stockBySize?: Record<string, number>): Product {
+  // Build sizes from multiple sources to avoid losing variants
+  const sizesFromRow = ((row as { sizes?: string[] }).sizes ?? []) as string[]
+  const sizesFromStock = stockBySize ? Object.keys(stockBySize) : []
+  const sizesFromMeasurements = (() => {
+    const raw = (row as { measurements_by_size?: unknown }).measurements_by_size
+    if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+      return Object.keys(raw as Record<string, unknown>)
+    }
+    return [] as string[]
+  })()
+  const mergedSizes = Array.from(new Set([...
+    sizesFromRow,
+    ...sizesFromStock,
+    ...sizesFromMeasurements,
+  ].filter(Boolean)))
+
   return {
     id: (row as { id: string }).id,
     name: (row as { name: string }).name,
@@ -9,7 +25,7 @@ function mapRowToProduct(row: unknown, stockBySize?: Record<string, number>): Pr
     currency: (row as { currency: string }).currency,
     images: (row as { images: string[] }).images ?? [],
     colors: (row as { colors: string[] }).colors ?? [],
-    sizes: (row as { sizes: string[] }).sizes ?? [],
+    sizes: mergedSizes,
     measurementsBySize: (() => {
       const raw = (row as { measurements_by_size?: unknown }).measurements_by_size
       if (raw && typeof raw === "object" && !Array.isArray(raw)) {

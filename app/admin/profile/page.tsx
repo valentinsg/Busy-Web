@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = 'force-dynamic'
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -178,6 +180,36 @@ export default function ProfilePage() {
       </div>
 
       <div className="space-y-6">
+        {/* Account Info Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Información de Cuenta</CardTitle>
+            <CardDescription>
+              Detalles de tu cuenta de autor
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs text-muted-foreground">Email</Label>
+                <p className="text-sm font-medium">{profile.email || "No disponible"}</p>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Miembro desde</Label>
+                <p className="text-sm font-medium">
+                  {profile.created_at 
+                    ? new Date(profile.created_at).toLocaleDateString('es-AR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })
+                    : "No disponible"}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Avatar Section */}
         <Card>
           <CardHeader>

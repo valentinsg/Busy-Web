@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import type { Product } from "@/lib/types"
 import { useCart } from "@/hooks/use-cart"
 import { capitalize } from "@/lib/format"
+import { useTranslations } from "@/hooks/use-translations"
 
 interface AddToCartProps {
   product: Product
@@ -15,17 +16,42 @@ interface AddToCartProps {
   sizeLabel?: string
 }
 
-export function AddToCart({ product, className = "", sizeLabel = "Size" }: AddToCartProps) {
+export function AddToCart({ product, className = "", sizeLabel }: AddToCartProps) {
+  const t = useTranslations('product')
   const [selectedSize, setSelectedSize] = React.useState(product.sizes[0])
   const [selectedColor, setSelectedColor] = React.useState(product.colors[0])
   const [quantity, setQuantity] = React.useState(1)
 
   const { addItem, getItemCount, openCart } = useCart()
+  
+  // Determine label based on product type or use provided sizeLabel
+  const effectiveSizeLabel = sizeLabel || (product.tags?.includes('pin') || product.tags?.includes('accessory') ? t('type') : t('size'))
 
   const currentItemCount = getItemCount(product.id, selectedSize, selectedColor)
 
   const handleAddToCart = () => {
     addItem(product, selectedSize, selectedColor, quantity)
+    try {
+      if (typeof window !== "undefined" && (window as any).dataLayer) {
+        ;(window as any).dataLayer.push({
+          event: "add_to_cart",
+          ecommerce: {
+            currency: product.currency || "ARS",
+            value: Number((product.price * quantity).toFixed(2)),
+            items: [
+              {
+                item_id: product.id,
+                item_name: product.name,
+                item_category: product.category,
+                price: product.price,
+                quantity,
+                item_variant: `${selectedSize}|${selectedColor}`,
+              },
+            ],
+          },
+        })
+      }
+    } catch {}
     openCart()
   }
 
@@ -57,7 +83,7 @@ export function AddToCart({ product, className = "", sizeLabel = "Size" }: AddTo
       {/* Size Selection */}
       {product.sizes.length > 0 && (
         <div className="space-y-2">
-          <label className="text-sm font-medium">{sizeLabel}</label>
+          <label className="text-sm font-medium">{effectiveSizeLabel}</label>
           <Select
             value={selectedSize}
             onValueChange={(value) => {
@@ -68,7 +94,7 @@ export function AddToCart({ product, className = "", sizeLabel = "Size" }: AddTo
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[300px] overflow-y-auto">
               {product.sizes.map((size) => {
                 const s = getSizeStock(size)
                 const disabled = s === 0
@@ -86,7 +112,7 @@ export function AddToCart({ product, className = "", sizeLabel = "Size" }: AddTo
       {/* Color Selection */}
       {product.colors.length > 1 && (
         <div className="space-y-2">
-          <label className="text-sm font-medium">Color</label>
+          <label className="text-sm font-medium">{t('color')}</label>
           <div className="flex flex-wrap gap-2">
             {product.colors.map((color) => (
               <button
@@ -122,7 +148,7 @@ export function AddToCart({ product, className = "", sizeLabel = "Size" }: AddTo
 
       {/* Quantity Selection */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Quantity</label>
+        <label className="text-sm font-medium">{t('quantity')}</label>
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="icon" onClick={decrementQuantity} disabled={quantity <= 1}>
             <Minus className="h-4 w-4" />
@@ -142,12 +168,12 @@ export function AddToCart({ product, className = "", sizeLabel = "Size" }: AddTo
       )}
 
       {/* Current Cart Count */}
-      {currentItemCount > 0 && <div className="text-sm text-muted-foreground">{currentItemCount} in cart</div>}
+      {currentItemCount > 0 && <div className="text-sm text-muted-foreground">{currentItemCount} {t('in_cart')}</div>}
 
       {/* Add to Cart Button */}
       <Button onClick={handleAddToCart} disabled={isOutOfStock} className="w-full" size="lg">
         <ShoppingCart className="mr-2 h-5 w-5" />
-        {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+        {isOutOfStock ? t('out_of_stock') : t('add_to_cart')}
       </Button>
     </div>
   )

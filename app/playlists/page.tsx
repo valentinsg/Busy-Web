@@ -6,6 +6,8 @@ import { Music2, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Playlists',
   description: 'Con nuestras playlists queremos compartir lo que mas nos gusta de la cultura urbana. Actualizadas y curadas semanalmente, vamos a ayudar y posicionar artistas emergentes desde nuestro espacio.',

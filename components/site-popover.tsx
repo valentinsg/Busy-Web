@@ -173,7 +173,14 @@ export default function SitePopover({ section }: { section?: string }) {
       
       if (res.ok) {
         setEmailSubmitted(true)
-        setSubmitMessage(data.show_newsletter ? "¡Gracias por suscribirte!" : "¡Código desbloqueado!")
+        // Manejar diferentes respuestas de la API
+        let message = data.show_newsletter ? "¡Gracias por suscribirte!" : "¡Código desbloqueado!"
+        if (json?.already) {
+          message = "Ya estás suscrito. " + (data.discount_code ? "Aquí está tu código:" : "")
+        } else if (json?.upgraded) {
+          message = "¡Bienvenido de vuelta! " + (data.discount_code ? "Aquí está tu código:" : "")
+        }
+        setSubmitMessage(message)
         setShowConfetti(true)
         setTimeout(() => setShowConfetti(false), 3000)
       } else {
@@ -318,6 +325,9 @@ export default function SitePopover({ section }: { section?: string }) {
                     )}
                   </button>
                 </div>
+                <p className="font-body text-xs text-zinc-400 text-center sm:text-left">
+                  Guardalo bien. Podés copiarlo ahora y usarlo en tu compra.
+                </p>
               </div>
             )}
 

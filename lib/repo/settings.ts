@@ -29,7 +29,23 @@ export async function getSettingsClient(): Promise<ShopSettings> {
 
 export async function upsertSettingsServer(values: ShopSettings) {
   const sb = getServiceClient()
-  // ensure singleton by upserting into first row
-  const { error } = await sb.from("shop_settings").upsert({ id: 1, ...values }, { onConflict: "id" })
-  if (error) throw error
+  // Update existing row if present; otherwise insert a new one (avoid explicit id for identity column)
+  const { data: existing, error: selectError } = await sb
+    .from("shop_settings")
+    .select("id")
+    .limit(1)
+    .maybeSingle()
+  if (selectError) throw selectError
+  if (existing?.id) {
+    const { error: updateError } = await sb
+      .from("shop_settings")
+      .update(values)
+      .eq("id", existing.id)
+    if (updateError) throw updateError
+  } else {
+    const { error: insertError } = await sb
+      .from("shop_settings")
+      .insert(values)
+    if (insertError) throw insertError
+  }
 }

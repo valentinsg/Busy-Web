@@ -255,11 +255,14 @@ function mapDbToAuthor(row: Record<string, unknown>): Author {
   return {
     id: row.id as string,
     name: row.name as string,
+    email: row.email as string | undefined,
     avatar: row.avatar_url as string | undefined,
     instagram: row.instagram as string | undefined,
     twitter: row.twitter as string | undefined,
     linkedin: row.linkedin as string | undefined,
     medium: row.medium as string | undefined,
     bio: row.bio as string | undefined,
+    created_at: row.created_at as string | undefined,
+    updated_at: row.updated_at as string | undefined,
   }
 }

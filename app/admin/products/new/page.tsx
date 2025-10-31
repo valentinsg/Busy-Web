@@ -3,100 +3,64 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
-import Image from "next/image"
-import { CategorySelector } from "@/components/admin/category-selector"
-import { PREDEFINED_BENEFITS, buildBenefitsFromKeys } from "@/lib/benefits"
-import { COLOR_PALETTE } from "@/lib/color-utils"
-
-// Format slug: lowercase and replace spaces with hyphens
-function formatSlug(value: string): string {
-  return value.toLowerCase().replace(/\s+/g, '-')
-}
+import { useToast } from "@/hooks/use-toast"
+import { ProductForm, type ProductFormData, type SizeRow } from "@/components/admin/product-form"
+import { buildBenefitsFromKeys } from "@/lib/benefits"
 
 export default function NewProductPage() {
+  const { toast } = useToast()
   const router = useRouter()
-  const [form, setForm] = React.useState({
+  const [saving, setSaving] = React.useState(false)
+
+  const initialData: ProductFormData = {
     id: "",
     name: "",
     price: 0,
     currency: "USD",
+    images: [],
+    colors: "",
+    selectedColors: [],
+    sizes: "",
+    tags: "",
+    featured: false,
     category: "",
     sku: "",
     stock: 0,
     description: "",
-    colors: "",
-    selectedColors: [] as string[],
-    sizes: "",
-    images: [] as string[],
-    tags: "",
-    featured: false,
     imported: false,
     careInstructions: "",
     benefitsText: "",
-    selectedBenefitKeys: [] as string[],
+    selectedBenefitKeys: [],
     badgeText: "",
     badgeVariant: "default",
     discountPercentage: 0,
     discountActive: false,
-  })
-  // Dynamic size rows for per-size stock and measurements
-  const [sizeRows, setSizeRows] = React.useState<
-    Array<{
-      size: string
-      chest?: number
-      length?: number
-      sleeve?: number
-      waist?: number
-      hip?: number
-      stock?: number
-    }>
-  >([])
-  const [uploading, setUploading] = React.useState(false)
-  const [saving, setSaving] = React.useState(false)
-  const [error, setError] = React.useState<string | null>(null)
-
-  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || !files.length) return
-    setUploading(true)
-    setError(null)
-    try {
-      const { data: session } = await supabase.auth.getSession()
-      const token = session.session?.access_token
-      if (!token) throw new Error("No auth token")
-      const uploaded: string[] = []
-      for (const file of Array.from(files)) {
-        const fd = new FormData()
-        fd.append("file", file)
-        const res = await fetch("/api/admin/upload", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: fd,
-        })
-        const json = await res.json()
-        if (!res.ok || !json.ok) throw new Error(json.error || "Upload failed")
-        uploaded.push(json.url as string)
-      }
-      setForm((f) => ({ ...f, images: [...f.images, ...uploaded] }))
-    } catch (e: unknown) {
-      setError(e?.toString() || String(e))
-    } finally {
-      setUploading(false)
-    }
   }
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (formData: ProductFormData, sizeRows: SizeRow[]) => {
     setSaving(true)
-    setError(null)
     try {
-      if (!form.id) throw new Error("Debes definir un ID único (slug)")
+      if (!formData.id) throw new Error("Debes definir un ID único (slug)")
       const { data: session } = await supabase.auth.getSession()
       const token = session.session?.access_token
       if (!token) throw new Error("No auth token")
-      // Build sizes, measurements_by_size and stockBySize from table if provided
-      const tableSizes = sizeRows.map((r) => r.size).filter(Boolean)
-      const uniqueSizes = Array.from(new Set((tableSizes.length ? tableSizes : form.sizes.split(",")).map((s) => s.trim()).filter(Boolean)))
+      
+      // Build sizes/measurements from table rows
+      const uniqueSizes = Array.from(
+        new Set(
+          (
+            String(formData.sizes || "")
+              .split(",")
+              .map((s: string) => s.trim())
+              .filter(Boolean).length
+              ? String(formData.sizes || "").split(",")
+              : sizeRows.map((r) => r.size)
+          )
+            .map((s: string) => s.trim())
+            .filter(Boolean)
+        )
+      )
+
       const measurements_by_size = sizeRows.length
         ? Object.fromEntries(
             sizeRows
@@ -104,7 +68,7 @@ export default function NewProductPage() {
               .map((r) => [
                 r.size,
                 {
-                  unit: "cm",
+                  unit: 'cm',
                   ...(typeof r.chest === 'number' ? { chest: r.chest } : {}),
                   ...(typeof r.length === 'number' ? { length: r.length } : {}),
                   ...(typeof r.sleeve === 'number' ? { sleeve: r.sleeve } : {}),
@@ -114,54 +78,63 @@ export default function NewProductPage() {
               ])
           )
         : undefined
+
       const stockBySize = sizeRows.length
-        ? Object.fromEntries(sizeRows.filter((r) => r.size && typeof r.stock === 'number').map((r) => [r.size, Number(r.stock)]))
+        ? Object.fromEntries(
+            sizeRows
+              .filter((r) => r.size && typeof r.stock === 'number')
+              .map((r) => [r.size, Number(r.stock)])
+          )
         : undefined
 
-      // Parse benefits text lines -> array
-      const benefits = String(form.benefitsText||"")
+      // Parse benefits
+      const benefits = String(formData.benefitsText || "")
         .split("\n")
-        .map((l)=>l.trim())
+        .map((l) => l.trim())
         .filter(Boolean)
-        .map((l)=>{
-          const [title, subtitle] = l.split("|").map(s=>s.trim())
+        .map((l) => {
+          const [title, subtitle] = l.split("|").map((s) => s.trim())
           return subtitle ? { title, subtitle } : { title }
         })
 
       // Build from predefined selected keys
-      const predefined = buildBenefitsFromKeys(form.selectedBenefitKeys)
+      const predefined = buildBenefitsFromKeys(formData.selectedBenefitKeys || [])
       const combinedBenefits = [...predefined, ...benefits]
 
-      const baseTags = form.tags.split(",").map((s) => s.trim()).filter(Boolean)
-      const tags = form.featured
+      const baseTags = (formData.tags || "").split(",").map((s) => s.trim()).filter(Boolean)
+      const tags = formData.featured
         ? Array.from(new Set([...baseTags, "featured"]))
-        : baseTags.filter((t)=>t!=="featured")
+        : baseTags.filter((t) => t !== "featured")
+
+      // Calculate total stock from size rows
+      const totalStock = sizeRows.reduce((sum, row) => sum + (row.stock || 0), 0)
 
       const payload = {
-        id: form.id,
-        name: form.name,
-        price: Number(form.price),
-        currency: form.currency,
-        images: form.images,
-        colors: (form.selectedColors && form.selectedColors.length > 0)
-          ? Array.from(new Set(form.selectedColors))
-          : form.colors.split(",").map((s) => s.trim()).filter(Boolean),
+        id: formData.id,
+        name: formData.name,
+        price: Number(formData.price) || 0,
+        currency: formData.currency || "USD",
+        images: formData.images || [],
+        colors: (formData.selectedColors && formData.selectedColors.length > 0)
+          ? Array.from(new Set(formData.selectedColors))
+          : (formData.colors || "").split(",").map((s) => s.trim()).filter(Boolean),
         sizes: uniqueSizes,
         measurements_by_size,
-        category: form.category,
-        sku: form.sku,
-        stock: Number(form.stock) || 0,
-        description: form.description || "",
+        category: formData.category || null,
+        sku: formData.sku || "",
+        stock: totalStock, // Use calculated total from size rows
+        description: formData.description || "",
         tags,
-        imported: !!form.imported,
-        care_instructions: form.careInstructions || undefined,
+        imported: !!formData.imported,
+        care_instructions: formData.careInstructions || undefined,
         benefits: combinedBenefits.length ? combinedBenefits : undefined,
-        badge_text: form.badgeText?.trim() || null,
-        badge_variant: form.badgeVariant || "default",
-        discount_percentage: form.discountPercentage ? Math.floor(Number(form.discountPercentage)) : null,
-        discount_active: !!form.discountActive,
+        badge_text: formData.badgeText?.trim() || null,
+        badge_variant: formData.badgeVariant || "default",
+        discount_percentage: formData.discountPercentage ? Math.floor(Number(formData.discountPercentage)) : null,
+        discount_active: !!formData.discountActive,
         stockBySize,
       }
+
       const res = await fetch("/api/admin/products", {
         method: "POST",
         headers: {
@@ -170,11 +143,25 @@ export default function NewProductPage() {
         },
         body: JSON.stringify(payload),
       })
+      
       const json = await res.json()
-      if (!res.ok || !json.ok) throw new Error(json.error || "Error al guardar")
-      router.replace("/admin/products")
+      if (!res.ok || !json.ok) {
+        throw new Error(json.error || "Error al guardar el producto")
+      }
+      
+      toast({
+        title: "Producto creado",
+        description: `"${formData.name}" ha sido creado exitosamente`,
+      })
+      
+      router.push("/admin/products")
     } catch (e: unknown) {
-      setError(e?.toString() || String(e))
+      const message = e instanceof Error ? e.message : String(e)
+      toast({
+        title: "Error al guardar",
+        description: message,
+        variant: "destructive",
+      })
     } finally {
       setSaving(false)
     }
@@ -183,255 +170,13 @@ export default function NewProductPage() {
   return (
     <div className="space-y-6">
       <h2 className="font-heading text-xl font-semibold">Nuevo producto</h2>
-      <form onSubmit={onSubmit} className="space-y-4 max-w-2xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="text-sm">ID (slug)
-            <input value={form.id} onChange={(e)=>setForm({...form, id: formatSlug(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" required />
-          </label>
-          <label className="text-sm">SKU
-            <input value={form.sku} onChange={(e)=>setForm({...form, sku: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />
-          </label>
-          <label className="text-sm md:col-span-2">Nombre
-            <input value={form.name} onChange={(e)=>setForm({...form, name: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />
-          </label>
-          <label className="text-sm">Precio
-            <input type="number" value={form.price} onChange={(e)=>setForm({...form, price: Number(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" required />
-          </label>
-          <label className="text-sm">Moneda
-            <input value={form.currency} onChange={(e)=>setForm({...form, currency: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
-          </label>
-          <CategorySelector
-            value={form.category}
-            onChange={(value) => setForm({...form, category: value})}
-            required
-          />
-          <label className="text-sm">Stock
-            <input type="number" value={form.stock} onChange={(e)=>setForm({...form, stock: Number(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" />
-          </label>
-          <label className="text-sm md:col-span-2">Descripción
-            <textarea value={form.description} onChange={(e)=>setForm({...form, description: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} />
-          </label>
-          <div className="text-sm">
-            <div className="mb-1">Colores</div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2">
-              {COLOR_PALETTE.map((c)=>{
-                const checked = (form.selectedColors||[]).includes(c.key)
-                return (
-                  <label key={c.key} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={(e)=>{
-                        const on = e.target.checked
-                        setForm((f)=>({
-                          ...f,
-                          selectedColors: on
-                            ? Array.from(new Set([...(f.selectedColors||[]), c.key]))
-                            : (f.selectedColors||[]).filter((k)=>k!==c.key)
-                        }))
-                      }}
-                    />
-                    <span className="flex items-center gap-2 text-xs">
-                      <span className="w-4 h-4 rounded-full border border-border inline-block" style={{ backgroundColor: c.hex }} />
-                      {c.name}
-                    </span>
-                  </label>
-                )
-              })}
-            </div>
-            <div className="text-xs text-muted-foreground mb-1">Opcional: ingresar manual (se usará solo si no seleccionás de la paleta)</div>
-            <input value={form.colors} onChange={(e)=>setForm({...form, colors: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" placeholder="negro, crema, #e8dccc" />
-          </div>
-          <label className="text-sm">Talles (coma)
-            <input value={form.sizes} onChange={(e)=>setForm({...form, sizes: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" />
-          </label>
-          <div className="md:col-span-2 flex items-center gap-2">
-            <input id="imported" type="checkbox" checked={!!form.imported} onChange={(e)=>setForm({...form, imported: e.target.checked})} />
-            <label htmlFor="imported" className="text-sm">Producto importado</label>
-          </div>
-          <label className="text-sm md:col-span-2">Tags (coma)
-            <input value={form.tags} onChange={(e)=>setForm({...form, tags: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" placeholder="featured,pin,no-care,no-free-shipping,no-returns,no-quality,no-default-features" />
-          </label>
-          <div className="md:col-span-2 flex items-center gap-2">
-            <input id="featured" type="checkbox" checked={!!form.featured} onChange={(e)=>setForm({...form, featured: e.target.checked})} />
-            <label htmlFor="featured" className="text-sm">Mostrar en Novedades (featured)</label>
-          </div>
-          <label className="text-sm md:col-span-2">Cuidados (texto)
-            <textarea value={form.careInstructions} onChange={(e)=>setForm({...form, careInstructions: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} placeholder={"• Lavar a máquina con agua fría..."} />
-          </label>
-          <div className="md:col-span-2 border rounded p-3">
-            <div className="font-medium text-sm mb-2">Beneficios predefinidos</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {PREDEFINED_BENEFITS.map((b)=>{
-                const checked = form.selectedBenefitKeys.includes(b.key)
-                return (
-                  <label key={b.key} className="flex items-start gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={(e)=>{
-                        const on = e.target.checked
-                        setForm((f)=>({
-                          ...f,
-                          selectedBenefitKeys: on
-                            ? Array.from(new Set([...(f.selectedBenefitKeys||[]), b.key]))
-                            : (f.selectedBenefitKeys||[]).filter((k)=>k!==b.key)
-                        }))
-                      }}
-                    />
-                    <span>
-                      <span className="font-medium">{b.title}</span>
-                      {b.subtitle && <span className="block text-muted-foreground">{b.subtitle}</span>}
-                    </span>
-                  </label>
-                )
-              })}
-            </div>
-          </div>
-          <label className="text-sm md:col-span-2">Beneficios (uno por línea, usar &quot;Título|Subtítulo&quot; opcional)
-            <textarea value={form.benefitsText} onChange={(e)=>setForm({...form, benefitsText: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} placeholder={"Envío gratis|En compras superiores a $100.000\nGarantía de calidad|Materiales de primera calidad\nProducido en Argentina"} />
-          </label>
-
-          {/* Badge and Discount Section */}
-          <div className="md:col-span-2 border-t pt-4 mt-4">
-            <h3 className="font-heading font-medium mb-3 text-base">Badge y Descuentos</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label className="text-sm">
-                Texto del Badge (ej: &quot;2x1&quot;, &quot;NUEVO&quot;, &quot;OFERTA&quot;)
-                <input value={form.badgeText} onChange={(e)=>setForm({...form, badgeText: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" placeholder="Producto Busy" />
-              </label>
-              <label className="text-sm">
-                Estilo del Badge
-                <select value={form.badgeVariant} onChange={(e)=>setForm({...form, badgeVariant: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent">
-                  <option value="default">Default</option>
-                  <option value="secondary">Secondary (Gris)</option>
-                  <option value="destructive">Destructive (Rojo)</option>
-                  <option value="outline">Outline</option>
-                </select>
-              </label>
-              <label className="text-sm">
-                Porcentaje de Descuento (0-100)
-                <input type="number" min="0" max="100" value={form.discountPercentage} onChange={(e)=>setForm({...form, discountPercentage: Number(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" />
-              </label>
-              <div className="flex items-center gap-2">
-                <input id="discountActive" type="checkbox" checked={!!form.discountActive} onChange={(e)=>setForm({...form, discountActive: e.target.checked})} />
-                <label htmlFor="discountActive" className="text-sm">Descuento activo</label>
-              </div>
-              <p className="text-xs text-muted-foreground md:col-span-2">💡 El badge se mostrará siempre si tiene texto. El descuento solo se aplicará si está activo y tiene un porcentaje mayor a 0.</p>
-            </div>
-          </div>
-
-          <div className="md:col-span-2">
-            <h3 className="font-heading font-medium mb-2">Talles, stock y medidas</h3>
-            <div className="overflow-x-auto border rounded">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-muted">
-                    <th className="p-2 text-left">Talle</th>
-                    <th className="p-2 text-left">Stock</th>
-                    <th className="p-2 text-left">Pecho (cm)</th>
-                    <th className="p-2 text-left">Largo (cm)</th>
-                    <th className="p-2 text-left">Manga (cm)</th>
-                    <th className="p-2 text-left">Cintura (cm)</th>
-                    <th className="p-2 text-left">Cadera (cm)</th>
-                    <th className="p-2"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sizeRows.map((row, idx) => (
-                    <tr key={idx} className="border-t border-border">
-                      <td className="p-2">
-                        <input
-                          value={row.size}
-                          onChange={(e)=>{
-                            const v = e.target.value
-                            setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, size: v }: r))
-                          }}
-                          className="w-24 border rounded px-2 py-1 bg-transparent"
-                          placeholder="S"
-                        />
-                      </td>
-                      <td className="p-2">
-                        <input type="number" value={row.stock ?? 0} onChange={(e)=>{
-                          const v = Number(e.target.value)
-                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, stock: v }: r))
-                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                      </td>
-                      <td className="p-2">
-                        <input type="number" value={row.chest ?? ''} onChange={(e)=>{
-                          const v = e.target.value === '' ? undefined : Number(e.target.value)
-                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, chest: v }: r))
-                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                      </td>
-                      <td className="p-2">
-                        <input type="number" value={row.length ?? ''} onChange={(e)=>{
-                          const v = e.target.value === '' ? undefined : Number(e.target.value)
-                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, length: v }: r))
-                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                      </td>
-                      <td className="p-2">
-                        <input type="number" value={row.sleeve ?? ''} onChange={(e)=>{
-                          const v = e.target.value === '' ? undefined : Number(e.target.value)
-                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, sleeve: v }: r))
-                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                      </td>
-                      <td className="p-2">
-                        <input type="number" value={row.waist ?? ''} onChange={(e)=>{
-                          const v = e.target.value === '' ? undefined : Number(e.target.value)
-                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, waist: v }: r))
-                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                      </td>
-                      <td className="p-2">
-                        <input type="number" value={row.hip ?? ''} onChange={(e)=>{
-                          const v = e.target.value === '' ? undefined : Number(e.target.value)
-                          setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, hip: v }: r))
-                        }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                      </td>
-                      <td className="p-2">
-                        <button type="button" className="text-sm underline" onClick={()=>setSizeRows(rows=>rows.filter((_,i)=>i!==idx))}>Quitar</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-2 flex gap-2">
-              <button type="button" className="rounded px-3 py-1 border" onClick={()=>setSizeRows(rows=>[...rows, { size: "" }])}>Agregar fila</button>
-              <button type="button" className="rounded px-3 py-1 border" onClick={()=>{
-                // Prefill typical S-XL
-                setSizeRows([
-                  { size: 'S' },
-                  { size: 'M' },
-                  { size: 'L' },
-                  { size: 'XL' },
-                ])
-              }}>Prefill S-XL</button>
-            </div>
-          </div>
-          <div className="md:col-span-2">
-            <label className="text-sm">Imágenes
-              <input type="file" accept="image/*" multiple onChange={onFileChange} className="block mt-1" />
-            </label>
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              {form.images.map((url) => (
-                <Image
-                  key={url}
-                  src={url}
-                  alt="img"
-                  width={200}
-                  height={96}
-                  className="w-full h-24 object-cover rounded"
-                />
-              ))}
-            </div>
-            {uploading && <p className="text-sm text-muted-foreground mt-1">Subiendo...</p>}
-          </div>
-        </div>
-        {error && <p className="text-sm text-red-500">{error}</p>}
-        <button type="submit" className="rounded px-3 py-2 bg-black text-white disabled:opacity-60" disabled={saving}>
-          {saving ? "Guardando..." : "Guardar"}
-        </button>
-      </form>
+      <ProductForm 
+        initialData={initialData}
+        initialSizeRows={[]}
+        onSubmit={handleSubmit}
+        submitLabel="Guardar"
+        isSubmitting={saving}
+      />
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { useCart } from "@/hooks/use-cart"
 import type { CartItemInput } from "@/lib/checkout/types"
+import { trackPurchase } from "@/lib/analytics/ecommerce"
 
 export default function PayWithTransfer(props: {
   items: CartItemInput[]
@@ -70,6 +71,23 @@ export default function PayWithTransfer(props: {
       // Limpiar el carrito después de confirmar la orden
       clearCart()
       
+      // Track purchase for bank transfer (status: pending until verified)
+      try {
+        const already = typeof window !== 'undefined' && window.sessionStorage.getItem(`purchase_tracked_${data.order_id}`)
+        if (!already) {
+          trackPurchase({
+            transaction_id: String(data.order_id),
+            currency: 'ARS',
+            value: Number(data.total || 0),
+            tax: 0,
+            shipping: Number(props.shippingCost ?? 0),
+            coupon: props.couponCode ?? null,
+            items: [],
+          })
+          try { window.sessionStorage.setItem(`purchase_tracked_${data.order_id}`, '1') } catch {}
+        }
+      } catch {}
+
       // Redirigir a página de confirmación con instrucciones de transferencia
       window.location.href = `/order/transfer?order_id=${data.order_id}&total=${data.total}`
     } catch (err: unknown) {

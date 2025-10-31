@@ -33,7 +33,25 @@ export default function CartPage() {
 
   const totalItems = mounted ? getTotalItems() : 0
   const subtotal = mounted ? getSubtotal() : 0
-  const estimatedShipping = computeShipping(subtotal)
+  const [freeThreshold, setFreeThreshold] = React.useState<number>(100000)
+  const [flatRate, setFlatRate] = React.useState<number>(25000)
+  React.useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { getSettingsClient } = await import('@/lib/repo/settings')
+        const s = await getSettingsClient()
+        if (!cancelled) {
+          setFreeThreshold(Number(s.shipping_free_threshold ?? 100000))
+          setFlatRate(Number(s.shipping_flat_rate ?? 25000))
+        }
+      } catch {
+        // ignore
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+  const estimatedShipping = computeShipping(subtotal, { flat_rate: flatRate, free_threshold: freeThreshold })
   const estimatedTax = computeTax(Number((subtotal + estimatedShipping).toFixed(2)))
   const finalTotal = subtotal + estimatedShipping + estimatedTax
   const itemsForRender = mounted ? items : []
@@ -229,9 +247,9 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                {subtotal < 100000 && (
+                {subtotal < freeThreshold && (
                   <div className="font-body text-sm text-center text-muted-foreground p-3 bg-muted rounded-lg">
-                    {t("cart.free_shipping_notice").replace("{amount}", formatPrice(100000 - subtotal))}
+                    {t("cart.free_shipping_notice").replace("{amount}", formatPrice(freeThreshold - subtotal))}
                   </div>
                 )}
 

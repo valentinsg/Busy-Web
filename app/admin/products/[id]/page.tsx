@@ -10,6 +10,8 @@ import type { Product } from "@/lib/types"
 import { CategorySelector } from "@/components/admin/category-selector"
 import { COLOR_PALETTE } from "@/lib/color-utils"
 import { PREDEFINED_BENEFITS, buildBenefitsFromKeys } from "@/lib/benefits"
+import { getSettingsClient } from "@/lib/repo/settings"
+import { formatPrice } from "@/lib/format"
 
 // Format slug: lowercase and replace spaces with hyphens
 function formatSlug(value: string): string {
@@ -63,6 +65,20 @@ export default function EditProductPage({ params }: PageProps) {
       stock?: number
     }>
   >([])
+  const [freeThreshold, setFreeThreshold] = React.useState<number>(100000)
+
+  React.useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const s = await getSettingsClient()
+        if (!cancelled) setFreeThreshold(Number(s.shipping_free_threshold ?? 100000))
+      } catch {
+        // ignore
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   // File upload handler for images input (top-level)
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,9 +219,12 @@ export default function EditProductPage({ params }: PageProps) {
               ])
           )
         : undefined
-      const stockMap = sizeRows.length
-        ? Object.fromEntries(sizeRows.filter((r)=>r.size && typeof r.stock === 'number').map((r)=>[r.size, Number(r.stock)]))
-        : stockBySize
+      // Build stockMap from sizeRows - this is the source of truth
+      const stockMap = Object.fromEntries(
+        sizeRows
+          .filter((r) => r.size && typeof r.stock === 'number')
+          .map((r) => [r.size, Number(r.stock)])
+      )
       // Parse benefits text lines -> array
       const benefits = String(form.benefitsText||"")
         .split("\n")
@@ -225,6 +244,9 @@ export default function EditProductPage({ params }: PageProps) {
         ? Array.from(new Set([...baseTags, 'featured']))
         : baseTags.filter((t)=>t!=='featured')
 
+      // Calculate total stock from size rows
+      const totalStock = sizeRows.reduce((sum, row) => sum + (row.stock || 0), 0)
+
       const payload = {
         id: form.id,
         name: form.name,
@@ -239,7 +261,7 @@ export default function EditProductPage({ params }: PageProps) {
         tags,
         category: form.category,
         sku: form.sku,
-        stock: Number(form.stock) || 0,
+        stock: totalStock, // Use calculated total from size rows
         description: form.description || "",
         imported: !!form.imported,
         care_instructions: form.careInstructions || undefined,
@@ -310,7 +332,7 @@ export default function EditProductPage({ params }: PageProps) {
         <h2 className="font-heading text-xl font-semibold">Editar producto</h2>
         <button onClick={del} className="text-sm underline">Eliminar</button>
       </div>
-      <form onSubmit={saveProduct} className="space-y-4 max-w-2xl">
+      <form onSubmit={saveProduct} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="text-sm md:col-span-2">ID (slug)
             <input value={form.id||""} onChange={(e)=>setForm({...form, id: formatSlug(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" required />
@@ -331,9 +353,6 @@ export default function EditProductPage({ params }: PageProps) {
           />
           <label className="text-sm">SKU
             <input value={form.sku||""} onChange={(e)=>setForm({...form, sku: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />
-          </label>
-          <label className="text-sm">Stock
-            <input type="number" value={form.stock||0} onChange={(e)=>setForm({...form, stock: Number(e.target.value)})} className="w-full border rounded px-3 py-2 bg-transparent" />
           </label>
           <label className="text-sm md:col-span-2">Descripción
             <textarea value={form.description||""} onChange={(e)=>setForm({...form, description: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} />
@@ -391,6 +410,7 @@ export default function EditProductPage({ params }: PageProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {PREDEFINED_BENEFITS.map((b)=>{
                 const checked = (form.selectedBenefitKeys||[]).includes(b.key)
+                const subtitle = b.key === 'free_shipping' ? `A partir de ${formatPrice(freeThreshold)}` : b.subtitle
                 return (
                   <label key={b.key} className="flex items-start gap-2 text-sm">
                     <input
@@ -408,7 +428,7 @@ export default function EditProductPage({ params }: PageProps) {
                     />
                     <span>
                       <span className="font-medium">{b.title}</span>
-                      {b.subtitle && <span className="block text-muted-foreground">{b.subtitle}</span>}
+                      {subtitle && <span className="block text-muted-foreground">{subtitle}</span>}
                     </span>
                   </label>
                 )
@@ -491,85 +511,171 @@ export default function EditProductPage({ params }: PageProps) {
           </div>
         </div>
 
-        <div className="mt-4">
-          <h3 className="font-heading font-medium mb-2">Stock por talle</h3>
-          <div className="overflow-x-auto border rounded">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-muted">
-                  <th className="p-2 text-left">Talle</th>
-                  <th className="p-2 text-left">Stock</th>
-                  <th className="p-2 text-left">Pecho (cm)</th>
-                  <th className="p-2 text-left">Largo (cm)</th>
-                  <th className="p-2 text-left">Manga (cm)</th>
-                  <th className="p-2 text-left">Cintura (cm)</th>
-                  <th className="p-2 text-left">Cadera (cm)</th>
-                  <th className="p-2"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {sizeRows.map((row, idx) => (
-                  <tr key={idx} className="border-t border-border">
-                    <td className="p-2">
-                      <input value={row.size} onChange={(e)=>{
-                        const v = e.target.value
-                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, size: v }: r))
-                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                    </td>
-                    <td className="p-2">
-                      <input type="number" value={row.stock ?? 0} onChange={(e)=>{
-                        const v = Number(e.target.value)
-                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, stock: v }: r))
-                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                    </td>
-                    <td className="p-2">
-                      <input type="number" value={row.chest ?? ''} onChange={(e)=>{
-                        const v = e.target.value === '' ? undefined : Number(e.target.value)
-                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, chest: v }: r))
-                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                    </td>
-                    <td className="p-2">
-                      <input type="number" value={row.length ?? ''} onChange={(e)=>{
-                        const v = e.target.value === '' ? undefined : Number(e.target.value)
-                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, length: v }: r))
-                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                    </td>
-                    <td className="p-2">
-                      <input type="number" value={row.sleeve ?? ''} onChange={(e)=>{
-                        const v = e.target.value === '' ? undefined : Number(e.target.value)
-                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, sleeve: v }: r))
-                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                    </td>
-                    <td className="p-2">
-                      <input type="number" value={row.waist ?? ''} onChange={(e)=>{
-                        const v = e.target.value === '' ? undefined : Number(e.target.value)
-                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, waist: v }: r))
-                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                    </td>
-                    <td className="p-2">
-                      <input type="number" value={row.hip ?? ''} onChange={(e)=>{
-                        const v = e.target.value === '' ? undefined : Number(e.target.value)
-                        setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, hip: v }: r))
-                      }} className="w-24 border rounded px-2 py-1 bg-transparent" />
-                    </td>
-                    <td className="p-2">
-                      <button type="button" className="text-sm underline" onClick={()=>setSizeRows(rows=>rows.filter((_,i)=>i!==idx))}>Quitar</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="col-span-full mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-heading font-medium text-base">Talles, stock y medidas</h3>
+            <div className="text-sm text-muted-foreground">
+              Stock total: <span className="font-semibold text-foreground">{sizeRows.reduce((sum, row) => sum + (row.stock || 0), 0)}</span>
+            </div>
           </div>
-          <div className="mt-2 flex gap-2">
-            <button type="button" className="rounded px-3 py-1 border" onClick={()=>setSizeRows(rows=>[...rows, { size: '' }])}>Agregar fila</button>
-            <button type="button" className="rounded px-3 py-1 border" onClick={()=>{
-              setSizeRows([
-                { size: 'S' },
-                { size: 'M' },
-                { size: 'L' },
-                { size: 'XL' },
-              ])
-            }}>Prefill S-XL</button>
+          <div className="border rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-muted/50">
+                    <th className="p-3 text-left font-medium">Talle</th>
+                    <th className="p-3 text-left font-medium">Stock</th>
+                    <th className="p-3 text-left font-medium">Pecho (cm)</th>
+                    <th className="p-3 text-left font-medium">Largo (cm)</th>
+                    <th className="p-3 text-left font-medium">Manga (cm)</th>
+                    <th className="p-3 text-left font-medium">Cintura (cm)</th>
+                    <th className="p-3 text-left font-medium">Cadera (cm)</th>
+                    <th className="p-3 text-right font-medium">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sizeRows.map((row, idx) => (
+                    <tr key={idx} className="border-t border-border hover:bg-muted/30 transition-colors">
+                      <td className="p-3">
+                        <input 
+                          value={row.size} 
+                          onChange={(e)=>{
+                            const v = e.target.value
+                            setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, size: v }: r))
+                          }} 
+                          className="w-full max-w-[120px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          placeholder="S, M, L..."
+                        />
+                      </td>
+                      <td className="p-3">
+                        <input 
+                          type="number" 
+                          value={row.stock ?? 0} 
+                          onChange={(e)=>{
+                            const v = Number(e.target.value)
+                            setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, stock: v }: r))
+                          }} 
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                        />
+                      </td>
+                      <td className="p-3">
+                        <input 
+                          type="number" 
+                          value={row.chest ?? ''} 
+                          onChange={(e)=>{
+                            const v = e.target.value === '' ? undefined : Number(e.target.value)
+                            setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, chest: v }: r))
+                          }} 
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          placeholder="-"
+                        />
+                      </td>
+                      <td className="p-3">
+                        <input 
+                          type="number" 
+                          value={row.length ?? ''} 
+                          onChange={(e)=>{
+                            const v = e.target.value === '' ? undefined : Number(e.target.value)
+                            setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, length: v }: r))
+                          }} 
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          placeholder="-"
+                        />
+                      </td>
+                      <td className="p-3">
+                        <input 
+                          type="number" 
+                          value={row.sleeve ?? ''} 
+                          onChange={(e)=>{
+                            const v = e.target.value === '' ? undefined : Number(e.target.value)
+                            setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, sleeve: v }: r))
+                          }} 
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          placeholder="-"
+                        />
+                      </td>
+                      <td className="p-3">
+                        <input 
+                          type="number" 
+                          value={row.waist ?? ''} 
+                          onChange={(e)=>{
+                            const v = e.target.value === '' ? undefined : Number(e.target.value)
+                            setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, waist: v }: r))
+                          }} 
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          placeholder="-"
+                        />
+                      </td>
+                      <td className="p-3">
+                        <input 
+                          type="number" 
+                          value={row.hip ?? ''} 
+                          onChange={(e)=>{
+                            const v = e.target.value === '' ? undefined : Number(e.target.value)
+                            setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, hip: v }: r))
+                          }} 
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          placeholder="-"
+                        />
+                      </td>
+                      <td className="p-3 text-right">
+                        <button 
+                          type="button" 
+                          className="text-sm text-red-600 hover:text-red-700 hover:underline font-medium transition-colors" 
+                          onClick={()=>{
+                            const sizeToRemove = sizeRows[idx].size
+                            // Remove from sizeRows
+                            setSizeRows(rows=>rows.filter((_,i)=>i!==idx))
+                            // Remove from stockBySize state
+                            if (sizeToRemove) {
+                              setStockBySize(prev => {
+                                const updated = {...prev}
+                                delete updated[sizeToRemove]
+                                return updated
+                              })
+                              // Also update form.sizes to remove this size
+                              setForm(f => ({
+                                ...f,
+                                sizes: (f.sizes || "")
+                                  .split(",")
+                                  .map(s => s.trim())
+                                  .filter(s => s !== sizeToRemove)
+                                  .join(",")
+                              }))
+                            }
+                          }}
+                        >
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button 
+              type="button" 
+              className="rounded-lg px-4 py-2 border border-border hover:bg-muted transition-colors font-medium text-sm" 
+              onClick={()=>setSizeRows(rows=>[...rows, { size: '' }])}
+            >
+              + Agregar fila
+            </button>
+            <button 
+              type="button" 
+              className="rounded-lg px-4 py-2 border border-border hover:bg-muted transition-colors font-medium text-sm" 
+              onClick={()=>{
+                setSizeRows([
+                  { size: 'S' },
+                  { size: 'M' },
+                  { size: 'L' },
+                  { size: 'XL' },
+                ])
+              }}
+            >
+              Prefill S-XL
+            </button>
           </div>
         </div>
 

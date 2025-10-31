@@ -13,13 +13,26 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   try {
     const body = await req.json()
     const { stockBySize } = bodySchema.parse(body)
-    const rows = Object.entries(stockBySize).map(([size, stock]) => ({
-      product_id: params.id,
-      size,
-      stock,
-    }))
-    const { error } = await svc.from("product_sizes").upsert(rows)
-    if (error) throw error
+    
+    // First, delete all existing sizes for this product
+    const { error: deleteError } = await svc
+      .from("product_sizes")
+      .delete()
+      .eq("product_id", params.id)
+    
+    if (deleteError) throw deleteError
+    
+    // Then insert the new sizes (only if there are any)
+    if (Object.keys(stockBySize).length > 0) {
+      const rows = Object.entries(stockBySize).map(([size, stock]) => ({
+        product_id: params.id,
+        size,
+        stock,
+      }))
+      const { error: insertError } = await svc.from("product_sizes").insert(rows)
+      if (insertError) throw insertError
+    }
+    
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 400 })

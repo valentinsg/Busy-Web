@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast"
 import PayWithMercadoPago from "@/components/checkout/pay-with-mercadopago"
 import PayWithTransfer from "@/components/checkout/pay-with-transfer"
 import { Checkbox } from "@/components/ui/checkbox"
+import { trackBeginCheckout } from "@/lib/analytics/ecommerce"
 
 export default function CheckoutPage() {
   const { items, getTotalItems, getSubtotal, getPromoDiscount, getAppliedPromos, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon } = useCart()
@@ -49,12 +50,16 @@ export default function CheckoutPage() {
   const discountedSubtotal = getSubtotalAfterDiscount()
   // Settings-based free shipping threshold + city-aware flat rate
   const [freeThreshold, setFreeThreshold] = React.useState<number>(100000)
+  const [flatRate, setFlatRate] = React.useState<number>(25000)
   React.useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
         const s = await getSettingsClient()
-        if (!cancelled) setFreeThreshold(Number(s.shipping_free_threshold ?? 100000))
+        if (!cancelled) {
+          setFreeThreshold(Number(s.shipping_free_threshold ?? 100000))
+          setFlatRate(Number(s.shipping_flat_rate ?? 25000))
+        }
       } catch {
         // ignore
       }
@@ -63,7 +68,7 @@ export default function CheckoutPage() {
   }, [])
   const isMarDelPlata = (shippingData.city || "").trim().toLowerCase().includes("mar del plata")
   const estimatedShipping = computeShipping(discountedSubtotal, {
-    flat_rate: isMarDelPlata ? 10000 : 8000,
+    flat_rate: isMarDelPlata ? 10000 : flatRate,
     free_threshold: freeThreshold,
   })
   // Tax only applies to card payments (Mercado Pago), not to bank transfers
@@ -71,6 +76,25 @@ export default function CheckoutPage() {
     ? computeTax(Number((discountedSubtotal + estimatedShipping).toFixed(2)))
     : 0
   const finalTotal = discountedSubtotal + estimatedShipping + estimatedTax
+
+  // Track begin_checkout once when arriving to checkout with items
+  React.useEffect(() => {
+    try {
+      if (items.length > 0) {
+        const currency = items[0]?.product?.currency || "ARS"
+        const value = Number((discountedSubtotal + estimatedShipping + estimatedTax).toFixed(2))
+        const mapped = items.map((it) => ({
+          item_id: it.product.id,
+          item_name: it.product.name,
+          item_category: it.product.category,
+          price: it.product.price,
+          quantity: it.quantity,
+          item_variant: `${it.selectedSize}|${it.selectedColor}`,
+        }))
+        trackBeginCheckout({ currency, value, items: mapped })
+      }
+    } catch {}
+  }, [items, discountedSubtotal, estimatedShipping, estimatedTax])
 
   const handleInputChange = (field: string, value: string) => {
     setShippingData((prev) => ({ ...prev, [field]: value }))

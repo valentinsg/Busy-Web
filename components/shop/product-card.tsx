@@ -99,6 +99,11 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
     return tags.some((t) => t.includes('acces') || t.includes('accessor'))
   }, [product.category, product.tags])
 
+  // Show overlay up to 6 sizes; hide when there are more than 6 to avoid confusion
+  const shouldShowSizeOverlay = React.useMemo(() => {
+    return product.sizes && product.sizes.length > 0 && product.sizes.length <= 6
+  }, [product.sizes])
+
   const hasMeasurementsForSize = React.useCallback((size: string) => {
     const m = (product as Product).measurementsBySize?.[size] as | Record<string, unknown> | undefined
     return !!m && Object.keys(m).length > 0
@@ -316,8 +321,8 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
             </a>
           )}
 
-          {/* Sizes overlay on hover (hidden in admin cards) */}
-          {!adminEditHref && product.sizes?.length > 0 && (
+          {/* Sizes overlay on hover (hidden in admin cards and when more than 5 sizes) */}
+          {!adminEditHref && shouldShowSizeOverlay && (
             <div
               ref={overlayRef}
               className={`absolute inset-0 z-10 ${

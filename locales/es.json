@@ -252,6 +252,17 @@
     "post.cta.subtitle": "Descubrí nuestra última colección de streetwear premium pensada para la vida moderna.",
     "post.cta.button": "Ver colección"
   },
+  "product": {
+    "size": "Talle",
+    "type": "Tipo",
+    "color": "Color",
+    "quantity": "Cantidad",
+    "add_to_cart": "Agregar al carrito",
+    "out_of_stock": "Sin stock",
+    "in_cart": "en el carrito",
+    "free_shipping": "Envío gratis",
+    "free_shipping_from": "A partir de {amount}"
+  },
   "checkout": {
     "header.back": "Volver al carrito",
     "header.title": "Checkout",

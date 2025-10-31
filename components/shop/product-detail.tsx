@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { addReview, averageRating, getReviews, type Review } from "@/lib/reviews"
+import { useTranslations } from "@/hooks/use-translations"
 
 interface ProductDetailProps {
   product: Product
@@ -48,6 +49,7 @@ const getBenefitIcon = (title: string) => {
 }
 
 export function ProductDetail({ product, relatedProducts }: ProductDetailProps) {
+  const t = useTranslations('product')
   const { toast } = useToast()
   const [reviews, setReviews] = React.useState<Review[]>([])
   const [avg, setAvg] = React.useState<number>(0)
@@ -62,6 +64,29 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
     setReviews(list)
     setAvg(averageRating(product.id))
   }, [product.id])
+
+  React.useEffect(() => {
+    try {
+      if (typeof window !== "undefined" && (window as any).dataLayer) {
+        ;(window as any).dataLayer.push({
+          event: "view_item",
+          ecommerce: {
+            currency: product.currency || "ARS",
+            value: Number((product.price).toFixed(2)),
+            items: [
+              {
+                item_id: product.id,
+                item_name: product.name,
+                item_category: product.category,
+                price: product.price,
+                quantity: 1,
+              },
+            ],
+          },
+        })
+      }
+    } catch {}
+  }, [product.id, product.name, product.category, product.price, product.currency])
 
   React.useEffect(() => {
     let cancelled = false
@@ -113,12 +138,11 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Breadcrumb */}
+      {/* Back button */}
       <div className="mb-4 sm:mb-8">
-        <Button asChild variant="ghost" className="mb-2 sm:mb-4">
-          <Link href="/products">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver a productos
+        <Button asChild variant="ghost" size="icon" className="h-16 w-16 sm:h-16 sm:w-16 rounded-full hover:bg-accent">
+          <Link aria-label="Volver a productos" href="/products">
+            <ArrowLeft className="h-12 w-12" />
           </Link>
         </Button>
       </div>
@@ -133,7 +157,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
         <div className="space-y-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary" className="font-body">{product.category}</Badge>
+              <Badge variant="secondary" className="font-body">{String(product.category||"").slice(0,1).toUpperCase() + String(product.category||"").slice(1).toLowerCase()}</Badge>
               {product.badgeText && (
                 <Badge variant={(product.badgeVariant as 'default' | 'destructive' | 'secondary' | 'outline' | 'success' | 'warning' | 'promo') || 'default'} className="font-body font-semibold">
                   {product.badgeText}
@@ -190,7 +214,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           <Separator />
 
           {/* Add to Cart */}
-          <AddToCart product={product} sizeLabel={isPin ? "Tipo" : "Size"} />
+          <AddToCart product={product} />
 
           <Separator />
 
@@ -200,12 +224,17 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               <>
                 {product.benefits.map((b, idx) => {
                   const IconComponent = getBenefitIcon(b.title)
+                  // If benefit is "Envío gratis" and has no subtitle, add the threshold
+                  const displaySubtitle = b.subtitle || 
+                    (b.title.toLowerCase().includes('envío') && b.title.toLowerCase().includes('gratis') 
+                      ? t('free_shipping_from', { amount: formatPrice(freeThreshold) })
+                      : undefined)
                   return (
                     <div key={idx} className="flex items-center space-x-3">
                       <IconComponent className="h-5 w-5 text-muted-foreground" />
                       <div>
                         <div className="font-medium font-heading">{b.title}</div>
-                        {b.subtitle && <div className="text-sm text-muted-foreground font-body">{b.subtitle}</div>}
+                        {displaySubtitle && <div className="text-sm text-muted-foreground font-body">{displaySubtitle}</div>}
                       </div>
                     </div>
                   )
@@ -226,8 +255,8 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                   <div className="flex items-center space-x-3">
                     <Truck className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <div className="font-medium font-heading">Envío gratis</div>
-                      <div className="text-sm text-muted-foreground font-body">En compras superiores a {formatPrice(freeThreshold)}</div>
+                      <div className="font-medium font-heading">{t('free_shipping')}</div>
+                      <div className="text-sm text-muted-foreground font-body">{t('free_shipping_from', { amount: formatPrice(freeThreshold) })}</div>
                     </div>
                   </div>
                 )}
@@ -275,14 +304,14 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
             {showCare && <TabsTrigger value="care" className="text-xs sm:text-sm">Cuidados</TabsTrigger>}
             <TabsTrigger value="reviews" className="text-xs sm:text-sm">Reseñas</TabsTrigger>
           </TabsList>
-          <TabsContent value="description" className="mt-6">
+          <TabsContent value="description" className={isAccessory ? "mt-4" : "mt-6"}>
             <div className="prose prose-neutral dark:prose-invert max-w-none">
               <p className="leading-relaxed font-body whitespace-pre-line">{product.description}</p>
               <span className="libre-barcode-39-text-regular text-muted-foreground font-semibold text-xl">SKU: {product.sku}</span>
             </div>
           </TabsContent>
           {showSizing && (
-          <TabsContent value="sizing" className="mt-6">
+          <TabsContent value="sizing" className={isAccessory ? "mt-4" : "mt-6"}>
             <div className="space-y-4">
               <h3 className="font-medium font-heading">Guía de Talles</h3>
               {product.measurementsBySize ? (
@@ -376,9 +405,9 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           </TabsContent>
           )}
           {showCare && (
-          <TabsContent value="care" className="mt-6">
+          <TabsContent value="care" className={isAccessory ? "mt-4" : "mt-6"}>
             <div className="space-y-4">
-              <h3 className="font-medium font-heading">Instrucciones de cuidado</h3>
+              <h3 className="font-heading font-semibold text-lg sm:text-xl">Instrucciones de cuidado</h3>
               {product.careInstructions ? (
                 <div className="prose prose-neutral dark:prose-invert max-w-none whitespace-pre-line font-body text-muted-foreground">{product.careInstructions}</div>
               ) : (

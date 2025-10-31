@@ -2,6 +2,8 @@ import ProductsClient from '@/components/products/ProductsClient'
 import { getProductsAsync } from '@/lib/repo/products'
 import type { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 export const revalidate = 1800 // Revalidar cada 30 minutos
 
 export function generateMetadata(): Metadata {

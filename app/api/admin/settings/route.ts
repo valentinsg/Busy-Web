@@ -29,10 +29,25 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Valores inválidos" }, { status: 400 })
     }
     const sb = getServiceClient()
-    const { error } = await sb
+    // Update existing row if present; otherwise insert a new one (do not provide explicit id for identity column)
+    const { data: existing, error: selectError } = await sb
       .from("shop_settings")
-      .upsert({ id: 1, shipping_flat_rate, shipping_free_threshold }, { onConflict: "id" })
-    if (error) throw error
+      .select("id")
+      .limit(1)
+      .maybeSingle()
+    if (selectError) throw selectError
+    if (existing?.id) {
+      const { error: updateError } = await sb
+        .from("shop_settings")
+        .update({ shipping_flat_rate, shipping_free_threshold })
+        .eq("id", existing.id)
+      if (updateError) throw updateError
+    } else {
+      const { error: insertError } = await sb
+        .from("shop_settings")
+        .insert({ shipping_flat_rate, shipping_free_threshold })
+      if (insertError) throw insertError
+    }
     return NextResponse.json({ ok: true })
   } catch (error: unknown) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 })

@@ -14,9 +14,10 @@ export function applyPercentDiscount(amount: Money, percent: number): Money {
   return Number((amount * (pct / 100)).toFixed(2))
 }
 
-// Shipping rule (ARS): charge 8,000 unless items_total >= 100,000
+// Shipping rule (ARS): charge flat_rate unless items_total >= free_threshold
+// Default values match shop_settings defaults: 25,000 flat rate, 100,000 free threshold
 export function computeShipping(items_total: Money, rule?: ShippingRule): Money {
-  const r = rule ?? { flat_rate: 8000, free_threshold: 100000 }
+  const r = rule ?? { flat_rate: 25000, free_threshold: 100000 }
   return items_total >= r.free_threshold ? 0 : r.flat_rate
 }
 
