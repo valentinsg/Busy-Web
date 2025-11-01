@@ -11,7 +11,7 @@ function getStaticRoutes() {
   const weekly = 'weekly' as const
   const daily = 'daily' as const
 
-  const createLang = (path: string) => ({ 'es-AR': `${SITE_URL}${path}`, en: `${SITE_URL}${path}` })
+  const createLang = (path: string) => ({ 'es-AR': `${SITE_URL}${path}` })
   
   return [
     // Home - Highest priority
@@ -57,7 +57,7 @@ async function getBlogRoutes() {
         lastModified: post.date || now,
         changeFrequency: 'monthly' as const,
         priority: 0.7,
-        alternates: { languages: { 'es-AR': url, en: url } },
+        alternates: { languages: { 'es-AR': url } },
       }
     })
   } catch {
@@ -86,7 +86,7 @@ async function getProductRoutes() {
           lastModified: now,
           changeFrequency: 'weekly' as const,
           priority: 0.8,
-          alternates: { languages: { 'es-AR': url, en: url } },
+          alternates: { languages: { 'es-AR': url } },
         }
       })
   } catch {
@@ -104,7 +104,7 @@ async function getPlaylistRoutes() {
         lastModified: playlist.updated_at || playlist.created_at,
         changeFrequency: 'weekly' as const,
         priority: 0.7,
-        alternates: { languages: { 'es-AR': url, en: url } },
+        alternates: { languages: { 'es-AR': url } },
       }
     })
   } catch {

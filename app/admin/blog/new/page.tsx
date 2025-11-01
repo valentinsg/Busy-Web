@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Author } from "@/lib/types"
 import Image from "next/image"
-import WYSIWYGEditor from "@/components/admin/wysiwyg-editor"
+import { useToast } from "@/hooks/use-toast"
 
 const MarkdownPreview = dynamic(() => import("@/components/blog/markdown-preview"), {
   ssr: false,
@@ -50,8 +50,8 @@ export default function AdminBlogNewPage() {
   const [ctaUrl, setCtaUrl] = useState("")
   const [seoKeywords, setSeoKeywords] = useState("")
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const { toast } = useToast()
 
   // Toolbar popovers state
   const [imageOpen, setImageOpen] = useState(false)
@@ -166,7 +166,6 @@ export default function AdminBlogNewPage() {
         onSubmit={async (e) => {
           e.preventDefault()
           setSaving(true)
-          setMessage(null)
           try {
             const author = authorsList.find((a) => a.id === authorId) || authorsList?.[0]
             const res = await fetch("/api/admin/blog/new", {
@@ -209,9 +208,16 @@ export default function AdminBlogNewPage() {
             })
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || "Error al guardar")
-            setMessage("Artículo creado correctamente")
+            toast({
+              title: "✅ Artículo creado",
+              description: "El artículo se guardó correctamente",
+            })
           } catch (err: unknown) {
-            setMessage(err?.toString() || "Error al guardar")
+            toast({
+              title: "❌ Error",
+              description: err?.toString() || "Error al guardar el artículo",
+              variant: "destructive",
+            })
           } finally {
             setSaving(false)
           }
@@ -315,15 +321,14 @@ export default function AdminBlogNewPage() {
                 </Popover>
               </div>
 
-              {/* Editor WYSIWYG con preview en tiempo real */}
-              <div>
-                <label className="text-sm font-medium mb-2 block">Contenido del artículo</label>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Escribí en Markdown y veé el resultado en tiempo real. Los formatos se aplican automáticamente mientras escribís.
-                </p>
-                <WYSIWYGEditor
+              {/* Textarea simple para contenido MDX */}
+              <div className="grid gap-2">
+                <label className="text-sm font-medium">Contenido del artículo</label>
+                <Textarea
+                  ref={textareaRef}
+                  className="font-mono text-sm min-h-[500px]"
                   value={content}
-                  onChange={setContent}
+                  onChange={(e) => setContent(e.target.value)}
                   placeholder="Escribe tu contenido aquí... Usa **negrita**, *cursiva*, # títulos, etc."
                 />
               </div>
@@ -497,10 +502,7 @@ export default function AdminBlogNewPage() {
         </div>
 
         {/* Footer con botones */}
-        <div className="lg:col-span-3 flex items-center justify-between border-t pt-6">
-          <div>
-            {message && <p className="text-sm text-muted-foreground">{message}</p>}
-          </div>
+        <div className="lg:col-span-3 flex items-center justify-end border-t pt-6">
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancelar</Button>
             <Button type="submit" disabled={saving} className="font-body">

@@ -25,12 +25,15 @@ function normalizeSlug(input: string) {
 // Async storage-first getters
 
 export async function getAllPostsAsync(): Promise<BlogPost[]> {
+  console.log('[BLOG] USE_STORAGE:', USE_STORAGE, 'BLOG_BUCKET:', BLOG_BUCKET)
   try {
     if (USE_STORAGE) {
       const supabase = getServiceClient()
       const listRes = (await (supabase.storage.from(BLOG_BUCKET).list('', { limit: 1000 }) as unknown as Promise<{ data: Array<{ name: string }>; error: Error | null }>))
+      console.log('[BLOG] Supabase Storage response:', listRes?.data?.length || 0, 'files')
       const list = listRes?.data || []
       const mdxFiles = list.filter((o) => o.name?.endsWith('.mdx'))
+      console.log('[BLOG] MDX files found:', mdxFiles.length)
       const results: BlogPost[] = []
       for (const obj of mdxFiles) {
         try {

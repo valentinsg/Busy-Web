@@ -8,7 +8,7 @@ export function SuccessClient() {
   const router = useRouter()
 
   useEffect(() => {
-    const sessionId = q.get("session_id") || q.get("external_reference") || q.get("merchant_order_id")
+    const sessionId = q?.get("session_id") || q?.get("external_reference") || q?.get("merchant_order_id") || null
     if (sessionId) {
       try { window.sessionStorage.setItem("mp_session_id", sessionId) } catch {}
       // Try to fetch order info to fire purchase once before redirect

@@ -61,11 +61,12 @@ const CommentsForm = NextDynamic(() => import('@/components/blog/comments-form')
 export const revalidate = 3600 // Revalidar cada hora
 export const dynamic = 'force-static' // Generar estáticamente en build
 
-// Pre-generar los slugs más populares
+// Pre-generar TODOS los posts en build (blog pequeño)
 export async function generateStaticParams() {
   const posts = await getAllPostsAsync()
-  // Generar los primeros 10 posts más recientes
-  return posts.slice(0, 10).map((post) => ({
+  console.log('[BUILD] generateStaticParams - Posts encontrados:', posts.length)
+  console.log('[BUILD] Slugs:', posts.map(p => p.slug).join(', '))
+  return posts.map((post) => ({
     slug: post.slug,
   }))
 }
@@ -94,18 +95,21 @@ export async function generateMetadata({
   const image = post.ogImage || post.cover || '/busy-streetwear.png'
 
   return {
-    title: `▷ ${post.title}`,
+    title: post.title,
     description: post.description,
     keywords: post.tags,
     openGraph: {
       title: post.title,
       description: post.description,
       url: canonical,
+      type: 'article',
+      publishedTime: post.date,
+      authors: [post.authorName || 'Busy'],
       images: [{ url: image, alt: post.title }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${post.title} - Blog de Busy`,
+      title: post.title,
       description: post.description,
       images: [image],
     },
@@ -113,7 +117,6 @@ export async function generateMetadata({
       canonical,
       languages: {
         'es-AR': canonical,
-        en: canonical,
       },
     },
   }
@@ -191,45 +194,113 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // Normalize CRLF to LF only; remark-breaks will handle single newlines as <br>
   const preparedContent = (post.content || '').replace(/\r\n/g, '\n')
 
+  const base = process.env.SITE_URL || 'https://busy.com.ar'
+  const postUrl = `${base}/blog/${post.slug}`
+
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Inicio',
+        item: base,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Blog',
+        item: `${base}/blog`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: post.title,
+        item: postUrl,
+      },
+    ],
+  }
+
+  // FAQ schema (condicional)
+  const faqSchema = post.faqs && post.faqs.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: post.faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  } : null
+
+  // Article schema completo
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    dateModified: post.date,
+    url: postUrl,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postUrl,
+    },
+    image: [post.ogImage || post.cover || `${base}/busy-streetwear.png`],
+    keywords: post.tags?.join(', '),
+    author: post.authorName || post.author
+      ? { '@type': 'Person', name: post.authorName || post.author }
+      : { '@type': 'Organization', name: 'Busy' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Busy Streetwear',
+      url: base,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${base}/logo-busy-black.png`,
+      },
+      sameAs: [
+        'https://instagram.com/busy.streetwear',
+        'https://www.facebook.com/profile.php?id=61581696441351',
+        'https://www.tiktok.com/@busy.streetwear',
+      ],
+    },
+  }
+
+  // JSON-LD consolidado con @graph
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [articleSchema, breadcrumbSchema, faqSchema].filter(Boolean),
+  }
+
   return (
     <div className="container py-6 sm:py-8 pt-24 sm:pt-28 tracking-wide font-body backdrop-blur-sm px-3 sm:px-4">
         <div className="max-w-7xl mx-auto">
-        {/* JSON-LD Article */}
+        {/* JSON-LD consolidado (Article + Breadcrumb + FAQ) */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Article',
-              headline: post.title,
-              description: post.description,
-              datePublished: post.date,
-              dateModified: post.date,
-              url: `${process.env.SITE_URL || 'https://busy.com.ar'}/blog/${
-                post.slug
-              }`,
-              image: [post.ogImage || post.cover || '/busy-streetwear.png'],
-              keywords: post.tags,
-              author:
-                post.authorName || post.author
-                  ? { '@type': 'Person', name: post.authorName || post.author }
-                  : { '@type': 'Organization', name: 'Busy' },
-              publisher: {
-                '@type': 'Organization',
-                name: 'Busy',
-                logo: {
-                  '@type': 'ImageObject',
-                  url: `${
-                    process.env.SITE_URL || 'https://busy.com.ar'
-                  }/logo-busy-black.png`,
-                },
-              },
-            }),
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         {/* Article Header */}
         <article>
           <header className="mb-5 sm:mb-6">
+            {/* Hero image con priority para LCP */}
+            {post.cover && (
+              <Image
+                src={post.cover}
+                alt={post.coverAlt || post.title}
+                width={1200}
+                height={630}
+                priority={true}
+                className="w-full h-auto rounded-lg mb-6"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+              />
+            )}
+            
             <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-3 text-balance">
               {post.title}
             </h1>

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 
 export default function NewCouponPage() {
   const router = useRouter()
@@ -12,8 +13,8 @@ export default function NewCouponPage() {
   const [maxUses, setMaxUses] = useState<string>("")
   const [expiresAt, setExpiresAt] = useState<string>("")
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
   const [redirecting, setRedirecting] = useState(false)
+  const { toast } = useToast()
 
   return (
     <div className="space-y-6">
@@ -29,7 +30,6 @@ export default function NewCouponPage() {
         onSubmit={async (e) => {
           e.preventDefault()
           setSaving(true)
-          setMessage(null)
           try {
             const res = await fetch("/api/admin/coupons", {
               method: "POST",
@@ -50,12 +50,19 @@ export default function NewCouponPage() {
             setActive(true)
             setMaxUses("")
             setExpiresAt("")
-            setMessage("Cupón creado correctamente. Redirigiendo...")
+            toast({
+              title: "✅ Cupón creado",
+              description: "El cupón se creó correctamente",
+            })
             setRedirecting(true)
             setTimeout(() => router.push("/admin/coupons"), 800)
           } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : String(err)
-            setMessage(msg)
+            toast({
+              title: "❌ Error",
+              description: msg || "Error al crear el cupón",
+              variant: "destructive",
+            })
           } finally {
             setSaving(false)
           }
@@ -88,7 +95,6 @@ export default function NewCouponPage() {
         <button disabled={saving || redirecting} className="rounded-md border bg-primary text-primary-foreground px-3 py-2 text-sm hover:opacity-90 disabled:opacity-60">
           {redirecting ? "Redirigiendo..." : saving ? "Guardando..." : "Crear cupón"}
         </button>
-        {message && <p className="text-sm text-muted-foreground">{message}</p>}
       </form>
     </div>
   )

@@ -47,41 +47,41 @@ export default function SitePopover({ section }: { section?: string }) {
       console.log('[Popover] Already initialized, skipping')
       return
     }
-    
+
     if (dismissed) {
       console.log('[Popover] Already dismissed, skipping')
       return
     }
-    
+
     let cancelled = false
     let timeoutId: NodeJS.Timeout | null = null
-    
+
     const run = async () => {
       try {
         console.log('[Popover] Fetching active popover...')
-        const res = await fetch(`/api/popovers/active?path=${encodeURIComponent(pathname)}${section ? `&section=${encodeURIComponent(section)}` : ""}`)
-        
+        const res = await fetch(`/api/popovers/active?path=${encodeURIComponent(pathname || '')}${section ? `&section=${encodeURIComponent(section)}` : ""}`)
+
         if (cancelled) return
-        
+
         const json = await res.json()
         const p = json?.popover
-        
+
         console.log('[Popover] Response:', p)
-        
+
         if (p && !cancelled) {
           const lsKey = `dismiss_popover_${p.id}`
-          const already = typeof window !== "undefined" ? localStorage.getItem(lsKey) : null
-          
+          const already = typeof window !== "undefined" ? localStorage.getItem(lsKey) || '' : ''
+
           if (!already) {
             console.log('[Popover] Setting up popover data')
             isInitializedRef.current = true
             const delayMs = (p.delay_seconds || 0) * 1000
-            
-            setData({ 
-              id: p.id, 
-              title: p.title, 
-              body: p.body, 
-              discount_code: p.discount_code, 
+
+            setData({
+              id: p.id,
+              title: p.title,
+              body: p.body,
+              discount_code: p.discount_code,
               image_url: p.image_url,
               type: p.type || 'simple',
               require_email: p.require_email || false,
@@ -90,7 +90,7 @@ export default function SitePopover({ section }: { section?: string }) {
               cta_url: p.cta_url,
               delay_seconds: p.delay_seconds || 0
             })
-            
+
             // Trigger visibility immediately for testing
             console.log('[Popover] Making visible in', delayMs, 'ms')
             timeoutId = setTimeout(() => {
@@ -113,9 +113,9 @@ export default function SitePopover({ section }: { section?: string }) {
         }
       }
     }
-    
+
     run()
-    
+
     return () => {
       console.log('[Popover] Cleanup')
       cancelled = true
@@ -157,10 +157,10 @@ export default function SitePopover({ section }: { section?: string }) {
       setSubmitMessage("Ingresa un email válido")
       return
     }
-    
+
     setSubmitting(true)
     setSubmitMessage("")
-    
+
     try {
       // Submit to newsletter API
       const res = await fetch("/api/newsletter/subscribe", {
@@ -168,9 +168,9 @@ export default function SitePopover({ section }: { section?: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim(), source: `popover-${data.id}` })
       })
-      
+
       const json = await res.json()
-      
+
       if (res.ok) {
         setEmailSubmitted(true)
         // Manejar diferentes respuestas de la API
@@ -200,12 +200,12 @@ export default function SitePopover({ section }: { section?: string }) {
   return (
     <>
       <Confetti active={showConfetti} />
-      
+
       <AnimatedPopover isVisible={isVisible} onClose={onDismiss}>
         <div className="relative bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-700 overflow-hidden">
           {/* Gradient glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5 pointer-events-none" />
-          
+
           {/* Close button - más grande en móvil */}
           <button
             onClick={onDismiss}
@@ -243,16 +243,16 @@ export default function SitePopover({ section }: { section?: string }) {
           <div className={`relative space-y-4 md:space-y-5 ${data.image_url ? 'p-4 sm:p-6 md:p-8' : 'p-6 sm:p-8 md:p-12'}`}>
             <div className="space-y-3 md:space-y-4">
               <h3 className={`font-body font-bold tracking-tight pr-10 md:pr-8 text-white ${
-                data.image_url 
-                  ? 'text-xl sm:text-2xl md:text-3xl' 
+                data.image_url
+                  ? 'text-xl sm:text-2xl md:text-3xl'
                   : 'text-2xl sm:text-3xl md:text-4xl'
               }`}>
                 {data.title}
               </h3>
               {data.body && (
                 <p className={`font-body text-zinc-300 leading-relaxed whitespace-pre-line ${
-                  data.image_url 
-                    ? 'text-sm sm:text-base' 
+                  data.image_url
+                    ? 'text-sm sm:text-base'
                     : 'text-base sm:text-lg'
                 }`}>
                   {data.body}
@@ -265,8 +265,8 @@ export default function SitePopover({ section }: { section?: string }) {
               <form onSubmit={handleEmailSubmit} className="space-y-3">
                 <div className="space-y-2">
                   <label htmlFor="popover-email" className="font-body text-xs sm:text-sm font-medium text-white">
-                    {data.show_newsletter 
-                      ? "Suscríbete a nuestro newsletter" 
+                    {data.show_newsletter
+                      ? "Suscríbete a nuestro newsletter"
                       : "Ingresa tu email para desbloquear el código"}
                   </label>
                   <div className="flex flex-col sm:flex-row gap-2">

@@ -3,13 +3,14 @@
 export const dynamic = 'force-dynamic'
 
 import * as React from "react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function SettingsPage() {
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
   const [flat, setFlat] = React.useState<number>(25000)
   const [free, setFree] = React.useState<number>(100000)
-  const [toast, setToast] = React.useState<string>("")
+  const { toast } = useToast()
 
   React.useEffect(() => {
     let cancelled = false
@@ -36,7 +37,6 @@ export default function SettingsPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    setToast("")
     try {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
@@ -45,9 +45,16 @@ export default function SettingsPage() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data?.error || "Error guardando cambios")
-      setToast("Guardado ✔")
+      toast({
+        title: "✅ Configuración guardada",
+        description: "Los cambios se aplicaron correctamente",
+      })
     } catch (err: unknown) {
-      setToast(err?.toString() || "Error inesperado")
+      toast({
+        title: "❌ Error",
+        description: err?.toString() || "Error al guardar la configuración",
+        variant: "destructive",
+      })
     } finally {
       setSaving(false)
     }
@@ -98,7 +105,6 @@ export default function SettingsPage() {
             >
               {saving ? "Guardando…" : "Guardar"}
             </button>
-            {toast && <span className="text-xs text-muted-foreground">{toast}</span>}
           </div>
         </form>
       )}

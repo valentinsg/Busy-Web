@@ -229,6 +229,10 @@ export default function RootLayout({
   return (
     <html lang={htmlLang} suppressHydrationWarning className="dark">
       <head>
+        {/* Preconnect a Supabase Storage para mejorar LCP */}
+        <link rel="preconnect" href="https://wbqbupxoyzczwroqzklj.supabase.co" />
+        <link rel="dns-prefetch" href="https://wbqbupxoyzczwroqzklj.supabase.co" />
+        
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){document.documentElement.classList.add('dark')})()`,

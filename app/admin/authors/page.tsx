@@ -31,6 +31,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from "react"
 import { Loader2, Plus, Pencil, Trash2, Instagram, Twitter, Linkedin } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 interface Author {
   id: string
@@ -51,7 +52,7 @@ export default function AuthorsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingAuthor, setEditingAuthor] = useState<Author | null>(null)
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState("")
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     id: "",
     name: "",
@@ -77,7 +78,11 @@ export default function AuthorsPage() {
       setAuthors(data)
     } catch (error) {
       console.error("Error loading authors:", error)
-      setToast("Error al cargar autores")
+      toast({
+        title: "❌ Error",
+        description: "Error al cargar los autores",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
@@ -118,7 +123,6 @@ export default function AuthorsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    setToast("")
 
     try {
       if (editingAuthor) {
@@ -138,7 +142,10 @@ export default function AuthorsPage() {
         })
 
         if (!res.ok) throw new Error("Failed to update author")
-        setToast("✓ Autor actualizado")
+        toast({
+          title: "✅ Autor actualizado",
+          description: "Los cambios se guardaron correctamente",
+        })
       } else {
         // Create new author
         const res = await fetch("/api/admin/authors", {
@@ -148,14 +155,21 @@ export default function AuthorsPage() {
         })
 
         if (!res.ok) throw new Error("Failed to create author")
-        setToast("✓ Autor creado")
+        toast({
+          title: "✅ Autor creado",
+          description: "El autor se creó correctamente",
+        })
       }
 
       setIsDialogOpen(false)
       await loadAuthors()
     } catch (error) {
       console.error("Error saving author:", error)
-      setToast("Error al guardar el autor")
+      toast({
+        title: "❌ Error",
+        description: "Error al guardar el autor",
+        variant: "destructive",
+      })
     } finally {
       setSaving(false)
     }
@@ -171,11 +185,18 @@ export default function AuthorsPage() {
 
       if (!res.ok) throw new Error("Failed to delete author")
 
-      setToast("✓ Autor eliminado")
+      toast({
+        title: "✅ Autor eliminado",
+        description: "El autor se eliminó correctamente",
+      })
       await loadAuthors()
     } catch (error) {
       console.error("Error deleting author:", error)
-      setToast("Error al eliminar el autor")
+      toast({
+        title: "❌ Error",
+        description: "Error al eliminar el autor",
+        variant: "destructive",
+      })
     }
   }
 
@@ -379,18 +400,6 @@ export default function AuthorsPage() {
           </DialogContent>
         </Dialog>
       </div>
-
-      {toast && (
-        <div
-          className={`mb-4 p-3 rounded-md text-sm ${
-            toast.startsWith("✓")
-              ? "bg-green-50 text-green-800 border border-green-200"
-              : "bg-red-50 text-red-800 border border-red-200"
-          }`}
-        >
-          {toast}
-        </div>
-      )}
 
       <Card>
         <CardHeader>

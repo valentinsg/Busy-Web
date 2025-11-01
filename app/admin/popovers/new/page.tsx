@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 
 function arrFromInput(v: string): string[] {
   return v
@@ -30,7 +31,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 export default function NewPopoverPage() {
   const router = useRouter()
   const sp = useSearchParams()
-  const editingId = sp.get("id")
+  const editingId = sp?.get("id")
 
   const [title, setTitle] = useState("")
   const [body, setBody] = useState("")
@@ -52,7 +53,7 @@ export default function NewPopoverPage() {
 
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     const load = async () => {
@@ -104,7 +105,6 @@ export default function NewPopoverPage() {
         onSubmit={async (e) => {
           e.preventDefault()
           setSaving(true)
-          setMessage(null)
           try {
             const payload = {
               title: title.trim(),
@@ -131,10 +131,17 @@ export default function NewPopoverPage() {
             const res = await fetch(url, { method, headers, body: JSON.stringify(payload) })
             const json = await res.json()
             if (!res.ok) throw new Error(json?.error || "Error")
-            setMessage(isEdit ? "Actualizado" : "Creado")
+            toast({
+              title: isEdit ? "✅ Popover actualizado" : "✅ Popover creado",
+              description: isEdit ? "Los cambios se guardaron correctamente" : "El popover se creó correctamente",
+            })
             setTimeout(() => router.push("/admin/popovers"), 600)
           } catch (err: unknown) {
-            setMessage(err?.toString() || String(err))
+            toast({
+              title: "❌ Error",
+              description: err?.toString() || "Error al guardar el popover",
+              variant: "destructive",
+            })
           } finally {
             setSaving(false)
           }
@@ -160,8 +167,7 @@ export default function NewPopoverPage() {
                 const file = e.target.files?.[0]
                 if (!file) return
                 setUploading(true)
-                setMessage(null)
-                try {
+                try{
                   const fd = new FormData()
                   fd.append("file", file)
                   fd.append("bucket", "popovers")
@@ -175,9 +181,16 @@ export default function NewPopoverPage() {
                   const json = await res.json()
                   if (!res.ok || !json?.ok) throw new Error(json?.error || "Error al subir")
                   setImageUrl(json.url)
-                  setMessage("Imagen subida correctamente")
+                  toast({
+                    title: "✅ Imagen subida",
+                    description: "La imagen se subió correctamente",
+                  })
                 } catch (err: unknown) {
-                  setMessage(err?.toString() || String(err))
+                  toast({
+                    title: "❌ Error",
+                    description: err?.toString() || "Error al subir la imagen",
+                    variant: "destructive",
+                  })
                 } finally {
                   setUploading(false)
                 }
@@ -347,15 +360,22 @@ export default function NewPopoverPage() {
                 if (!editingId) return
                 if (!confirm("¿Eliminar popover?")) return
                 setSaving(true)
-                setMessage(null)
                 try {
                   const headers = await getAuthHeaders()
                   const res = await fetch(`/api/admin/popovers/${editingId}`, { method: "DELETE", headers })
                   const json = await res.json()
                   if (!res.ok) throw new Error(json?.error || "Error")
+                  toast({
+                    title: "✅ Popover eliminado",
+                    description: "El popover se eliminó correctamente",
+                  })
                   router.push("/admin/popovers")
                 } catch (err: unknown) {
-                  setMessage(err?.toString() || String(err))
+                  toast({
+                    title: "❌ Error",
+                    description: err?.toString() || "Error al eliminar el popover",
+                    variant: "destructive",
+                  })
                 } finally {
                   setSaving(false)
                 }
@@ -366,7 +386,6 @@ export default function NewPopoverPage() {
             </button>
           )}
         </div>
-        {message && <p className="text-sm text-muted-foreground">{message}</p>}
       </form>
     </div>
   )

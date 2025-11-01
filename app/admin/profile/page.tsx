@@ -1,15 +1,14 @@
 "use client"
 
-export const dynamic = 'force-dynamic'
-
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useEffect, useState } from "react"
-import { Upload, X, Loader2 } from "lucide-react"
+import { Loader2, Upload, Trash2, X } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 import { Author } from "@/lib/types"
 
 export default function ProfilePage() {
@@ -25,7 +24,7 @@ export default function ProfilePage() {
     linkedin: "",
     medium: "",
   })
-  const [toast, setToast] = useState("")
+  const { toast } = useToast()
 
   useEffect(() => {
     loadProfile()
@@ -48,7 +47,11 @@ export default function ProfilePage() {
       })
     } catch (error) {
       console.error("Error loading profile:", error)
-      setToast("Error al cargar el perfil")
+      toast({
+        title: "❌ Error",
+        description: "Error al cargar el perfil",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
@@ -57,7 +60,6 @@ export default function ProfilePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    setToast("")
 
     try {
       const res = await fetch("/api/admin/profile", {
@@ -70,10 +72,17 @@ export default function ProfilePage() {
 
       const updated = await res.json()
       setProfile(updated)
-      setToast("✓ Perfil actualizado")
+      toast({
+        title: "✅ Perfil actualizado",
+        description: "Los cambios se guardaron correctamente",
+      })
     } catch (error) {
       console.error("Error updating profile:", error)
-      setToast("Error al actualizar el perfil")
+      toast({
+        title: "❌ Error",
+        description: "Error al actualizar el perfil",
+        variant: "destructive",
+      })
     } finally {
       setSaving(false)
     }
@@ -85,18 +94,25 @@ export default function ProfilePage() {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      setToast("Por favor selecciona una imagen")
+      toast({
+        title: "⚠️ Archivo inválido",
+        description: "Por favor selecciona una imagen",
+        variant: "destructive",
+      })
       return
     }
 
     // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      setToast("La imagen debe ser menor a 2MB")
+      toast({
+        title: "⚠️ Archivo muy grande",
+        description: "La imagen debe ser menor a 2MB",
+        variant: "destructive",
+      })
       return
     }
 
     setUploading(true)
-    setToast("")
 
     try {
       const formData = new FormData()
@@ -111,10 +127,17 @@ export default function ProfilePage() {
 
       const data = await res.json()
       setProfile((prev) => (prev ? { ...prev, avatar: data.avatar_url } : null))
-      setToast("✓ Avatar actualizado")
+      toast({
+        title: "✅ Avatar actualizado",
+        description: "La imagen se subió correctamente",
+      })
     } catch (error) {
       console.error("Error uploading avatar:", error)
-      setToast("Error al subir la imagen")
+      toast({
+        title: "❌ Error",
+        description: "Error al subir la imagen",
+        variant: "destructive",
+      })
     } finally {
       setUploading(false)
     }
@@ -124,7 +147,6 @@ export default function ProfilePage() {
     if (!confirm("¿Estás seguro de eliminar tu avatar?")) return
 
     setUploading(true)
-    setToast("")
 
     try {
       const res = await fetch("/api/admin/profile/avatar", {
@@ -134,10 +156,17 @@ export default function ProfilePage() {
       if (!res.ok) throw new Error("Failed to delete avatar")
 
       setProfile((prev) => (prev ? { ...prev, avatar: undefined } : null))
-      setToast("✓ Avatar eliminado")
+      toast({
+        title: "✅ Avatar eliminado",
+        description: "El avatar se eliminó correctamente",
+      })
     } catch (error) {
       console.error("Error deleting avatar:", error)
-      setToast("Error al eliminar el avatar")
+      toast({
+        title: "❌ Error",
+        description: "Error al eliminar el avatar",
+        variant: "destructive",
+      })
     } finally {
       setUploading(false)
     }
@@ -379,17 +408,6 @@ export default function ProfilePage() {
                     "Guardar Cambios"
                   )}
                 </Button>
-                {toast && (
-                  <span
-                    className={`text-sm ${
-                      toast.startsWith("✓")
-                        ? "text-green-600"
-                        : "text-destructive"
-                    }`}
-                  >
-                    {toast}
-                  </span>
-                )}
               </div>
             </form>
           </CardContent>

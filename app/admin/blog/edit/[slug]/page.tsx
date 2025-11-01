@@ -7,7 +7,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import MarkdownPreview from "@/components/blog/markdown-preview"
-import WYSIWYGEditor from "@/components/admin/wysiwyg-editor"
 import authors from "@/data/authors.json"
 import supabase from "@/lib/supabase/client"
 import { Author } from "@/lib/types"
@@ -15,6 +14,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 function slugify(input: string) {
   return (input || "")
@@ -60,9 +60,8 @@ export default function AdminBlogEditPage() {
   const [authorAvatar, setAuthorAvatar] = useState<string>("")
 
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
-
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const { toast } = useToast()
 
   // Upload helpers state
   const coverInputRef = useRef<HTMLInputElement | null>(null)
@@ -151,7 +150,7 @@ export default function AdminBlogEditPage() {
     return () => {
       cancelled = true
     }
-  },  [currentSlug, authorsList])
+  }, [currentSlug, authorsList])
 
   function applyFormat(before: string, after = "") {
     const el = textareaRef.current
@@ -198,7 +197,6 @@ export default function AdminBlogEditPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    setMessage(null)
     setError(null)
     try {
       // Normalize content: enforce a single H1 by demoting subsequent H1s to H2
@@ -256,13 +254,21 @@ export default function AdminBlogEditPage() {
       if (!res.ok) throw new Error(data?.error || "Error al guardar")
 
       const newSlug = data?.slug || slug || currentSlug
-      setMessage("Cambios guardados")
+      toast({
+        title: "✅ Cambios guardados",
+        description: "El artículo se actualizó correctamente",
+      })
       if (newSlug !== currentSlug) {
         router.replace(`/admin/blog/edit/${encodeURIComponent(newSlug)}`)
       } else {
         router.refresh()
       }
     } catch (err: unknown) {
+      toast({
+        title: "❌ Error",
+        description: err?.toString() || "Error al guardar los cambios",
+        variant: "destructive",
+      })
       setError(err?.toString() || "Error al guardar")
     } finally {
       setSaving(false)
@@ -414,14 +420,13 @@ export default function AdminBlogEditPage() {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Contenido del artículo</label>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Escribí en Markdown y veé el resultado en tiempo real. Los formatos se aplican automáticamente mientras escribís.
-                </p>
-                <WYSIWYGEditor
+              <div className="grid gap-2">
+                <label className="text-sm font-medium">Contenido del artículo</label>
+                <Textarea
+                  ref={textareaRef}
+                  className="font-mono text-sm min-h-[500px]"
                   value={content}
-                  onChange={setContent}
+                  onChange={(e) => setContent(e.target.value)}
                   placeholder="Escribe tu contenido aquí... Usa **negrita**, *cursiva*, # títulos, etc."
                 />
               </div>
@@ -598,10 +603,7 @@ export default function AdminBlogEditPage() {
         </div>
 
         {/* Footer con botones */}
-        <div className="lg:col-span-3 flex items-center justify-between border-t pt-6">
-          <div>
-            {message && <p className="text-sm text-muted-foreground">{message}</p>}
-          </div>
+        <div className="lg:col-span-3 flex items-center justify-end border-t pt-6">
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancelar</Button>
             <Button type="submit" disabled={saving} className="font-body">

@@ -31,7 +31,6 @@ export function generateMetadata(): Metadata {
       canonical,
       languages: {
         'es-AR': canonical,
-        en: canonical,
       },
     },
 
