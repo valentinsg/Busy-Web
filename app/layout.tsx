@@ -82,23 +82,22 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.ico', sizes: '48x48', type: 'image/x-icon' },
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
       { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
     ],
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
     other: [
-      // Android/Chrome
-      { rel: 'icon', type: 'image/png', sizes: '192x192', url: '/android-chrome-192x192.png' },
-      { rel: 'icon', type: 'image/png', sizes: '512x512', url: '/android-chrome-512x512.png' },
-      // Safari
-      { rel: 'mask-icon', url: '/safari-pinned-tab.svg', color: '#000000' },
       // Microsoft Tiles
       { rel: 'msapplication-TileImage', url: '/mstile-150x150.png' },
-      // PWA
-      { rel: 'manifest', url: '/site.webmanifest' },
+      { rel: 'msapplication-square70x70logo', url: '/mstile-70x70.png' },
+      { rel: 'msapplication-square150x150logo', url: '/mstile-150x150.png' },
+      { rel: 'msapplication-square310x310logo', url: '/mstile-310x310.png' },
     ],
   },
   // Configuración de Microsoft Tiles
