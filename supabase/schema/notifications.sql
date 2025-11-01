@@ -413,7 +413,8 @@ begin
       'newsletter_subscription',
       '📧 Nueva Suscripción Newsletter',
       NEW.email || ' se suscribió',
-      jsonb_build_object('email', NEW.email, 'subscriber_id', NEW.id),
+      -- newsletter_subscribers no tiene columna id; usar email en metadata
+      jsonb_build_object('email', NEW.email, 'subscriber_email', NEW.email),
       '/admin/newsletter'
     );
   end if;
