@@ -71,10 +71,9 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
   }, [allSectionsOpen])
 
   return (
-    <div className="sticky h-[calc(100vh-4rem)]">
-
-      <SidebarContent className="gap-0 py-0 relative">
-      <div className="relative z-10 px-2 py-3">
+    <>
+      <SidebarContent className="gap-0 py-0 relative overflow-y-auto">
+      <div className="relative z-10 px-2 py-3 pb-6">
       {/* Dashboard - siempre visible */}
       <SidebarGroup className="py-0 px-0">
         <SidebarGroupContent>
@@ -599,6 +598,6 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
       </SidebarGroup>
       </div>
       </SidebarContent>
-    </div>
+    </>
   )
 }

@@ -242,15 +242,15 @@ export default function SitePopover({ section }: { section?: string }) {
           {/* Content section - más padding si no hay imagen */}
           <div className={`relative space-y-4 md:space-y-5 ${data.image_url ? 'p-4 sm:p-6 md:p-8' : 'p-6 sm:p-8 md:p-12'}`}>
             <div className="space-y-3 md:space-y-4">
-              <h3 className={`font-body font-bold tracking-tight pr-10 md:pr-8 text-white ${
+              <h3 className={`font-body font-bold tracking-tight pr-14 sm:pr-12 md:pr-10 text-white leading-tight break-words ${
                 data.image_url
-                  ? 'text-xl sm:text-2xl md:text-3xl'
-                  : 'text-2xl sm:text-3xl md:text-4xl'
+                  ? 'text-lg sm:text-xl md:text-2xl lg:text-3xl'
+                  : 'text-xl sm:text-2xl md:text-3xl lg:text-4xl'
               }`}>
                 {data.title}
               </h3>
               {data.body && (
-                <p className={`font-body text-zinc-300 leading-relaxed whitespace-pre-line ${
+                <p className={`font-body text-zinc-300 leading-relaxed whitespace-pre-line break-words ${
                   data.image_url
                     ? 'text-sm sm:text-base'
                     : 'text-base sm:text-lg'
@@ -331,14 +331,14 @@ export default function SitePopover({ section }: { section?: string }) {
               </div>
             )}
 
-            {/* CTA Button - más grande en móvil */}
+            {/* CTA Button - adaptativo para textos largos */}
             {data.cta_url && data.cta_text && (
               <div className="pt-2">
                 <a
                   href={data.cta_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-body block w-full text-center px-6 py-3.5 sm:py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 font-medium shadow-sm hover:shadow-md text-base"
+                  className="font-body block w-full text-center px-4 py-3 sm:px-6 sm:py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 font-medium shadow-sm hover:shadow-md text-xs sm:text-sm leading-tight line-clamp-2 break-words"
                   onClick={onDismiss}
                 >
                   {data.cta_text}

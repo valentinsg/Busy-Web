@@ -23,21 +23,26 @@ export function MarketingSidebar({ latestPost, featuredProducts = [] }: Marketin
       {latestPost && (
         <Card className="overflow-hidden">
           <CardContent className="p-3">
-            <div className="flex gap-3 items-center">
-              {latestPost.cover && (
-                <div className="relative w-20 h-20 flex-shrink-0 rounded overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={latestPost.cover} alt={latestPost.coverAlt || latestPost.title} className="w-full h-full object-cover" />
+            <div className="space-y-3">
+              {/* Imagen y título en la misma línea */}
+              <Link href={`/blog/${latestPost.slug}`} prefetch={false} className="flex gap-3 items-start group">
+                {latestPost.cover && (
+                  <div className="relative w-16 h-16 flex-shrink-0 rounded overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={latestPost.cover} alt={latestPost.coverAlt || latestPost.title} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-heading text-sm font-semibold leading-tight line-clamp-3 break-words group-hover:text-accent-brand transition-colors">{latestPost.title}</h3>
                 </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-heading text-base font-semibold mb-1 line-clamp-2">{latestPost.title}</h3>
-                <Button asChild size="sm" className="font-body h-8 text-sm mt-2">
-                  <Link href={latestPost.cta?.url || `/blog/${latestPost.slug}`} prefetch={false}>
-                    {latestPost.cta?.text || "Leer"}
-                  </Link>
-                </Button>
-              </div>
+              </Link>
+              
+              {/* Botón abajo con texto truncado */}
+              <Button asChild size="sm" className="font-body w-full h-8 text-sm">
+                <Link href={latestPost.cta?.url || `/blog/${latestPost.slug}`} prefetch={false} className="truncate">
+                  {latestPost.cta?.text || "Leer"}
+                </Link>
+              </Button>
             </div>
           </CardContent>
         </Card>

@@ -37,11 +37,11 @@ export function AnimatedPopover({ isVisible, onClose, children }: AnimatedPopove
     <>
       {/* Backdrop - sin onClick para que solo se cierre con la X */}
       <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100000] animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] animate-in fade-in duration-200"
       />
 
       {/* Popover - centrado en todas las pantallas */}
-      <div className="fixed inset-0 z-[100001] flex items-center justify-center p-4 pointer-events-none">
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 pointer-events-none">
         <div
           className="w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-300 pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
