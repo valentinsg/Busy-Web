@@ -9,22 +9,24 @@ export function generateMetadata(): Metadata {
   const ogImage = `${siteUrlStr}/busy-streetwear.png`
 
   return {
-    title: 'Blog de Busy: Streetwear, Moda y Cultura',
+    title: 'Blog Busy | Cultura, Cine, Arte y Streetwear',
     description:
-      'Descubrí guías útiles, artículos relacionadas con la moda, tendencias e historia de cultura. Todos los articulos están previamente investigados y curados por el equipo de Busy.',
+      'Artículos sobre cultura urbana, cine, moda y lifestyle. Contenido editorial curado por Busy Streetwear: guías de estilo, tendencias, cuidado de ropa y conversaciones reales. Busy Talks en desarrollo.',
     keywords: [
-      'blog streetwear',
+      'blog cultura urbana',
+      'busy talks',
+      'streetwear argentina',
+      'cultura urbana mar del plata',
       'moda urbana',
-      'tendencias streetwear',
+      'cine y cultura',
+      'arte urbano',
+      'lifestyle streetwear',
       'guías de estilo',
-      'streetwear',
-      'cultura',
+      'tendencias streetwear',
       'cuidado de ropa',
-      'lookbook',
-      'cultura urbana',
-      'moda sostenible',
+      'básquet y cultura',
+      'podcast cultura urbana',
       'Busy Streetwear',
-      'streetwear Argentina',
     ],
 
     alternates: {
@@ -38,16 +40,16 @@ export function generateMetadata(): Metadata {
       type: 'website',
       locale: 'es_AR',
       url: canonical,
-      siteName: 'Busy',
-      title: 'Blog de Busy: Streetwear, Moda y Cultura',
+      siteName: 'Busy Streetwear',
+      title: 'Blog Busy | Cultura, Cine, Arte y Streetwear',
       description:
-        'Descubrí guías útiles relacionadas con la moda, tendencias del streetwear y contenido relacionado a la cultura urbana. Todos los articulos están curados por Busy.',
+        'Contenido editorial sobre cultura urbana, cine, moda y lifestyle. Artículos curados por Busy Streetwear. Conversaciones reales, sin frases motivacionales vacías.',
       images: [
         {
           url: ogImage,
           width: 1200,
           height: 630,
-          alt: 'Blog de Busy Streetwear - Moda Urbana y Cultura',
+          alt: 'Blog Busy - Cultura Urbana y Streetwear',
         },
       ],
     },

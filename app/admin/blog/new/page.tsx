@@ -60,6 +60,14 @@ export default function AdminBlogNewPage() {
   const [imageUploading, setImageUploading] = useState(false)
   const imageInputRef = useRef<HTMLInputElement | null>(null)
 
+  // Link popover state
+  const [linkOpen, setLinkOpen] = useState(false)
+  const [linkText, setLinkText] = useState("")
+  const [linkUrl, setLinkUrl] = useState("")
+
+  // Template selector state
+  const [templateOpen, setTemplateOpen] = useState(false)
+
   // Cover upload state
   const coverInputRef = useRef<HTMLInputElement | null>(null)
   const [coverUploading, setCoverUploading] = useState(false)
@@ -109,9 +117,13 @@ export default function AdminBlogNewPage() {
     }
   }, [])
 
-  function applyFormat(before: string, after = "") {
+  function applyFormat(before: string, after = "", preserveScroll = true) {
     const el = textareaRef.current
     if (!el) return
+    
+    // Save scroll position
+    const scrollTop = preserveScroll ? el.scrollTop : 0
+    
     const start = el.selectionStart || 0
     const end = el.selectionEnd || 0
 
@@ -143,12 +155,283 @@ export default function AdminBlogNewPage() {
 
     setContent(newText)
 
-    // Restore focus
+    // Restore focus and scroll position
     requestAnimationFrame(() => {
       el.focus()
       const newPos = start + trimStart + before.length + trimmedSelected.length + after.length
       el.setSelectionRange(newPos, newPos)
+      if (preserveScroll) {
+        el.scrollTop = scrollTop
+      }
     })
+  }
+
+  function applyTemplate(templateName: string) {
+    const templates: Record<string, string> = {
+      "tutorial": `# Título del Tutorial
+
+## Introducción
+
+Breve introducción sobre qué aprenderás en este tutorial.
+
+## Requisitos previos
+
+- Requisito 1
+- Requisito 2
+- Requisito 3
+
+## Paso 1: [Nombre del paso]
+
+Explicación detallada del primer paso.
+
+\`\`\`
+// Código de ejemplo si es necesario
+\`\`\`
+
+## Paso 2: [Nombre del paso]
+
+Explicación del segundo paso.
+
+## Paso 3: [Nombre del paso]
+
+Explicación del tercer paso.
+
+## Conclusión
+
+Resumen de lo que se aprendió.
+
+> **Tip:** Consejo adicional para el lector.
+
+## Preguntas frecuentes
+
+**¿Pregunta 1?**
+
+Respuesta 1.
+
+**¿Pregunta 2?**
+
+Respuesta 2.
+`,
+      "review": `# Review: [Nombre del Producto]
+
+## Primeras impresiones
+
+Describe tus primeras impresiones al recibir el producto.
+
+![Imagen del producto](/ruta-a-imagen.jpg)
+
+## Características principales
+
+- **Material:** Descripción del material
+- **Fit:** Cómo calza el producto
+- **Calidad:** Evaluación de la calidad
+- **Precio:** Relación calidad-precio
+
+## Lo que nos gustó ✅
+
+- Punto positivo 1
+- Punto positivo 2
+- Punto positivo 3
+
+## Lo que podría mejorar ⚠️
+
+- Punto a mejorar 1
+- Punto a mejorar 2
+
+## Veredicto final
+
+Conclusión y recomendación final.
+
+### Puntuación: ⭐⭐⭐⭐⭐ (X/5)
+
+> **Recomendado para:** Tipo de persona a quien le gustaría este producto.
+`,
+      "guia": `# Guía: [Título de la Guía]
+
+## ¿Por qué es importante?
+
+Explica la importancia del tema que vas a tratar.
+
+## Conceptos básicos
+
+Define los conceptos fundamentales que el lector debe conocer.
+
+### Concepto 1
+
+Explicación del concepto 1.
+
+### Concepto 2
+
+Explicación del concepto 2.
+
+## Mejores prácticas
+
+1. **Práctica 1:** Descripción y por qué es importante
+2. **Práctica 2:** Descripción y por qué es importante
+3. **Práctica 3:** Descripción y por qué es importante
+
+## Errores comunes a evitar
+
+- ❌ Error 1 y cómo evitarlo
+- ❌ Error 2 y cómo evitarlo
+- ❌ Error 3 y cómo evitarlo
+
+## Recursos adicionales
+
+- [Recurso 1](https://ejemplo.com)
+- [Recurso 2](https://ejemplo.com)
+
+## Conclusión
+
+Resumen final y próximos pasos.
+`,
+      "noticia": `# [Título de la Noticia]
+
+## Resumen
+
+Breve resumen de la noticia en 2-3 líneas.
+
+![Imagen destacada](/ruta-a-imagen.jpg)
+
+## ¿Qué pasó?
+
+Descripción detallada del evento o noticia.
+
+## Contexto
+
+Información de contexto necesaria para entender la noticia.
+
+## Detalles importantes
+
+- **Fecha:** Cuándo ocurrió
+- **Lugar:** Dónde ocurrió
+- **Involucrados:** Quiénes están involucrados
+
+## Impacto
+
+Cómo afecta esto a la comunidad o industria.
+
+## Próximos pasos
+
+Qué se espera que suceda a continuación.
+
+## Fuentes
+
+- [Fuente 1](https://ejemplo.com)
+- [Fuente 2](https://ejemplo.com)
+`,
+      "lista": `# [Título]: Top X [Tema]
+
+## Introducción
+
+Breve introducción sobre el tema de la lista.
+
+## #1 - [Nombre del Item]
+
+![Imagen](/ruta-a-imagen.jpg)
+
+**Por qué está en el #1:**
+
+Explicación detallada de por qué este item está en primer lugar.
+
+### Características destacadas:
+- Característica 1
+- Característica 2
+- Característica 3
+
+---
+
+## #2 - [Nombre del Item]
+
+![Imagen](/ruta-a-imagen.jpg)
+
+**Por qué está en el #2:**
+
+Explicación del segundo item.
+
+### Características destacadas:
+- Característica 1
+- Característica 2
+
+---
+
+## #3 - [Nombre del Item]
+
+![Imagen](/ruta-a-imagen.jpg)
+
+**Por qué está en el #3:**
+
+Explicación del tercer item.
+
+## Conclusión
+
+Resumen final y recomendación.
+`,
+      "comparacion": `# [Producto A] vs [Producto B]: ¿Cuál elegir?
+
+## Introducción
+
+Breve introducción sobre los productos que vas a comparar.
+
+## Tabla comparativa rápida
+
+| Característica | Producto A | Producto B |
+|----------------|------------|------------|
+| Precio | $XXX | $XXX |
+| Material | XXX | XXX |
+| Fit | XXX | XXX |
+| Durabilidad | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+
+## Producto A
+
+![Imagen Producto A](/ruta-a-imagen.jpg)
+
+### Ventajas
+- ✅ Ventaja 1
+- ✅ Ventaja 2
+- ✅ Ventaja 3
+
+### Desventajas
+- ❌ Desventaja 1
+- ❌ Desventaja 2
+
+## Producto B
+
+![Imagen Producto B](/ruta-a-imagen.jpg)
+
+### Ventajas
+- ✅ Ventaja 1
+- ✅ Ventaja 2
+- ✅ Ventaja 3
+
+### Desventajas
+- ❌ Desventaja 1
+- ❌ Desventaja 2
+
+## Veredicto final
+
+**Elige Producto A si:**
+- Condición 1
+- Condición 2
+
+**Elige Producto B si:**
+- Condición 1
+- Condición 2
+
+## Conclusión
+
+Recomendación final basada en diferentes perfiles de usuario.
+`
+    }
+
+    if (templates[templateName]) {
+      setContent(templates[templateName])
+      setTemplateOpen(false)
+      toast({
+        title: "✅ Template aplicado",
+        description: `Se aplicó el template "${templateName}" correctamente`,
+      })
+    }
   }
 
   return (
@@ -261,18 +544,59 @@ export default function AdminBlogNewPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("**", "**")}>Bold</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("*", "*")}>Italic</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("<u>", "</u>")}>Underline</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("# ")}>H1</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("## ")}>H2</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("### ")}>H3</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("\n\n")}>Espacio</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("\n> Cita de ejemplo\n> segunda línea opcional\n\n")}>Cita</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("\n> **Tip:** escribe aquí tu consejo destacado.\n\n")}>Caja destacada</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("\n1. Paso uno\n2. Paso dos\n3. Paso tres\n\n")}>Snippet numerado</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("\n| Columna A | Columna B | Columna C |\n|-----------|-----------|-----------|\n| A1        | B1        | C1        |\n| A2        | B2        | C2        |\n\n")}>Tabla</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormat("\n**FAQ**\n\n**Pregunta:** …\n\n**Respuesta:** …\n\n")}>FAQ</Button>
+                {/* Template selector */}
+                <Popover open={templateOpen} onOpenChange={setTemplateOpen}>
+                  <PopoverTrigger asChild>
+                    <Button type="button" variant="default" size="sm" className="font-semibold">📄 Templates</Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    <div className="grid gap-2">
+                      <h4 className="font-semibold text-sm mb-2">Selecciona un template</h4>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("tutorial")} className="justify-start">📚 Tutorial / How-to</Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("review")} className="justify-start">⭐ Review de Producto</Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("guia")} className="justify-start">📖 Guía Completa</Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("noticia")} className="justify-start">📰 Noticia / Anuncio</Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("lista")} className="justify-start">📝 Lista / Top X</Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("comparacion")} className="justify-start">⚖️ Comparación</Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                {/* Format buttons */}
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("**", "**") }}>Bold</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("*", "*") }}>Italic</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("<u>", "</u>") }}>Underline</Button>
+                
+                {/* Link button */}
+                <Popover open={linkOpen} onOpenChange={setLinkOpen}>
+                  <PopoverTrigger asChild>
+                    <Button type="button" variant="outline" size="sm">🔗 Link</Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-96">
+                    <div className="grid gap-2">
+                      <label className="text-xs text-muted-foreground">Texto del enlace</label>
+                      <Input value={linkText} onChange={(e) => setLinkText(e.target.value)} placeholder="Haz click aquí" />
+                      <label className="text-xs text-muted-foreground">URL</label>
+                      <Input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="https://ejemplo.com" />
+                      <div className="flex justify-end gap-2">
+                        <Button type="button" variant="ghost" size="sm" onClick={() => { setLinkText(""); setLinkUrl(""); setLinkOpen(false) }}>Cancelar</Button>
+                        <Button type="button" size="sm" onClick={(e) => { e.preventDefault(); const insert = `[${linkText || "enlace"}](${linkUrl || "#"})`; applyFormat(insert, ""); setLinkText(""); setLinkUrl(""); setLinkOpen(false) }}>Insertar</Button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("# ") }}>H1</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("## ") }}>H2</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("### ") }}>H3</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("<br/>\n") }}>Line Break</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n\n") }}>Espacio</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n- Item 1\n- Item 2\n- Item 3\n\n") }}>Lista</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n1. Paso uno\n2. Paso dos\n3. Paso tres\n\n") }}>Lista numerada</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n> Cita de ejemplo\n> segunda línea opcional\n\n") }}>Cita</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n> **Tip:** escribe aquí tu consejo destacado.\n\n") }}>Caja destacada</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n| Columna A | Columna B | Columna C |\n|-----------|-----------|-----------|\n| A1        | B1        | C1        |\n| A2        | B2        | C2        |\n\n") }}>Tabla</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n**FAQ**\n\n**Pregunta:** …\n\n**Respuesta:** …\n\n") }}>FAQ</Button>
 
                 <Popover open={imageOpen} onOpenChange={setImageOpen}>
                   <PopoverTrigger asChild>
@@ -314,7 +638,7 @@ export default function AdminBlogNewPage() {
                       <Input value={imageAlt} onChange={(e) => setImageAlt(e.target.value)} placeholder="Descripción" />
                       <div className="flex justify-end gap-2">
                         <Button type="button" variant="ghost" size="sm" onClick={() => { setImageUrl(""); setImageAlt(""); setImageOpen(false) }}>Cancelar</Button>
-                        <Button type="button" size="sm" className="font-heading" onClick={() => { const insert = `![${imageAlt || "imagen"}](${imageUrl || "/busy-streetwear.png"})\n`; applyFormat(insert, ""); setImageUrl(""); setImageAlt(""); setImageOpen(false) }}>Insertar</Button>
+                        <Button type="button" size="sm" className="font-heading" onClick={(e) => { e.preventDefault(); const insert = `![${imageAlt || "imagen"}](${imageUrl || "/busy-streetwear.png"})\n`; applyFormat(insert, ""); setImageUrl(""); setImageAlt(""); setImageOpen(false) }}>Insertar</Button>
                       </div>
                     </div>
                   </PopoverContent>

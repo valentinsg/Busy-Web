@@ -10,9 +10,9 @@ export function generateMetadata(): Metadata {
   const siteUrl = process.env.SITE_URL || 'https://busy.com.ar'
 
   return {
-    title: 'Shop',
+    title: 'Tienda Busy Streetwear | Moda Urbana, Básicos y Reventa',
     description:
-      'Conseguí nuestros productos online apartir de 5000$, con envíos a todo el país. Desde remeras oversize o jeans baggy hasta accesorios.',
+      'Shop online de Busy Streetwear: básicos propios, marcas amigas y reventa curada. Hoodies, remeras oversize, jeans baggy y accesorios. Envíos a todo Argentina desde Mar del Plata.',
     alternates: {
       canonical: `${siteUrl}/products`,
       languages: {
@@ -21,38 +21,39 @@ export function generateMetadata(): Metadata {
       },
     },
     openGraph: {
-      title: 'Productos de moda',
+      title: 'Tienda Busy Streetwear | Moda Urbana Argentina',
       description:
-        'Conseguí nuestros productos online apartir de 5000$, con envíos a todo el país. Desde remeras oversize o jeans baggy hasta accesorios.',
+        'Shop de Busy: básicos propios, marcas amigas y reventa curada. Hoodies, remeras, jeans y accesorios. Envíos a todo el país.',
       url: `${siteUrl}/products`,
       images: [
         {
-          url: `${siteUrl}/og/busy-products.png`,
+          url: `${siteUrl}/busy-og-image.png`,
           width: 1200,
           height: 630,
-          alt: 'Shop',
+          alt: 'Tienda Busy Streetwear',
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Shop',
+      title: 'Tienda Busy Streetwear',
       description:
-        'Conseguí nuestros productos online apartir de 5000$, con envíos a todo el país. Desde remeras oversize o jeans baggy hasta accesorios.',
-      images: [`${siteUrl}/og/busy-products.png`],
+        'Shop de Busy: básicos propios, marcas amigas y reventa curada. Hoodies, remeras, jeans y accesorios.',
+      images: [`${siteUrl}/busy-og-image.png`],
     },
     keywords: [
-      'Busy',
-      'Busy Streetwear',
-      'ropa urbana',
-      'ropa streetwear Mar del Plata',
+      'busy streetwear',
+      'tienda streetwear argentina',
+      'ropa urbana mar del plata',
       'hoodies oversize',
       'remeras oversize',
       'jeans baggy',
-      'gorras',
-      'accesorios',
+      'streetwear básicos',
+      'marcas amigas',
+      'reventa streetwear',
       'ropa unisex',
-      'tienda online',
+      'tienda online argentina',
+      'cultura urbana',
     ],
   }
 }

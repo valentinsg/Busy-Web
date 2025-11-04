@@ -70,15 +70,15 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   ...generateSEO({
-    title: 'Busy Streetwear',
-    description: 'Busy hace para los que hacen. Únite a nuestra comunidad que ofrece ropa de moda, contenido sobre cultura urbana, playlists, eventos y más.',
-    image: '/busy-streetwear.png',
+    title: 'Busy Streetwear | Cultura Urbana, Moda y Comunidad Argentina',
+    description: 'Marca argentina de cultura urbana nacida en Mar del Plata. Más que ropa: cultura, música, básquet, playlists, blog y comunidad real. Busy hace para los que hacen.',
+    image: '/busy-og-image.png',
     url: SITE_URL,
   }),
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Busy Streetwear',
-    template: '%s - Busy Streetwear',
+    default: 'Busy Streetwear | Cultura Urbana, Moda y Comunidad Argentina',
+    template: '%s | Busy Streetwear',
   },
   icons: {
     icon: [
@@ -112,7 +112,7 @@ export const metadata: Metadata = {
     'apple-mobile-web-app-status-bar-style': 'black-translucent',
   },
   manifest: '/site.webmanifest',
-  
+
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,
   },
@@ -127,29 +127,114 @@ export const viewport: Viewport = {
 }
 
 const jsonLd = [
+  // Brand Schema - Identidad de marca completa
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Brand',
+    name: 'Busy Streetwear',
+    alternateName: 'Busy',
+    description: 'Marca argentina de cultura urbana que combina moda, contenido y comunidad. Más que ropa: cultura, música, básquet y generar conversación.',
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo-busy-black.png`,
+    image: `${SITE_URL}/busy-og-image.png`,
+    foundingDate: '2024',
+    foundingLocation: {
+      '@type': 'Place',
+      name: 'Mar del Plata, Buenos Aires, Argentina',
+    },
+    founder: [
+      {
+        '@type': 'Person',
+        name: 'Valentín Sánchez Guevara',
+        jobTitle: 'Fundador, Programador, Director Creativo',
+        description: 'Fundador de Busy Streetwear, responsable de la idea de Busy, el desarrollo web y estrategia digital',
+      },
+      {
+        '@type': 'Person',
+        name: 'Agustín Bernardo Molina',
+        jobTitle: 'Co-fundador, Diseñador y embajador',
+        description: 'Co-fundador de Busy Streetwear, responsable del diseño de productos y dirección de la marca',
+      },
+    ],
+    sameAs: [
+      'https://www.instagram.com/busy.streetwear',
+      'https://www.tiktok.com/@busy.streetwear',
+      'https://www.facebook.com/profile.php?id=61581696441351',
+      'https://open.spotify.com/user/agustinmancho',
+      'https://www.youtube.com/@busystreetwear',
+    ],
+    slogan: 'Busy hace para los que hacen',
+  },
+  // Organization Schema - Información empresarial
   {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Busy Streetwear',
-    description: 'Busy hace para los que hacen. Únite a nuestra comunidad que ofrece ropa de moda, contenido sobre cultura urbana, playlists, eventos y más.',
+    legalName: 'Busy Streetwear',
+    description: 'Marca de cultura urbana nacida en Mar del Plata que trasciende la moda. Plataforma creativa que impulsa cultura, artistas y experiencias reales.',
     url: SITE_URL,
     logo: `${SITE_URL}/logo-busy-black.png`,
+    image: `${SITE_URL}/busy-og-image.png`,
+    foundingDate: '2024',
     sameAs: [
-      'https://instagram.com/busy.streetwear',
-      'https://www.facebook.com/profile.php?id=61581696441351',
+      'https://www.instagram.com/busy.streetwear',
       'https://www.tiktok.com/@busy.streetwear',
+      'https://www.facebook.com/profile.php?id=61581696441351',
+      'https://open.spotify.com/user/agustinmancho',
+      'https://www.youtube.com/@busystreetwear',
     ],
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+54 9 22 3668 0041',
       contactType: 'Customer Service',
       email: 'busy.streetwear@gmail.com',
+      areaServed: 'AR',
+      availableLanguage: ['Spanish', 'English'],
+    },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'María Curie 5457',
+      addressLocality: 'Mar del Plata',
+      addressRegion: 'Buenos Aires',
+      addressCountry: 'AR',
     },
   },
+  // LocalBusiness Schema - Showroom actual
+  {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: 'Busy Streetwear Showroom',
+    description: 'Showroom provisional de Busy Streetwear en Mar del Plata. Primer local físico planeado para 2026.',
+    image: `${SITE_URL}/busy-og-image.png`,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'María Curie 5457',
+      addressLocality: 'Mar del Plata',
+      addressRegion: 'Buenos Aires',
+      postalCode: '7600',
+      addressCountry: 'AR',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: -38.0055,
+      longitude: -57.5426,
+    },
+    url: SITE_URL,
+    telephone: '+54 9 22 3668 0041',
+    priceRange: '$$',
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      opens: '10:00',
+      closes: '20:00',
+    },
+  },
+  // WebSite Schema - Búsqueda del sitio
   {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Busy',
+    name: 'Busy Streetwear',
+    alternateName: 'Busy',
     url: SITE_URL,
     potentialAction: {
       '@type': 'SearchAction',
@@ -157,7 +242,46 @@ const jsonLd = [
       'query-input': 'required name=search_term_string',
     },
     inLanguage: 'es-AR',
+    publisher: {
+      '@type': 'Organization',
+      name: 'Busy Streetwear',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/logo-busy-black.png`,
+      },
+    },
   },
+  // PodcastSeries Schema - Busy Talks
+  {
+    '@context': 'https://schema.org',
+    '@type': 'PodcastSeries',
+    name: 'Busy Talks',
+    description: 'Podcast de Busy Streetwear: conversaciones reales sobre cultura urbana, música, básquet y creatividad. Entrevistas con artistas, creadores y la comunidad.',
+    url: `${SITE_URL}/blog`,
+    webFeed: `${SITE_URL}/blog`,
+    image: `${SITE_URL}/busy-og-image.png`,
+    author: {
+      '@type': 'Organization',
+      name: 'Busy Streetwear',
+      url: SITE_URL,
+    },
+    inLanguage: 'es-AR',
+  },
+  // CreativeWorkSeries Schema - Contenido audiovisual
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWorkSeries',
+    name: 'Busy Content',
+    description: 'Serie de contenido cultural de Busy Streetwear: documentales, entrevistas, cultura urbana y streetwear en YouTube y redes sociales.',
+    url: 'https://www.youtube.com/@busystreetwear',
+    creator: {
+      '@type': 'Organization',
+      name: 'Busy Streetwear',
+      url: SITE_URL,
+    },
+    inLanguage: 'es-AR',
+  },
+  // ItemList Schema - Navegación principal
   {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -175,21 +299,21 @@ const jsonLd = [
         '@type': 'ListItem',
         position: 2,
         name: 'Sobre Nosotros',
-        description: 'Conocé la historia, valores y roadmap de Busy Streetwear',
+        description: 'Historia de Busy Streetwear – Fundada en Mar del Plata por Valentín S. Guevara y Agustín B. Molina',
         url: `${SITE_URL}/about`,
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: 'Playlists',
-        description: 'Playlists curadas de música urbana y cultura streetwear',
+        description: 'Playlists curadas de Spotify para potenciar artistas emergentes',
         url: `${SITE_URL}/playlists`,
       },
       {
         '@type': 'ListItem',
         position: 4,
         name: 'Blog',
-        description: 'Artículos sobre cultura urbana, moda y streetwear',
+        description: 'Blog Busy | Cultura, cine, arte y streetwear',
         url: `${SITE_URL}/blog`,
       },
       {
@@ -231,7 +355,7 @@ export default function RootLayout({
         {/* Preconnect a Supabase Storage para mejorar LCP */}
         <link rel="preconnect" href="https://wbqbupxoyzczwroqzklj.supabase.co" />
         <link rel="dns-prefetch" href="https://wbqbupxoyzczwroqzklj.supabase.co" />
-        
+
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){document.documentElement.classList.add('dark')})()`,
