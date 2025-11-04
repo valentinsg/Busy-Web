@@ -79,6 +79,16 @@ export async function GET(req: NextRequest) {
           .limit(1)
           .maybeSingle()
 
+        // Get order items for analytics tracking
+        let orderItems = null
+        if (order?.id) {
+          const { data: items } = await supabase
+            .from("order_items")
+            .select("product_id,product_name,quantity,unit_price,variant_size,variant_color")
+            .eq("order_id", order.id)
+          orderItems = items || null
+        }
+
         const payload = {
           session_id,
           payment_id: String(tmp.payment_id),
@@ -87,6 +97,7 @@ export async function GET(req: NextRequest) {
           merchant_order_id: merchant_order_id ?? null,
           preference_id: preference_id ?? null,
           order: order ?? null,
+          items: orderItems ?? null,
         }
 
         logInfo("order-status from MP", payload)

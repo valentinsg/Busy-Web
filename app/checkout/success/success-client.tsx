@@ -20,6 +20,7 @@ export function SuccessClient() {
             const data = await res.json()
             const status: string = data?.status || 'unknown'
             const order = data?.order
+            const orderItems = data?.items || []
             if (!already && order && (status === 'approved' || status === 'accredited')) {
               trackPurchase({
                 transaction_id: String(order.id),
@@ -28,7 +29,13 @@ export function SuccessClient() {
                 tax: Number(order.tax || 0),
                 shipping: Number(order.shipping || 0),
                 coupon: null,
-                items: [],
+                items: orderItems.map((item: any) => ({
+                  item_id: item.product_id,
+                  item_name: item.product_name,
+                  price: Number(item.unit_price || 0),
+                  quantity: item.quantity,
+                  item_variant: item.variant_size && item.variant_color ? `${item.variant_size}|${item.variant_color}` : undefined,
+                })),
               })
               try { window.sessionStorage.setItem(`purchase_tracked_${sessionId}`, '1') } catch {}
             }
