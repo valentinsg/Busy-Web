@@ -209,10 +209,10 @@ export default function SitePopover({ section }: { section?: string }) {
           {/* Close button - más grande en móvil */}
           <button
             onClick={onDismiss}
-            className="absolute top-3 right-3 md:top-4 md:right-4 z-10 p-2.5 md:p-2 rounded-full bg-zinc-800/90 backdrop-blur-sm border border-zinc-600 hover:bg-zinc-700 transition-all duration-200 hover:scale-110 shadow-lg active:scale-95"
+            className="absolute top-3 right-3 md:top-4 md:right-4 z-[9999] p-3 md:p-2 rounded-full bg-zinc-800/95 backdrop-blur-sm border border-zinc-600 hover:bg-zinc-700 transition-all duration-200 hover:scale-110 shadow-lg active:scale-95"
             aria-label="Cerrar"
           >
-            <X className="w-5 h-5 md:w-4 md:h-4 text-white" />
+            <X className="w-6 h-6 md:w-4 md:h-4 text-white" />
           </button>
 
           {/* Image section - Más compacto en móvil */}
