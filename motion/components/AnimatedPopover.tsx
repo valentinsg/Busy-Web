@@ -41,9 +41,9 @@ export function AnimatedPopover({ isVisible, onClose, children }: AnimatedPopove
       />
 
       {/* Popover - centrado con más espacio del navbar en mobile */}
-      <div className="fixed inset-0 z-[9999999] flex items-start justify-center pt-20 pb-4 px-3 sm:items-center sm:pt-20 sm:pb-4 sm:px-4 pointer-events-none overflow-y-auto">
+      <div className="fixed inset-0 z-[9999999] flex items-start justify-center pt-20 pb-4 px-3 sm:items-center sm:pt-20 sm:pb-4 sm:px-4 pointer-events-none">
         <div
-          className="w-full max-w-3xl my-auto animate-in fade-in zoom-in-95 duration-300 pointer-events-auto"
+          className="w-full max-w-3xl max-h-[calc(100vh-6rem)] my-auto overflow-y-auto animate-in fade-in zoom-in-95 duration-300 pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {children}
