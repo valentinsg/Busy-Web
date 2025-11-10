@@ -13,6 +13,9 @@ export type NotificationType =
   | 'weekly_report'
   | 'monthly_report'
   | 'newsletter_reminder'
+  | 'blacktop_team_registration'
+  | 'blacktop_match_upcoming'
+  | 'blacktop_match_result'
 
 export type NotificationPriority = 'low' | 'medium' | 'high' | 'critical'
 
@@ -150,6 +153,39 @@ export interface NewsletterReminderMetadata {
   last_campaign_date?: string
 }
 
+export interface BlacktopTeamRegistrationMetadata extends Record<string, unknown> {
+  team_id: number
+  team_name: string
+  tournament_id: number
+  tournament_name: string
+  tournament_slug: string
+  captain_name: string
+  captain_instagram: string
+  players_count: number
+}
+
+export interface BlacktopMatchUpcomingMetadata extends Record<string, unknown> {
+  match_id: number
+  tournament_name: string
+  tournament_slug: string
+  team_a_name: string
+  team_b_name: string
+  scheduled_time: string
+  round: string
+}
+
+export interface BlacktopMatchResultMetadata extends Record<string, unknown> {
+  match_id: number
+  tournament_name: string
+  tournament_slug: string
+  team_a_name: string
+  team_a_score: number
+  team_b_name: string
+  team_b_score: number
+  winner_name: string
+  round: string
+}
+
 // =====================================================
 // NOTIFICATION SUMMARY
 // =====================================================
@@ -177,6 +213,9 @@ export const NOTIFICATION_ICONS: Record<NotificationType, string> = {
   weekly_report: 'BarChart3',
   monthly_report: 'TrendingUp',
   newsletter_reminder: 'BellRing',
+  blacktop_team_registration: 'Users',
+  blacktop_match_upcoming: 'Calendar',
+  blacktop_match_result: 'Trophy',
 }
 
 export const NOTIFICATION_COLORS: Record<NotificationPriority, string> = {
@@ -197,6 +236,9 @@ export const NOTIFICATION_LABELS: Record<NotificationType, string> = {
   weekly_report: 'Reporte Semanal',
   monthly_report: 'Reporte Mensual',
   newsletter_reminder: 'Recordatorio Newsletter',
+  blacktop_team_registration: 'Nuevo Equipo Inscrito',
+  blacktop_match_upcoming: 'Próximo Partido',
+  blacktop_match_result: 'Resultado de Partido',
 }
 
 // =====================================================

@@ -27,7 +27,8 @@ import {
   ShoppingCart,
   List,
   Tag,
-  Film
+  Film,
+  Trophy
 } from "lucide-react"
 import {
   SidebarContent,
@@ -299,6 +300,40 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                             <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
                                 <Users className="h-3.5 w-3.5" /> Propuestas de artistas
+                              </a>
+                            </SidebarMenuSubButton>
+                          </Link>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+
+                <Collapsible>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton isActive={isActive("/admin/blacktop")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
+                        <Trophy className="h-4 w-4" />
+                        <span>Blacktop</span>
+                        <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:slide-in-from-top-1">
+                      <SidebarMenuSub className="gap-1 ml-3 mt-1.5 mb-1.5 border-l-2 border-white/10 pl-3">
+                        <SidebarMenuSubItem>
+                          <Link href="/admin/blacktop" legacyBehavior>
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
+                              <a className="flex items-center gap-2">
+                                <Trophy className="h-3.5 w-3.5" /> Ver torneos
+                              </a>
+                            </SidebarMenuSubButton>
+                          </Link>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <Link href="/admin/blacktop/new" legacyBehavior>
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
+                              <a className="flex items-center gap-2">
+                                <Plus className="h-3.5 w-3.5" /> Nuevo torneo
                               </a>
                             </SidebarMenuSubButton>
                           </Link>

@@ -37,13 +37,13 @@ export function AnimatedPopover({ isVisible, onClose, children }: AnimatedPopove
     <>
       {/* Backdrop - sin onClick para que solo se cierre con la X */}
       <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[99999] animate-in fade-in duration-200"
       />
 
-      {/* Popover - centrado en todas las pantallas */}
-      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 pointer-events-none">
+      {/* Popover - centrado con más espacio del navbar en mobile */}
+      <div className="fixed inset-0 z-[100000] flex items-center justify-center pt-20 pb-4 px-4 sm:p-4 pointer-events-none">
         <div
-          className="w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-300 pointer-events-auto"
+          className="w-full max-w-3xl max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-300 pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {children}
