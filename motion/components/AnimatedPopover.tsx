@@ -56,8 +56,9 @@ export function AnimatedPopover({ isVisible, onClose, children }: AnimatedPopove
       {/* Popover - centrado sin navbar */}
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
         <div
-          className="w-full max-w-3xl max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-300 pointer-events-auto"
+          className="w-full max-w-3xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden animate-in fade-in zoom-in-95 duration-300 pointer-events-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"
           onClick={(e) => e.stopPropagation()}
+          style={{ overscrollBehavior: 'contain' }}
         >
           {children}
         </div>
