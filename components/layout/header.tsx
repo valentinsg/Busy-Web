@@ -17,7 +17,7 @@ import * as React from 'react'
 const navigation = [
   { label: 'Inicio', href: '/' },
   { label: 'Productos', href: '/products' },
-  // { label: 'Blacktop', href: '/blacktop' }, // Temporalmente oculto
+  { label: 'Blacktop', href: '/blacktop' },
   { label: 'Playlists', href: '/playlists' },
   { label: 'Blog', href: '/blog' },
   { label: 'Cultura', href: '/about' },
@@ -124,7 +124,7 @@ export function Header() {
     <header
       style={{ minHeight: '72px' }}
       className={
-        'fixed font-heading top-0 left-0 right-0 z-40 w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
+        'fixed font-heading top-0 left-0 right-0 z-[9997] w-full transition-[background-color,border-color,backdrop-filter] duration-500 ease-out ' +
         (showHeroVariant
           ? '!border-0 py-3 sm:p-3 !bg-transparent supports-[backdrop-filter]:!bg-transparent !backdrop-blur-0 !shadow-none'
           : 'border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-3 sm:py-0')
@@ -139,7 +139,7 @@ export function Header() {
 
         >
 
-        {/* Left logo (standard navbar) */} 
+        {/* Left logo (standard navbar) */}
         <Link
           href="/"
           className={
