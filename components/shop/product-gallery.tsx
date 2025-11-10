@@ -49,13 +49,6 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           sizes={getImageConfig('pattern').sizes}
         />
         <Image
-          src={'/product-bg.jpg'}
-          alt={productName}
-          fill
-          className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
-          sizes={getImageConfig('pattern').sizes}
-        />
-        <Image
           src={normalizeImageUrl(
             images[currentImage] ||
             '/busy-streetwear.png'
@@ -109,13 +102,6 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   : 'border-transparent hover:border-border'
               }`}
             >
-              <Image
-                src={'/product-bg.jpg'}
-                alt={"Busy Pattern white, diseñado por @agus.mxlina"}
-                fill
-                className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
-                sizes={getImageConfig('productThumbnail').sizes}
-              />
               <Image
                 src={normalizeImageUrl(
                   image || '/busy-streetwear.png'

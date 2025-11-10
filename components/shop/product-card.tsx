@@ -409,7 +409,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
                                   width={16}
                                   height={16}
                                   className="opacity-95 shrink-0"
-                                  unoptimized
+                                  unoptimized={true}
                                 />
                                 <div className="leading-snug opacity-90 text-sm">
                                   {formatSizeTooltip(String(product.sizes[0]))}
@@ -478,7 +478,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
                                           width={16}
                                           height={16}
                                           className="opacity-95 shrink-0"
-                                          unoptimized
+                                          unoptimized={true}
                                         />
                                         <div className="leading-snug opacity-90 text-sm">
                                           {formatSizeTooltip(size)}

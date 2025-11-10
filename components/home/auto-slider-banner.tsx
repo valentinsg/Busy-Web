@@ -33,23 +33,27 @@ export function AutoSliderBanner() {
   return (
     <div id="hero-banner" className="relative w-full h-screen overflow-hidden">
       {images.map((src, index) => (
-        <div
-          key={src}
-          className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 ${
-            index === currentIndex ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <Image
-            src={src}
-            alt={`Banner ${index + 1}`}
-            fill
-            style={{ objectFit: "cover" }}
-            sizes={getImageConfig('hero').sizes}
-            priority={index === 0}
-            loading={index === 0 ? "eager" : "lazy"}
-            quality={90}
-          />
-        </div>
+        // Only render current and next image to reduce memory
+        (index === currentIndex || index === (currentIndex + 1) % images.length) ? (
+          <div
+            key={src}
+            className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 ${
+              index === currentIndex ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <Image
+              src={src}
+              alt={`Banner ${index + 1}`}
+              fill
+              style={{ objectFit: "cover" }}
+              sizes={getImageConfig('hero').sizes}
+              priority={index === 0}
+              loading={index === 0 ? "eager" : "lazy"}
+              quality={75}
+              unoptimized={true}
+            />
+          </div>
+        ) : null
       ))}
       <motion.div
         className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center"
