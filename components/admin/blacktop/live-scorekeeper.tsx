@@ -39,7 +39,7 @@ export function LiveScorekeeper({ match, open, onClose, onSuccess }: LiveScoreke
   const [statsB, setStatsB] = useState<PlayerLiveStats[]>([]);
   const [selectedPlayerA, setSelectedPlayerA] = useState<number | null>(null);
   const [selectedPlayerB, setSelectedPlayerB] = useState<number | null>(null);
-  const [isLive, setIsLive] = useState(match.status === 'in_progress');
+  const [isLive, setIsLive] = useState(match.status === 'live');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -140,7 +140,7 @@ export function LiveScorekeeper({ match, open, onClose, onSuccess }: LiveScoreke
   };
 
   const handleStartStop = async () => {
-    const newStatus = isLive ? 'scheduled' : 'in_progress';
+    const newStatus = isLive ? 'pending' : 'live';
     try {
       await fetch(`/api/blacktop/matches/${match.id}`, {
         method: 'PATCH',
@@ -165,7 +165,7 @@ export function LiveScorekeeper({ match, open, onClose, onSuccess }: LiveScoreke
         body: JSON.stringify({
           team_a_score: scoreA,
           team_b_score: scoreB,
-          status: 'completed',
+          status: 'finished',
           winner_id: scoreA > scoreB ? match.team_a_id : match.team_b_id,
         }),
       });

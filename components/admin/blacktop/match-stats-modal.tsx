@@ -141,7 +141,7 @@ export function MatchStatsModal({ match, open, onClose, onSuccess }: MatchStatsM
         body: JSON.stringify({
           team_a_score: teamAScore,
           team_b_score: teamBScore,
-          status: 'completed',
+          status: 'finished',
           winner_id: teamAScore > teamBScore ? match.team_a_id : match.team_b_id,
         }),
       });

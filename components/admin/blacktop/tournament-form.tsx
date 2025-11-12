@@ -394,6 +394,57 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
         </CardContent>
       </Card>
 
+      {/* Configuración de tiempo */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Configuración de tiempo</CardTitle>
+          <CardDescription>Duración de períodos y reglas de desempate</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label htmlFor="period_duration">Duración del período (minutos)</Label>
+              <Input
+                id="period_duration"
+                type="number"
+                min="1"
+                value={(formData as any).period_duration_minutes || 8}
+                onChange={(e) => setFormData({ ...formData, period_duration_minutes: parseInt(e.target.value) } as any)}
+                placeholder="8"
+              />
+              <p className="text-sm text-muted-foreground mt-1">Ej: 8 para partidos de 2x8</p>
+            </div>
+
+            <div>
+              <Label htmlFor="periods_count">Cantidad de períodos</Label>
+              <Input
+                id="periods_count"
+                type="number"
+                min="1"
+                value={(formData as any).periods_count || 2}
+                onChange={(e) => setFormData({ ...formData, periods_count: parseInt(e.target.value) } as any)}
+                placeholder="2"
+              />
+              <p className="text-sm text-muted-foreground mt-1">Ej: 2 para dos tiempos</p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="golden_point"
+              checked={(formData as any).golden_point_enabled || false}
+              onCheckedChange={(checked) => setFormData({ ...formData, golden_point_enabled: checked } as any)}
+            />
+            <div>
+              <Label htmlFor="golden_point">Punto de Oro (Golden Point)</Label>
+              <p className="text-sm text-muted-foreground">
+                Si está habilitado, en caso de empate al finalizar el tiempo se juega muerte súbita: el próximo punto gana
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Premios */}
       <Card>
         <CardHeader>

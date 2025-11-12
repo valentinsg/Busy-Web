@@ -7,7 +7,7 @@ import { getTournamentWithStats } from '@/lib/repo/blacktop';
 import { ArrowLeft, Edit } from 'lucide-react';
 import { TournamentOverview } from '@/components/admin/blacktop/tournament-overview';
 import { TournamentTeams } from '@/components/admin/blacktop/tournament-teams';
-import { TournamentFixture } from '@/components/admin/blacktop/tournament-fixture';
+import { TournamentFixtureV2 } from '@/components/admin/blacktop/tournament-fixture-v2';
 import { TournamentGallery } from '@/components/admin/blacktop/tournament-gallery';
 import { TournamentFormatTab } from '@/components/admin/blacktop/tournament-format-tab';
 
@@ -74,7 +74,15 @@ async function TournamentDetail({ id }: { id: string }) {
         </TabsContent>
 
         <TabsContent value="fixture">
-          <TournamentFixture tournamentId={tournament.id} />
+          <TournamentFixtureV2 
+            tournamentId={tournament.id} 
+            tournament={{
+              ...tournament,
+              period_duration_minutes: tournament.period_duration_minutes || 8,
+              periods_count: tournament.periods_count || 2,
+              tournament_status: tournament.tournament_status || 'draft',
+            }} 
+          />
         </TabsContent>
 
         <TabsContent value="gallery">

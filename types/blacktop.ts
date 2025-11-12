@@ -2,9 +2,10 @@
 // BUSY BLACKTOP - Tipos TypeScript
 // =====================================================
 
-export type TournamentStatus = 'upcoming' | 'ongoing' | 'completed';
+export type MatchStatus = 'pending' | 'live' | 'halftime' | 'finished' | 'cancelled';
+export type TournamentStatus = 'draft' | 'groups' | 'playoffs' | 'finished';
+export type MatchPhase = 'groups' | 'semifinals' | 'third_place' | 'final';
 export type TeamStatus = 'pending' | 'approved' | 'rejected';
-export type MatchStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
 export type MatchRound = 'group_a' | 'group_b' | 'semifinal' | 'final' | 'third_place';
 export type MediaType = 'image' | 'video';
 
@@ -23,6 +24,17 @@ export interface TournamentFormatConfig {
       team_b_id?: number;
     }>;
   }[];
+  // Optional cover image for tournament (stored in JSON to avoid schema migration)
+  cover_image?: string;
+}
+
+export interface Group {
+  id: string;
+  tournament_id: number;
+  name: string;
+  display_name: string;
+  order_index: number;
+  created_at: string;
 }
 
 export interface Tournament {
@@ -46,6 +58,13 @@ export interface Tournament {
   prizes_description?: string;
   rules_content?: string;
   rules_url?: string;
+  // Configuración de tiempo
+  period_duration_minutes: number;
+  periods_count: number;
+  playoff_period_duration_minutes?: number; // Si es null, usa period_duration_minutes
+  playoff_periods_count?: number; // Si es null, usa periods_count
+  tournament_status: TournamentStatus;
+  golden_point_enabled: boolean;
   // Formato de torneo
   format_type: TournamentFormatType;
   num_groups: number;
@@ -72,6 +91,7 @@ export interface Team {
   status: TeamStatus;
   accept_image_rights: boolean;
   accept_rules: boolean;
+  group_id?: string;
   group_name?: string;
   group_position?: number;
   created_at: string;
@@ -108,15 +128,24 @@ export interface PlayerProfile {
 export interface Match {
   id: number;
   tournament_id: number;
+  phase: MatchPhase;
+  group_id?: string;
   team_a_id?: number;
   team_b_id?: number;
   team_a_score?: number;
   team_b_score?: number;
   winner_id?: number;
-  round: MatchRound;
+  current_period: number;
+  elapsed_seconds: number;
+  started_at?: string;
+  paused_at?: string;
+  finished_at?: string;
+  fouls_a: number;
+  fouls_b: number;
+  status: MatchStatus;
+  round?: MatchRound;
   match_number?: number;
   scheduled_time?: string;
-  status: MatchStatus;
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -291,11 +320,32 @@ export interface TeamLeaderboard {
   games_played: number;
 }
 
-export interface TournamentStandings {
-  team: Team;
-  wins: number;
-  losses: number;
+export interface StandingsRow {
+  team_id: number;
+  team_name: string;
+  played: number;
+  won: number;
+  lost: number;
   points_for: number;
   points_against: number;
-  point_differential: number;
+  point_diff: number;
+  tournament_points: number; // Mantener para compatibilidad pero no mostrar
+  win_pct: number; // Porcentaje de victorias (W/L)
+  streak: number; // Racha actual (positivo = victorias, negativo = derrotas)
+  total_fouls: number; // Total de faltas acumuladas
+}
+
+export interface FixturesResponse {
+  tournament: Tournament;
+  groups: {
+    group: Group;
+    teams: Team[];
+    matches: MatchWithTeams[];
+    standings: StandingsRow[];
+  }[];
+  playoffs: {
+    semifinals: MatchWithTeams[];
+    third_place: MatchWithTeams | null;
+    final: MatchWithTeams | null;
+  };
 }

@@ -110,25 +110,25 @@ export function TournamentFormatTab({ tournamentId }: TournamentFormatTabProps) 
   };
 
   const handleGenerateMatches = async () => {
-    if (!confirm('¿Generar partidos según el formato del torneo? Esto eliminará los partidos existentes.')) {
+    if (!confirm('¿Generar fixture de grupos? Esto eliminará los partidos de grupos existentes.')) {
       return;
     }
 
     try {
-      const response = await fetch(`/api/blacktop/tournaments/${tournamentId}/generate-matches`, {
+      const response = await fetch(`/api/admin/blacktop/tournaments/${tournamentId}/generate-groups-fixtures`, {
         method: 'POST',
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Error al generar partidos');
+        throw new Error(error.error || 'Error al generar fixture');
       }
 
       const result = await response.json();
 
       toast({
-        title: 'Partidos generados',
-        description: `Se crearon ${result.matchesCreated} partidos correctamente.`,
+        title: 'Fixture generado',
+        description: `Se crearon ${result.matchesCreated} partidos de grupos correctamente.`,
       });
 
       await loadData();

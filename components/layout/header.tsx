@@ -17,7 +17,7 @@ import * as React from 'react'
 const navigation = [
   { label: 'Inicio', href: '/' },
   { label: 'Productos', href: '/products' },
-  { label: 'Blacktop', href: '/blacktop' },
+  // { label: 'Blacktop', href: '/blacktop' }, // oculto del header
   { label: 'Playlists', href: '/playlists' },
   { label: 'Blog', href: '/blog' },
   { label: 'Cultura', href: '/about' },

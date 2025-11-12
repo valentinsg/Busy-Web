@@ -86,7 +86,7 @@ export function PlayoffBracket({ tournamentId }: PlayoffBracketProps) {
 
 function MatchCard({ match, label, highlight }: { match: BracketMatch; label: string; highlight?: boolean }) {
   const winner = match.winner_id;
-  const isCompleted = match.status === 'completed';
+  const isCompleted = match.status === 'finished';
 
   return (
     <div className={`border-2 rounded-lg p-4 ${highlight ? 'border-yellow-500 bg-yellow-500/10' : 'border-border'}`}>
@@ -135,7 +135,7 @@ function MatchCard({ match, label, highlight }: { match: BracketMatch; label: st
       {/* Estado */}
       <div className="mt-2 text-center">
         <Badge variant={isCompleted ? 'default' : 'outline'} className="text-xs">
-          {isCompleted ? 'Finalizado' : match.status === 'in_progress' ? 'En juego' : 'Programado'}
+          {isCompleted ? 'Finalizado' : match.status === 'live' ? 'En juego' : 'Programado'}
         </Badge>
       </div>
     </div>

@@ -36,20 +36,29 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
 
   // Calcular standings por grupo
   const standings = useMemo(() => {
-    // Infer group membership from any group matches (scheduled or not)
+    // Inferir pertenencia a grupo desde:
+    // - round (group_a / group_b) si existe
+    // - phase === 'groups' + group_id
+    // - team.group_name en listado de equipos
     const inferredGroup = new Map<number, 'A' | 'B'>();
+    // Desde partidos
     matches.forEach(m => {
-      if (m.round === 'group_a') {
+      if (m.round === 'group_a' || (m.phase === 'groups' && (m.group_id === 'group_a' || m.group_id?.toLowerCase().includes('group_a')))) {
         if (m.team_a_id) inferredGroup.set(m.team_a_id, 'A');
         if (m.team_b_id) inferredGroup.set(m.team_b_id, 'A');
       }
-      if (m.round === 'group_b') {
+      if (m.round === 'group_b' || (m.phase === 'groups' && (m.group_id === 'group_b' || m.group_id?.toLowerCase().includes('group_b')))) {
         if (m.team_a_id) inferredGroup.set(m.team_a_id, 'B');
         if (m.team_b_id) inferredGroup.set(m.team_b_id, 'B');
       }
     });
+    // Desde equipos
+    teams.forEach(t => {
+      if (t.group_name === 'A') inferredGroup.set(t.id, 'A');
+      if (t.group_name === 'B') inferredGroup.set(t.id, 'B');
+    });
 
-    const groupMatches = matches.filter(m => m.round.startsWith('group_') && m.status === 'completed');
+    const groupMatches = matches.filter(m => (m.round?.startsWith('group_') || m.phase === 'groups') && m.status === 'finished');
     const teamStats = new Map<number, StandingsRow>();
 
     // Inicializar stats
@@ -114,16 +123,43 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
 
   // Agrupar partidos
   const groupedMatches = useMemo(() => {
-    return Object.entries(ROUND_LABELS).map(([key, label]) => ({
-      key,
-      label,
-      matches: matches.filter((m) => m.round === key),
-    })).filter(r => r.matches.length > 0);
-  }, [matches]);
+    const teamById = new Map(teams.map(t => [t.id, t] as const));
+
+    const inRound = (m: MatchWithTeams, key: string) => {
+      if (m.round === key) return true;
+      // Grupos: aceptar phase/groups y decidir por group_id o group_name
+      if (key === 'group_a' && m.phase === 'groups') {
+        const ga = m.team_a_id ? teamById.get(m.team_a_id)?.group_name : undefined;
+        const gb = m.team_b_id ? teamById.get(m.team_b_id)?.group_name : undefined;
+        return m.group_id === 'group_a' || m.group_id?.toLowerCase().includes('group_a') || ga === 'A' || gb === 'A';
+      }
+      if (key === 'group_b' && m.phase === 'groups') {
+        const ga = m.team_a_id ? teamById.get(m.team_a_id)?.group_name : undefined;
+        const gb = m.team_b_id ? teamById.get(m.team_b_id)?.group_name : undefined;
+        return m.group_id === 'group_b' || m.group_id?.toLowerCase().includes('group_b') || ga === 'B' || gb === 'B';
+      }
+      // Playoffs: phase puede ser 'semifinals', 'final', 'third_place'
+      if (key === 'semifinal') return m.phase === 'semifinals';
+      if (key === 'final') return m.phase === 'final';
+      if (key === 'third_place') return m.phase === 'third_place';
+      return false;
+    };
+
+    return Object.entries(ROUND_LABELS)
+      .map(([key, label]) => ({
+        key,
+        label,
+        matches: matches.filter(m => inRound(m, key)),
+      }))
+      .filter(r => r.matches.length > 0);
+  }, [matches, teams]);
 
   // Partidos de playoff
   const playoffMatches = useMemo(() => {
-    return matches.filter(m => ['semifinal', 'final', 'third_place'].includes(m.round));
+    return matches.filter(m =>
+      ['semifinal', 'final', 'third_place'].includes(m.round as any) ||
+      ['semifinals', 'final', 'third_place'].includes(m.phase as any)
+    );
   }, [matches]);
 
   const renderTeamLogo = (team: TeamWithPlayers | undefined) => {
@@ -253,7 +289,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             })}
                           </span>
                         )}
-                        {match.status === 'completed' && match.winner && (
+                        {match.status === 'finished' && match.winner && (
                           <span className="px-2 py-1 rounded text-xs font-bold" style={{ backgroundColor: `${accentColor}30` }}>
                             Ganador: {match.winner.name}
                           </span>

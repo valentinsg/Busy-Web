@@ -23,7 +23,7 @@ interface MatchSlot {
   team_b?: Team;
   team_a_score?: number;
   team_b_score?: number;
-  status: 'scheduled' | 'in_progress' | 'completed';
+  status: 'pending' | 'live' | 'finished';
 }
 
 export function FixtureBuilder({ tournamentId, tournament }: FixtureBuilderProps) {
@@ -248,7 +248,7 @@ export function FixtureBuilder({ tournamentId, tournament }: FixtureBuilderProps
                             )}
                           </td>
                           <td className="p-3 text-center">
-                            {match.status === 'completed' ? (
+                            {match.status === 'finished' ? (
                               <div className="font-bold">
                                 {match.team_a_score} - {match.team_b_score}
                               </div>
@@ -259,16 +259,16 @@ export function FixtureBuilder({ tournamentId, tournament }: FixtureBuilderProps
                           <td className="p-3 text-center">
                             <Badge
                               variant={
-                                match.status === 'completed'
+                                match.status === 'finished'
                                   ? 'default'
-                                  : match.status === 'in_progress'
+                                  : match.status === 'live'
                                   ? 'destructive'
                                   : 'outline'
                               }
                             >
-                              {match.status === 'completed'
+                              {match.status === 'finished'
                                 ? 'Finalizado'
-                                : match.status === 'in_progress'
+                                : match.status === 'live'
                                 ? 'En juego'
                                 : 'Programado'}
                             </Badge>

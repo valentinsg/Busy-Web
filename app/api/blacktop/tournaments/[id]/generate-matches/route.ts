@@ -56,7 +56,7 @@ export async function POST(
               team_a_id: groupTeams[i].id,
               team_b_id: groupTeams[j].id,
               round: roundKey,
-              status: 'scheduled',
+              status: 'pending',
               match_number: matches.length + 1,
             });
           }

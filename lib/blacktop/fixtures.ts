@@ -1,0 +1,141 @@
+// lib/blacktop/fixtures.ts
+import { getServiceClient } from '@/lib/supabase/server';
+import type { Match } from '@/types/blacktop';
+
+/**
+ * Genera todos los enfrentamientos posibles para un grupo (round-robin)
+ */
+function generateRoundRobinMatches(teams: { id: number; name: string }[]) {
+  const matches: Array<[number, number]> = [];
+  for (let i = 0; i < teams.length; i++) {
+    for (let j = i + 1; j < teams.length; j++) {
+      matches.push([teams[i].id, teams[j].id]);
+    }
+  }
+  return matches;
+}
+
+/**
+ * Algoritmo mejorado que distribuye partidos evitando que un equipo juegue 3 veces seguidas
+ * Usa un enfoque greedy: prioriza partidos donde los equipos llevan más tiempo sin jugar
+ */
+function optimizeMatchOrder(allGroupMatches: Array<{ groupId: number; groupName: string; matches: Array<[number, number]> }>) {
+  const orderedMatches: any[] = [];
+  const lastPlayedIndex: Map<number, number> = new Map(); // teamId -> último índice donde jugó
+  let globalIndex = 0;
+
+  // Crear pool de partidos pendientes por grupo
+  const pendingByGroup = allGroupMatches.map(g => ({
+    groupId: g.groupId,
+    groupName: g.groupName,
+    pending: [...g.matches]
+  }));
+
+  while (pendingByGroup.some(g => g.pending.length > 0)) {
+    let bestMatch: { groupIdx: number; matchIdx: number; score: number } | undefined = undefined;
+
+    // Evaluar todos los partidos pendientes
+    pendingByGroup.forEach((group, groupIdx) => {
+      group.pending.forEach((match, matchIdx) => {
+        const [teamA, teamB] = match;
+        const lastA = lastPlayedIndex.get(teamA) ?? -1000;
+        const lastB = lastPlayedIndex.get(teamB) ?? -1000;
+        
+        // Score: cuanto mayor, mejor (más tiempo sin jugar)
+        const gapA = globalIndex - lastA;
+        const gapB = globalIndex - lastB;
+        const score = Math.min(gapA, gapB); // Priorizamos el equipo que jugó más recientemente
+        
+        if (!bestMatch || score > bestMatch.score) {
+          bestMatch = { groupIdx, matchIdx, score };
+        }
+      });
+    });
+
+    if (!bestMatch) break;
+
+    // Agregar el mejor partido encontrado
+    const { groupIdx, matchIdx } = bestMatch;
+    const selectedGroup = pendingByGroup[groupIdx];
+    const [teamA, teamB] = selectedGroup.pending[matchIdx];
+    
+    orderedMatches.push({
+      groupId: selectedGroup.groupId,
+      groupName: selectedGroup.groupName,
+      teamA,
+      teamB
+    });
+
+    // Actualizar índices
+    lastPlayedIndex.set(teamA, globalIndex);
+    lastPlayedIndex.set(teamB, globalIndex);
+    globalIndex++;
+
+    // Remover partido del pool
+    selectedGroup.pending.splice(matchIdx, 1);
+  }
+
+  return orderedMatches;
+}
+
+export async function generateGroupsFixtures(tournamentId: number): Promise<Match[]> {
+  const supabase = getServiceClient();
+  
+  const { data: groups } = await supabase
+    .from('groups')
+    .select('*')
+    .eq('tournament_id', tournamentId)
+    .order('order_index', { ascending: true });
+  
+  if (!groups || groups.length === 0) throw new Error('No hay grupos configurados');
+  
+  // 1. Generar todos los enfrentamientos por grupo
+  const allGroupMatches: Array<{ groupId: number; groupName: string; matches: Array<[number, number]> }> = [];
+  
+  for (const group of groups) {
+    const { data: teams } = await supabase
+      .from('teams')
+      .select('id, name')
+      .eq('tournament_id', tournamentId)
+      .eq('group_id', group.id)
+      .eq('status', 'approved');
+    
+    if (!teams || teams.length === 0) continue;
+    
+    const matches = generateRoundRobinMatches(teams);
+    allGroupMatches.push({
+      groupId: group.id,
+      groupName: group.name,
+      matches
+    });
+  }
+  
+  // 2. Optimizar orden de partidos
+  const optimizedMatches = optimizeMatchOrder(allGroupMatches);
+  
+  // 3. Crear objetos de partido
+  const matches = optimizedMatches.map((m, idx) => ({
+    tournament_id: tournamentId,
+    phase: 'groups',
+    round: m.groupName,
+    group_id: m.groupId,
+    team_a_id: m.teamA,
+    team_b_id: m.teamB,
+    status: 'pending',
+    match_number: idx + 1,
+    current_period: 1,
+    elapsed_seconds: 0,
+    fouls_a: 0,
+    fouls_b: 0,
+  }));
+  
+  // 4. BORRAR TODOS LOS PARTIDOS DEL TORNEO (no solo grupos)
+  await supabase.from('matches').delete().eq('tournament_id', tournamentId);
+  
+  // 5. Insertar nuevos partidos
+  const { data: insertedMatches, error } = await supabase.from('matches').insert(matches).select();
+  
+  if (error) throw new Error(`Error al generar partidos: ${error.message}`);
+  
+  return insertedMatches || [];
+}
