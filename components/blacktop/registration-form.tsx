@@ -376,7 +376,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
           <div className="space-y-2">
             <Label htmlFor="team_name" className="text-white flex items-center gap-2">
               <Trophy className="h-4 w-4" style={{ color: tournament.accent_color }} />
-              Nombre del equipo *
+              Nombre del equipo <span className="text-red-500 font-bold">*</span>
             </Label>
             <Input
               id="team_name"
@@ -424,7 +424,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Nombre del capitán */}
               <div className="space-y-2">
-                <Label htmlFor="captain_name" className="text-white">Nombre completo *</Label>
+                <Label htmlFor="captain_name" className="text-white">Nombre completo <span className="text-red-500 font-bold">*</span></Label>
                 <Input
                   id="captain_name"
                   value={captainName}
@@ -452,7 +452,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="captain_instagram" className="text-white flex items-center gap-2">
                   <Instagram className="h-4 w-4" />
-                  Instagram *
+                  Instagram <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="captain_instagram"
@@ -482,7 +482,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-white flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  Email *
+                  Email <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="email"
@@ -512,7 +512,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-white flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  WhatsApp / Teléfono *
+                  WhatsApp / Teléfono <span className="text-red-500 font-bold">*</span>
                 </Label>
                 <Input
                   id="phone"
@@ -599,7 +599,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Nombre */}
                 <div className="space-y-2 md:col-span-2">
-                  <Label className="text-white text-sm">Nombre completo *</Label>
+                  <Label className="text-white text-sm">Nombre completo <span className="text-red-500 font-bold">*</span></Label>
                   <Input
                     value={player.full_name}
                     onChange={(e) => updatePlayer(index, 'full_name', e.target.value)}
@@ -623,7 +623,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
                 <div className="space-y-2">
                   <Label className="text-white text-sm flex items-center gap-2">
                     <Instagram className="h-3 w-3" />
-                    Instagram *
+                    Instagram <span className="text-red-500 font-bold">*</span>
                   </Label>
                   <Input
                     value={player.instagram_handle}
@@ -651,7 +651,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
                 <div className="space-y-2">
                   <Label className="text-white text-sm flex items-center gap-2">
                     <Mail className="h-3 w-3" />
-                    Email *
+                    Email <span className="text-red-500 font-bold">*</span>
                   </Label>
                   <Input
                     type="email"
@@ -699,7 +699,7 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
             <p className="text-sm text-white/70 flex items-start gap-2">
               <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: tournament.accent_color }} />
               <span>
-                Las fotos de los jugadores son <strong>opcionales</strong> pero recomendadas. Se usarán para crear los perfiles del torneo y contenido en redes sociales.
+                Las fotos de los jugadores son <strong className="text-red-500 font-bold">opcionales</strong> pero recomendadas. Se usarán para crear los perfiles del torneo y contenido en redes sociales.
               </span>
             </p>
           </div>
@@ -741,11 +741,12 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
               id="accept_rules"
               checked={acceptRules}
               onCheckedChange={(checked) => setAcceptRules(checked as boolean)}
-              className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-black mt-1"
+              className="border-red-500 data-[state=checked]:bg-red-600 data-[state=checked]:text-white mt-1"
+              style={{ borderColor: `${tournament.accent_color}80` }}
             />
             <div className="flex-1">
               <Label htmlFor="accept_rules" className="text-white text-sm leading-relaxed cursor-pointer">
-                Acepto el <strong>reglamento del torneo</strong> y el <strong>código de conducta</strong> de BUSY BLACKTOP *
+                Acepto el <strong className="text-red-500 font-bold">reglamento del torneo</strong> y el <strong className="text-red-500 font-bold">código de conducta</strong> de BUSY BLACKTOP *
               </Label>
               {tournament.rules_content && (
                 <Dialog 
@@ -772,10 +773,10 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
                       Leer reglamento completo
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="w-[95vw] md:max-w-3xl lg:max-w-4xl max-h-[85vh] overflow-y-auto bg-neutral-900 text-white border border-white/20 rounded-xl shadow-2xl z-[100]">
+                  <DialogContent className="w-[95vw] md:max-w-3xl lg:max-w-4xl max-h-[85vh] overflow-y-auto bg-neutral-900 text-white border-2 rounded-xl shadow-2xl z-[100]" style={{ borderColor: `${tournament.accent_color}40` }}>
                     <DialogHeader>
-                      <DialogTitle className="text-white text-2xl">Reglamento del Torneo</DialogTitle>
-                      <DialogDescription className="text-white/80">
+                      <DialogTitle className="text-2xl font-bold" style={{ color: tournament.accent_color }}>Reglamento del Torneo</DialogTitle>
+                      <DialogDescription className="text-red-400 font-semibold">
                         {tournament.name}
                       </DialogDescription>
                     </DialogHeader>
@@ -793,16 +794,17 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
               id="accept_image_rights"
               checked={acceptImageRights}
               onCheckedChange={(checked) => setAcceptImageRights(checked as boolean)}
-              className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-black mt-1"
+              className="border-red-500 data-[state=checked]:bg-red-600 data-[state=checked]:text-white mt-1"
+              style={{ borderColor: `${tournament.accent_color}80` }}
             />
             <Label htmlFor="accept_image_rights" className="text-white text-sm leading-relaxed cursor-pointer">
-              Autorizo el uso de mi imagen y la de mi equipo en <strong>fotos, videos y perfiles públicos</strong> del torneo para redes sociales, web y contenido de BUSY *
+              Autorizo el uso de mi imagen y la de mi equipo en <strong className="text-red-500 font-bold">fotos, videos y perfiles públicos</strong> del torneo para redes sociales, web y contenido de BUSY *
             </Label>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-lg p-4 mt-4">
+          <div className="bg-red-500/5 border rounded-lg p-4 mt-4" style={{ borderColor: `${tournament.accent_color}30` }}>
             <p className="text-xs text-white/60 flex items-start gap-2">
-              <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+              <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: tournament.accent_color }} />
               <span>
                 Al inscribirte aceptas que BUSY puede usar las imágenes del torneo para promover futuros eventos y crear contenido en redes sociales. Siempre etiquetaremos a los jugadores y equipos.
               </span>

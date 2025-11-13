@@ -17,10 +17,10 @@ export function TournamentRulesMarkdown({ content }: TournamentRulesMarkdownProp
             <h1 className="text-3xl font-bold text-white mb-4 mt-6" {...props} />
           ),
           h2: ({ node, ...props }) => (
-            <h2 className="text-2xl font-bold text-red-500 mb-3 mt-5 flex items-center gap-2" {...props} />
+            <h2 className="text-2xl font-bold text-red-600 mb-3 mt-5 flex items-center gap-2" {...props} />
           ),
           h3: ({ node, ...props }) => (
-            <h3 className="text-xl font-semibold text-red-400 mb-2 mt-4" {...props} />
+            <h3 className="text-xl font-semibold text-red-500 mb-2 mt-4" {...props} />
           ),
           p: ({ node, ...props }) => (
             <p className="text-white/80 mb-3 leading-relaxed" {...props} />
@@ -35,7 +35,7 @@ export function TournamentRulesMarkdown({ content }: TournamentRulesMarkdownProp
             <li className="text-white/80" {...props} />
           ),
           strong: ({ node, ...props }) => (
-            <strong className="font-bold text-red-400" {...props} />
+            <strong className="font-bold text-red-500" {...props} />
           ),
           em: ({ node, ...props }) => (
             <em className="italic text-white/90" {...props} />

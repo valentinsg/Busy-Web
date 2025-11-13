@@ -532,31 +532,45 @@ export async function registerTeam(formData: TeamRegistrationFormData, teamLogoU
     }
 
     // 2. Crear nuevo equipo
-    const team = await createTeam({
+    const teamData: any = {
       tournament_id: formData.tournament_id,
       name: formData.team_name,
       captain_name: formData.captain_name,
       captain_email: formData.email,
       captain_phone: formData.whatsapp_or_phone,
       captain_instagram: normalizeInstagram(formData.captain_instagram),
-      logo_url: teamLogoUrl || undefined,
       accept_image_rights: formData.accept_image_rights || false,
       accept_rules: formData.accept_rules || false,
       status: 'pending',
       is_confirmed: false,
-    });
+    };
+    
+    // Solo agregar logo_url si existe
+    if (teamLogoUrl) {
+      teamData.logo_url = teamLogoUrl;
+    }
+    
+    const team = await createTeam(teamData);
 
     // 3. Crear jugadores con sus fotos
-    const players = formData.players.map((p: any) => ({
-      tournament_id: formData.tournament_id,
-      team_id: team.id,
-      full_name: p.full_name,
-      instagram_handle: normalizeInstagram(p.instagram_handle),
-      email: p.email,
-      photo_url: p.photo_url || undefined,
-      is_captain: p.is_captain,
-      consent_media: formData.accept_image_rights || false,
-    }));
+    const players = formData.players.map((p: any) => {
+      const playerData: any = {
+        tournament_id: formData.tournament_id,
+        team_id: team.id,
+        full_name: p.full_name,
+        instagram_handle: normalizeInstagram(p.instagram_handle),
+        email: p.email,
+        is_captain: p.is_captain,
+        consent_media: formData.accept_image_rights || false,
+      };
+      
+      // Solo agregar photo_url si existe y no es null
+      if (p.photo_url) {
+        playerData.photo_url = p.photo_url;
+      }
+      
+      return playerData;
+    });
 
     await createPlayers(players);
 
