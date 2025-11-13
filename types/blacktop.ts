@@ -24,8 +24,6 @@ export interface TournamentFormatConfig {
       team_b_id?: number;
     }>;
   }[];
-  // Optional cover image for tournament (stored in JSON to avoid schema migration)
-  cover_image?: string;
 }
 
 export interface Group {
@@ -54,6 +52,8 @@ export interface Tournament {
   is_hidden: boolean;
   primary_color: string;
   accent_color: string;
+  banner_url?: string;
+  flyer_images?: string[]; // URLs de imágenes del carousel
   prizes_title: string;
   prizes_description?: string;
   rules_content?: string;
@@ -232,6 +232,7 @@ export interface TournamentFormData {
   is_hidden?: boolean;
   primary_color?: string;
   accent_color?: string;
+  banner_url?: string;
   prizes_title?: string;
   prizes_description?: string;
   rules_content?: string;
@@ -254,11 +255,13 @@ export interface TeamRegistrationFormData {
   captain_instagram: string;
   email: string;
   whatsapp_or_phone: string;
+  team_photo?: File | null;
   players: {
     full_name: string;
     instagram_handle: string;
     email: string;
     is_captain: boolean;
+    photo?: File | null;
   }[];
   accept_rules: boolean;
   accept_image_rights: boolean;

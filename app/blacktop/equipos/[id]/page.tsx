@@ -103,256 +103,266 @@ export default async function TeamProfilePage({ params }: TeamProfilePageProps) 
   const teamStats = await getTeamStats(parseInt(params.id));
   const matches = await getTeamMatches(parseInt(params.id));
 
+  const accentColor = tournament?.accent_color || '#ef4444';
+
   return (
     <div className="min-h-screen bg-black text-white font-body">
-      <div className="container mx-auto px-4 pt-24 pb-8 max-w-6xl">
-        {/* Botón volver y Breadcrumb */}
-        <div className="flex items-center gap-4 mb-6 flex-wrap">
-          <Link href={`/blacktop/${tournament?.slug || ''}`}>
-            <Button variant="ghost" size="sm" className="text-white/60 hover:text-white">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver
-            </Button>
-          </Link>
-          <nav className="flex items-center gap-2 text-sm text-white/60">
-            <Link href={`/blacktop/${tournament?.slug || ''}`} className="hover:text-white">
-              {tournament?.name || 'Torneo'}
-            </Link>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-white">{team.name}</span>
-          </nav>
-        </div>
+      <div className="container mx-auto px-4 pt-20 pb-12 max-w-6xl">
+        {/* Botón volver */}
+        <Link href={`/blacktop/${tournament?.slug || ''}`} className="inline-block mb-6">
+          <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/5">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver al torneo
+          </Button>
+        </Link>
 
-        {/* Header */}
-        <div className="mb-8">
-
-          <div className="flex items-start gap-6">
+        {/* Header mejorado */}
+        <div className="relative mb-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 overflow-hidden">
+          {/* Accent line */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent" style={{ color: accentColor }} />
+          
+          <div className="flex flex-col sm:flex-row items-start gap-6">
             {/* Logo del equipo */}
-            <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center">
-              {team.logo_url ? (
-                <Image
-                  src={team.logo_url}
-                  alt={team.name}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <Trophy className="h-16 w-16 text-white/50" />
+            <div className="relative">
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-white/5 flex items-center justify-center border-2" style={{ borderColor: `${accentColor}40` }}>
+                {team.logo_url ? (
+                  <Image
+                    src={team.logo_url}
+                    alt={team.name}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="text-4xl font-bold" style={{ color: accentColor }}>
+                    {team.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              {team.group_name && (
+                <div 
+                  className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 border-black"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  {team.group_name.replace('Grupo ', '')}
+                </div>
               )}
             </div>
 
             {/* Info del equipo */}
             <div className="flex-1">
-              <h1 className="text-4xl font-bold mb-2">{team.name}</h1>
-              <div className="flex items-center gap-4 text-white/70">
+              <h1 className="text-3xl sm:text-4xl font-bold mb-3" style={{ color: accentColor }}>{team.name}</h1>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-white/70 mb-3">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   <span>{team.players?.length || 0} jugadores</span>
                 </div>
+                <div className="w-px h-4 bg-white/20" />
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4" />
+                  <span>Capitán: {team.captain_name}</span>
+                </div>
+                <div className="w-px h-4 bg-white/20" />
                 <a
-                  href={`https://instagram.com/${team.captain_instagram}`}
+                  href={`https://instagram.com/${team.captain_instagram.replace('@', '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 hover:text-white transition-colors"
+                  style={{ color: accentColor }}
                 >
                   <Instagram className="h-4 w-4" />
-                  @{team.captain_instagram}
+                  @{team.captain_instagram.replace('@', '')}
                 </a>
               </div>
-              <Badge variant="outline" className="mt-3">
-                Capitán: {team.captain_name}
-              </Badge>
+              {tournament && (
+                <p className="text-xs text-white/50">
+                  {tournament.name}
+                </p>
+              )}
             </div>
           </div>
         </div>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-          <Card className="bg-white/5 border-white/10">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold" style={{ color: tournament?.accent_color || '#ef4444' }}>{teamStats.matches_played}</div>
-                <div className="text-sm text-white/70 mt-1">Partidos</div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8">
+          <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-white/20 transition-all">
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl font-bold mb-1" style={{ color: accentColor }}>{teamStats.matches_played}</div>
+              <div className="text-xs text-white/50 uppercase tracking-wide">Partidos</div>
+            </div>
+          </div>
 
-          <Card className="bg-white/5 border-white/10">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-500">{teamStats.wins}</div>
-                <div className="text-sm text-white/70 mt-1">Victorias</div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-white/20 transition-all">
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-green-500 mb-1">{teamStats.wins}</div>
+              <div className="text-xs text-white/50 uppercase tracking-wide">Victorias</div>
+            </div>
+          </div>
 
-          <Card className="bg-white/5 border-white/10">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-red-500">{teamStats.losses}</div>
-                <div className="text-sm text-white/70 mt-1">Derrotas</div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-white/20 transition-all">
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-red-500 mb-1">{teamStats.losses}</div>
+              <div className="text-xs text-white/50 uppercase tracking-wide">Derrotas</div>
+            </div>
+          </div>
 
-          <Card className="bg-white/5 border-white/10">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">{teamStats.total_points}</div>
-                <div className="text-sm text-white/70 mt-1">Puntos a favor</div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-white/20 transition-all">
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{teamStats.total_points}</div>
+              <div className="text-xs text-white/50 uppercase tracking-wide">Pts a favor</div>
+            </div>
+          </div>
 
-          <Card className="bg-white/5 border-white/10">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white/70">{teamStats.avg_points}</div>
-                <div className="text-sm text-white/70 mt-1">Promedio</div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-white/20 transition-all">
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-white/70 mb-1">{teamStats.avg_points}</div>
+              <div className="text-xs text-white/50 uppercase tracking-wide">Promedio</div>
+            </div>
+          </div>
 
-          <Card className="bg-white/5 border-white/10">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className={`text-3xl font-bold ${(teamStats.differential ?? 0) > 0 ? 'text-green-500' : (teamStats.differential ?? 0) < 0 ? 'text-red-500' : 'text-white/70'}`}>
-                  {(teamStats.differential ?? 0) > 0 ? '+' : ''}{teamStats.differential ?? 0}
-                </div>
-                <div className="text-sm text-white/70 mt-1">Diferencial</div>
+          <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-white/20 transition-all">
+            <div className="text-center">
+              <div className={`text-2xl sm:text-3xl font-bold mb-1 ${(teamStats.differential ?? 0) > 0 ? 'text-green-500' : (teamStats.differential ?? 0) < 0 ? 'text-red-500' : 'text-white/70'}`}>
+                {(teamStats.differential ?? 0) > 0 ? '+' : ''}{teamStats.differential ?? 0}
               </div>
-            </CardContent>
-          </Card>
+              <div className="text-xs text-white/50 uppercase tracking-wide">Diferencial</div>
+            </div>
+          </div>
         </div>
 
         {/* Jugadores */}
-        <Card className="bg-white/5 border-white/10 mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Plantel
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {team.players?.map((player) => (
-                <Link
-                  key={player.id}
-                  href={`/blacktop/jugadores/${player.id}`}
-                  className="block"
-                >
-                  <div className="flex items-center gap-3 p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-white/10 flex items-center justify-center flex-shrink-0">
-                      {player.photo_url ? (
-                        <Image
-                          src={player.photo_url}
-                          alt={player.full_name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <span className="text-xl font-bold text-white/50">
-                          {player.full_name.charAt(0)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold truncate">{player.full_name}</div>
-                      <div className="text-sm text-white/70 truncate">
-                        @{player.instagram_handle}
-                      </div>
-                      {player.is_captain && (
-                        <Badge variant="outline" className="mt-1 text-xs">
-                          Capitán
-                        </Badge>
-                      )}
+        <div className="relative mb-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent" style={{ color: accentColor }} />
+          
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-lg" style={{ backgroundColor: `${accentColor}20` }}>
+              <Users className="h-5 w-5" style={{ color: accentColor }} />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold">Plantel</h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {team.players?.map((player) => (
+              <Link
+                key={player.id}
+                href={`/blacktop/jugadores/${player.id}`}
+                className="group block"
+              >
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/20 hover:bg-white/[0.08] transition-all">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden bg-white/10 flex items-center justify-center flex-shrink-0">
+                    {player.photo_url ? (
+                      <Image
+                        src={player.photo_url}
+                        alt={player.full_name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="text-lg font-bold" style={{ color: accentColor }}>
+                        {player.full_name.charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold truncate group-hover:text-white transition-colors">{player.full_name}</div>
+                    <div className="text-xs text-white/50 truncate">
+                      @{player.instagram_handle.replace('@', '')}
                     </div>
                   </div>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                  {player.is_captain && (
+                    <div className="px-2 py-1 rounded text-xs font-bold" style={{ backgroundColor: `${accentColor}20`, color: accentColor }}>
+                      C
+                    </div>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
 
         {/* Historial de partidos */}
-        <Card className="bg-white/5 border-white/10">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
-              Historial de partidos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {matches.length === 0 ? (
-              <div className="text-center py-8 text-white/50">
-                No hay partidos registrados aún
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {matches.map((match: any) => {
-                  const isTeamA = match.team_a_id === team.id;
-                  const isWinner = match.winner_id === team.id;
-                  const opponent = isTeamA ? match.team_b : match.team_a;
-                  const teamScore = isTeamA ? match.team_a_score : match.team_b_score;
-                  const opponentScore = isTeamA ? match.team_b_score : match.team_a_score;
+        <div className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent" style={{ color: accentColor }} />
+          
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-lg" style={{ backgroundColor: `${accentColor}20` }}>
+              <Target className="h-5 w-5" style={{ color: accentColor }} />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold">Historial de partidos</h2>
+          </div>
 
-                  return (
-                    <div
-                      key={match.id}
-                      className={`p-4 rounded-lg border ${
-                        match.status === 'completed'
-                          ? isWinner
-                            ? 'bg-green-500/10 border-green-500/30'
-                            : 'bg-red-500/10 border-red-500/30'
-                          : 'bg-white/5 border-white/10'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 flex-1">
-                          <div className="text-sm text-white/60">
-                            {match.round.replace('_', ' ').toUpperCase()}
-                          </div>
-                          {match.scheduled_time && (
-                            <div className="text-sm text-white/60">
+          {matches.length === 0 ? (
+            <div className="text-center py-12 text-white/40">
+              <Target className="h-12 w-12 mx-auto mb-3 opacity-20" />
+              <p>No hay partidos registrados aún</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {matches.map((match: any) => {
+                const isTeamA = match.team_a_id === team.id;
+                const isWinner = match.winner_id === team.id;
+                const opponent = isTeamA ? match.team_b : match.team_a;
+                const teamScore = isTeamA ? match.team_a_score : match.team_b_score;
+                const opponentScore = isTeamA ? match.team_b_score : match.team_a_score;
+
+                return (
+                  <div
+                    key={match.id}
+                    className={`p-4 sm:p-5 rounded-xl border transition-all ${
+                      match.status === 'finished'
+                        ? isWinner
+                          ? 'bg-green-500/5 border-green-500/20 hover:border-green-500/40'
+                          : 'bg-red-500/5 border-red-500/20 hover:border-red-500/40'
+                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-white/50 uppercase tracking-wide font-medium">
+                          {match.round?.replace('_', ' ') || 'Partido'}
+                        </span>
+                        {match.scheduled_time && (
+                          <>
+                            <div className="w-1 h-1 rounded-full bg-white/30" />
+                            <span className="text-xs text-white/50">
                               {new Date(match.scheduled_time).toLocaleDateString('es-AR', {
                                 day: 'numeric',
                                 month: 'short',
                               })}
-                            </div>
-                          )}
-                        </div>
-                        {match.status === 'completed' && (
-                          <Badge variant={isWinner ? 'default' : 'destructive'}>
-                            {isWinner ? 'Victoria' : 'Derrota'}
-                          </Badge>
+                            </span>
+                          </>
                         )}
                       </div>
-                      <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold">{team.name}</span>
+                      {match.status === 'finished' && (
+                        <div className={`px-2.5 py-1 rounded-lg text-xs font-bold ${isWinner ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                          {isWinner ? 'Victoria' : 'Derrota'}
                         </div>
-                        {match.status === 'completed' && (
-                          <div className="flex items-center gap-3 text-2xl font-bold">
-                            <span className={isWinner ? 'text-green-500' : 'text-white/70'}>
-                              {teamScore}
-                            </span>
-                            <span className="text-white/40">-</span>
-                            <span className={!isWinner ? 'text-red-500' : 'text-white/70'}>
-                              {opponentScore}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold">{opponent?.name || 'TBD'}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold truncate">{team.name}</p>
+                      </div>
+                      {match.status === 'finished' && (
+                        <div className="flex items-center gap-4 px-6">
+                          <span className={`text-2xl font-bold tabular-nums ${isWinner ? 'text-green-500' : 'text-white/50'}`}>
+                            {teamScore}
+                          </span>
+                          <span className="text-white/30">-</span>
+                          <span className={`text-2xl font-bold tabular-nums ${!isWinner ? 'text-red-500' : 'text-white/50'}`}>
+                            {opponentScore}
+                          </span>
                         </div>
+                      )}
+                      <div className="flex-1 min-w-0 text-right">
+                        <p className="font-bold truncate">{opponent?.name || 'TBD'}</p>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -493,7 +493,7 @@ export async function deleteTournamentMedia(id: number): Promise<void> {
 // TEAM REGISTRATION (proceso completo)
 // =====================================================
 
-export async function registerTeam(formData: TeamRegistrationFormData) {
+export async function registerTeam(formData: TeamRegistrationFormData, teamLogoUrl?: string | null) {
   const supabase = getServiceClient();
 
   try {
@@ -539,19 +539,21 @@ export async function registerTeam(formData: TeamRegistrationFormData) {
       captain_email: formData.email,
       captain_phone: formData.whatsapp_or_phone,
       captain_instagram: normalizeInstagram(formData.captain_instagram),
+      logo_url: teamLogoUrl || undefined,
       accept_image_rights: formData.accept_image_rights || false,
       accept_rules: formData.accept_rules || false,
       status: 'pending',
       is_confirmed: false,
     });
 
-    // 3. Crear jugadores
-    const players = formData.players.map(p => ({
+    // 3. Crear jugadores con sus fotos
+    const players = formData.players.map((p: any) => ({
       tournament_id: formData.tournament_id,
       team_id: team.id,
       full_name: p.full_name,
       instagram_handle: normalizeInstagram(p.instagram_handle),
       email: p.email,
+      photo_url: p.photo_url || undefined,
       is_captain: p.is_captain,
       consent_media: formData.accept_image_rights || false,
     }));

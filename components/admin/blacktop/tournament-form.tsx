@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload, X } from 'lucide-react';
 import type { Tournament, TournamentFormData, TournamentFormatType, PlayoffFormat } from '@/types/blacktop';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
 interface TournamentFormProps {
   tournament?: Tournament;
@@ -22,6 +23,10 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(tournament?.banner_url || null);
+  const [flyerFiles, setFlyerFiles] = useState<File[]>([]);
+  const [flyerPreviews, setFlyerPreviews] = useState<string[]>(tournament?.flyer_images || []);
 
   const [formData, setFormData] = useState<TournamentFormData>({
     name: tournament?.name || '',
@@ -71,12 +76,166 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
       .replace(/-+/g, '-');
   };
 
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Error',
+        description: 'Solo se permiten imágenes',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validar tamaño (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'Error',
+        description: 'La imagen debe pesar menos de 5MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setBannerFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setBannerPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveBanner = () => {
+    setBannerFile(null);
+    setBannerPreview(null);
+  };
+
+  const handleFlyerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Validar cada archivo
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: 'Error',
+          description: 'Solo se permiten imágenes',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: 'Error',
+          description: 'Cada imagen debe pesar menos de 5MB',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    // Agregar nuevos archivos
+    setFlyerFiles(prev => [...prev, ...files]);
+
+    // Crear previews
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFlyerPreviews(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveFlyer = (index: number) => {
+    setFlyerFiles(prev => prev.filter((_, i) => i !== index));
+    setFlyerPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
+      // Si hay banner, subirlo primero
+      let bannerUrl = formData.banner_url || tournament?.banner_url;
+      
+      if (bannerFile) {
+        const bannerFormData = new FormData();
+        bannerFormData.append('file', bannerFile);
+        bannerFormData.append('bucket', 'blacktop-banners');
+
+        // Obtener token de sesión
+        const { supabase } = await import('@/lib/supabase/client');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.access_token) {
+          throw new Error('No estás autenticado');
+        }
+
+        const uploadResponse = await fetch('/api/admin/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: bannerFormData,
+        });
+
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          throw new Error(errorData.error || 'Error al subir el banner');
+        }
+
+        const uploadData = await uploadResponse.json();
+        bannerUrl = uploadData.url;
+      }
+
+      // Subir flyers si hay nuevos
+      let flyerUrls = tournament?.flyer_images || [];
+      
+      if (flyerFiles.length > 0) {
+        const { supabase } = await import('@/lib/supabase/client');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.access_token) {
+          throw new Error('No estás autenticado');
+        }
+
+        // Subir cada flyer
+        const uploadPromises = flyerFiles.map(async (file) => {
+          const flyerFormData = new FormData();
+          flyerFormData.append('file', file);
+          flyerFormData.append('bucket', 'blacktop-banners');
+
+          const uploadResponse = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+            },
+            body: flyerFormData,
+          });
+
+          if (!uploadResponse.ok) {
+            const errorData = await uploadResponse.json();
+            throw new Error(errorData.error || 'Error al subir flyer');
+          }
+
+          const uploadData = await uploadResponse.json();
+          return uploadData.url;
+        });
+
+        const newFlyerUrls = await Promise.all(uploadPromises);
+        flyerUrls = [...flyerUrls, ...newFlyerUrls];
+      } else {
+        // Mantener solo los previews que no son archivos nuevos
+        flyerUrls = flyerPreviews.filter(preview => preview.startsWith('http'));
+      }
+
       const url = mode === 'create' 
         ? '/api/blacktop/tournaments'
         : `/api/blacktop/tournaments/${tournament?.id}`;
@@ -88,6 +247,8 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          banner_url: bannerUrl,
+          flyer_images: flyerUrls,
           // Propagar columnas directas si existen en la tabla
           format_type: formData.format_config?.format_type as TournamentFormatType,
           num_groups: formData.format_config?.num_groups,
@@ -510,9 +671,108 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
       <Card>
         <CardHeader>
           <CardTitle>Estética</CardTitle>
-          <CardDescription>Colores del torneo</CardDescription>
+          <CardDescription>Colores y banner del torneo</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          {/* Banner */}
+          <div>
+            <Label>Banner del torneo</Label>
+            <p className="text-sm text-muted-foreground mb-3">
+              Imagen que se mostrará en el header del torneo (recomendado: 1920x600px)
+            </p>
+            
+            {bannerPreview ? (
+              <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border">
+                <Image
+                  src={bannerPreview}
+                  alt="Banner preview"
+                  fill
+                  className="object-cover"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2"
+                  onClick={handleRemoveBanner}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-accent-brand/50 transition-colors">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className="h-10 w-10 text-muted-foreground mb-3" />
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    <span className="font-semibold">Click para subir</span> o arrastra aquí
+                  </p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG o WEBP (máx. 5MB)</p>
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleBannerChange}
+                  disabled={loading}
+                />
+              </label>
+            )}
+          </div>
+
+          {/* Flyers para carousel */}
+          <div>
+            <Label>Flyers del torneo (Carousel)</Label>
+            <p className="text-sm text-muted-foreground mb-3">
+              Imágenes que se mostrarán en el formulario de inscripción (recomendado: 1080x1350px - formato Instagram)
+            </p>
+            
+            {/* Grid de previews */}
+            {flyerPreviews.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
+                {flyerPreviews.map((preview, index) => (
+                  <div key={index} className="relative aspect-[4/5] rounded-lg overflow-hidden border border-border group">
+                    <Image
+                      src={preview}
+                      alt={`Flyer ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFlyer(index)}
+                      className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                    <div className="absolute bottom-2 left-2 px-2 py-1 rounded bg-black/60 text-white text-xs font-medium">
+                      {index + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Botón para agregar más */}
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-accent-brand/50 transition-colors">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="mb-1 text-sm text-muted-foreground">
+                  <span className="font-semibold">Click para agregar flyers</span>
+                </p>
+                <p className="text-xs text-muted-foreground">PNG, JPG o WEBP (máx. 5MB cada uno)</p>
+              </div>
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                multiple
+                onChange={handleFlyerChange}
+                disabled={loading}
+              />
+            </label>
+          </div>
+
+          {/* Colores */}
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label htmlFor="primary_color">Color primario</Label>

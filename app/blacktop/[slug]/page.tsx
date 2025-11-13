@@ -38,13 +38,8 @@ async function TournamentContent({ slug }: { slug: string }) {
       {/* Header + Tabs root */}
       <Tabs defaultValue="dashboard" className="w-full">
         <TournamentHeader tournament={tournament} teamsCount={teams.length}>
-          <div className="mt-6">
-            <TournamentTabsNav />
-          </div>
+          <TournamentTabsNav />
         </TournamentHeader>
-
-        {/* Gradient separator */}
-        <div className="h-10 bg-gradient-to-b from-white/10 to-transparent" />
 
         {/* Panels below */}
         <TournamentTabPanels
@@ -61,11 +56,6 @@ async function TournamentContent({ slug }: { slug: string }) {
           <TournamentGalleryPublic media={media} />
         </div>
       )}
-
-      {/* Footer */}
-      <div className="py-12 text-center text-white/60 text-sm font-body">
-        <p>BUSY BLACKTOP © {new Date().getFullYear()}</p>
-      </div>
 
       {/* Notificaciones de próximos partidos */}
       <UpcomingMatchesNotification 

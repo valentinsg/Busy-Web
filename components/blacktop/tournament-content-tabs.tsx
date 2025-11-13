@@ -19,54 +19,54 @@ interface TournamentPanelsProps {
 
 export function TournamentTabsNav() {
   return (
-    <div className="overflow-x-auto pb-2 flex justify-center">
-      <TabsList className="inline-flex bg-white/10 backdrop-blur border border-white/20 p-2 rounded-lg h-auto gap-1">
+    <div className="overflow-x-auto pb-2 flex justify-center -mx-4 px-4">
+      <TabsList className="inline-flex bg-white/5 backdrop-blur-sm border border-white/10 p-1 rounded-lg h-auto gap-0.5">
         <TabsTrigger
           value="dashboard"
-          className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white font-body text-sm md:text-base px-4 py-3 rounded-md transition-all"
+          className="flex items-center gap-1.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 font-body text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-md transition-all hover:text-white/80"
         >
-          <Home className="h-5 w-5" />
-          <span>Inicio</span>
+          <Home className="h-4 w-4" />
+          <span className="hidden sm:inline">Inicio</span>
         </TabsTrigger>
 
         <TabsTrigger
           value="teams"
-          className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white font-body text-sm md:text-base px-4 py-3 rounded-md transition-all"
+          className="flex items-center gap-1.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 font-body text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-md transition-all hover:text-white/80"
         >
-          <Users className="h-5 w-5" />
-          <span>Equipos</span>
+          <Users className="h-4 w-4" />
+          <span className="hidden sm:inline">Equipos</span>
         </TabsTrigger>
 
         <TabsTrigger
           value="fixture"
-          className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white font-body text-sm md:text-base px-4 py-3 rounded-md transition-all"
+          className="flex items-center gap-1.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 font-body text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-md transition-all hover:text-white/80"
         >
-          <Calendar className="h-5 w-5" />
-          <span>Fixture</span>
+          <Calendar className="h-4 w-4" />
+          <span className="hidden sm:inline">Fixture</span>
         </TabsTrigger>
 
         <TabsTrigger
           value="stats"
-          className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white font-body text-sm md:text-base px-4 py-3 rounded-md transition-all"
+          className="flex items-center gap-1.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 font-body text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-md transition-all hover:text-white/80"
         >
-          <TrendingUp className="h-5 w-5" />
-          <span>Stats</span>
+          <TrendingUp className="h-4 w-4" />
+          <span className="hidden sm:inline">Stats</span>
         </TabsTrigger>
 
         <TabsTrigger
           value="rules"
-          className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white font-body text-sm md:text-base px-4 py-3 rounded-md transition-all"
+          className="flex items-center gap-1.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 font-body text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-md transition-all hover:text-white/80"
         >
-          <FileText className="h-5 w-5" />
-          <span>Reglas</span>
+          <FileText className="h-4 w-4" />
+          <span className="hidden sm:inline">Reglas</span>
         </TabsTrigger>
 
         <TabsTrigger
           value="glossary"
-          className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white font-body text-sm md:text-base px-4 py-3 rounded-md transition-all"
+          className="flex items-center gap-1.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 font-body text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-md transition-all hover:text-white/80"
         >
-          <BookOpen className="h-5 w-5" />
-          <span>Info</span>
+          <BookOpen className="h-4 w-4" />
+          <span className="hidden sm:inline">Info</span>
         </TabsTrigger>
       </TabsList>
     </div>
@@ -101,11 +101,11 @@ export function TournamentTabPanels({
         </TabsContent>
 
         <TabsContent value="fixture" className="mt-0">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2" style={{ color: tournament.accent_color }}>
+          <div className="mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1.5" style={{ color: tournament.accent_color }}>
               Fixture y Resultados
             </h2>
-            <p className="text-white/70 font-body">
+            <p className="text-white/50 font-body text-sm">
               Calendario completo, tablas de posiciones y llaves de playoff
             </p>
           </div>
@@ -117,11 +117,11 @@ export function TournamentTabPanels({
         </TabsContent>
 
         <TabsContent value="stats" className="mt-0">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2" style={{ color: tournament.accent_color }}>
+          <div className="mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1.5" style={{ color: tournament.accent_color }}>
               Estadísticas de Jugadores
             </h2>
-            <p className="text-white/70 font-body">
+            <p className="text-white/50 font-body text-sm">
               Líderes en puntos, rebotes, asistencias y más
             </p>
           </div>
@@ -133,11 +133,11 @@ export function TournamentTabPanels({
         </TabsContent>
 
         <TabsContent value="rules" className="mt-0">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2" style={{ color: tournament.accent_color }}>
+          <div className="mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1.5" style={{ color: tournament.accent_color }}>
               Reglamento del Torneo
             </h2>
-            <p className="text-white/70 font-body">
+            <p className="text-white/50 font-body text-sm">
               Reglas oficiales y código de conducta
             </p>
           </div>
@@ -145,11 +145,11 @@ export function TournamentTabPanels({
         </TabsContent>
 
         <TabsContent value="glossary" className="mt-0">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2" style={{ color: tournament.accent_color }}>
+          <div className="mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1.5" style={{ color: tournament.accent_color }}>
               Glosario de Términos
             </h2>
-            <p className="text-white/70 font-body">
+            <p className="text-white/50 font-body text-sm">
               Explicación de estadísticas y términos del básquet
             </p>
           </div>

@@ -1,10 +1,10 @@
-import { Suspense } from 'react';
-import { notFound } from 'next/navigation';
-import { getTournamentBySlug } from '@/lib/repo/blacktop';
 import { RegistrationForm } from '@/components/blacktop/registration-form';
+import { Button } from '@/components/ui/button';
+import { getTournamentBySlug } from '@/lib/repo/blacktop';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 
 interface RegistrationPageProps {
   params: {
@@ -46,20 +46,14 @@ async function RegistrationContent({ slug }: { slug: string }) {
         color: '#ffffff',
       }}
     >
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-8">
+      <div className="max-w-4xl mx-auto font-body">
+        <div className="pt-24 pb-4">
           <Link href={`/blacktop/${slug}`}>
-            <Button variant="ghost" className="mb-4">
+            <Button variant="ghost" className="text-white hover:bg-white/10">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver
             </Button>
           </Link>
-          <h1 className="text-4xl md:text-6xl font-bold mb-2" style={{ fontFamily: 'var(--font-abstract-slab)' }}>
-            {tournament.name}
-          </h1>
-          <p className="text-xl text-white/80">
-            INSCRIPCIÓN DE EQUIPO
-          </p>
         </div>
 
         <RegistrationForm tournament={tournament} />

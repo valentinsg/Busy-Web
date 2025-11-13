@@ -45,56 +45,54 @@ export function TournamentTeamsEnhanced({ teams, accentColor }: TournamentTeamsE
 
   return (
     <div className="space-y-6 font-body">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {sortedTeams.map((team) => (
           <Link
             key={team.id}
             href={`/blacktop/equipos/${team.id}`}
-            className="bg-white/10 backdrop-blur border border-white/20 rounded-lg overflow-hidden hover:bg-white/15 transition-all hover:scale-[1.02] cursor-pointer block"
-            style={{ borderColor: `${accentColor}30` }}
+            className="group relative bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden hover:border-white/20 transition-all hover:scale-[1.02] cursor-pointer block"
           >
+            {/* Accent line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent opacity-50" style={{ color: accentColor }} />
+            
             {/* Team Header */}
-            <div className="p-6 border-b border-white/10">
-              <div className="flex items-center gap-4">
-                {renderTeamLogo(team)}
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-1" style={{ color: accentColor }}>
-                    {team.name}
-                  </h3>
+            <div className="p-5 sm:p-6">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="relative">
+                  {renderTeamLogo(team)}
                   {team.group_name && (
-                    <span className="text-sm text-white/60">
-                      Grupo {team.group_name}
-                    </span>
+                    <div 
+                      className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 border-black"
+                      style={{ backgroundColor: accentColor }}
+                    >
+                      {team.group_name.replace('Grupo ', '')}
+                    </div>
                   )}
                 </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg sm:text-xl font-bold mb-1 truncate group-hover:text-white transition-colors" style={{ color: accentColor }}>
+                    {team.name}
+                  </h3>
+                  <p className="text-xs text-white/50">
+                    {team.players?.length || 0} jugadores
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {/* Players List */}
-            <div className="p-6">
-              <h4 className="text-sm font-bold text-white/60 mb-3 uppercase tracking-wide">
-                Jugadores ({team.players?.length || 0})
-              </h4>
-              <div className="space-y-2">
+              {/* Players List - Compact */}
+              <div className="space-y-1.5">
                 {team.players && team.players.length > 0 ? (
-                  team.players.map((player) => (
+                  team.players.slice(0, 4).map((player) => (
                     <div
                       key={player.id}
-                      className="flex items-center gap-2 text-white/80 p-2 rounded hover:bg-white/5 transition-colors"
+                      className="flex items-center gap-2 text-sm text-white/70 group-hover:text-white/90 transition-colors"
                     >
-                      <Instagram className="h-4 w-4 shrink-0" style={{ color: accentColor }} />
-                      <a
-                        href={`https://instagram.com/${player.instagram_handle.replace('@', '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline flex-1"
-                      >
-                        {player.full_name}
-                      </a>
+                      <div className="w-1 h-1 rounded-full" style={{ backgroundColor: accentColor }} />
+                      <span className="flex-1 truncate">{player.full_name}</span>
                       {player.is_captain && (
                         <span 
-                          className="text-xs px-2 py-0.5 rounded font-bold"
-                          style={{ backgroundColor: `${accentColor}40`, color: accentColor }}
+                          className="text-[10px] px-1.5 py-0.5 rounded font-bold"
+                          style={{ backgroundColor: `${accentColor}20`, color: accentColor }}
                         >
                           C
                         </span>
@@ -102,30 +100,16 @@ export function TournamentTeamsEnhanced({ teams, accentColor }: TournamentTeamsE
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-white/50 text-center py-4">
-                    Sin jugadores registrados
-                  </p>
+                  <p className="text-sm text-white/40">Sin jugadores</p>
+                )}
+                {team.players && team.players.length > 4 && (
+                  <p className="text-xs text-white/40 mt-2">+{team.players.length - 4} más</p>
                 )}
               </div>
             </div>
 
-            {/* Team Stats Footer (opcional) */}
-            {team.group_name && (
-              <div className="px-6 py-3 bg-white/5 border-t border-white/10">
-                <div className="flex items-center justify-between text-xs text-white/60">
-                  <span>Capitán: {team.captain_name}</span>
-                  <a
-                    href={`https://instagram.com/${team.captain_instagram.replace('@', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline"
-                    style={{ color: accentColor }}
-                  >
-                    @{team.captain_instagram.replace('@', '')}
-                  </a>
-                </div>
-              </div>
-            )}
+            {/* Hover indicator */}
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-current to-transparent opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: accentColor }} />
           </Link>
         ))}
       </div>
