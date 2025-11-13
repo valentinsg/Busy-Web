@@ -1,10 +1,10 @@
-import { RegistrationForm } from '@/components/blacktop/registration-form';
 import { Button } from '@/components/ui/button';
 import { getTournamentBySlug } from '@/lib/repo/blacktop';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import RegistrationWrapper from './registration-wrapper';
 
 interface RegistrationPageProps {
   params: {
@@ -38,28 +38,7 @@ async function RegistrationContent({ slug }: { slug: string }) {
     );
   }
 
-  return (
-    <div
-      className="min-h-screen p-4 md:p-8"
-      style={{
-        backgroundColor: tournament.primary_color,
-        color: '#ffffff',
-      }}
-    >
-      <div className="max-w-4xl mx-auto font-body">
-        <div className="pt-24 pb-4">
-          <Link href={`/blacktop/${slug}`}>
-            <Button variant="ghost" className="text-white hover:bg-white/10">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver
-            </Button>
-          </Link>
-        </div>
-
-        <RegistrationForm tournament={tournament} />
-      </div>
-    </div>
-  );
+  return <RegistrationWrapper tournament={tournament} slug={slug} />;
 }
 
 export default function RegistrationPage({ params }: RegistrationPageProps) {

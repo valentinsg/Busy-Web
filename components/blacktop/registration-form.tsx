@@ -17,6 +17,7 @@ import { TournamentRulesMarkdown } from './tournament-rules-markdown';
 
 interface RegistrationFormProps {
   tournament: Tournament;
+  onSuccessChange?: (success: boolean) => void;
 }
 
 interface PlayerFormData {
@@ -45,7 +46,7 @@ interface FormErrors {
   general?: string;
 }
 
-export function RegistrationForm({ tournament }: RegistrationFormProps) {
+export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -294,6 +295,12 @@ export function RegistrationForm({ tournament }: RegistrationFormProps) {
 
       setSuccess(true);
       setSuccessMessage(data.message);
+      
+      // Notificar al padre que hubo éxito
+      onSuccessChange?.(true);
+      
+      // Scroll suave al inicio para mostrar el mensaje de éxito
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
       window.scrollTo({ top: 0, behavior: 'smooth' });

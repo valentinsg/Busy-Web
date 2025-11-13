@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(result, { status: 409 });
     }
 
-    // Si es un equipo nuevo, crear notificación
+    // Si es un equipo nuevo, crear notificación y agregar emails a newsletter
     if (result.isNewTeam && result.team) {
       try {
         const tournament = await getTournamentById(tournament_id);
@@ -148,6 +148,42 @@ export async function POST(request: NextRequest) {
       } catch (notifError) {
         // No fallar el registro si falla la notificación
         console.error('Error creating notification:', notifError);
+      }
+
+      // Agregar emails a la newsletter (capitán + jugadores)
+      try {
+        const supabase = getServiceClient();
+        const allEmails = [email, ...playersWithPhotos.map(p => p.email)];
+        const uniqueEmails = [...new Set(allEmails)]; // Eliminar duplicados
+
+        for (const playerEmail of uniqueEmails) {
+          // Verificar si ya existe
+          const { data: existing } = await supabase
+            .from('newsletter_subscribers')
+            .select('email, status')
+            .eq('email', playerEmail)
+            .maybeSingle();
+
+          if (!existing) {
+            // Agregar nuevo suscriptor
+            await supabase
+              .from('newsletter_subscribers')
+              .insert({
+                email: playerEmail,
+                status: 'subscribed',
+                token: null,
+              });
+          } else if (existing.status !== 'subscribed') {
+            // Reactivar si estaba inactivo
+            await supabase
+              .from('newsletter_subscribers')
+              .update({ status: 'subscribed', token: null })
+              .eq('email', playerEmail);
+          }
+        }
+      } catch (newsletterError) {
+        // No fallar el registro si falla la newsletter
+        console.error('Error adding to newsletter:', newsletterError);
       }
     }
 
