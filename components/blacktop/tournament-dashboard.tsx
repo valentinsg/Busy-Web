@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, Users, Calendar, TrendingUp } from 'lucide-react';
 import type { Tournament, TeamWithPlayers, MatchWithTeams, TournamentLeaderboard } from '@/types/blacktop';
 import Link from 'next/link';
+import { TournamentEmptyState } from './tournament-empty-state';
 
 interface TournamentDashboardProps {
   tournament: Tournament;
@@ -59,6 +60,11 @@ export function TournamentDashboard({
     .filter(m => m.status === 'finished' && m.winner_id)
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
     .slice(0, 3);
+
+  // Si no hay equipos ni jugadores, mostrar estado vacío
+  if (teams.length === 0 && totalPlayers === 0) {
+    return <TournamentEmptyState tournament={tournament} />;
+  }
 
   return (
     <div className="space-y-6 font-body">
