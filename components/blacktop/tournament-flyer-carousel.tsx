@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,8 +17,6 @@ export function TournamentFlyerCarousel({
 }: TournamentFlyerCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const touchStartX = useRef<number>(0);
-  const touchEndX = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Debug: ver cuántas imágenes hay
@@ -46,25 +43,8 @@ export function TournamentFlyerCarousel({
     setTimeout(() => setIsTransitioning(false), 300);
   };
 
-  // Touch handlers para swipe en mobile
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = () => {
-    if (touchStartX.current - touchEndX.current > 50) {
-      // Swipe left -> next
-      goToNext();
-    }
-    if (touchStartX.current - touchEndX.current < -50) {
-      // Swipe right -> previous
-      goToPrevious();
-    }
-  };
+  // Touch handlers deshabilitados para permitir zoom nativo
+  // Los usuarios pueden usar las flechas o dots para cambiar de imagen
 
   // Preload imágenes adyacentes
   useEffect(() => {
@@ -86,24 +66,23 @@ export function TournamentFlyerCarousel({
       {/* Carousel container */}
       <div 
         ref={containerRef}
-        className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-black/20 backdrop-blur-sm border border-white/10 touch-pan-y select-none"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-black/20 backdrop-blur-sm border border-white/10"
+        style={{ touchAction: 'pinch-zoom' }}
       >
-        {/* Current image con transición */}
-        <div className="relative w-full h-full bg-black">
-          <Image
+        {/* Current image con transición - usando img para permitir zoom nativo */}
+        <div className="relative w-full h-full bg-black flex items-center justify-center">
+          <img
             src={images[currentIndex]}
             alt={`${tournamentName} - Flyer ${currentIndex + 1}`}
-            fill
             className={cn(
-              "object-contain transition-opacity duration-300",
+              "max-w-full max-h-full object-contain transition-opacity duration-300",
               isTransitioning ? "opacity-0" : "opacity-100"
             )}
-            priority={currentIndex === 0}
-            quality={95}
             loading={currentIndex === 0 ? "eager" : "lazy"}
+            style={{ 
+              touchAction: 'auto',
+              userSelect: 'none'
+            }}
           />
         </div>
 

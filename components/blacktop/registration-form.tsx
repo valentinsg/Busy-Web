@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import type { Tournament } from '@/types/blacktop';
 import { AlertCircle, CheckCircle, FileText, Info, Instagram, Loader2, Mail, Phone, Plus, Trophy, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ImageUpload } from './image-upload';
 import { TournamentFlyerCarousel } from './tournament-flyer-carousel';
 import { TournamentRulesMarkdown } from './tournament-rules-markdown';
@@ -298,9 +298,6 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
       
       // Notificar al padre que hubo éxito
       onSuccessChange?.(true);
-      
-      // Scroll suave al inicio para mostrar el mensaje de éxito
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -309,6 +306,13 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
     }
   };
 
+  // Scroll al inicio cuando hay éxito
+  useEffect(() => {
+    if (success) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [success]);
+
   if (success) {
     return (
       <Card className="bg-white/10 backdrop-blur border-white/20">
@@ -316,13 +320,20 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
           <CheckCircle className="h-16 w-16 mx-auto text-green-400" />
           <h2 className="text-2xl font-bold">¡Registro exitoso!</h2>
           <p className="text-lg text-white/80">{successMessage}</p>
-          <div className="pt-4">
+          <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
             <Button
               variant="outline"
               onClick={() => router.push(`/blacktop/${tournament.slug}`)}
               className="bg-white/10 border-white/20 hover:bg-white/20"
             >
               Ver torneo
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push('/about')}
+              className="bg-white/10 border-white/20 hover:bg-white/20"
+            >
+              Conoce quiénes somos
             </Button>
           </div>
         </CardContent>
