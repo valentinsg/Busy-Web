@@ -224,6 +224,15 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
       {/* Schedule View */}
       {view === 'schedule' && (
         <div className="space-y-6">
+          {groupedMatches.length === 0 && (
+            <Card className="bg-white/10 backdrop-blur border-white/20">
+              <CardContent className="p-12 text-center space-y-2">
+                <Calendar className="h-12 w-12 mx-auto mb-2 opacity-60" />
+                <p className="text-xl font-semibold">Calendario próximamente</p>
+                <p className="text-white/70">Todavía no hay partidos programados. Publicaremos el fixture cuando cerremos inscripciones y confirmemos equipos.</p>
+              </CardContent>
+            </Card>
+          )}
           {groupedMatches.map((round) => (
             <Card key={round.key} className="bg-white/10 backdrop-blur border-white/20">
               <CardContent className="p-6">
@@ -512,7 +521,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                       <div
                         key={match.id}
                         className="p-4 rounded-lg bg-white/5 border-2"
-                        style={{ borderColor: match.status === 'completed' ? `${accentColor}40` : 'rgba(255,255,255,0.1)' }}
+                        style={{ borderColor: match.status === 'finished' ? `${accentColor}40` : 'rgba(255,255,255,0.1)' }}
                       >
                         {/* Team A */}
                         <div className="flex items-center justify-between mb-2">

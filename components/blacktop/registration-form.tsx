@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import type { Tournament } from '@/types/blacktop';
-import { AlertCircle, CheckCircle, FileText, Info, Instagram, Loader2, Mail, Phone, Plus, Trophy, Users, X } from 'lucide-react';
+import { AlertCircle, CheckCircle, FileText, Info, Instagram, Loader2, Mail, Phone, Plus, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ImageUpload } from './image-upload';
 import { TournamentFlyerCarousel } from './tournament-flyer-carousel';
 import { TournamentRulesMarkdown } from './tournament-rules-markdown';
@@ -46,6 +46,37 @@ interface FormErrors {
   general?: string;
 }
 
+// Helper function to adjust color brightness
+const adjustBrightness = (color: string, percent: number): string => {
+  // Convert hex to RGB
+  const r = parseInt(color.substring(1, 3), 16);
+  const g = parseInt(color.substring(3, 5), 16);
+  const b = parseInt(color.substring(5, 7), 16);
+
+  // Adjust brightness
+  const adjust = (value: number) => {
+    const newValue = Math.max(0, Math.min(255, value + (value * percent) / 100));
+    return Math.round(newValue);
+  };
+
+  // Convert back to hex
+  return `#${[
+    adjust(r).toString(16).padStart(2, '0'),
+    adjust(g).toString(16).padStart(2, '0'),
+    adjust(b).toString(16).padStart(2, '0')
+  ].join('')}`;
+};
+
+// Helper function to adjust color opacity
+const adjustOpacity = (color: string, opacity: number): string => {
+  // Convert hex to RGB
+  const r = parseInt(color.substring(1, 3), 16);
+  const g = parseInt(color.substring(3, 5), 16);
+  const b = parseInt(color.substring(5, 7), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
 export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -53,6 +84,7 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
   const [successMessage, setSuccessMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  // Form state
   const [teamName, setTeamName] = useState('');
   const [captainName, setCaptainName] = useState('');
   const [captainInstagram, setCaptainInstagram] = useState('');
@@ -64,7 +96,15 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
   const [rulesModalOpen, setRulesModalOpen] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
+  const [form, setForm] = useState({
+    teamName: '',
+    captainName: '',
+    captainInstagram: '',
+    email: '',
+    phone: '',
+  });
 
+  // Players state
   const [players, setPlayers] = useState<PlayerFormData[]>([
     { full_name: '', instagram_handle: '', email: '', is_captain: true, photo: null },
     { full_name: '', instagram_handle: '', email: '', is_captain: false, photo: null },
@@ -295,7 +335,7 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
 
       setSuccess(true);
       setSuccessMessage(data.message);
-      
+
       // Notificar al padre que hubo éxito
       onSuccessChange?.(true);
     } catch (err) {
@@ -345,106 +385,118 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
     <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
       {/* Error General - solo mostrar si hay un error real de API o si intentó enviar */}
       {error && (
-        <div className="bg-red-500/20 border-2 border-red-500/50 text-white px-4 py-4 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
-          <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+        <div className="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 rounded-lg flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="font-semibold">Error</p>
-            <p className="text-sm text-white/90 mt-1">{error}</p>
+            <p className="font-medium">Error al enviar el formulario</p>
+            <p className="text-sm">{error}</p>
           </div>
         </div>
       )}
 
-      {/* Carousel de flyers o header simple */}
-      {(() => {
-        console.log('🎯 Tournament flyer_images:', tournament.flyer_images);
-        return tournament.flyer_images && tournament.flyer_images.length > 0;
-      })() ? (
-        <TournamentFlyerCarousel
-          images={tournament.flyer_images!}
-          tournamentName={tournament.name}
-          accentColor={tournament.accent_color}
-        />
-      ) : (
-        <div className="text-center space-y-2 pb-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full" style={{ backgroundColor: `${tournament.accent_color}20` }}>
-            <Trophy className="h-8 w-8" style={{ color: tournament.accent_color }} />
-          </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-white font-body">Inscripción {tournament.name}</h2>
-          <p className="text-white/70 text-sm md:text-base font-body">Completa todos los datos para inscribir tu equipo</p>
+      {/* Carousel de flyers */}
+      {tournament.flyer_images && tournament.flyer_images.length > 0 && (
+        <div className="mb-8 rounded-xl overflow-hidden shadow-2xl">
+          <TournamentFlyerCarousel
+            images={tournament.flyer_images}
+            tournamentName={tournament.name}
+            accentColor={tournament.accent_color}
+          />
         </div>
       )}
 
       {/* Datos del equipo */}
-      <Card className="bg-white/10 backdrop-blur border-white/20 shadow-xl">
-        <CardHeader className="border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg" style={{ backgroundColor: `${tournament.accent_color}20` }}>
-              <Users className="h-5 w-5" style={{ color: tournament.accent_color }} />
-            </div>
-            <div>
-              <CardTitle className="text-white text-xl">Datos del equipo</CardTitle>
-              <CardDescription className="text-white/60 text-sm">
-                Información básica y foto del equipo
-              </CardDescription>
-            </div>
-          </div>
+      <Card className="bg-gradient-to-br from-white/5 to-white/[0.03] backdrop-blur-sm border border-white/10 shadow-lg overflow-hidden">
+        <div
+          className="h-2 w-full"
+          style={{ backgroundColor: tournament.accent_color }}
+        ></div>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-white text-2xl font-bold tracking-tight">
+            Información del equipo
+          </CardTitle>
+          <CardDescription className="text-white/70">
+            Completa la información básica de tu equipo
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-5 pt-6">
-          {/* Nombre del equipo */}
-          <div className="space-y-2">
-            <Label htmlFor="team_name" className="text-white flex items-center gap-2">
-              <Trophy className="h-4 w-4" style={{ color: tournament.accent_color }} />
-              Nombre del equipo <span className="text-red-500 font-bold">*</span>
+        <CardContent className="space-y-8 pt-2">
+        {/* Nombre del equipo */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5" style={{ color: tournament.accent_color }} />
+            <Label htmlFor="teamName" className="text-white/90 font-medium">
+              Nombre del equipo <span className="text-red-500">*</span>
             </Label>
+          </div>
+          <div className="relative">
             <Input
-              id="team_name"
+              id="teamName"
+              type="text"
+              placeholder="Ej: Los Campeones"
+              className={cn(
+                'pl-12 bg-white/5 border-white/20 text-white placeholder:text-white/30 h-14 text-base rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/50',
+                errors.teamName ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-white/50',
+                'hover:bg-white/10 focus:bg-white/10'
+              )}
+              style={{
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              }}
               value={teamName}
               onChange={(e) => {
                 setTeamName(e.target.value);
                 validateField('teamName', e.target.value);
               }}
               onBlur={() => handleBlur('teamName')}
-              placeholder="Los Imparables"
-              className={cn(
-                "bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11",
-                errors.teamName && touched.teamName && "border-red-400 focus-visible:ring-red-400"
-              )}
             />
-            {errors.teamName && touched.teamName && (
-              <p className="text-sm text-red-400 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.teamName}
-              </p>
-            )}
-            <p className="text-xs text-white/50 flex items-center gap-1">
-              <Info className="h-3 w-3" />
-              Elige un nombre único y representativo (3-30 caracteres)
-            </p>
+            <Users className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
           </div>
+          {errors.teamName && (
+            <div className="flex items-start gap-2 text-red-400 text-sm mt-1 bg-red-500/10 px-3 py-2 rounded-md">
+              <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <span>{errors.teamName}</span>
+            </div>
+          )}
+        </div>
 
-          {/* Foto del equipo */}
-          <ImageUpload
-            value={teamPhoto}
-            onChange={setTeamPhoto}
-            label="Foto del equipo"
-            description="Opcional"
-            aspectRatio="landscape"
-            maxSizeMB={5}
-          />
+        {/* Foto del equipo */}
+        <ImageUpload
+          value={teamPhoto}
+          onChange={setTeamPhoto}
+          label="Foto del equipo"
+          description="Opcional"
+          aspectRatio="landscape"
+          maxSizeMB={5}
+        />
 
-          {/* Capitán */}
-          <div className="pt-4 border-t border-white/10">
-            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-              <Users className="h-4 w-4" style={{ color: tournament.accent_color }} />
-              Datos del capitán
-            </h3>
+        {/* Capitán */}
+        <div className="pt-4 border-t border-white/10">
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+            <Users className="h-4 w-4" style={{ color: tournament.accent_color }} />
+            Datos del capitán
+          </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Nombre del capitán */}
-              <div className="space-y-2">
-                <Label htmlFor="captain_name" className="text-white">Nombre completo <span className="text-red-500 font-bold">*</span></Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Nombre del capitán */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5" style={{ color: tournament.accent_color }} />
+                <Label htmlFor="captainName" className="text-white/90 font-medium">
+                  Nombre completo <span className="text-red-500">*</span>
+                </Label>
+              </div>
+              <div className="relative">
                 <Input
-                  id="captain_name"
+                  id="captainName"
+                  type="text"
+                  placeholder="Ej: Juan Pérez"
+                  className={cn(
+                    'pl-12 bg-white/5 border-white/20 text-white placeholder:text-white/30 h-14 text-base rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/50',
+                    errors.captainName ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-white/50',
+                    'hover:bg-white/10 focus:bg-white/10'
+                  )}
+                  style={{
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}
                   value={captainName}
                   onChange={(e) => {
                     setCaptainName(e.target.value);
@@ -452,28 +504,37 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
                     validateField('captainName', e.target.value);
                   }}
                   onBlur={() => handleBlur('captainName')}
-                  placeholder="Juan Pérez"
-                  className={cn(
-                    "bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11",
-                    errors.captainName && touched.captainName && "border-red-400"
-                  )}
                 />
-                {errors.captainName && touched.captainName && (
-                  <p className="text-sm text-red-400 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.captainName}
-                  </p>
-                )}
+                <Users className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
               </div>
+              {errors.captainName && (
+                <div className="flex items-start gap-2 text-red-400 text-sm mt-1 bg-red-500/10 px-3 py-2 rounded-md">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span>{errors.captainName}</span>
+                </div>
+              )}
+            </div>
 
-              {/* Instagram del capitán */}
-              <div className="space-y-2">
-                <Label htmlFor="captain_instagram" className="text-white flex items-center gap-2">
-                  <Instagram className="h-4 w-4" />
-                  Instagram <span className="text-red-400">*</span>
+            {/* Instagram del capitán */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="captainInstagram" className="text-white/90 font-medium">
+                  Instagram <span className="text-red-500">*</span>
                 </Label>
+              </div>
+              <div className="relative">
                 <Input
-                  id="captain_instagram"
+                  id="captainInstagram"
+                  type="text"
+                  placeholder="Ej: @juanperez"
+                  className={cn(
+                    'pl-12 bg-white/5 border-white/20 text-white placeholder:text-white/30 h-14 text-base rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/50',
+                    errors.captainInstagram ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-white/50',
+                    'hover:bg-white/10 focus:bg-white/10'
+                  )}
+                  style={{
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}
                   value={captainInstagram}
                   onChange={(e) => {
                     const value = e.target.value.startsWith('@') ? e.target.value : `@${e.target.value}`;
@@ -482,29 +543,38 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
                     validateField('captainInstagram', value);
                   }}
                   onBlur={() => handleBlur('captainInstagram')}
-                  placeholder="@juanperez"
-                  className={cn(
-                    "bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11",
-                    errors.captainInstagram && touched.captainInstagram && "border-red-400"
-                  )}
                 />
-                {errors.captainInstagram && touched.captainInstagram && (
-                  <p className="text-sm text-red-400 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.captainInstagram}
-                  </p>
-                )}
+                <Instagram className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
               </div>
+              {errors.captainInstagram && (
+                <div className="flex items-start gap-2 text-red-400 text-sm mt-1 bg-red-500/10 px-3 py-2 rounded-md">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span>{errors.captainInstagram}</span>
+                </div>
+              )}
+            </div>
 
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-white flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email <span className="text-red-400">*</span>
+            {/* Email */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Mail className="h-5 w-5" style={{ color: tournament.accent_color }} />
+                <Label htmlFor="email" className="text-white/90 font-medium">
+                  Email <span className="text-red-500">*</span>
                 </Label>
+              </div>
+              <div className="relative">
                 <Input
                   id="email"
                   type="email"
+                  placeholder="Ej: equipo@ejemplo.com"
+                  className={cn(
+                    'pl-12 bg-white/5 border-white/20 text-white placeholder:text-white/30 h-14 text-base rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/50',
+                    errors.email ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-white/50',
+                    'hover:bg-white/10 focus:bg-white/10'
+                  )}
+                  style={{
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -512,72 +582,90 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
                     validateField('email', e.target.value);
                   }}
                   onBlur={() => handleBlur('email')}
-                  placeholder="equipo@ejemplo.com"
-                  className={cn(
-                    "bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11",
-                    errors.email && touched.email && "border-red-400"
-                  )}
                 />
-                {errors.email && touched.email && (
-                  <p className="text-sm text-red-400 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.email}
-                  </p>
-                )}
+                <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
               </div>
+              {errors.email && (
+                <div className="flex items-start gap-2 text-red-400 text-sm mt-1 bg-red-500/10 px-3 py-2 rounded-md">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span>{errors.email}</span>
+                </div>
+              )}
+            </div>
 
-              {/* Teléfono */}
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-white flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  WhatsApp / Teléfono <span className="text-red-500 font-bold">*</span>
+            {/* Teléfono */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Phone className="h-5 w-5" style={{ color: tournament.accent_color }} />
+                <Label htmlFor="phone" className="text-white/90 font-medium">
+                  WhatsApp / Teléfono <span className="text-red-500">*</span>
                 </Label>
+              </div>
+              <div className="relative">
                 <Input
                   id="phone"
+                  type="text"
+                  placeholder="Ej: +54 9 223 123 4567"
+                  className={cn(
+                    'pl-12 bg-white/5 border-white/20 text-white placeholder:text-white/30 h-14 text-base rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/50',
+                    errors.phone ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-white/50',
+                    'hover:bg-white/10 focus:bg-white/10'
+                  )}
+                  style={{
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}
                   value={phone}
                   onChange={(e) => {
                     setPhone(e.target.value);
                     validateField('phone', e.target.value);
                   }}
                   onBlur={() => handleBlur('phone')}
-                  placeholder="+54 9 223 123 4567"
-                  className={cn(
-                    "bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11",
-                    errors.phone && touched.phone && "border-red-400"
-                  )}
                 />
-                {errors.phone && touched.phone && (
-                  <p className="text-sm text-red-400 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.phone}
-                  </p>
-                )}
-                <p className="text-xs text-white/50 flex items-center gap-1">
-                  <Info className="h-3 w-3" />
-                  Para coordinar detalles del torneo
-                </p>
+                <Phone className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
               </div>
+              {errors.phone && (
+                <div className="flex items-start gap-2 text-red-400 text-sm mt-1 bg-red-500/10 px-3 py-2 rounded-md">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span>{errors.phone}</span>
+                </div>
+              )}
             </div>
           </div>
+        </div> {/* Close captain section div */}
         </CardContent>
       </Card>
 
       {/* Jugadores */}
-      <Card className="bg-white/10 backdrop-blur border-white/20 shadow-xl">
-        <CardHeader className="border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg" style={{ backgroundColor: `${tournament.accent_color}20` }}>
-              <Users className="h-5 w-5" style={{ color: tournament.accent_color }} />
-            </div>
+      <Card className="bg-gradient-to-br from-white/5 to-white/[0.03] backdrop-blur-sm border border-white/10 shadow-lg overflow-hidden mt-10">
+        <div
+          className="h-2 w-full"
+          style={{ backgroundColor: tournament.accent_color }}
+        ></div>
+        <CardHeader className="pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle className="text-white text-xl">Jugadores del equipo</CardTitle>
-              <CardDescription className="text-white/60 text-sm">
-                Mínimo {tournament.players_per_team_min}, máximo {tournament.players_per_team_max} jugadores
+              <CardTitle className="text-white text-2xl font-bold tracking-tight">
+                Jugadores
+              </CardTitle>
+              <CardDescription className="text-white/70">
+                Agrega al menos {tournament.players_per_team_min} jugadores (incluyendo al capitán)
               </CardDescription>
             </div>
+            <Button
+              type="button"
+              onClick={addPlayer}
+              disabled={players.length >= tournament.players_per_team_max}
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 h-11 px-6 font-medium rounded-lg transition-all hover:shadow-lg hover:scale-[1.02] active:scale-95 flex-shrink-0"
+              style={{
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              }}
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Agregar jugador
+            </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6 pt-6">
+        <CardContent className="space-y-8 pt-2">
           {players.map((player, index) => (
             <div
               key={index}
@@ -767,8 +855,8 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
                 Acepto el <strong className="text-red-500 font-bold">reglamento del torneo</strong> y el <strong className="text-red-500 font-bold">código de conducta</strong> de BUSY BLACKTOP *
               </Label>
               {tournament.rules_content && (
-                <Dialog 
-                  open={rulesModalOpen} 
+                <Dialog
+                  open={rulesModalOpen}
                   onOpenChange={(open) => {
                     setRulesModalOpen(open);
                     // Ocultar/mostrar header cuando se abre/cierra el modal
@@ -791,15 +879,34 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
                       Leer reglamento completo
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="w-[95vw] md:max-w-3xl lg:max-w-4xl max-h-[85vh] overflow-y-auto bg-neutral-900 text-white border-2 rounded-xl shadow-2xl z-[100]" style={{ borderColor: `${tournament.accent_color}40` }}>
-                    <DialogHeader>
-                      <DialogTitle className="text-2xl font-bold" style={{ color: tournament.accent_color }}>Reglamento del Torneo</DialogTitle>
-                      <DialogDescription className="text-red-400 font-semibold">
+                  <DialogContent
+                    className="relative w-[95vw] md:max-w-3xl lg:max-w-4xl max-h-[85vh] overflow-y-auto bg-neutral-900/95 text-white border rounded-2xl shadow-2xl backdrop-blur z-[100]"
+                    style={{ borderColor: `${tournament.accent_color}40` }}
+                  >
+                    <div
+                      className="absolute inset-x-0 top-0 h-1 rounded-t-2xl"
+                      style={{ background: `linear-gradient(90deg, ${tournament.accent_color}, transparent 60%)` }}
+                    />
+                    <DialogHeader className="px-4 pt-4">
+                      <DialogTitle
+                        className="text-2xl sm:text-3xl font-extrabold tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+                        style={{ color: tournament.accent_color }}
+                      >
+                        Reglamento del Torneo
+                      </DialogTitle>
+                      <DialogDescription className="text-white/70">
                         {tournament.name}
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="mt-4 pb-2">
-                      <TournamentRulesMarkdown content={tournament.rules_content} />
+                    <div className="mt-2 pb-4">
+                      <div
+                        className="rounded-xl border bg-gradient-to-b from-white/[0.04] to-transparent p-4 sm:p-6 leading-relaxed shadow-inner"
+                        style={{ borderColor: `${tournament.accent_color}25` }}
+                      >
+                        <div className="space-y-4 text-white/90">
+                          <TournamentRulesMarkdown content={tournament.rules_content || ''} />
+                        </div>
+                      </div>
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -836,7 +943,7 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
         <Button
           type="submit"
           disabled={loading || !acceptRules || !acceptImageRights}
-          className="relative w-full text-base sm:text-lg py-5 sm:py-6 font-body font-semibold transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group"
+          className="relative w-full text-base sm:text-lg py-5 sm:py-6 font-body font-semibold transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group text-white"
           style={{
             backgroundColor: tournament.accent_color,
             boxShadow: `0 4px 16px ${tournament.accent_color}30`
@@ -861,7 +968,6 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
           </span>
         </Button>
       </div>
-
     </form>
   );
 }

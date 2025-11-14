@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Info, Sparkles } from 'lucide-react';
 
 interface TournamentGlossaryProps {
   accentColor: string;
@@ -34,45 +34,67 @@ const glossaryTerms = [
 
 export function TournamentGlossary({ accentColor }: TournamentGlossaryProps) {
   return (
-    <div className="space-y-6 font-body">
-      <Card className="bg-white/10 backdrop-blur border-white/20">
-        <CardContent className="p-6">
-          {/* Formato del Torneo first */}
-          <div className="p-4 rounded-lg bg-white/5 border border-white/10 mb-8">
-            <h4 className="font-bold mb-2" style={{ color: accentColor }}>Formato del Torneo</h4>
-            <ul className="space-y-2 text-sm text-white/80">
-              <li>• <strong>Fase de Grupos:</strong> Los equipos se dividen en grupos y juegan todos contra todos</li>
-              <li>• <strong>Clasificación:</strong> Los mejores equipos de cada grupo avanzan a playoffs</li>
-              <li>• <strong>Playoffs:</strong> Eliminación directa hasta definir al campeón</li>
-              <li>• <strong>Criterios de desempate:</strong> Diferencia de puntos, enfrentamiento directo, puntos anotados</li>
-            </ul>
-          </div>
-
-          <div className="flex items-center gap-2 mb-6">
-            <BookOpen className="h-5 w-5" style={{ color: accentColor }} />
-            <h3 className="text-2xl font-bold">Glosario de Términos</h3>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            {glossaryTerms.map((item) => (
-              <div
-                key={item.term}
-                className="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
-              >
-                <div className="flex items-start gap-3">
-                  <span
-                    className="px-3 py-1 rounded font-bold text-sm shrink-0"
-                    style={{ backgroundColor: `${accentColor}30`, color: accentColor }}
-                  >
-                    {item.term}
-                  </span>
-                  <p className="text-sm text-white/80 leading-relaxed">{item.definition}</p>
-                </div>
+    <div className="space-y-8 font-body">
+      <div className="relative overflow-hidden rounded-2xl border bg-white/[0.04] backdrop-blur shadow-xl" style={{ borderColor: `${accentColor}30` }}>
+        <div className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${accentColor}, transparent 60%)` }} />
+        <Card className="bg-transparent border-0 shadow-none">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="p-2 rounded-lg" style={{ backgroundColor: `${accentColor}20` }}>
+                <BookOpen className="h-5 w-5" style={{ color: accentColor }} />
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Info del Torneo</h3>
+                <p className="text-white/60 text-sm">Formato general, términos y conceptos clave</p>
+              </div>
+            </div>
+
+            {/* Formato del Torneo */}
+            <div className="rounded-xl border bg-gradient-to-b from-white/[0.05] to-transparent p-4 sm:p-6 mb-8 shadow-inner" style={{ borderColor: `${accentColor}25` }}>
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="h-4 w-4" style={{ color: accentColor }} />
+                <h4 className="font-bold" style={{ color: accentColor }}>Formato del Torneo</h4>
+              </div>
+              <ul className="space-y-2 text-sm text-white/85">
+                <li>• <strong>Fase de Grupos:</strong> Todos contra todos dentro de cada grupo</li>
+                <li>• <strong>Clasificación:</strong> Los mejores avanzan a playoffs</li>
+                <li>• <strong>Playoffs:</strong> Eliminación directa hasta la final</li>
+                <li>• <strong>Desempate:</strong> Diferencia de puntos, duelo directo y puntos a favor</li>
+              </ul>
+              <div className="mt-3 flex items-start gap-2 text-xs text-white/60">
+                <Info className="h-3.5 w-3.5 mt-0.5" style={{ color: accentColor }} />
+                <span>El formato puede variar según cantidad de equipos y tiempos disponibles.</span>
+              </div>
+            </div>
+
+            {/* Glosario */}
+            <div className="flex items-center gap-2 mb-4">
+              <BookOpen className="h-5 w-5" style={{ color: accentColor }} />
+              <h4 className="text-xl font-bold">Glosario de Términos</h4>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {glossaryTerms.map((item) => (
+                <div
+                  key={item.term}
+                  className="p-4 rounded-lg border bg-white/[0.04] hover:bg-white/[0.07] transition-colors shadow-sm"
+                  style={{ borderColor: `${accentColor}15` }}
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className="px-3 py-1 rounded font-bold text-sm shrink-0"
+                      style={{ backgroundColor: `${accentColor}30`, color: accentColor }}
+                    >
+                      {item.term}
+                    </span>
+                    <p className="text-sm text-white/80 leading-relaxed">{item.definition}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

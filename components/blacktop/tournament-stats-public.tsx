@@ -20,6 +20,9 @@ type SortKey =
   | 'gp' | 'name' | 'team';
 
 export function TournamentStatsPublic({ leaderboard, teams, accentColor }: TournamentStatsPublicProps) {
+  // Filtrar leaderboard a solo jugadores cuyos equipos existen en 'teams' (aprobados)
+  const teamIds = new Set(teams.map(t => t.id));
+  const validLeaderboard = leaderboard.filter(p => teamIds.has(p.team.id));
   const [selectedTeam, setSelectedTeam] = useState<number | 'all'>('all');
   const [mode, setMode] = useState<'totals' | 'pergame'>('pergame');
   const [sortKey, setSortKey] = useState<SortKey>('ppg');
@@ -29,7 +32,8 @@ export function TournamentStatsPublic({ leaderboard, teams, accentColor }: Tourn
   const [searchQuery, setSearchQuery] = useState('');
 
   const rows = useMemo(() => {
-    let list = (selectedTeam === 'all' ? leaderboard : leaderboard.filter(p => p.team.id === selectedTeam))
+    let base = validLeaderboard;
+    let list = (selectedTeam === 'all' ? base : base.filter(p => p.team.id === selectedTeam))
       .map((p) => {
         const gp = p.games_played || 0;
         const safe = (v: number) => Number.isFinite(v) ? v : 0;
@@ -75,7 +79,7 @@ export function TournamentStatsPublic({ leaderboard, teams, accentColor }: Tourn
       }
       return ((a[sortKey] ?? 0) - (b[sortKey] ?? 0)) * dir;
     });
-  }, [leaderboard, selectedTeam, sortKey, sortDir, minGames, searchQuery]);
+  }, [validLeaderboard, selectedTeam, sortKey, sortDir, minGames, searchQuery]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -84,6 +88,24 @@ export function TournamentStatsPublic({ leaderboard, teams, accentColor }: Tourn
       setSortDir('desc');
     }
   };
+
+  // Si no hay equipos aprobados o no hay datos válidos, mostrar vacío directo
+  if (teams.length === 0 || validLeaderboard.length === 0) {
+    return (
+      <div className="space-y-8 font-body">
+        <Card className="bg-white/10 backdrop-blur border-white/20">
+          <CardHeader>
+            <CardTitle className="text-white">Estadísticas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-12 text-white/60">
+              No hay estadísticas disponibles aún. Se activarán cuando haya equipos y partidos aprobados.
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 font-body">
@@ -292,10 +314,10 @@ export function TournamentStatsPublic({ leaderboard, teams, accentColor }: Tourn
       </Card>
 
       {/* Tablas Top 5 al final */}
-      {leaderboard.length > 0 && (
+      {validLeaderboard.length > 0 && (
         <div>
           <h3 className="text-2xl font-bold mb-6 text-white">Top 5 por Categoría</h3>
-          <TopStatsTables leaderboard={leaderboard} accentColor={accentColor} />
+          <TopStatsTables leaderboard={validLeaderboard} accentColor={accentColor} />
         </div>
       )}
     </div>
