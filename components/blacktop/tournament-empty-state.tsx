@@ -68,10 +68,15 @@ export function TournamentEmptyState({ tournament }: TournamentEmptyStateProps) 
           <Button
             onClick={() => router.push(`/blacktop/${tournament.slug}/inscripcion`)}
             size="lg"
-            className="text-lg px-8 py-6 font-bold shadow-lg hover:scale-105 transition-all"
-            style={{ backgroundColor: tournament.accent_color, color: '#fff' }}
+            className="relative text-lg px-8 py-6 font-bold transition-all hover:scale-105 rounded-xl overflow-hidden border text-white"
+            style={{
+              background: 'linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.98))',
+              borderColor: tournament.accent_color,
+              boxShadow: `0 8px 28px ${tournament.accent_color}20, 0 0 0 1px ${tournament.accent_color}40 inset`
+            }}
           >
-            Inscribir mi equipo
+            <span className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(120deg, rgba(255,255,255,0.08), transparent 40%)' }} />
+            <span className="relative z-10">Inscribir mi equipo</span>
           </Button>
         )}
         <Button

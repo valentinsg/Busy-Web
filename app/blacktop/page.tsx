@@ -140,10 +140,16 @@ async function TournamentsList() {
                 {canRegister && (
                   <Button
                     asChild
-                    className="w-full bg-[#ef4444] hover:bg-[#dc2626] text-white font-semibold transition-all duration-200 hover:-translate-y-0.5 shadow-sm hover:shadow-lg"
+                    className="relative w-full text-white font-semibold transition-all duration-200 hover:-translate-y-0.5 rounded-xl overflow-hidden border"
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.98))',
+                      borderColor: '#ef4444',
+                      boxShadow: '0 8px 28px rgba(239,68,68,0.2), 0 0 0 1px rgba(239,68,68,0.4) inset'
+                    }}
                   >
-                    <Link href={`/blacktop/${tournament.slug}/inscripcion`} className="flex items-center justify-center gap-2">
-                      Inscribirse
+                    <Link href={`/blacktop/${tournament.slug}/inscripcion`} className="relative flex items-center justify-center gap-2 px-6 py-3">
+                      <span className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(120deg, rgba(255,255,255,0.08), transparent 40%)' }} />
+                      <span className="relative z-10">Inscribirse</span>
                     </Link>
                   </Button>
                 )}

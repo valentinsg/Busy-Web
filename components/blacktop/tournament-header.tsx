@@ -45,15 +45,16 @@ export function TournamentHeader({ tournament, teamsCount = 0, children }: Tourn
                 <Link href={`/blacktop/${tournament.slug}/inscripcion`}>
                   <Button
                     size="lg"
-                    className="relative text-sm sm:text-lg px-6 sm:px-10 py-4 sm:py-6 font-bold text-white hover:text-white transition-all hover:scale-[1.02] rounded-xl overflow-hidden group"
+                    className="relative text-sm sm:text-lg px-6 sm:px-10 py-4 sm:py-6 font-bold text-white transition-all hover:scale-[1.02] rounded-xl overflow-hidden group border"
                     style={{ 
-                      backgroundColor: tournament.accent_color,
-                      boxShadow: `0 8px 32px ${tournament.accent_color}25, inset 0 1px 0 rgba(255,255,255,0.1)`
+                      background: 'linear-gradient(180deg, rgba(0,0,0,0.85), rgba(0,0,0,0.95))',
+                      borderColor: tournament.accent_color,
+                      boxShadow: `0 8px 28px ${tournament.accent_color}20, 0 0 0 1px ${tournament.accent_color}40 inset`
                     }}
                   >
-                    {/* Liquid glass effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    {/* sheen */}
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(120deg, rgba(255,255,255,0.08), transparent 40%)' }} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
                     <span className="relative z-10">INSCRIBÍ TU EQUIPO</span>
                   </Button>
                 </Link>
