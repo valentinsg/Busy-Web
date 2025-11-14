@@ -67,7 +67,7 @@ export function TournamentFlyerCarousel({
       <div 
         ref={containerRef}
         className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-black/20 backdrop-blur-sm border border-white/10"
-        style={{ touchAction: 'pinch-zoom' }}
+        style={{ touchAction: 'pan-y pinch-zoom' }}
       >
         {/* Current image con transición - usando img para permitir zoom nativo */}
         <div className="relative w-full h-full bg-black flex items-center justify-center">
@@ -80,7 +80,7 @@ export function TournamentFlyerCarousel({
             )}
             loading={currentIndex === 0 ? "eager" : "lazy"}
             style={{ 
-              touchAction: 'auto',
+              touchAction: 'pan-y pinch-zoom',
               userSelect: 'none'
             }}
           />
