@@ -1,6 +1,14 @@
 import getServiceClient from "@/lib/supabase/server"
 import type { CustomerStats, ProductPopularity } from "@/types/commerce"
 
+// Date helpers
+function nextDayISO(dateStr: string): string {
+  // Input 'YYYY-MM-DD' -> returns next day in same format (UTC)
+  const d = new Date(`${dateStr}T00:00:00.000Z`)
+  d.setUTCDate(d.getUTCDate() + 1)
+  return d.toISOString().slice(0, 10)
+}
+
 // Get historical balance (all-time or filtered by date)
 export async function getHistoricalBalance(params?: {
   from?: string
@@ -13,14 +21,14 @@ export async function getHistoricalBalance(params?: {
 }> {
   const supabase = getServiceClient()
   
-  // Get total revenue (exclude pending orders)
+  // Get total revenue: include only paid/completed orders
   let revenueQuery = supabase
     .from('orders')
     .select('total')
-    .neq('status', 'pending')
+    .in('status', ['paid','completed'])
   
   if (params?.from) revenueQuery = revenueQuery.gte('placed_at', params.from)
-  if (params?.to) revenueQuery = revenueQuery.lte('placed_at', params.to)
+  if (params?.to) revenueQuery = revenueQuery.lt('placed_at', nextDayISO(params.to))
   
   const { data: orders, error: ordersErr } = await revenueQuery
   if (ordersErr) throw ordersErr
@@ -34,7 +42,7 @@ export async function getHistoricalBalance(params?: {
     .select('amount')
   
   if (params?.from) expensesQuery = expensesQuery.gte('incurred_at', params.from)
-  if (params?.to) expensesQuery = expensesQuery.lte('incurred_at', params.to)
+  if (params?.to) expensesQuery = expensesQuery.lt('incurred_at', nextDayISO(params.to))
   
   const { data: expenses, error: expensesErr } = await expensesQuery
   if (expensesErr) throw expensesErr
@@ -92,10 +100,10 @@ export async function getRevenueByChannel(params: {
 }): Promise<Array<{ channel: string; orders: number; revenue: number }>> {
   const supabase = getServiceClient()
   // Fetch channel + total and aggregate in application code for reliability
-  // Exclude pending orders from revenue calculations
-  let query = supabase.from("orders").select("channel,total,placed_at").neq("status", "pending")
+  // Include only paid/completed orders in revenue calculations
+  let query = supabase.from("orders").select("channel,total,placed_at").in('status', ['paid','completed'])
   if (params.from) query = query.gte("placed_at", params.from)
-  if (params.to) query = query.lte("placed_at", params.to)
+  if (params.to) query = query.lt("placed_at", nextDayISO(params.to))
   const { data, error } = await query
   if (error) throw error
   type ChannelRow = { channel: string; total: number }
@@ -118,18 +126,18 @@ export async function getProfitSummary(params: {
 }): Promise<{ revenue: number; expenses: number; profit: number }> {
   const supabase = getServiceClient()
   // Fetch values and aggregate in app to avoid PostgREST aggregate quirks
-  // Exclude pending orders from profit calculations
+  // Include only paid/completed orders in profit calculations
   type OrderRow = { total: number; placed_at: string }
-  let ordersQB = supabase.from("orders").select("total,placed_at").neq("status", "pending")
+  let ordersQB = supabase.from("orders").select("total,placed_at").in('status', ['paid','completed'])
   if (params.from) ordersQB = ordersQB.gte("placed_at", params.from)
-  if (params.to) ordersQB = ordersQB.lte("placed_at", params.to)
+  if (params.to) ordersQB = ordersQB.lt("placed_at", nextDayISO(params.to))
   const { data: orderRows, error: revErr } = await ordersQB
   if (revErr) throw revErr
 
   type ExpenseRow = { amount: number; incurred_at: string }
   let expensesQB = supabase.from("expenses").select("amount,incurred_at")
   if (params.from) expensesQB = expensesQB.gte("incurred_at", params.from)
-  if (params.to) expensesQB = expensesQB.lte("incurred_at", params.to)
+  if (params.to) expensesQB = expensesQB.lt("incurred_at", nextDayISO(params.to))
   const { data: expenseRows, error: expErr } = await expensesQB
   if (expErr) throw expErr
 
@@ -169,10 +177,10 @@ export async function getTimeSeries(params: {
   type TSOrderRow = { total: number; placed_at: string; id: string }
   type TSExpenseRow = { amount: number; incurred_at: string }
   
-  // fetch orders for current period (exclude pending)
-  let ordersQB = supabase.from('orders').select('id,total,placed_at').neq('status', 'pending')
+  // fetch orders for current period (only paid/completed)
+  let ordersQB = supabase.from('orders').select('id,total,placed_at').in('status', ['paid','completed'])
   if (params.from) ordersQB = ordersQB.gte('placed_at', params.from)
-  if (params.to) ordersQB = ordersQB.lte('placed_at', params.to)
+  if (params.to) ordersQB = ordersQB.lt('placed_at', nextDayISO(params.to))
   const { data: orderRows, error: oErr } = await ordersQB
   if (oErr) throw oErr
 
@@ -257,7 +265,7 @@ export async function getTimeSeries(params: {
     const prevTo = new Date(fromDate.getTime() - 1)
     
     const prevOrdersQB = supabase.from('orders').select('total,placed_at')
-      .neq('status', 'pending')
+      .in('status', ['paid','completed'])
       .gte('placed_at', prevFrom.toISOString().slice(0, 10))
       .lte('placed_at', prevTo.toISOString().slice(0, 10))
     const { data: prevOrderRows } = await prevOrdersQB
@@ -288,10 +296,10 @@ export async function getTimeSeries(params: {
 
 export async function getKPIs(params: { from?: string; to?: string }): Promise<{ orders: number; aov: number; new_customers: number }> {
   const supabase = getServiceClient()
-  // Orders and revenue (exclude pending)
-  let ordersQB = supabase.from('orders').select('id,total,placed_at').neq('status', 'pending')
+  // Orders and revenue (only paid/completed) with inclusive end date
+  let ordersQB = supabase.from('orders').select('id,total,placed_at').in('status', ['paid','completed'])
   if (params.from) ordersQB = ordersQB.gte('placed_at', params.from)
-  if (params.to) ordersQB = ordersQB.lte('placed_at', params.to)
+  if (params.to) ordersQB = ordersQB.lt('placed_at', nextDayISO(params.to))
   const { data: orderRows, error: ordErr } = await ordersQB
   if (ordErr) throw ordErr
   const orders = (orderRows ?? []).length
@@ -301,7 +309,7 @@ export async function getKPIs(params: { from?: string; to?: string }): Promise<{
   // New customers in period
   let custQB = supabase.from('customers').select('id,created_at')
   if (params.from) custQB = custQB.gte('created_at', params.from)
-  if (params.to) custQB = custQB.lte('created_at', params.to)
+  if (params.to) custQB = custQB.lt('created_at', nextDayISO(params.to))
   const { data: custRows, error: custErr } = await custQB
   if (custErr) throw custErr
   const new_customers = (custRows ?? []).length

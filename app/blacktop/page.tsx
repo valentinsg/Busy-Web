@@ -7,30 +7,20 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { generateSEO } from '@/lib/seo';
+import { generateBreadcrumbSchema } from '@/lib/structured-data';
+import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'Busy Blacktop | Torneos 3v3 de básquet',
-  description:
-    'Busy Blacktop es nuestro circuito de torneos 3v3: cultura, comunidad y competencia. Inscribí tu equipo y viví la experiencia Busy en la cancha.',
-  keywords: [
-    'busy blacktop',
-    'torneo 3v3',
-    'básquet',
-    'streetball',
-    'mar del plata',
-  ],
-  openGraph: {
-    title: 'Busy Blacktop | Torneos 3v3 de básquet',
+  ...generateSEO({
+    title: 'Busy Blacktop | Torneos de básquet',
     description:
-      'Nuestro circuito de torneos 3v3 con cultura, comunidad y competencia. Sumate con tu equipo.',
-    type: 'website',
-    url: 'https://busyclothing.com.ar/blacktop',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Busy Blacktop | Torneos 3v3 de básquet',
-    description:
-      'Nuestro circuito de torneos 3v3 con cultura, comunidad y competencia. Sumate con tu equipo.',
+      'Busy Blacktop es un circuito de torneos 3v3 que busca fomentar la cultura del básquet, comunidad y competencia. Inscribí tu equipo y participa en un torneo organizado por Busy.',
+    image: '/busy-og-image.png',
+    url: (process.env.SITE_URL || 'https://busy.com.ar') + '/blacktop',
+  }),
+  alternates: {
+    canonical: '/blacktop',
   },
 };
 
@@ -55,6 +45,7 @@ async function TournamentsList() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+      <BlacktopStructuredData tournaments={tournamentsWithStats} />
       {tournamentsWithStats.map((tournament) => {
         const teamsCount = tournament.teams_count ?? 0;
         const isFull = teamsCount >= tournament.max_teams;
@@ -222,5 +213,31 @@ export default async function BlacktopPage() {
         </Suspense>
       </div>
     </div>
+  );
+}
+
+function BlacktopStructuredData({ tournaments }: { tournaments: Array<any> }) {
+  const RAW_SITE_URL = process.env.SITE_URL || '';
+  const SITE_URL = /^https?:\/\//.test(RAW_SITE_URL) && RAW_SITE_URL ? RAW_SITE_URL : 'https://busy.com.ar';
+  const breadcrumb = generateBreadcrumbSchema([
+    { name: 'Blacktop', url: `${SITE_URL}/blacktop` },
+  ]);
+  const itemList = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Torneos Busy Blacktop',
+    itemListElement: tournaments.map((t, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: t.name,
+      url: `${SITE_URL}/blacktop/${t.slug}`,
+      image: t.banner_url || t.flyer_images?.[0] || `${SITE_URL}/busy-og-image.png`,
+    })),
+  };
+  return (
+    <>
+      <Script id="blacktop-breadcrumb" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <Script id="blacktop-itemlist" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
+    </>
   );
 }

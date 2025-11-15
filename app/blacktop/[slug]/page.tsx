@@ -6,10 +6,61 @@ import { TournamentTabsNav, TournamentTabPanels } from '@/components/blacktop/to
 import { TournamentGalleryPublic } from '@/components/blacktop/tournament-gallery-public';
 import { UpcomingMatchesNotification } from '@/components/blacktop/upcoming-matches-notification';
 import { Tabs } from '@/components/ui/tabs';
+import type { Metadata } from 'next';
+import { generateSEO } from '@/lib/seo';
+import { generateBreadcrumbSchema } from '@/lib/structured-data';
+import Script from 'next/script';
 
 interface TournamentPageProps {
   params: {
     slug: string;
+  };
+}
+
+export async function generateMetadata(
+  { params }: TournamentPageProps
+): Promise<Metadata> {
+  const tournament = await getTournamentBySlug(params.slug);
+  if (!tournament) {
+    return {
+      title: 'Torneo no encontrado',
+      robots: { index: false, follow: false },
+      alternates: { canonical: '/blacktop' },
+    };
+  }
+
+  const RAW_SITE_URL = process.env.SITE_URL || '';
+  const SITE_URL = /^https?:\/\//.test(RAW_SITE_URL) && RAW_SITE_URL ? RAW_SITE_URL : 'https://busy.com.ar';
+
+  const image = tournament.banner_url || tournament.flyer_images?.[0] || '/busy-og-image.png';
+  const url = `${SITE_URL}/blacktop/${tournament.slug}`;
+
+  // Build a concise description
+  const dateText = tournament.date ? new Date(tournament.date).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined;
+  const baseDescription = tournament.description ||
+    [
+      'Torneo 3v3 de básquet de Busy Blacktop',
+      tournament.location ? `en ${tournament.location}` : undefined,
+      dateText ? `- ${dateText}` : undefined,
+    ].filter(Boolean).join(' ');
+
+  return {
+    ...generateSEO({
+      title: `${tournament.name} | Busy Blacktop`,
+      description: baseDescription,
+      image,
+      url,
+      type: 'website',
+    }),
+    alternates: {
+      canonical: `/blacktop/${tournament.slug}`,
+    },
+    openGraph: {
+      ...generateSEO({ title: `${tournament.name} | Busy Blacktop`, description: baseDescription, image, url }).openGraph,
+    },
+    twitter: {
+      ...generateSEO({ title: `${tournament.name} | Busy Blacktop`, description: baseDescription, image, url }).twitter,
+    },
   };
 }
 
@@ -35,6 +86,7 @@ async function TournamentContent({ slug }: { slug: string }) {
         color: '#ffffff',
       }}
     >
+      <StructuredData slug={slug} tournamentName={tournament.name} tournamentImage={tournament.banner_url || tournament.flyer_images?.[0]} tournamentDate={tournament.date} location={tournament.location} />
       {/* Header + Tabs root */}
       <Tabs defaultValue="dashboard" className="w-full">
         <TournamentHeader tournament={tournament} teamsCount={teams.length}>
@@ -73,5 +125,60 @@ export default function TournamentPage({ params }: TournamentPageProps) {
     <Suspense fallback={<div className="min-h-screen bg-black" />}>
       <TournamentContent slug={params.slug} />
     </Suspense>
+  );
+}
+
+function StructuredData({
+  slug,
+  tournamentName,
+  tournamentImage,
+  tournamentDate,
+  location,
+}: {
+  slug: string;
+  tournamentName: string;
+  tournamentImage?: string;
+  tournamentDate?: string;
+  location?: string;
+}) {
+  const RAW_SITE_URL = process.env.SITE_URL || '';
+  const SITE_URL = /^https?:\/\//.test(RAW_SITE_URL) && RAW_SITE_URL ? RAW_SITE_URL : 'https://busy.com.ar';
+
+  const breadcrumb = generateBreadcrumbSchema([
+    { name: 'Blacktop', url: `${SITE_URL}/blacktop` },
+    { name: tournamentName, url: `${SITE_URL}/blacktop/${slug}` },
+  ]);
+
+  const event: any = {
+    '@context': 'https://schema.org',
+    '@type': 'SportsEvent',
+    name: tournamentName,
+    sport: 'Basketball',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    eventStatus: 'https://schema.org/EventScheduled',
+    organizer: {
+      '@type': 'Organization',
+      name: 'Busy Streetwear',
+      url: SITE_URL,
+    },
+    url: `${SITE_URL}/blacktop/${slug}`,
+    image: tournamentImage ? [tournamentImage] : [`${SITE_URL}/busy-og-image.png`],
+  };
+
+  if (location) {
+    event.location = {
+      '@type': 'Place',
+      name: location,
+    };
+  }
+  if (tournamentDate) {
+    event.startDate = new Date(tournamentDate).toISOString();
+  }
+
+  return (
+    <>
+      <Script id="tournament-breadcrumb" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <Script id="tournament-event" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(event) }} />
+    </>
   );
 }

@@ -11,7 +11,7 @@ export async function GET(req: Request) {
     const { data, error } = await supabase
       .from("product_popularity")
       .select("*")
-      .order("popularity", { ascending: false })
+      .order("revenue", { ascending: false })
       .limit(limit)
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

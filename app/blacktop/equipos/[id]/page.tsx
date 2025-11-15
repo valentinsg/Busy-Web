@@ -248,20 +248,7 @@ export default async function TeamProfilePage({ params }: TeamProfilePageProps) 
                 className="group block"
               >
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/20 hover:bg-white/[0.08] transition-all">
-                  <div className="relative w-12 h-12 rounded-full overflow-hidden bg-white/10 flex items-center justify-center flex-shrink-0">
-                    {player.photo_url ? (
-                      <Image
-                        src={player.photo_url}
-                        alt={player.full_name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <span className="text-lg font-bold" style={{ color: accentColor }}>
-                        {player.full_name.charAt(0)}
-                      </span>
-                    )}
-                  </div>
+                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: accentColor }} />
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold truncate group-hover:text-white transition-colors">{player.full_name}</div>
                     <div className="text-xs text-white/50 truncate">
