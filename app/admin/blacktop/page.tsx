@@ -50,7 +50,7 @@ async function TournamentsList() {
               {tournament.date && (
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="mr-2 h-4 w-4" />
-                  {format(new Date(tournament.date), "d 'de' MMMM, yyyy", { locale: es })}
+                  {format((() => { const d = String(tournament.date); return /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(`${d}T12:00:00Z`) : new Date(d) })(), "d 'de' MMMM, yyyy", { locale: es })}
                 </div>
               )}
               {tournament.location && (

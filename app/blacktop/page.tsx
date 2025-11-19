@@ -105,7 +105,7 @@ async function TournamentsList() {
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span>
-                      {format(new Date(tournament.date), "d 'de' MMMM, yyyy", { locale: es })}
+                      {format((() => { const d = String(tournament.date); const day = /^\d{4}-\d{2}-\d{2}/.test(d) ? d.slice(0,10) : d; return /^\d{4}-\d{2}-\d{2}$/.test(day) ? new Date(`${day}T12:00:00Z`) : new Date(day) })(), "d 'de' MMMM, yyyy", { locale: es })}
                     </span>
                   </div>
                 )}

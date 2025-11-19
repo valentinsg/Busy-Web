@@ -40,7 +40,7 @@ export function TournamentOverview({ tournament }: TournamentOverviewProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Fecha</p>
                 <p className="font-medium">
-                  {format(new Date(tournament.date), "d 'de' MMMM, yyyy", { locale: es })}
+                  {format((() => { const d = String(tournament.date); return /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(`${d}T12:00:00Z`) : new Date(d) })(), "d 'de' MMMM, yyyy", { locale: es })}
                   {tournament.time && ` a las ${tournament.time}`}
                 </p>
               </div>

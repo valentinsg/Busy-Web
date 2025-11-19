@@ -84,7 +84,7 @@ export function TournamentHeader({ tournament, teamsCount = 0, children }: Tourn
                     </div>
                     <div>
                       <p className="text-[9px] sm:text-[10px] uppercase tracking-wider font-medium whitespace-nowrap" style={{ color: tournament.accent_color, opacity: 0.8 }}>Fecha</p>
-                      <p className="text-xs sm:text-sm font-bold whitespace-nowrap" style={{ color: tournament.accent_color }}>{format(new Date(tournament.date), "d MMM, yyyy", { locale: es })}</p>
+                      <p className="text-xs sm:text-sm font-bold whitespace-nowrap" style={{ color: tournament.accent_color }}>{format((() => { const d = String(tournament.date); const day = /^\d{4}-\d{2}-\d{2}/.test(d) ? d.slice(0,10) : d; return /^\d{4}-\d{2}-\d{2}$/.test(day) ? new Date(`${day}T12:00:00Z`) : new Date(day) })(), "d MMM, yyyy", { locale: es })}</p>
                     </div>
                   </div>
                 )}
@@ -157,7 +157,7 @@ export function TournamentHeader({ tournament, teamsCount = 0, children }: Tourn
               </div>
               <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-wide text-white/60">Fecha</p>
-                <p className="text-sm font-semibold" style={{ color: tournament.accent_color }}>{format(new Date(tournament.date), "d MMM, yyyy", { locale: es })}</p>
+                <p className="text-sm font-semibold" style={{ color: tournament.accent_color }}>{format((() => { const d = String(tournament.date); const day = /^\d{4}-\d{2}-\d{2}/.test(d) ? d.slice(0,10) : d; return /^\d{4}-\d{2}-\d{2}$/.test(day) ? new Date(`${day}T12:00:00Z`) : new Date(day) })(), "d MMM, yyyy", { locale: es })}</p>
               </div>
             </div>
           )}

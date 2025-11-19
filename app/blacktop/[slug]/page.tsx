@@ -36,7 +36,7 @@ export async function generateMetadata(
   const url = `${SITE_URL}/blacktop/${tournament.slug}`;
 
   // Build a concise description
-  const dateText = tournament.date ? new Date(tournament.date).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined;
+  const dateText = tournament.date ? (() => { const d = String(tournament.date); const dt = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(`${d}T12:00:00Z`) : new Date(d); return dt.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' }); })() : undefined;
   const baseDescription = tournament.description ||
     [
       'Torneo 3v3 de básquet de Busy Blacktop',
@@ -172,7 +172,9 @@ function StructuredData({
     };
   }
   if (tournamentDate) {
-    event.startDate = new Date(tournamentDate).toISOString();
+    const d = String(tournamentDate);
+    const dt = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(`${d}T12:00:00Z`) : new Date(d);
+    event.startDate = dt.toISOString();
   }
 
   return (

@@ -703,84 +703,82 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Nombre */}
-                <div className="space-y-2 md:col-span-2">
-                  <Label className="text-white text-sm">Nombre completo <span className="text-red-500 font-bold">*</span></Label>
-                  <Input
-                    value={player.full_name}
-                    onChange={(e) => updatePlayer(index, 'full_name', e.target.value)}
-                    placeholder={index === 0 ? captainName : `Nombre del jugador ${index + 1}`}
-                    disabled={index === 0}
-                    className={cn(
-                      "bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11",
-                      errors.players?.[index]?.full_name && "border-red-400",
-                      index === 0 && "opacity-60 cursor-not-allowed"
+                {/* Para el capitán, no repetir campos: solo permitir foto opcional */}
+                {index !== 0 && (
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="text-white text-sm">Nombre completo <span className="text-red-500 font-bold">*</span></Label>
+                    <Input
+                      value={player.full_name}
+                      onChange={(e) => updatePlayer(index, 'full_name', e.target.value)}
+                      placeholder={`Nombre del jugador ${index + 1}`}
+                      className={cn(
+                        "bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11",
+                        errors.players?.[index]?.full_name && "border-red-400"
+                      )}
+                    />
+                    {errors.players?.[index]?.full_name && (
+                      <p className="text-sm text-red-400 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.players[index].full_name}
+                      </p>
                     )}
-                  />
-                  {errors.players?.[index]?.full_name && (
-                    <p className="text-sm text-red-400 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {errors.players[index].full_name}
-                    </p>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                {/* Instagram */}
-                <div className="space-y-2">
-                  <Label className="text-white text-sm flex items-center gap-2">
-                    <Instagram className="h-3 w-3" />
-                    Instagram <span className="text-red-500 font-bold">*</span>
-                  </Label>
-                  <Input
-                    value={player.instagram_handle}
-                    onChange={(e) => {
-                      const value = e.target.value.startsWith('@') ? e.target.value : `@${e.target.value}`;
-                      updatePlayer(index, 'instagram_handle', value);
-                    }}
-                    placeholder="@instagram"
-                    disabled={index === 0}
-                    className={cn(
-                      "bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11",
-                      errors.players?.[index]?.instagram_handle && "border-red-400",
-                      index === 0 && "opacity-60 cursor-not-allowed"
+                {index !== 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-white text-sm flex items-center gap-2">
+                      <Instagram className="h-3 w-3" />
+                      Instagram <span className="text-red-500 font-bold">*</span>
+                    </Label>
+                    <Input
+                      value={player.instagram_handle}
+                      onChange={(e) => {
+                        const value = e.target.value.startsWith('@') ? e.target.value : `@${e.target.value}`;
+                        updatePlayer(index, 'instagram_handle', value);
+                      }}
+                      placeholder="@instagram"
+                      className={cn(
+                        "bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11",
+                        errors.players?.[index]?.instagram_handle && "border-red-400"
+                      )}
+                    />
+                    {errors.players?.[index]?.instagram_handle && (
+                      <p className="text-sm text-red-400 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.players[index].instagram_handle}
+                      </p>
                     )}
-                  />
-                  {errors.players?.[index]?.instagram_handle && (
-                    <p className="text-sm text-red-400 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {errors.players[index].instagram_handle}
-                    </p>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                {/* Email */}
-                <div className="space-y-2">
-                  <Label className="text-white text-sm flex items-center gap-2">
-                    <Mail className="h-3 w-3" />
-                    Email <span className="text-red-500 font-bold">*</span>
-                  </Label>
-                  <Input
-                    type="email"
-                    value={player.email}
-                    onChange={(e) => updatePlayer(index, 'email', e.target.value)}
-                    placeholder="email@ejemplo.com"
-                    disabled={index === 0}
-                    className={cn(
-                      "bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11",
-                      errors.players?.[index]?.email && "border-red-400",
-                      index === 0 && "opacity-60 cursor-not-allowed"
+                {index !== 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-white text-sm flex items-center gap-2">
+                      <Mail className="h-3 w-3" />
+                      Email <span className="text-red-500 font-bold">*</span>
+                    </Label>
+                    <Input
+                      type="email"
+                      value={player.email}
+                      onChange={(e) => updatePlayer(index, 'email', e.target.value)}
+                      placeholder="email@ejemplo.com"
+                      className={cn(
+                        "bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11",
+                        errors.players?.[index]?.email && "border-red-400"
+                      )}
+                    />
+                    {errors.players?.[index]?.email && (
+                      <p className="text-sm text-red-400 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.players[index].email}
+                      </p>
                     )}
-                  />
-                  {errors.players?.[index]?.email && (
-                    <p className="text-sm text-red-400 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {errors.players[index].email}
-                    </p>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                {/* Foto del jugador */}
-                <div className="md:col-span-2">
+                {/* Foto del jugador o capitán */}
+                <div className={cn(index !== 0 ? 'md:col-span-2' : '')}>
                   <ImageUpload
                     value={player.photo || null}
                     onChange={(file) => updatePlayer(index, 'photo', file)}
@@ -791,13 +789,6 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
                   />
                 </div>
               </div>
-
-              {index === 0 && (
-                <p className="text-xs text-white/50 mt-3 flex items-center gap-1">
-                  <Info className="h-3 w-3" />
-                  Los datos del capitán se completan automáticamente
-                </p>
-              )}
             </div>
           ))}
 

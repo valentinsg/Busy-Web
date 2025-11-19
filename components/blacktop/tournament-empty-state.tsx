@@ -15,11 +15,12 @@ export function TournamentEmptyState({ tournament }: TournamentEmptyStateProps) 
 
   // Formatear fecha de inicio
   const startDate = tournament.date
-    ? new Date(tournament.date).toLocaleDateString('es-AR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })
+    ? (() => {
+        const d = String(tournament.date)
+        const day = /^\d{4}-\d{2}-\d{2}/.test(d) ? d.slice(0,10) : d
+        const dt = /^\d{4}-\d{2}-\d{2}$/.test(day) ? new Date(`${day}T12:00:00Z`) : new Date(day)
+        return dt.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })
+      })()
     : null;
 
   return (
