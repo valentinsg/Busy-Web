@@ -228,6 +228,16 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
 
     // Validar jugadores
     const playerErrors: { [key: number]: any } = {};
+    // Detección de emails duplicados (case-insensitive, trim)
+    const normalizedEmails = players.map(p => p.email?.trim().toLowerCase());
+    const duplicates = new Set<string>();
+    const seen = new Set<string>();
+    normalizedEmails.forEach((em) => {
+      if (!em) return;
+      if (seen.has(em)) duplicates.add(em);
+      else seen.add(em);
+    });
+
     players.forEach((player, index) => {
       const pErrors: any = {};
 
@@ -239,6 +249,7 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
 
       if (!player.email.trim()) pErrors.email = 'Email obligatorio';
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(player.email)) pErrors.email = 'Email inválido';
+      else if (duplicates.has(player.email.trim().toLowerCase())) pErrors.email = 'Email ya usado por otro jugador';
 
       if (Object.keys(pErrors).length > 0) {
         playerErrors[index] = pErrors;

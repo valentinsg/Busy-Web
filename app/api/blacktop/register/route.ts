@@ -110,6 +110,20 @@ export async function POST(request: NextRequest) {
       })
     );
 
+    // Validar emails de jugadores únicos (case-insensitive)
+    const emailsNorm = playersWithPhotos.map(p => (p.email || '').trim().toLowerCase());
+    const seenEmails = new Set<string>();
+    for (const em of emailsNorm) {
+      if (!em) continue;
+      if (seenEmails.has(em)) {
+        return NextResponse.json(
+          { error: 'Cada jugador debe tener un email distinto.' },
+          { status: 400 }
+        );
+      }
+      seenEmails.add(em);
+    }
+
     // Preparar datos para registro
     const registrationData: TeamRegistrationFormData = {
       tournament_id,
