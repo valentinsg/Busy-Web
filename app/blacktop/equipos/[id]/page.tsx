@@ -1,12 +1,14 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getTeamById } from '@/lib/repo/blacktop';
 import { ArrowLeft, Instagram, Trophy, Target, Users, ChevronRight } from 'lucide-react';
 import { getServiceClient } from '@/lib/supabase/server';
+import type { Metadata } from 'next';
+import { generateSEO } from '@/lib/seo';
+import { generateBreadcrumbSchema } from '@/lib/structured-data';
+import Script from 'next/script';
 
 interface TeamProfilePageProps {
   params: {
@@ -35,7 +37,7 @@ async function getTournamentByTeam(teamId: number) {
 
 async function getTeamStats(teamId: number) {
   const supabase = getServiceClient();
-  
+
   // Get all matches where team participated
   const { data: matches } = await supabase
     .from('matches')
@@ -77,7 +79,7 @@ async function getTeamStats(teamId: number) {
 
 async function getTeamMatches(teamId: number) {
   const supabase = getServiceClient();
-  
+
   const { data: matches } = await supabase
     .from('matches')
     .select(`
@@ -90,6 +92,56 @@ async function getTeamMatches(teamId: number) {
     .order('scheduled_time', { ascending: false });
 
   return matches || [];
+}
+
+export async function generateMetadata(
+  { params }: TeamProfilePageProps
+): Promise<Metadata> {
+  const id = parseInt(params.id);
+  if (Number.isNaN(id)) {
+    return {
+      title: 'Equipo no encontrado',
+      robots: { index: false, follow: false },
+      alternates: { canonical: '/blacktop' },
+    };
+  }
+
+  const team = await getTeamById(id);
+  if (!team || team.status !== 'approved') {
+    return {
+      title: 'Equipo no encontrado',
+      robots: { index: false, follow: false },
+      alternates: { canonical: '/blacktop' },
+    };
+  }
+
+  const tournament = await getTournamentByTeam(id);
+
+  const RAW_SITE_URL = process.env.SITE_URL || '';
+  const SITE_URL = /^https?:\/\//.test(RAW_SITE_URL) && RAW_SITE_URL ? RAW_SITE_URL : 'https://busy.com.ar';
+  const url = `${SITE_URL}/blacktop/equipos/${id}`;
+  const image = team.logo_url || '/busy-og-image.png';
+
+  const descriptionParts = [
+    `Perfil del equipo ${team.name} en Busy Blacktop`,
+    team.captain_name ? `— Capitán: ${team.captain_name}` : undefined,
+    tournament?.name ? `— Torneo: ${tournament.name}` : undefined,
+    'Estadísticas, plantel, historial y redes.',
+  ].filter(Boolean);
+  const description = descriptionParts.join(' ');
+
+  const title = `${team.name} | Equipo Busy Blacktop`;
+
+  return {
+    ...generateSEO({
+      title,
+      description,
+      image,
+      url,
+      type: 'website',
+    }),
+    alternates: { canonical: `/blacktop/equipos/${id}` },
+  };
 }
 
 export default async function TeamProfilePage({ params }: TeamProfilePageProps) {
@@ -108,6 +160,7 @@ export default async function TeamProfilePage({ params }: TeamProfilePageProps) 
   return (
     <div className="min-h-screen bg-black text-white font-body">
       <div className="container mx-auto px-4 pt-20 pb-12 max-w-6xl">
+        <StructuredData team={team} tournament={tournament} />
         {/* Botón volver */}
         <Link href={`/blacktop/${tournament?.slug || ''}`} className="inline-block mb-6">
           <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/5">
@@ -120,7 +173,7 @@ export default async function TeamProfilePage({ params }: TeamProfilePageProps) 
         <div className="relative mb-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 overflow-hidden">
           {/* Accent line */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent" style={{ color: accentColor }} />
-          
+
           <div className="flex flex-col sm:flex-row items-start gap-6">
             {/* Logo del equipo */}
             <div className="relative">
@@ -139,7 +192,7 @@ export default async function TeamProfilePage({ params }: TeamProfilePageProps) 
                 )}
               </div>
               {team.group_name && (
-                <div 
+                <div
                   className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 border-black"
                   style={{ backgroundColor: accentColor }}
                 >
@@ -232,7 +285,7 @@ export default async function TeamProfilePage({ params }: TeamProfilePageProps) 
         {/* Jugadores */}
         <div className="relative mb-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent" style={{ color: accentColor }} />
-          
+
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 rounded-lg" style={{ backgroundColor: `${accentColor}20` }}>
               <Users className="h-5 w-5" style={{ color: accentColor }} />
@@ -269,7 +322,7 @@ export default async function TeamProfilePage({ params }: TeamProfilePageProps) 
         {/* Historial de partidos */}
         <div className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent" style={{ color: accentColor }} />
-          
+
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 rounded-lg" style={{ backgroundColor: `${accentColor}20` }}>
               <Target className="h-5 w-5" style={{ color: accentColor }} />
@@ -352,5 +405,46 @@ export default async function TeamProfilePage({ params }: TeamProfilePageProps) 
         </div>
       </div>
     </div>
+  );
+}
+
+function StructuredData({ team, tournament }: { team: any; tournament: any | null }) {
+  const RAW_SITE_URL = process.env.SITE_URL || '';
+  const SITE_URL = /^https?:\/\//.test(RAW_SITE_URL) && RAW_SITE_URL ? RAW_SITE_URL : 'https://busy.com.ar';
+
+  const breadcrumb = generateBreadcrumbSchema([
+    { name: 'Blacktop', url: `${SITE_URL}/blacktop` },
+    ...(tournament?.slug ? [{ name: tournament.name, url: `${SITE_URL}/blacktop/${tournament.slug}` }] : []),
+    { name: team.name, url: `${SITE_URL}/blacktop/equipos/${team.id}` },
+  ]);
+
+  const sportsTeam = {
+    '@context': 'https://schema.org',
+    '@type': 'SportsTeam',
+    name: team.name,
+    sport: 'Basketball',
+    url: `${SITE_URL}/blacktop/equipos/${team.id}`,
+    image: team.logo_url ? [team.logo_url] : [`${SITE_URL}/busy-og-image.png`],
+    memberOf: tournament?.name ? {
+      '@type': 'SportsOrganization',
+      name: 'Busy Blacktop',
+      url: `${SITE_URL}/blacktop`,
+    } : undefined,
+    coach: team.captain_name ? {
+      '@type': 'Person',
+      name: team.captain_name,
+    } : undefined,
+    member: Array.isArray(team.players) ? team.players.map((p: any) => ({
+      '@type': 'Person',
+      name: p.full_name,
+      sameAs: p.instagram_handle ? `https://instagram.com/${String(p.instagram_handle).replace('@','')}` : undefined,
+    })) : undefined,
+  } as any;
+
+  return (
+    <>
+      <Script id="team-breadcrumb" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <Script id="team-structured-data" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsTeam) }} />
+    </>
   );
 }

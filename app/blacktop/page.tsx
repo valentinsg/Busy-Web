@@ -13,9 +13,9 @@ import Script from 'next/script';
 
 export const metadata: Metadata = {
   ...generateSEO({
-    title: 'Busy Blacktop | Torneos de básquet',
+    title: 'Busy Blacktop | Torneos de Básquet',
     description:
-      'Busy Blacktop es un circuito de torneos 3v3 que busca fomentar la cultura del básquet, comunidad y competencia. Inscribí tu equipo y participa en un torneo organizado por Busy.',
+      'Busy Blacktop: circuito de torneos 3v3 de básquet en Argentina. Cultura, comunidad y competencia. Descubrí los próximos eventos, conocé equipos y registrá tu equipo.',
     image: '/busy-og-image.png',
     url: (process.env.SITE_URL || 'https://busy.com.ar') + '/blacktop',
   }),
@@ -234,10 +234,18 @@ function BlacktopStructuredData({ tournaments }: { tournaments: Array<any> }) {
       image: t.banner_url || t.flyer_images?.[0] || `${SITE_URL}/busy-og-image.png`,
     })),
   };
+  const webPage = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Busy Blacktop',
+    url: `${SITE_URL}/blacktop`,
+    description: 'Busy Blacktop: circuito de torneos 3v3 de básquet. Calendario, equipos y registros.',
+  };
   return (
     <>
       <Script id="blacktop-breadcrumb" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
       <Script id="blacktop-itemlist" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
+      <Script id="blacktop-webpage" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPage) }} />
     </>
   );
 }

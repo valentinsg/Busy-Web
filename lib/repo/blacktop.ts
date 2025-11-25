@@ -14,7 +14,6 @@ import type {
   PlayerMatchStats,
   TournamentMedia,
   TournamentWithStats,
-  PlayerWithStats,
   TournamentLeaderboard,
   TeamRegistrationFormData,
   MatchFormData,
@@ -75,7 +74,7 @@ export async function getTournamentById(id: number): Promise<Tournament | null> 
 
 export async function getTournamentWithStats(id: number): Promise<TournamentWithStats | null> {
   const supabase = getServiceClient();
-  
+
   const [tournament, teamsCount, playersCount, matchesCount] = await Promise.all([
     getTournamentById(id),
     supabase.from('teams').select('id', { count: 'exact', head: true }).eq('tournament_id', id).eq('status', 'approved'),
@@ -144,7 +143,7 @@ export async function deleteTournament(id: number): Promise<void> {
 
 export async function getTeamsByTournament(tournamentId: number, statusFilter?: string): Promise<TeamWithPlayers[]> {
   const supabase = getServiceClient();
-  
+
   let query = supabase
     .from('teams')
     .select(`
@@ -227,7 +226,7 @@ export function normalizeTeamName(name: string): string {
 export async function findExistingTeam(tournamentId: number, teamName: string): Promise<Team | null> {
   const supabase = getServiceClient();
   const normalized = normalizeTeamName(teamName);
-  
+
   const { data: teams } = await supabase
     .from('teams')
     .select('*')
@@ -391,7 +390,7 @@ export async function getPlayerStatsByMatch(matchId: number): Promise<PlayerMatc
 
 export async function getTournamentLeaderboard(tournamentId: number): Promise<TournamentLeaderboard[]> {
   const supabase = getServiceClient();
-  
+
   // Obtener todos los jugadores con sus stats
   const { data: players, error: playersError } = await supabase
     .from('players')
@@ -499,7 +498,7 @@ export async function registerTeam(formData: TeamRegistrationFormData, teamLogoU
   try {
     // 1. Verificar si el equipo ya existe (normalizado)
     const existingTeam = await findExistingTeam(formData.tournament_id, formData.team_name);
-    
+
     if (existingTeam) {
       // Equipo ya existe, verificar si el capitán ya estaba registrado
       const normalizedInstagram = normalizeInstagram(formData.captain_instagram);
@@ -544,12 +543,12 @@ export async function registerTeam(formData: TeamRegistrationFormData, teamLogoU
       status: 'pending',
       is_confirmed: false,
     };
-    
+
     // Solo agregar logo_url si existe
     if (teamLogoUrl) {
       teamData.logo_url = teamLogoUrl;
     }
-    
+
     const team = await createTeam(teamData);
 
     // 3. Crear jugadores con sus fotos
@@ -563,12 +562,12 @@ export async function registerTeam(formData: TeamRegistrationFormData, teamLogoU
         is_captain: p.is_captain,
         consent_media: formData.accept_image_rights || false,
       };
-      
+
       // Solo agregar photo_url si existe y no es null
       if (p.photo_url) {
         playerData.photo_url = p.photo_url;
       }
-      
+
       return playerData;
     });
 
