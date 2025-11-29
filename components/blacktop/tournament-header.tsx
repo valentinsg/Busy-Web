@@ -46,7 +46,7 @@ export function TournamentHeader({ tournament, teamsCount = 0, children }: Tourn
                   <Button
                     size="lg"
                     className="relative text-sm sm:text-lg px-6 sm:px-10 py-4 sm:py-6 font-bold text-white transition-all hover:scale-[1.02] rounded-xl overflow-hidden group border"
-                    style={{ 
+                    style={{
                       background: 'linear-gradient(180deg, rgba(0,0,0,0.85), rgba(0,0,0,0.95))',
                       borderColor: tournament.accent_color,
                       boxShadow: `0 8px 28px ${tournament.accent_color}20, 0 0 0 1px ${tournament.accent_color}40 inset`
@@ -63,7 +63,7 @@ export function TournamentHeader({ tournament, teamsCount = 0, children }: Tourn
                   {/* Liquid glass shine */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent" />
                   <div className="w-2 h-2 rounded-full animate-pulse relative z-10" style={{ backgroundColor: tournament.accent_color, boxShadow: `0 0 8px ${tournament.accent_color}` }} />
-                  <span className="text-sm sm:text-base font-bold tracking-wide relative z-10" style={{ color: tournament.accent_color }}>
+                  <span className="text-sm sm:text-base font-heading font-bold tracking-wide relative z-10" style={{ color: tournament.accent_color }}>
                     {isFull ? 'CUPOS COMPLETOS' : 'INSCRIPCIONES CERRADAS'}
                   </span>
                 </div>

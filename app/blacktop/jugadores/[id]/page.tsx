@@ -1,13 +1,13 @@
-import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Trophy, TrendingUp, Target, Activity, Users, Award, ChevronRight, ArrowLeft, Instagram } from 'lucide-react';
-import Link from 'next/link';
-import { getServiceClient } from '@/lib/supabase/server';
-import type { Player, Team, PlayerMatchStats, Match } from '@/types/blacktop';
 import { PlayerRadarChart } from '@/components/blacktop/player-radar-chart';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getServiceClient } from '@/lib/supabase/server';
+import type { Player, Team } from '@/types/blacktop';
+import { ArrowLeft, Award, ChevronRight, Instagram, Target, TrendingUp, Trophy } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 interface PlayerProfilePageProps {
   params: {
@@ -165,7 +165,7 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
           </div>
         </div>
 
-        {/* Estadísticas */}
+        {/* Estadísticas de rendimiento */}
         <Card className="bg-white/5 border-white/10 mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -174,44 +174,82 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="text-center p-4 rounded-lg bg-white/5">
-                <div className="text-3xl font-bold text-red-500">{playerStats.total_points}</div>
-                <div className="text-sm text-white/70 mt-1">Puntos</div>
+                <div className="text-3xl font-bold text-white">{playerStats.total_points}</div>
+                <div className="text-sm text-white/70 mt-1">Puntos totales</div>
+                <div className="text-xs text-white/50 mt-1">
+                  {(playerStats.matches_played > 0 ? (playerStats.total_points / playerStats.matches_played).toFixed(1) : '0.0')} por partido
+                </div>
               </div>
 
               <div className="text-center p-4 rounded-lg bg-white/5">
-                <div className="text-3xl font-bold text-blue-500">{playerStats.total_assists}</div>
-                <div className="text-sm text-white/70 mt-1">Asistencias</div>
+                <div className="text-3xl font-bold text-white">{playerStats.total_assists}</div>
+                <div className="text-sm text-white/70 mt-1">Asistencias totales</div>
+                <div className="text-xs text-white/50 mt-1">
+                  {(playerStats.matches_played > 0 ? (playerStats.total_assists / playerStats.matches_played).toFixed(1) : '0.0')} por partido
+                </div>
               </div>
 
               <div className="text-center p-4 rounded-lg bg-white/5">
-                <div className="text-3xl font-bold text-green-500">{playerStats.total_rebounds}</div>
-                <div className="text-sm text-white/70 mt-1">Rebotes</div>
+                <div className="text-3xl font-bold text-white">{playerStats.total_rebounds}</div>
+                <div className="text-sm text-white/70 mt-1">Rebotes totales</div>
+                <div className="text-xs text-white/50 mt-1">
+                  {(playerStats.matches_played > 0 ? (playerStats.total_rebounds / playerStats.matches_played).toFixed(1) : '0.0')} por partido
+                </div>
               </div>
 
               <div className="text-center p-4 rounded-lg bg-white/5">
-                <div className="text-3xl font-bold text-purple-500">{playerStats.total_steals}</div>
-                <div className="text-sm text-white/70 mt-1">Robos</div>
+                <div className="text-3xl font-bold text-white">{playerStats.total_steals}</div>
+                <div className="text-sm text-white/70 mt-1">Robos totales</div>
+                <div className="text-xs text-white/50 mt-1">
+                  {(playerStats.matches_played > 0 ? (playerStats.total_steals / playerStats.matches_played).toFixed(1) : '0.0')} por partido
+                </div>
               </div>
 
               <div className="text-center p-4 rounded-lg bg-white/5">
-                <div className="text-3xl font-bold text-orange-500">{playerStats.total_blocks}</div>
-                <div className="text-sm text-white/70 mt-1">Tapones</div>
+                <div className="text-3xl font-bold text-white">{playerStats.total_blocks}</div>
+                <div className="text-sm text-white/70 mt-1">Tapones totales</div>
+                <div className="text-xs text-white/50 mt-1">
+                  {(playerStats.matches_played > 0 ? (playerStats.total_blocks / playerStats.matches_played).toFixed(1) : '0.0')} por partido
+                </div>
               </div>
 
               <div className="text-center p-4 rounded-lg bg-white/5">
-                <div className="text-3xl font-bold text-yellow-500">{playerStats.mvp_count}</div>
-                <div className="text-sm text-white/70 mt-1">MVPs</div>
-              </div>
-
-              <div className="text-center p-4 rounded-lg bg-white/5 md:col-span-2">
                 <div className="text-3xl font-bold text-white">{playerStats.matches_played}</div>
                 <div className="text-sm text-white/70 mt-1">Partidos jugados</div>
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Premios e insignias */}
+        {(playerStats.mvp_count > 0 || player.team.tournament) && (
+          <Card className="bg-white/5 border-white/10 mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                Premios e insignias
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                {playerStats.mvp_count > 0 && (
+                  <Badge variant="outline" className="border-yellow-500/40 text-yellow-400 bg-black/40">
+                    <Trophy className="h-3 w-3 mr-1" />
+                    {playerStats.mvp_count} MVPs ganados
+                  </Badge>
+                )}
+
+                {player.team.tournament && (
+                  <Badge variant="outline" className="border-white/20 bg-black/40 text-white/80">
+                    Busy Blacktop: {player.team.tournament.name}
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Gráfico Radar - Perfil PES 2006 Style */}
         <PlayerRadarChart

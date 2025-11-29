@@ -1,17 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Upload, X } from 'lucide-react';
-import type { Tournament, TournamentFormData, TournamentFormatType, PlayoffFormat } from '@/types/blacktop';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import type { PlayoffFormat, Tournament, TournamentFormData, TournamentFormatType } from '@/types/blacktop';
+import { Loader2, Upload, X } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface TournamentFormProps {
   tournament?: Tournament;
@@ -164,7 +164,7 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
     try {
       // Si hay banner, subirlo primero
       let bannerUrl = formData.banner_url || tournament?.banner_url;
-      
+
       if (bannerFile) {
         const bannerFormData = new FormData();
         bannerFormData.append('file', bannerFile);
@@ -173,7 +173,7 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
         // Obtener token de sesión
         const { supabase } = await import('@/lib/supabase/client');
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (!session?.access_token) {
           throw new Error('No estás autenticado');
         }
@@ -197,11 +197,11 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
 
       // Subir flyers si hay nuevos
       let flyerUrls = tournament?.flyer_images || [];
-      
+
       if (flyerFiles.length > 0) {
         const { supabase } = await import('@/lib/supabase/client');
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (!session?.access_token) {
           throw new Error('No estás autenticado');
         }
@@ -236,10 +236,10 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
         flyerUrls = flyerPreviews.filter(preview => preview.startsWith('http'));
       }
 
-      const url = mode === 'create' 
+      const url = mode === 'create'
         ? '/api/blacktop/tournaments'
         : `/api/blacktop/tournaments/${tournament?.id}`;
-      
+
       const method = mode === 'create' ? 'POST' : 'PATCH';
 
       const response = await fetch(url, {
@@ -255,6 +255,8 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
           teams_advance_per_group: formData.format_config?.teams_advance_per_group,
           playoff_format: formData.format_config?.playoff_format as PlayoffFormat,
           third_place_match: formData.format_config?.third_place_match,
+          playoff_period_duration_minutes: (formData as any).playoff_period_duration_minutes,
+          playoff_periods_count: (formData as any).playoff_periods_count,
           // Guardar valores adicionales en JSON
           format_config: formData.format_config,
         }),
@@ -590,6 +592,53 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
             </div>
           </div>
 
+          {/* Configuración específica para Playoffs */}
+          <div className="mt-4 border-t border-border pt-4 space-y-3">
+            <p className="text-sm font-medium text-muted-foreground">
+              Playoffs (opcional)
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Si dejás estos campos vacíos, los playoffs usan la misma duración y cantidad de períodos que la fase de grupos.
+            </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="playoff_period_duration">Duración del período en Playoffs (minutos)</Label>
+                <Input
+                  id="playoff_period_duration"
+                  type="number"
+                  min="1"
+                  value={(formData as any).playoff_period_duration_minutes ?? ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? undefined : parseInt(e.target.value);
+                    setFormData({ ...formData, playoff_period_duration_minutes: value } as any);
+                  }}
+                  placeholder={(formData as any).period_duration_minutes || 8}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Ej: 10 para que los partidos de playoffs sean más largos.
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="playoff_periods_count">Cantidad de períodos en Playoffs</Label>
+                <Input
+                  id="playoff_periods_count"
+                  type="number"
+                  min="1"
+                  value={(formData as any).playoff_periods_count ?? ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? undefined : parseInt(e.target.value);
+                    setFormData({ ...formData, playoff_periods_count: value } as any);
+                  }}
+                  placeholder={(formData as any).periods_count || 2}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Si lo dejás vacío, se usa la misma cantidad que en grupos.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center space-x-2">
             <Switch
               id="golden_point"
@@ -680,7 +729,7 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
             <p className="text-sm text-muted-foreground mb-3">
               Imagen que se mostrará en el header del torneo (recomendado: 1920x600px)
             </p>
-            
+
             {bannerPreview ? (
               <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border">
                 <Image
@@ -725,7 +774,7 @@ export function TournamentForm({ tournament, mode }: TournamentFormProps) {
             <p className="text-sm text-muted-foreground mb-3">
               Imágenes que se mostrarán en el formulario de inscripción (recomendado: 1080x1350px - formato Instagram)
             </p>
-            
+
             {/* Grid de previews */}
             {flyerPreviews.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">

@@ -1,13 +1,13 @@
-import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
- import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { getTeamById } from '@/lib/repo/blacktop';
-import { ArrowLeft, Instagram, Trophy, Target, Users, ChevronRight } from 'lucide-react';
-import { getServiceClient } from '@/lib/supabase/server';
-import type { Metadata } from 'next';
 import { generateSEO } from '@/lib/seo';
 import { generateBreadcrumbSchema } from '@/lib/structured-data';
+import { getServiceClient } from '@/lib/supabase/server';
+import { ArrowLeft, Instagram, Target, Trophy, Users } from 'lucide-react';
+import type { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import Script from 'next/script';
 
 interface TeamProfilePageProps {
@@ -159,11 +159,11 @@ export default async function TeamProfilePage({ params }: TeamProfilePageProps) 
 
   return (
     <div className="min-h-screen bg-black text-white font-body">
-      <div className="container mx-auto px-4 pt-20 pb-12 max-w-6xl">
+      <div className="container mx-auto px-4 pt-24 pb-12 max-w-6xl">
         <StructuredData team={team} tournament={tournament} />
         {/* Botón volver */}
-        <Link href={`/blacktop/${tournament?.slug || ''}`} className="inline-block mb-6">
-          <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/5">
+        <Link href={`/blacktop/${tournament?.slug || ''}`} className="inline-block mb-8">
+          <Button variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/5">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver al torneo
           </Button>
@@ -209,27 +209,32 @@ export default async function TeamProfilePage({ params }: TeamProfilePageProps) 
                   <Users className="h-4 w-4" />
                   <span>{team.players?.length || 0} jugadores</span>
                 </div>
-                <div className="w-px h-4 bg-white/20" />
-                <div className="flex items-center gap-2">
-                  <Trophy className="h-4 w-4" />
-                  <span>Capitán: {team.captain_name}</span>
-                </div>
-                <div className="w-px h-4 bg-white/20" />
-                <a
-                  href={`https://instagram.com/${team.captain_instagram.replace('@', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 hover:text-white transition-colors"
-                  style={{ color: accentColor }}
-                >
-                  <Instagram className="h-4 w-4" />
-                  @{team.captain_instagram.replace('@', '')}
-                </a>
+                {team.captain_instagram && (
+                  <>
+                    <div className="w-px h-4 bg-white/20" />
+                    <a
+                      href={`https://instagram.com/${team.captain_instagram.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 hover:text-white transition-colors"
+                      style={{ color: accentColor }}
+                    >
+                      <Instagram className="h-4 w-4" />
+                      @{team.captain_instagram.replace('@', '')}
+                    </a>
+                  </>
+                )}
               </div>
               {tournament && (
-                <p className="text-xs text-white/50">
-                  {tournament.name}
-                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide bg-black/60"
+                    style={{ borderColor: `${accentColor}60`, color: accentColor }}
+                  >
+                    <Trophy className="h-3 w-3" />
+                    {tournament.name}
+                  </span>
+                </div>
               )}
             </div>
           </div>

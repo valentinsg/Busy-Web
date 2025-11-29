@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Square, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { ChevronLeft, ChevronRight, Clock, Pause, Play, Square } from 'lucide-react';
+import { useState } from 'react';
 
 interface TimerControlV2Props {
   timeRemaining: number;
@@ -50,6 +50,7 @@ export function TimerControlV2({
   onAdjustTime,
 }: TimerControlV2Props) {
   const [showTimeDialog, setShowTimeDialog] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
   const [manualMinutes, setManualMinutes] = useState('0');
   const [manualSeconds, setManualSeconds] = useState('0');
 
@@ -79,15 +80,15 @@ export function TimerControlV2({
   const isLastPeriod = currentPeriod === totalPeriods;
   const canEndPeriod = status === 'live' && timeRemaining === 0 && !isLastPeriod && !isGoldenPoint;
   const isTied = scoreA === scoreB;
-  const canFinish = status === 'live' && timeRemaining === 0 && isLastPeriod && (!isTied || isGoldenPoint);
+  const canFinish = status === 'live' && timeRemaining === 0 && isLastPeriod && !isGoldenPoint && !isTied;
 
   return (
-    <div className={`border-b border-white/10 py-4 ${isGoldenPoint ? 'bg-gradient-to-r from-yellow-900/30 to-orange-900/30' : 'bg-black'}`}>
-      <div className="container mx-auto px-4">
-        {/* Timer y Controles en una sola línea */}
-        <div className="flex items-center justify-between">
+    <div className={`border-b border-white/10 py-3 sm:py-4 ${isGoldenPoint ? 'bg-gradient-to-r from-yellow-900/30 to-orange-900/30' : 'bg-black'}`}>
+      <div className="container mx-auto px-3 sm:px-4">
+        {/* Header responsive: timer centrado en mobile, controles abajo */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Timer con controles */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between sm:justify-start gap-3">
             {/* Controles de tiempo */}
             {onAdjustTime && status !== 'pending' && status !== 'finished' && (
               <div className="flex items-center gap-1">
@@ -121,10 +122,10 @@ export function TimerControlV2({
               </div>
             )}
 
-            <span className="font-heading text-5xl font-bold text-white tabular-nums">
+            <span className="font-heading text-4xl sm:text-5xl font-bold text-white tabular-nums">
               {formatTime(timeRemaining)}
             </span>
-            
+
             {!isGoldenPoint ? (
               <Badge variant="outline" className="text-sm font-body">
                 Q{currentPeriod}/{totalPeriods}
@@ -137,7 +138,7 @@ export function TimerControlV2({
           </div>
 
           {/* Controles */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2 flex-wrap">
             {status === 'pending' && (
               <Button
                 onClick={onStart}
@@ -182,6 +183,7 @@ export function TimerControlV2({
               </Button>
             )}
 
+            {/* Botón principal de finalizar (flujo normal, sin Golden Point) */}
             {canFinish && (
               <Button
                 onClick={onFinish}
@@ -193,8 +195,8 @@ export function TimerControlV2({
               </Button>
             )}
 
-            {/* Botón Finalizar Partido (siempre visible durante el partido) */}
-            {(status === 'live' || status === 'halftime') && !canFinish && (
+            {/* Botón Finalizar Partido (override). Oculto mientras haya Golden Point activo y siga empatado */}
+            {(status === 'live' || status === 'halftime') && !canFinish && !(isGoldenPoint && isTied) && (
               <Button
                 onClick={onFinish}
                 size="lg"
@@ -221,7 +223,7 @@ export function TimerControlV2({
                 )}
                 {onReset && (
                   <Button
-                    onClick={onReset}
+                    onClick={() => setShowResetDialog(true)}
                     size="sm"
                     variant="ghost"
                     className="text-amber-400"
@@ -290,6 +292,40 @@ export function TimerControlV2({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Diálogo de confirmación de reset (solo si onReset existe) */}
+      {onReset && (
+        <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+          <DialogContent className="bg-zinc-900 border-white/10 max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="text-white">¿Reiniciar partido?</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-2">
+              <p className="text-sm text-muted-foreground">
+                Esto reinicia el marcador, faltas, estadísticas y el tiempo del partido. Úsalo solo para pruebas o si recién estás empezando el juego.
+              </p>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowResetDialog(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  className="flex-1 bg-red-600 hover:bg-red-700"
+                  onClick={() => {
+                    setShowResetDialog(false);
+                    onReset();
+                  }}
+                >
+                  Reiniciar
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

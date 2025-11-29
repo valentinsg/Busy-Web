@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Trophy } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { TimerControlV2 as TimerControl } from './timer-control-v2';
-import { TeamScoreboardV2 as TeamScoreboard } from './team-scoreboard-v2';
-import { PlayerActionSheet } from './player-action-sheet';
-import { MVPSelectionModal } from './mvp-selection-modal';
+import type { Match, Player, TeamWithPlayers, Tournament } from '@/types/blacktop';
+import { Trophy } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { ActionToast } from './action-toast';
-import type { Match, Tournament, TeamWithPlayers, Player } from '@/types/blacktop';
+import { MVPSelectionModal } from './mvp-selection-modal';
+import { PlayerActionSheet } from './player-action-sheet';
+import { TeamScoreboardV2 as TeamScoreboard } from './team-scoreboard-v2';
+import { TimerControlV2 as TimerControl } from './timer-control-v2';
 
 interface LiveScorekeeperProProps {
   match: Match;
@@ -61,12 +61,12 @@ export function LiveScorekeeperPro({
 
   // Determinar si es partido de playoffs
   const isPlayoffMatch = match.phase !== 'groups';
-  
+
   // Usar configuración de playoffs si existe y es partido de playoffs, sino usar configuración de grupos
-  const periodDuration = isPlayoffMatch && tournament.playoff_period_duration_minutes 
-    ? tournament.playoff_period_duration_minutes 
+  const periodDuration = isPlayoffMatch && tournament.playoff_period_duration_minutes
+    ? tournament.playoff_period_duration_minutes
     : tournament.period_duration_minutes;
-  
+
   const periodsCount = isPlayoffMatch && tournament.playoff_periods_count
     ? tournament.playoff_periods_count
     : tournament.periods_count;
@@ -112,7 +112,7 @@ export function LiveScorekeeperPro({
         console.log('🏀 Teams loaded:', { teamA: teamAData, teamB: teamBData });
         setTeamA(teamAData);
         setTeamB(teamBData);
-        
+
         // Inicializar stats de jugadores
         console.log('👥 Initializing player stats...');
         setStatsA(
@@ -163,8 +163,8 @@ export function LiveScorekeeperPro({
     setScoreB((match as any).team_b_score ?? 0);
     setFoulsA((match as any).fouls_a ?? 0);
     setFoulsB((match as any).fouls_b ?? 0);
-    // Timer based on status
-    if (match.status === 'live') setTimeRemaining(tournament.period_duration_minutes * 60);
+    // Timer based on status y configuración actual (grupos/playoffs)
+    if (match.status === 'live') setTimeRemaining(periodDuration * 60);
     else setTimeRemaining(0);
   }, [open]);
 
@@ -179,7 +179,7 @@ export function LiveScorekeeperPro({
     // 100% local
     if (match.status !== 'pending') return;
     setMatch((prev) => ({ ...prev, status: 'live', current_period: prev.current_period || 1 }));
-    setTimeRemaining(tournament.period_duration_minutes * 60);
+    setTimeRemaining(periodDuration * 60);
     showActionToast('¡Partido iniciado! 🏀');
   };
 
@@ -218,7 +218,7 @@ export function LiveScorekeeperPro({
     } else {
       // Avanzar al siguiente período (local)
       setMatch((prev) => ({ ...prev, current_period: prev.current_period + 1, status: 'halftime' }));
-      setTimeRemaining(tournament.period_duration_minutes * 60);
+      setTimeRemaining(periodDuration * 60);
       showActionToast(`Período ${match.current_period} finalizado. Iniciá el período ${match.current_period + 1} cuando estés listo.`);
     }
   };
@@ -226,9 +226,9 @@ export function LiveScorekeeperPro({
   const handleFinish = async () => {
     // Verificar si hay empate
     const isTied = scoreA === scoreB;
-    
+
+    // Caso 1: aún no hay Golden Point y hay empate -> activar Golden Point
     if (isTied && !isGoldenPoint && tournament.golden_point_enabled) {
-      // No permitir finalizar si hay empate - activar Golden Point
       setIsGoldenPoint(true);
       handleResume();
       showActionToast('⚡ EMPATE! Punto de Oro activado - Próximo punto gana');
@@ -239,7 +239,17 @@ export function LiveScorekeeperPro({
       });
       return;
     }
-    
+
+    // Caso 2: Golden Point activo y aún empatado -> no permitir finalizar manualmente
+    if (isTied && isGoldenPoint) {
+      toast({
+        title: 'Punto de Oro en juego',
+        description: 'Esperá a que algún equipo anote: el próximo punto define el partido.',
+        duration: 4000,
+      });
+      return;
+    }
+
     // Si no hay empate o ya estamos en golden point, permitir finalizar
     handlePause();
     setShowMVPModal(true);
@@ -300,7 +310,7 @@ export function LiveScorekeeperPro({
     delta: number
   ) => {
     if (match.status === 'finished') return; // block stats when finished
-    
+
     // Actualización instantánea del estado local
     if (side === 'A') {
       setStatsA((prev) =>
@@ -315,7 +325,7 @@ export function LiveScorekeeperPro({
         )
       );
     }
-    
+
     // Toast feedback
     const statLabels = {
       assists: 'asistencia',
@@ -327,7 +337,7 @@ export function LiveScorekeeperPro({
     const playerName = side === 'A'
       ? statsA.find(s => s.player_id === playerId)?.player_name
       : statsB.find(s => s.player_id === playerId)?.player_name;
-    
+
     if (delta > 0) {
       showActionToast(`+1 ${statLabels[stat]} para ${playerName}`);
     }
@@ -408,7 +418,7 @@ export function LiveScorekeeperPro({
     setMvpName(found?.player_name || 'MVP');
     setIsSavingMatch(true); // Mostrar loader
     setShowMVPModal(false);
-    
+
     // Guardar todo en la base de datos
     try {
       // 1. Actualizar score y faltas
@@ -441,10 +451,10 @@ export function LiveScorekeeperPro({
       });
 
       showActionToast('🏁 Partido finalizado y guardado');
-      
+
       // Set finished locally and freeze controls
       setMatch((prev) => ({ ...prev, status: 'finished' }));
-      
+
       // Cerrar modal y refrescar
       setTimeout(() => {
         onClose(); // Cerrar el scorekeeper
@@ -483,7 +493,7 @@ export function LiveScorekeeperPro({
               <p className="text-muted-foreground text-sm mt-2">Por favor espera</p>
             </div>
           )}
-          
+
           <div className="h-full overflow-y-auto">
             {match.status === 'finished' && (
               <div className="w-full bg-green-600/20 border-b border-green-600 px-4 py-3">
@@ -530,7 +540,7 @@ export function LiveScorekeeperPro({
                 setMvpName('');
                 setShowMVPModal(false);
                 setMatch((prev) => ({ ...prev, status: 'pending', current_period: 1 }));
-                setTimeRemaining(tournament.period_duration_minutes * 60);
+                setTimeRemaining(periodDuration * 60);
                 showActionToast('🔄 Partido reseteado (Dev)');
               } : undefined}
             />
@@ -570,15 +580,15 @@ export function LiveScorekeeperPro({
       {/* Player Action Sheet */}
       {(() => {
         if (!selectedPlayer) return null;
-        
+
         const pid = (selectedPlayer as any).player_id ?? (selectedPlayer as any).id;
         const side = (selectedPlayer as any).side as 'A' | 'B';
-        
+
         // Buscar stats actualizadas en tiempo real
-        const currentStats = side === 'A' 
+        const currentStats = side === 'A'
           ? statsA.find(s => s.player_id === pid)
           : statsB.find(s => s.player_id === pid);
-        
+
         const sheetPlayer = currentStats
           ? {
               id: currentStats.player_id,
@@ -591,7 +601,7 @@ export function LiveScorekeeperPro({
               turnovers: currentStats.turnovers,
             }
           : null;
-        
+
         return (
           <PlayerActionSheet
             player={sheetPlayer}

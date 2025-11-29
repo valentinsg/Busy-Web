@@ -466,188 +466,240 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
               </CardContent>
             </Card>
           ) : (
-        <Card className="bg-white/10 backdrop-blur border-white/20">
-          <CardContent className="p-6">
-            <h3 className="text-xl font-bold mb-6" style={{ color: accentColor }}>
-              Llaves de Playoff
-            </h3>
+            <Card className="bg-white/10 backdrop-blur border-white/20">
+              <CardContent className="p-6 md:p-8">
+                <h3 className="text-xl font-bold mb-6" style={{ color: accentColor }}>
+                  Llaves de Playoff
+                </h3>
 
-            <div className="space-y-8">
-              {/* Semifinales */}
-              {playoffMatches.filter(m => m.round === 'semifinal').length > 0 && (
-                <div>
-                  <h4 className="text-lg font-bold mb-4 text-white/80">Semifinales</h4>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {playoffMatches.filter(m => m.round === 'semifinal').map((match) => (
-                      <div
-                        key={match.id}
-                        className="p-4 rounded-lg bg-white/5 border-2"
-                        style={{ borderColor: match.status === 'finished' ? `${accentColor}40` : 'rgba(255,255,255,0.1)' }}
-                      >
-                        {/* Team A */}
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-3 flex-1">
-                            {renderTeamLogo(match.team_a)}
-                            <span className={`font-medium ${match.winner_id === match.team_a_id ? 'font-bold' : ''}`}>
-                              {match.team_a?.name || 'TBD'}
-                            </span>
-                          </div>
-                          {match.team_a_score !== null && (
-                            <span
-                              className="text-2xl font-bold"
-                              style={{ color: match.winner_id === match.team_a_id ? accentColor : 'inherit' }}
+                <div className="relative">
+                  {/* Conectores centrales (desktop) */}
+                  <div className="hidden md:block absolute inset-y-16 left-1/2 -translate-x-1/2 w-px bg-white/10" />
+
+                  <div className="grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-6 md:gap-10 items-center">
+                    {/* Semifinal izquierda */}
+                    <div className="space-y-4">
+                      {playoffMatches
+                        .filter(m => m.round === 'semifinal' || m.phase === 'semifinals')
+                        .slice(0, 1)
+                        .map((match) => (
+                          <div key={match.id} className="relative">
+                            {/* Conector hacia la final (desktop) */}
+                            <div className="hidden md:block absolute top-1/2 -right-6 w-6 h-px bg-white/15" />
+                            <div
+                              className="p-4 rounded-lg bg-white/5 border-2"
+                              style={{ borderColor: match.status === 'finished' ? `${accentColor}40` : 'rgba(255,255,255,0.15)' }}
                             >
-                              {match.team_a_score}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Team B */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 flex-1">
-                            {renderTeamLogo(match.team_b)}
-                            <span className={`font-medium ${match.winner_id === match.team_b_id ? 'font-bold' : ''}`}>
-                              {match.team_b?.name || 'TBD'}
-                            </span>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-3 flex-1">
+                                  {renderTeamLogo(match.team_a)}
+                                  <span className={`font-medium ${match.winner_id === match.team_a_id ? 'font-bold' : ''}`}>
+                                    {match.team_a?.name || 'TBD'}
+                                  </span>
+                                </div>
+                                {match.team_a_score !== null && (
+                                  <span
+                                    className="text-2xl font-bold"
+                                    style={{ color: match.winner_id === match.team_a_id ? accentColor : 'inherit' }}
+                                  >
+                                    {match.team_a_score}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3 flex-1">
+                                  {renderTeamLogo(match.team_b)}
+                                  <span className={`font-medium ${match.winner_id === match.team_b_id ? 'font-bold' : ''}`}>
+                                    {match.team_b?.name || 'TBD'}
+                                  </span>
+                                </div>
+                                {match.team_b_score !== null && (
+                                  <span
+                                    className="text-2xl font-bold"
+                                    style={{ color: match.winner_id === match.team_b_id ? accentColor : 'inherit' }}
+                                  >
+                                    {match.team_b_score}
+                                  </span>
+                                )}
+                              </div>
+                              {match.winner && (
+                                <div className="mt-3 pt-3 border-t border-white/10 text-center">
+                                  <span className="text-xs text-white/60">Pasa a la final</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          {match.team_b_score !== null && (
-                            <span
-                              className="text-2xl font-bold"
-                              style={{ color: match.winner_id === match.team_b_id ? accentColor : 'inherit' }}
-                            >
-                              {match.team_b_score}
-                            </span>
-                          )}
-                        </div>
+                        ))}
+                    </div>
 
-                        {match.winner && (
-                          <div className="mt-3 pt-3 border-t border-white/10 text-center">
-                            <span className="text-xs text-white/60">Pasa a la final</span>
-                          </div>
-                        )}
+                    {/* Final centrada */}
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <Trophy className="h-5 w-5" style={{ color: accentColor }} />
+                        <span className="text-lg font-bold" style={{ color: accentColor }}>FINAL</span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Final */}
-              {playoffMatches.filter(m => m.round === 'final').length > 0 && (
-                <div>
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <Trophy className="h-6 w-6" style={{ color: accentColor }} />
-                    <h4 className="text-2xl font-bold" style={{ color: accentColor }}>FINAL</h4>
-                  </div>
-                  <div className="max-w-md mx-auto">
-                    {playoffMatches.filter(m => m.round === 'final').map((match) => (
-                      <div
-                        key={match.id}
-                        className="p-6 rounded-lg bg-white/5 border-2"
-                        style={{ borderColor: `${accentColor}60` }}
-                      >
-                        {/* Team A */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3 flex-1">
-                            {renderTeamLogo(match.team_a)}
-                            <span className={`text-lg font-medium ${match.winner_id === match.team_a_id ? 'font-bold' : ''}`}>
-                              {match.team_a?.name || 'TBD'}
-                            </span>
-                          </div>
-                          {match.team_a_score !== null && (
-                            <span
-                              className="text-3xl font-bold"
-                              style={{ color: match.winner_id === match.team_a_id ? accentColor : 'inherit' }}
+                      <div className="w-full max-w-xs">
+                        {playoffMatches
+                          .filter(m => m.round === 'final' || m.phase === 'final')
+                          .map((match) => (
+                            <div
+                              key={match.id}
+                              className="p-5 rounded-lg bg-white/5 border-2"
+                              style={{ borderColor: `${accentColor}60` }}
                             >
-                              {match.team_a_score}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Team B */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 flex-1">
-                            {renderTeamLogo(match.team_b)}
-                            <span className={`text-lg font-medium ${match.winner_id === match.team_b_id ? 'font-bold' : ''}`}>
-                              {match.team_b?.name || 'TBD'}
-                            </span>
-                          </div>
-                          {match.team_b_score !== null && (
-                            <span
-                              className="text-3xl font-bold"
-                              style={{ color: match.winner_id === match.team_b_id ? accentColor : 'inherit' }}
-                            >
-                              {match.team_b_score}
-                            </span>
-                          )}
-                        </div>
-
-                        {match.winner && (
-                          <div className="mt-4 pt-4 border-t border-white/20 text-center">
-                            <Trophy className="h-8 w-8 mx-auto mb-2" style={{ color: accentColor }} />
-                            <p className="text-xl font-bold" style={{ color: accentColor }}>
-                              🏆 CAMPEÓN: {match.winner.name}
-                            </p>
-                          </div>
-                        )}
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-3 flex-1">
+                                  {renderTeamLogo(match.team_a)}
+                                  <span className={`text-sm font-medium ${match.winner_id === match.team_a_id ? 'font-bold' : ''}`}>
+                                    {match.team_a?.name || 'TBD'}
+                                  </span>
+                                </div>
+                                {match.team_a_score !== null && (
+                                  <span
+                                    className="text-2xl font-bold"
+                                    style={{ color: match.winner_id === match.team_a_id ? accentColor : 'inherit' }}
+                                  >
+                                    {match.team_a_score}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3 flex-1">
+                                  {renderTeamLogo(match.team_b)}
+                                  <span className={`text-sm font-medium ${match.winner_id === match.team_b_id ? 'font-bold' : ''}`}>
+                                    {match.team_b?.name || 'TBD'}
+                                  </span>
+                                </div>
+                                {match.team_b_score !== null && (
+                                  <span
+                                    className="text-2xl font-bold"
+                                    style={{ color: match.winner_id === match.team_b_id ? accentColor : 'inherit' }}
+                                  >
+                                    {match.team_b_score}
+                                  </span>
+                                )}
+                              </div>
+                              {match.winner && (
+                                <div className="mt-4 pt-3 border-t border-white/20 text-center">
+                                  <Trophy className="h-6 w-6 mx-auto mb-1" style={{ color: accentColor }} />
+                                  <p className="text-sm font-semibold" style={{ color: accentColor }}>
+                                    Campeón: {match.winner.name}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Semifinal derecha */}
+                    <div className="space-y-4">
+                      {playoffMatches
+                        .filter(m => m.round === 'semifinal' || m.phase === 'semifinals')
+                        .slice(1, 2)
+                        .map((match) => (
+                          <div key={match.id} className="relative">
+                            {/* Conector hacia la final (desktop) */}
+                            <div className="hidden md:block absolute top-1/2 -left-6 w-6 h-px bg-white/15" />
+                            <div
+                              className="p-4 rounded-lg bg-white/5 border-2"
+                              style={{ borderColor: match.status === 'finished' ? `${accentColor}40` : 'rgba(255,255,255,0.15)' }}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-3 flex-1">
+                                  {renderTeamLogo(match.team_a)}
+                                  <span className={`font-medium ${match.winner_id === match.team_a_id ? 'font-bold' : ''}`}>
+                                    {match.team_a?.name || 'TBD'}
+                                  </span>
+                                </div>
+                                {match.team_a_score !== null && (
+                                  <span
+                                    className="text-2xl font-bold"
+                                    style={{ color: match.winner_id === match.team_a_id ? accentColor : 'inherit' }}
+                                  >
+                                    {match.team_a_score}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3 flex-1">
+                                  {renderTeamLogo(match.team_b)}
+                                  <span className={`font-medium ${match.winner_id === match.team_b_id ? 'font-bold' : ''}`}>
+                                    {match.team_b?.name || 'TBD'}
+                                  </span>
+                                </div>
+                                {match.team_b_score !== null && (
+                                  <span
+                                    className="text-2xl font-bold"
+                                    style={{ color: match.winner_id === match.team_b_id ? accentColor : 'inherit' }}
+                                  >
+                                    {match.team_b_score}
+                                  </span>
+                                )}
+                              </div>
+                              {match.winner && (
+                                <div className="mt-3 pt-3 border-t border-white/10 text-center">
+                                  <span className="text-xs text-white/60">Pasa a la final</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
                   </div>
-                </div>
-              )}
 
-              {/* Tercer Puesto */}
-              {playoffMatches.filter(m => m.round === 'third_place').length > 0 && (
-                <div>
-                  <h4 className="text-lg font-bold mb-4 text-white/80 text-center">Tercer Puesto</h4>
-                  <div className="max-w-md mx-auto">
-                    {playoffMatches.filter(m => m.round === 'third_place').map((match) => (
-                      <div
-                        key={match.id}
-                        className="p-4 rounded-lg bg-white/5 border border-white/20"
-                      >
-                        {/* Team A */}
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-3 flex-1">
-                            {renderTeamLogo(match.team_a)}
-                            <span className={`font-medium ${match.winner_id === match.team_a_id ? 'font-bold' : ''}`}>
-                              {match.team_a?.name || 'TBD'}
-                            </span>
-                          </div>
-                          {match.team_a_score !== null && (
-                            <span
-                              className="text-2xl font-bold"
-                              style={{ color: match.winner_id === match.team_a_id ? accentColor : 'inherit' }}
+                  {/* Tercer Puesto (debajo) */}
+                  {playoffMatches.some(m => m.round === 'third_place' || m.phase === 'third_place') && (
+                    <div className="mt-10">
+                      <h4 className="text-sm font-semibold text-center mb-3 text-white/70">Tercer Puesto</h4>
+                      <div className="max-w-md mx-auto">
+                        {playoffMatches
+                          .filter(m => m.round === 'third_place' || m.phase === 'third_place')
+                          .map((match) => (
+                            <div
+                              key={match.id}
+                              className="p-4 rounded-lg bg-white/5 border border-white/20"
                             >
-                              {match.team_a_score}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Team B */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 flex-1">
-                            {renderTeamLogo(match.team_b)}
-                            <span className={`font-medium ${match.winner_id === match.team_b_id ? 'font-bold' : ''}`}>
-                              {match.team_b?.name || 'TBD'}
-                            </span>
-                          </div>
-                          {match.team_b_score !== null && (
-                            <span
-                              className="text-2xl font-bold"
-                              style={{ color: match.winner_id === match.team_b_id ? accentColor : 'inherit' }}
-                            >
-                              {match.team_b_score}
-                            </span>
-                          )}
-                        </div>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-3 flex-1">
+                                  {renderTeamLogo(match.team_a)}
+                                  <span className={`font-medium ${match.winner_id === match.team_a_id ? 'font-bold' : ''}`}>
+                                    {match.team_a?.name || 'TBD'}
+                                  </span>
+                                </div>
+                                {match.team_a_score !== null && (
+                                  <span
+                                    className="text-2xl font-bold"
+                                    style={{ color: match.winner_id === match.team_a_id ? accentColor : 'inherit' }}
+                                  >
+                                    {match.team_a_score}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3 flex-1">
+                                  {renderTeamLogo(match.team_b)}
+                                  <span className={`font-medium ${match.winner_id === match.team_b_id ? 'font-bold' : ''}`}>
+                                    {match.team_b?.name || 'TBD'}
+                                  </span>
+                                </div>
+                                {match.team_b_score !== null && (
+                                  <span
+                                    className="text-2xl font-bold"
+                                    style={{ color: match.winner_id === match.team_b_id ? accentColor : 'inherit' }}
+                                  >
+                                    {match.team_b_score}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
           )}
         </div>
       )}

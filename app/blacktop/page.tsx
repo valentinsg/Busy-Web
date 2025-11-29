@@ -1,21 +1,21 @@
 import { Button } from '@/components/ui/button';
 import { getPublicTournaments, getTournamentWithStats } from '@/lib/repo/blacktop';
+import { generateSEO } from '@/lib/seo';
+import { generateBreadcrumbSchema } from '@/lib/structured-data';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, MapPin } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Suspense } from 'react';
-import { generateSEO } from '@/lib/seo';
-import { generateBreadcrumbSchema } from '@/lib/structured-data';
 import Script from 'next/script';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   ...generateSEO({
     title: 'Busy Blacktop | Torneos de Básquet',
     description:
-      'Busy Blacktop: circuito de torneos 3v3 de básquet en Argentina. Cultura, comunidad y competencia. Descubrí los próximos eventos, conocé equipos y registrá tu equipo.',
+      'Busy Blacktop es el torneo 3x3 de básquet de Busy Streetwear en Mar del Plata. Competencia, premios para jugadores y público, música, contenido y comunidad alrededor de la plaza.',
     image: '/busy-og-image.png',
     url: (process.env.SITE_URL || 'https://busy.com.ar') + '/blacktop',
   }),
@@ -186,7 +186,7 @@ export default async function BlacktopPage() {
               Busy Blacktop
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 sm:mb-6 leading-relaxed px-4">
-              Torneos 3v3 de básquet. Cultura, comunidad y competencia.
+              Torneo 3x3 de básquet creado por Busy Streetwear en Mar del Plata. Un día de plaza: competencia, música, premios y contenido para jugadores y público.
             </p>
 
             {showHeroCta && (
@@ -239,7 +239,7 @@ function BlacktopStructuredData({ tournaments }: { tournaments: Array<any> }) {
     '@type': 'WebPage',
     name: 'Busy Blacktop',
     url: `${SITE_URL}/blacktop`,
-    description: 'Busy Blacktop: circuito de torneos 3v3 de básquet. Calendario, equipos y registros.',
+    description: 'Busy Blacktop es el torneo 3x3 de básquet de Busy Streetwear en Mar del Plata. Competencia, premios para jugadores y público, música, contenido y comunidad alrededor de la plaza.',
   };
   return (
     <>

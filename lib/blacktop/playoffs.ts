@@ -30,15 +30,33 @@ export async function advanceToPlayoffs(tournamentId: number): Promise<Match[]> 
     .eq('tournament_id', tournamentId)
     .order('order_index', { ascending: true });
 
-  if (!groups || groups.length < 2) throw new Error('Se requieren al menos 2 grupos');
+  if (!groups || groups.length === 0) {
+    throw new Error('No hay grupos configurados para este torneo');
+  }
 
   const teamsAdvancePerGroup = tournament.teams_advance_per_group || 2;
   const qualified: { groupId: string; teamIds: number[] }[] = [];
 
+  // Solo consideramos grupos que realmente tienen standings/equipos
   for (const group of groups) {
     const standings = await calculateStandings(tournamentId, group.id);
-    const topTeams = standings.slice(0, teamsAdvancePerGroup).map(s => s.team_id);
+
+    if (!standings || standings.length === 0) {
+      // Grupo sin equipos o sin partidos finalizados: lo ignoramos para playoffs
+      continue;
+    }
+
+    const topTeams = standings.slice(0, teamsAdvancePerGroup).map((s) => s.team_id);
+
+    if (topTeams.length === 0) {
+      continue;
+    }
+
     qualified.push({ groupId: group.id, teamIds: topTeams });
+  }
+
+  if (qualified.length < 2) {
+    throw new Error('Se requieren al menos 2 grupos con equipos para generar playoffs');
   }
 
   const playoffMatches: any[] = [];

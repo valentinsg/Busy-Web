@@ -52,6 +52,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       })
     );
 
+    // Ocultar grupos totalmente vacíos (sin equipos aprobados ni partidos de grupos)
+    const visibleGroups = groupsData.filter((g) => (g.teams?.length || 0) > 0 || (g.matches?.length || 0) > 0);
+
     // Get playoffs
     const { data: quarterfinals } = await supabase
       .from('matches')
@@ -103,7 +106,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     const response: FixturesResponse = {
       tournament,
-      groups: groupsData,
+      groups: visibleGroups,
       playoffs: {
         quarterfinals: quarterfinals || [],
         semifinals: semifinals || [],

@@ -1,9 +1,8 @@
 'use client';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Trophy } from 'lucide-react';
 
 interface Player {
   id: number;
@@ -28,12 +27,12 @@ export function MVPSelectionModal({ open, players, onSelect }: MVPSelectionModal
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent 
+      <DialogContent
         className="max-w-2xl bg-[#0d0d0d] border border-white/10"
         hideCloseButton
       >
         <DialogHeader>
-          <DialogTitle className="text-3xl text-center text-white flex items-center justify-center gap-3">
+          <DialogTitle className="text-3xl text-center text-white flex items-center justify-center gap-3 font-body">
             <Trophy className="h-8 w-8 text-yellow-500" />
             Seleccioná el MVP del Partido
           </DialogTitle>
@@ -57,7 +56,7 @@ export function MVPSelectionModal({ open, players, onSelect }: MVPSelectionModal
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl font-bold text-white">{player.full_name}</span>
+                    <span className="text-2xl font-bold text-white font-body">{player.full_name}</span>
                     {index === 0 && (
                       <Trophy className="h-5 w-5 text-yellow-500" />
                     )}

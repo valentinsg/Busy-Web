@@ -1,10 +1,6 @@
 "use client"
 
 import { useI18n } from "@/components/i18n-provider"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,14 +12,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { useCart } from "@/hooks/use-cart"
-import { capitalize, formatPrice } from "@/lib/format"
 import { computeShipping, computeTax } from "@/lib/checkout/totals"
+import { capitalize, formatPrice } from "@/lib/format"
 import { getSettingsClient } from "@/lib/repo/settings"
 import { Minus, Plus, ShoppingBag, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 
 interface CartSheetProps {
   children: React.ReactNode
@@ -103,7 +103,7 @@ export function CartSheet({ children }: CartSheetProps) {
                   </AlertDialogHeader>
                   <AlertDialogFooter className="gap-2 sm:gap-2">
                     <AlertDialogCancel className="font-medium">Cancelar</AlertDialogCancel>
-                    <AlertDialogAction 
+                    <AlertDialogAction
                       onClick={clearCart}
                       className="bg-destructive hover:bg-destructive/90 font-medium"
                     >
@@ -209,7 +209,7 @@ export function CartSheet({ children }: CartSheetProps) {
                         </AlertDialogHeader>
                         <AlertDialogFooter className="gap-2 sm:gap-2">
                           <AlertDialogCancel className="font-medium">Cancelar</AlertDialogCancel>
-                          <AlertDialogAction 
+                          <AlertDialogAction
                             onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor)}
                             className="bg-destructive hover:bg-destructive/90 font-medium"
                           >
@@ -232,7 +232,7 @@ export function CartSheet({ children }: CartSheetProps) {
                   <span>{t("cart.subtotal")}</span>
                   <span>{formatPrice(subtotal)}</span>
                 </div>
-                
+
                 {/* Promociones aplicadas */}
                 {promoDiscount > 0 && (
                   <div className="space-y-1">
@@ -249,7 +249,7 @@ export function CartSheet({ children }: CartSheetProps) {
                     ))}
                   </div>
                 )}
-                
+
                 <div className="flex justify-between">
                   <span>{t("cart.shipping")}</span>
                   <span>{estimatedShipping === 0 ? t("cart.shipping_free") : formatPrice(estimatedShipping)}</span>
