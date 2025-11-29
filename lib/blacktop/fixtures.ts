@@ -95,12 +95,43 @@ export async function generateGroupsFixtures(tournamentId: number): Promise<Matc
   const allGroupMatches: Array<{ groupId: number; groupName: string; matches: Array<[number, number]> }> = [];
 
   for (const group of groups) {
-    const { data: teams } = await supabase
+    // 1) Fuente principal: equipos vinculados por group_id
+    let teamsResult = await supabase
       .from('teams')
       .select('id, name')
       .eq('tournament_id', tournamentId)
       .eq('group_id', group.id)
       .eq('status', 'approved');
+
+    let teams = teamsResult.data;
+
+    // 2) Fallback legacy: si no hay equipos por group_id, intentar resolver por group_name
+    if (!teams || teams.length === 0) {
+      // Normalizar nombre de grupo a una letra: A, B, C...
+      const letters = (group.name || '').match(/[A-Z]/gi) || [];
+      const normalized = (letters[letters.length - 1] || 'A').toUpperCase();
+
+      const fallbackQuery = await supabase
+        .from('teams')
+        .select('id, name')
+        .eq('tournament_id', tournamentId)
+        .eq('status', 'approved')
+        .or(`group_name.eq.${normalized},group_name.eq.Zona ${normalized}`);
+
+      const fallbackTeams = fallbackQuery.data || [];
+
+      if (fallbackTeams.length > 0) {
+        teams = fallbackTeams;
+
+        // Self-heal: asignar group_id a estos equipos para futuras ejecuciones
+        await supabase
+          .from('teams')
+          .update({ group_id: group.id })
+          .eq('tournament_id', tournamentId)
+          .eq('status', 'approved')
+          .or(`group_name.eq.${normalized},group_name.eq.Zona ${normalized}`);
+      }
+    }
 
     if (!teams || teams.length === 0) {
       // Grupo sin equipos aprobados: lo saltamos pero dejamos un mensaje claro para debugging
@@ -117,6 +148,12 @@ export async function generateGroupsFixtures(tournamentId: number): Promise<Matc
       groupName: group.name,
       matches
     });
+  }
+
+  if (allGroupMatches.length === 0) {
+    throw new Error(
+      'No se encontraron equipos asignados a grupos (group_id). Verifica que todos los equipos aprobados tengan zona asignada y vuelve a intentar.'
+    );
   }
 
   // 2. Optimizar orden de partidos

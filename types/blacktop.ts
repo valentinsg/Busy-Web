@@ -4,7 +4,7 @@
 
 export type MatchStatus = 'pending' | 'live' | 'halftime' | 'finished' | 'cancelled';
 export type TournamentStatus = 'draft' | 'groups' | 'playoffs' | 'finished';
-export type MatchPhase = 'groups' | 'semifinals' | 'third_place' | 'final';
+export type MatchPhase = 'groups' | 'quarterfinals' | 'semifinals' | 'third_place' | 'final';
 export type TeamStatus = 'pending' | 'approved' | 'rejected';
 export type MatchRound = 'group_a' | 'group_b' | 'semifinal' | 'final' | 'third_place';
 export type MediaType = 'image' | 'video';
@@ -347,6 +347,7 @@ export interface FixturesResponse {
     standings: StandingsRow[];
   }[];
   playoffs: {
+    quarterfinals: MatchWithTeams[];
     semifinals: MatchWithTeams[];
     third_place: MatchWithTeams | null;
     final: MatchWithTeams | null;

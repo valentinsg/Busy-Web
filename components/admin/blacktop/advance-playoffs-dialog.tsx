@@ -1,16 +1,16 @@
 'use client';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Zap, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
+import { AlertCircle, ArrowRight, CheckCircle2, Trophy, Zap } from 'lucide-react';
 
 interface AdvancePlayoffsDialogProps {
   open: boolean;
@@ -19,6 +19,7 @@ interface AdvancePlayoffsDialogProps {
   groupsComplete: boolean;
   totalMatches: number;
   finishedMatches: number;
+  thirdPlaceEnabled: boolean;
 }
 
 export function AdvancePlayoffsDialog({
@@ -28,32 +29,33 @@ export function AdvancePlayoffsDialog({
   groupsComplete,
   totalMatches,
   finishedMatches,
+  thirdPlaceEnabled,
 }: AdvancePlayoffsDialogProps) {
   const progress = totalMatches > 0 ? (finishedMatches / totalMatches) * 100 : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-gradient-to-br from-zinc-950 to-black border-accent-brand/30">
+      <DialogContent className="max-w-2xl bg-gradient-to-br from-zinc-950 to-black border-accent-brand/30 font-body">
         <DialogHeader>
-          <DialogTitle className="text-3xl font-heading flex items-center gap-3">
+          <DialogTitle className="text-2xl sm:text-3xl font-heading flex items-center gap-3">
             <Trophy className="h-8 w-8 text-yellow-500" />
             Avanzar a Playoffs
           </DialogTitle>
-          <DialogDescription className="text-base mt-2">
+          <DialogDescription className="text-sm sm:text-base mt-1 text-muted-foreground">
             Los mejores equipos de cada zona se enfrentarán en la fase eliminatoria
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {/* Progress */}
-          <div className="space-y-3">
+          <div className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-white">Progreso de Fase de Grupos</span>
+              <span className="font-semibold text-white">Progreso de Fase de Grupos</span>
               <Badge variant={groupsComplete ? 'default' : 'outline'} className={groupsComplete ? 'bg-green-600' : ''}>
                 {finishedMatches}/{totalMatches} partidos
               </Badge>
             </div>
-            
+
             {/* Progress Bar */}
             <div className="relative h-3 bg-white/10 rounded-full overflow-hidden">
               <motion.div
@@ -63,10 +65,10 @@ export function AdvancePlayoffsDialog({
                 className={`h-full ${groupsComplete ? 'bg-green-500' : 'bg-accent-brand'}`}
               />
             </div>
-            
+
             <p className="text-xs text-muted-foreground">
-              {groupsComplete 
-                ? '✅ Todos los partidos de grupos están finalizados' 
+              {groupsComplete
+                ? '✅ Todos los partidos de grupos están finalizados'
                 : `⏳ Faltan ${totalMatches - finishedMatches} partidos por finalizar`
               }
             </p>
@@ -81,12 +83,12 @@ export function AdvancePlayoffsDialog({
             >
               <div className="flex items-center gap-3 mb-2">
                 <Zap className="h-5 w-5 text-purple-500" />
-                <span className="font-semibold text-white">Se Generarán</span>
+                <span className="font-semibold text-white text-sm">Se Generarán</span>
               </div>
-              <ul className="text-sm text-muted-foreground space-y-1">
+              <ul className="text-xs sm:text-sm text-muted-foreground space-y-1 list-none">
                 <li>• Semifinales (cruces)</li>
                 <li>• Final</li>
-                <li>• Tercer puesto</li>
+                {thirdPlaceEnabled && <li>• Tercer puesto</li>}
               </ul>
             </motion.div>
 
@@ -98,9 +100,9 @@ export function AdvancePlayoffsDialog({
             >
               <div className="flex items-center gap-3 mb-2">
                 <CheckCircle2 className="h-5 w-5 text-accent-brand" />
-                <span className="font-semibold text-white">Clasificación</span>
+                <span className="font-semibold text-white text-sm">Clasificación</span>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Los mejores equipos de cada zona según puntos y diferencia de gol
               </p>
             </motion.div>

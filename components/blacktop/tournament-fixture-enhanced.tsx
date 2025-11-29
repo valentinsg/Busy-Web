@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, Calendar } from 'lucide-react';
 import type { MatchWithTeams, TeamWithPlayers } from '@/types/blacktop';
+import { Calendar, Trophy } from 'lucide-react';
 import Image from 'next/image';
+import { useMemo, useState } from 'react';
 
 interface TournamentFixtureEnhancedProps {
   matches: MatchWithTeams[];
@@ -37,28 +36,30 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
   // Calcular standings por grupo
   const standings = useMemo(() => {
     // Inferir pertenencia a grupo desde:
-    // - round (group_a / group_b) si existe
     // - phase === 'groups' + group_id
     // - team.group_name en listado de equipos
-    const inferredGroup = new Map<number, 'A' | 'B'>();
-    // Desde partidos
+    const inferredGroup = new Map<number, string>();
+
     matches.forEach(m => {
-      if (m.round === 'group_a' || (m.phase === 'groups' && (m.group_id === 'group_a' || m.group_id?.toLowerCase().includes('group_a')))) {
-        if (m.team_a_id) inferredGroup.set(m.team_a_id, 'A');
-        if (m.team_b_id) inferredGroup.set(m.team_b_id, 'A');
+      if (m.phase === 'groups') {
+        const groupKey = m.group_id || null;
+        if (!groupKey) return;
+        if (m.team_a_id) inferredGroup.set(m.team_a_id, groupKey);
+        if (m.team_b_id) inferredGroup.set(m.team_b_id, groupKey);
       }
-      if (m.round === 'group_b' || (m.phase === 'groups' && (m.group_id === 'group_b' || m.group_id?.toLowerCase().includes('group_b')))) {
-        if (m.team_a_id) inferredGroup.set(m.team_a_id, 'B');
-        if (m.team_b_id) inferredGroup.set(m.team_b_id, 'B');
-      }
-    });
-    // Desde equipos
-    teams.forEach(t => {
-      if (t.group_name === 'A') inferredGroup.set(t.id, 'A');
-      if (t.group_name === 'B') inferredGroup.set(t.id, 'B');
     });
 
-    const groupMatches = matches.filter(m => (m.round?.startsWith('group_') || m.phase === 'groups') && m.status === 'finished');
+    teams.forEach(t => {
+      if (t.group_name) {
+        inferredGroup.set(t.id, t.group_name);
+      }
+    });
+
+    // Solo usar partidos de fase de grupos finalizados
+    const groupMatches = matches.filter(
+      m => m.phase === 'groups' && m.status === 'finished'
+    );
+
     const teamStats = new Map<number, StandingsRow>();
 
     // Inicializar stats
@@ -104,21 +105,40 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
       stats.diff = stats.pf - stats.pa;
     });
 
-    // Agrupar por grupo
-    const groupA = Array.from(teamStats.values())
-      .filter(s => (s.team.group_name || inferredGroup.get(s.team.id)) === 'A')
-      .sort((a, b) => b.pct - a.pct || b.diff - a.diff);
-    
-    const groupB = Array.from(teamStats.values())
-      .filter(s => (s.team.group_name || inferredGroup.get(s.team.id)) === 'B')
-      .sort((a, b) => b.pct - a.pct || b.diff - a.diff);
+    // Agrupar dinámicamente por grupo
+    const groupsMap = new Map<string, StandingsRow[]>();
+
+    Array.from(teamStats.values()).forEach(row => {
+      const rawKey = row.team.group_name || inferredGroup.get(row.team.id) || '';
+      if (!rawKey) return;
+
+      const key = rawKey.toString();
+      if (!groupsMap.has(key)) groupsMap.set(key, []);
+      groupsMap.get(key)!.push(row);
+    });
+
+    const groups = Array.from(groupsMap.entries()).map(([key, rows]) => {
+      const normalizedKey = key.toUpperCase();
+      const label = /^[A-Z]$/.test(normalizedKey)
+        ? `Grupo ${normalizedKey}`
+        : key;
+
+      const sortedRows = [...rows].sort((a, b) => b.pct - a.pct || b.diff - a.diff);
+
+      return {
+        key: normalizedKey,
+        label,
+        rows: sortedRows,
+      };
+    }).sort((a, b) => a.key.localeCompare(b.key));
 
     // Tabla general (fallback si no hay grupos asignados)
-    const overall = Array.from(teamStats.values())
-      .sort((a, b) => b.pct - a.pct || b.diff - a.diff);
+    const overall = Array.from(teamStats.values()).sort(
+      (a, b) => b.pct - a.pct || b.diff - a.diff
+    );
 
-    const hasGroups = groupA.length > 0 || groupB.length > 0 || inferredGroup.size > 0;
-    return { groupA, groupB, overall, hasGroups };
+    const hasGroups = groups.length > 0;
+    return { groups, overall, hasGroups };
   }, [matches, teams]);
 
   // Agrupar partidos
@@ -164,12 +184,12 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
 
   const renderTeamLogo = (team: TeamWithPlayers | undefined) => {
     if (!team) return null;
-    
+
     if (team.logo_url) {
       return (
         <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white/10">
-          <Image 
-            src={team.logo_url} 
+          <Image
+            src={team.logo_url}
             alt={team.name}
             fill
             className="object-cover"
@@ -177,10 +197,10 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
         </div>
       );
     }
-    
+
     // Template logo
     return (
-      <div 
+      <div
         className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg"
         style={{ backgroundColor: `${accentColor}30`, color: accentColor }}
       >
@@ -255,7 +275,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             </p>
                           </div>
                           {match.team_a_score !== null && (
-                            <span 
+                            <span
                               className="text-2xl font-bold min-w-[3rem] text-right"
                               style={{ color: match.winner_id === match.team_a_id ? accentColor : 'inherit' }}
                             >
@@ -276,7 +296,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             </p>
                           </div>
                           {match.team_b_score !== null && (
-                            <span 
+                            <span
                               className="text-2xl font-bold min-w-[3rem] text-left"
                               style={{ color: match.winner_id === match.team_b_id ? accentColor : 'inherit' }}
                             >
@@ -316,117 +336,58 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
       {/* Standings View */}
       {view === 'standings' && (
         <div className="space-y-6">
-          {/* Debug info */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="text-xs text-white/40 font-mono">
-              Teams: {teams.length} | Matches: {matches.length} | 
-              Groups: A={standings.groupA.length}, B={standings.groupB.length}, Overall={standings.overall.length}
-            </div>
-          )}
-          
           <div className="grid md:grid-cols-2 gap-6">
-          {/* Grupo A */}
-          {standings.groupA.length > 0 && (
-            <Card className="bg-white/10 backdrop-blur border-white/20">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-4" style={{ color: accentColor }}>
-                  Grupo A
-                </h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-white/20">
-                        <th className="text-left py-2 px-2">#</th>
-                        <th className="text-left py-2 px-2">Equipo</th>
-                        <th className="text-center py-2 px-2">G</th>
-                        <th className="text-center py-2 px-2">P</th>
-                        <th className="text-center py-2 px-2">%</th>
-                        <th className="text-center py-2 px-2">DIF</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {standings.groupA.map((row, idx) => (
-                        <tr key={row.team.id} className="border-b border-white/10 hover:bg-white/5">
-                          <td className="py-3 px-2">
-                            <span className="font-bold" style={{ color: idx < 2 ? accentColor : 'inherit' }}>
-                              {idx + 1}
-                            </span>
-                          </td>
-                          <td className="py-3 px-2">
-                            <div className="flex items-center gap-2">
-                              {renderTeamLogo(row.team)}
-                              <span className="font-medium">{row.team.name}</span>
-                            </div>
-                          </td>
-                          <td className="text-center py-3 px-2 font-bold">{row.wins}</td>
-                          <td className="text-center py-3 px-2">{row.losses}</td>
-                          <td className="text-center py-3 px-2">{(row.pct * 100).toFixed(0)}%</td>
-                          <td className="text-center py-3 px-2">
-                            <span className={row.diff > 0 ? 'text-green-400' : row.diff < 0 ? 'text-red-400' : ''}>
-                              {row.diff > 0 ? '+' : ''}{row.diff}
-                            </span>
-                          </td>
+            {standings.groups.map(group => (
+              <Card key={group.key} className="bg-white/10 backdrop-blur border-white/20">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-4" style={{ color: accentColor }}>
+                    {group.label}
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/20">
+                          <th className="text-left py-2 px-2">#</th>
+                          <th className="text-left py-2 px-2">Equipo</th>
+                          <th className="text-center py-2 px-2">G</th>
+                          <th className="text-center py-2 px-2">P</th>
+                          <th className="text-center py-2 px-2">%</th>
+                          <th className="text-center py-2 px-2">DIF</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                      </thead>
+                      <tbody>
+                        {group.rows.map((row, idx) => (
+                          <tr key={row.team.id} className="border-b border-white/10 hover:bg-white/5">
+                            <td className="py-3 px-2">
+                              <span className="font-bold" style={{ color: idx < 2 ? accentColor : 'inherit' }}>
+                                {idx + 1}
+                              </span>
+                            </td>
+                            <td className="py-3 px-2">
+                              <div className="flex items-center gap-2">
+                                {renderTeamLogo(row.team)}
+                                <span className="font-medium">{row.team.name}</span>
+                              </div>
+                            </td>
+                            <td className="text-center py-3 px-2 font-bold">{row.wins}</td>
+                            <td className="text-center py-3 px-2">{row.losses}</td>
+                            <td className="text-center py-3 px-2">{(row.pct * 100).toFixed(0)}%</td>
+                            <td className="text-center py-3 px-2">
+                              <span className={row.diff > 0 ? 'text-green-400' : row.diff < 0 ? 'text-red-400' : ''}>
+                                {row.diff > 0 ? '+' : ''}{row.diff}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
 
-          {/* Grupo B */}
-          {standings.groupB.length > 0 && (
-            <Card className="bg-white/10 backdrop-blur border-white/20">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-4" style={{ color: accentColor }}>
-                  Grupo B
-                </h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-white/20">
-                        <th className="text-left py-2 px-2">#</th>
-                        <th className="text-left py-2 px-2">Equipo</th>
-                        <th className="text-center py-2 px-2">G</th>
-                        <th className="text-center py-2 px-2">P</th>
-                        <th className="text-center py-2 px-2">%</th>
-                        <th className="text-center py-2 px-2">DIF</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {standings.groupB.map((row, idx) => (
-                        <tr key={row.team.id} className="border-b border-white/10 hover:bg-white/5">
-                          <td className="py-3 px-2">
-                            <span className="font-bold" style={{ color: idx < 2 ? accentColor : 'inherit' }}>
-                              {idx + 1}
-                            </span>
-                          </td>
-                          <td className="py-3 px-2">
-                            <div className="flex items-center gap-2">
-                              {renderTeamLogo(row.team)}
-                              <span className="font-medium">{row.team.name}</span>
-                            </div>
-                          </td>
-                          <td className="text-center py-3 px-2 font-bold">{row.wins}</td>
-                          <td className="text-center py-3 px-2">{row.losses}</td>
-                          <td className="text-center py-3 px-2">{(row.pct * 100).toFixed(0)}%</td>
-                          <td className="text-center py-3 px-2">
-                            <span className={row.diff > 0 ? 'text-green-400' : row.diff < 0 ? 'text-red-400' : ''}>
-                              {row.diff > 0 ? '+' : ''}{row.diff}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Fallback: Tabla General si no hay grupos */}
-          {standings.hasGroups === false && standings.overall.length > 0 && (
+            {/* Fallback: Tabla General si no hay grupos */}
+            {standings.hasGroups === false && standings.overall.length > 0 && (
             <Card className="bg-white/10 backdrop-blur border-white/20 md:col-span-2">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold mb-4" style={{ color: accentColor }}>
@@ -473,10 +434,10 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                 </div>
               </CardContent>
             </Card>
-          )}
+            )}
 
-          {/* Empty state */}
-          {standings.overall.length === 0 && (
+            {/* Empty state */}
+            {standings.overall.length === 0 && (
             <Card className="bg-white/10 backdrop-blur border-white/20 md:col-span-2">
               <CardContent className="p-12 text-center">
                 <div className="text-white/60">
@@ -486,7 +447,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                 </div>
               </CardContent>
             </Card>
-          )}
+            )}
           </div>
         </div>
       )}
@@ -510,7 +471,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
             <h3 className="text-xl font-bold mb-6" style={{ color: accentColor }}>
               Llaves de Playoff
             </h3>
-            
+
             <div className="space-y-8">
               {/* Semifinales */}
               {playoffMatches.filter(m => m.round === 'semifinal').length > 0 && (
@@ -532,7 +493,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             </span>
                           </div>
                           {match.team_a_score !== null && (
-                            <span 
+                            <span
                               className="text-2xl font-bold"
                               style={{ color: match.winner_id === match.team_a_id ? accentColor : 'inherit' }}
                             >
@@ -540,7 +501,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             </span>
                           )}
                         </div>
-                        
+
                         {/* Team B */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3 flex-1">
@@ -550,7 +511,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             </span>
                           </div>
                           {match.team_b_score !== null && (
-                            <span 
+                            <span
                               className="text-2xl font-bold"
                               style={{ color: match.winner_id === match.team_b_id ? accentColor : 'inherit' }}
                             >
@@ -593,7 +554,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             </span>
                           </div>
                           {match.team_a_score !== null && (
-                            <span 
+                            <span
                               className="text-3xl font-bold"
                               style={{ color: match.winner_id === match.team_a_id ? accentColor : 'inherit' }}
                             >
@@ -601,7 +562,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             </span>
                           )}
                         </div>
-                        
+
                         {/* Team B */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3 flex-1">
@@ -611,7 +572,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             </span>
                           </div>
                           {match.team_b_score !== null && (
-                            <span 
+                            <span
                               className="text-3xl font-bold"
                               style={{ color: match.winner_id === match.team_b_id ? accentColor : 'inherit' }}
                             >
@@ -653,7 +614,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             </span>
                           </div>
                           {match.team_a_score !== null && (
-                            <span 
+                            <span
                               className="text-2xl font-bold"
                               style={{ color: match.winner_id === match.team_a_id ? accentColor : 'inherit' }}
                             >
@@ -661,7 +622,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             </span>
                           )}
                         </div>
-                        
+
                         {/* Team B */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3 flex-1">
@@ -671,7 +632,7 @@ export function TournamentFixtureEnhanced({ matches, teams, accentColor }: Tourn
                             </span>
                           </div>
                           {match.team_b_score !== null && (
-                            <span 
+                            <span
                               className="text-2xl font-bold"
                               style={{ color: match.winner_id === match.team_b_id ? accentColor : 'inherit' }}
                             >

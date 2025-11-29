@@ -1,8 +1,8 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Trophy, Users, Calendar, TrendingUp } from 'lucide-react';
-import type { Tournament, TeamWithPlayers, MatchWithTeams, TournamentLeaderboard } from '@/types/blacktop';
+import type { MatchWithTeams, TeamWithPlayers, Tournament, TournamentLeaderboard } from '@/types/blacktop';
+import { Calendar, TrendingUp, Trophy, Users } from 'lucide-react';
 import Link from 'next/link';
 import { TournamentEmptyState } from './tournament-empty-state';
 
@@ -15,10 +15,18 @@ interface TournamentDashboardProps {
   showPrizes?: boolean;
 }
 
-export function TournamentDashboard({ 
-  tournament, 
-  teams, 
-  matches, 
+function formatPlayerName(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
+}
+
+export function TournamentDashboard({
+  tournament,
+  teams,
+  matches,
   leaderboard,
   accentColor,
   showPrizes = false
@@ -26,11 +34,14 @@ export function TournamentDashboard({
   // Calcular estadísticas
   const completedMatches = matches.filter(m => m.status === 'finished').length;
   const totalPlayers = teams.reduce((acc, team) => acc + (team.players?.length || 0), 0);
-  
+  const hasStarted = matches.some(m => m.status === 'finished' || m.status === 'live' || m.status === 'halftime');
+  const hasCompletedMatches = completedMatches > 0;
+
   // Top 3 jugadores por puntos
   const topScorers = [...leaderboard]
     .sort((a, b) => b.total_points - a.total_points)
     .slice(0, 3);
+  const hasTopScorersData = hasCompletedMatches && topScorers.some(p => p.total_points > 0);
 
   // Top 2 equipos por zona (standings)
   const teamsByGroup = teams.reduce((acc, team) => {
@@ -131,7 +142,7 @@ export function TournamentDashboard({
       <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Top Scorers */}
         <Card className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all">
-          <CardContent className="p-5 sm:p-6">
+          <CardContent className="p-4 sm:p-5">
             <div className="flex items-center gap-2.5 mb-5">
               <div className="p-2 rounded-lg" style={{ backgroundColor: `${accentColor}15` }}>
                 <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: accentColor }} />
@@ -142,15 +153,15 @@ export function TournamentDashboard({
               </div>
             </div>
             <div className="space-y-2">
-              {topScorers.length > 0 ? (
+              {hasTopScorersData ? (
                 topScorers.map((player, idx) => (
-                  <Link 
+                  <Link
                     key={player.player.id}
                     href={`/blacktop/jugadores/${player.player.id}`}
                     className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-white/10 transition-all cursor-pointer group"
                   >
                     <div className="flex items-center gap-3">
-                      <div 
+                      <div
                         className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all group-hover:scale-110"
                         style={{ backgroundColor: `${accentColor}20`, color: accentColor }}
                       >
@@ -170,7 +181,9 @@ export function TournamentDashboard({
                   </Link>
                 ))
               ) : (
-                <p className="text-center text-white/40 py-8 text-sm">Sin estadísticas aún</p>
+                <p className="text-center text-white/40 py-8 text-sm">
+                  Las estadísticas de anotadores aparecerán cuando se jueguen los primeros partidos.
+                </p>
               )}
             </div>
           </CardContent>
@@ -226,18 +239,19 @@ export function TournamentDashboard({
         </Card>
 
         {/* Standings - Top 2 por zona */}
-        {topTeamsByGroup.length > 0 && (
-          <Card className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all">
-            <CardContent className="p-5 sm:p-6">
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="p-2 rounded-lg" style={{ backgroundColor: `${accentColor}15` }}>
-                  <Trophy className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: accentColor }} />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold">Clasificados</h3>
-                  <p className="text-xs text-white/50">Top 2 por zona</p>
-                </div>
+        {hasCompletedMatches && (
+        <Card className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="p-2 rounded-lg" style={{ backgroundColor: `${accentColor}15` }}>
+                <Trophy className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: accentColor }} />
               </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold">Clasificados</h3>
+                <p className="text-xs text-white/50">Top 2 por zona</p>
+              </div>
+            </div>
+            {topTeamsByGroup.length > 0 ? (
               <div className="space-y-4">
                 {topTeamsByGroup.map(({ groupName, teams: groupTeams }) => (
                   <div key={groupName}>
@@ -245,7 +259,7 @@ export function TournamentDashboard({
                     <div className="space-y-2">
                       {groupTeams.map((team, idx) => (
                         <div key={team.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-white/[0.03] border border-white/5">
-                          <div 
+                          <div
                             className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                             style={{ backgroundColor: `${accentColor}20`, color: accentColor }}
                           >
@@ -261,49 +275,14 @@ export function TournamentDashboard({
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            ) : (
+              <p className="text-center text-white/40 text-sm">No hay información disponible aún</p>
+            )}
+          </CardContent>
+        </Card>
         )}
       </div>
 
-      {/* Upcoming Matches */}
-      {upcomingMatches.length > 0 && (
-        <Card className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all">
-          <CardContent className="p-5 sm:p-6">
-            <div className="flex items-center gap-2.5 mb-5">
-              <div className="p-2 rounded-lg" style={{ backgroundColor: `${accentColor}15` }}>
-                <Calendar className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: accentColor }} />
-              </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-bold">Próximos Partidos</h3>
-                <p className="text-xs text-white/50">Calendario de encuentros</p>
-              </div>
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {upcomingMatches.map((match) => (
-                <div key={match.id} className="p-4 rounded-lg bg-white/[0.03] border border-white/5 hover:border-white/10 transition-all">
-                  <div className="text-center mb-3">
-                    <p className="text-[10px] sm:text-xs text-white/50 mb-1.5 uppercase tracking-wide font-medium">{match.round?.replace('_', ' ') || 'Partido'}</p>
-                    <p className="text-xs sm:text-sm font-semibold" style={{ color: accentColor }}>
-                      {new Date(match.scheduled_time!).toLocaleDateString('es-AR', { 
-                        day: 'numeric', 
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-center font-semibold text-sm">{match.team_a?.name || 'TBD'}</p>
-                    <p className="text-center text-white/30 text-xs font-bold">VS</p>
-                    <p className="text-center font-semibold text-sm">{match.team_b?.name || 'TBD'}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

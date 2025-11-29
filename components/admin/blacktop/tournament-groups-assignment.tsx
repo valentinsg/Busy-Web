@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { Users, Shuffle, Save, AlertCircle, Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Team, Tournament } from '@/types/blacktop';
+import { DragDropContext, Draggable, DropResult, Droppable } from '@hello-pangea/dnd';
+import { AlertCircle, Calendar, Save, Shuffle, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface TournamentGroupsAssignmentProps {
   tournament: Tournament;
@@ -21,7 +21,7 @@ export function TournamentGroupsAssignment({ tournament, teams, onSave, onGenera
   const [loading, setLoading] = useState(false);
 
   const approvedTeams = teams.filter(t => t.status === 'approved');
-  const groupNames = Array.from({ length: tournament.num_groups || 2 }).map((_, i) => 
+  const groupNames = Array.from({ length: tournament.num_groups || 2 }).map((_, i) =>
     String.fromCharCode(65 + i)
   );
   const groupLabels = groupNames.map(name => `Zona ${name}`);
@@ -83,7 +83,7 @@ export function TournamentGroupsAssignment({ tournament, teams, onSave, onGenera
   const handleRandomize = () => {
     const shuffled = [...approvedTeams].sort(() => Math.random() - 0.5);
     const teamsPerGroup = Math.ceil(shuffled.length / groupNames.length);
-    
+
     const newGroups: { [key: string]: Team[] } = {};
     groupNames.forEach((name, i) => {
       newGroups[name] = shuffled.slice(i * teamsPerGroup, (i + 1) * teamsPerGroup);
@@ -97,7 +97,7 @@ export function TournamentGroupsAssignment({ tournament, teams, onSave, onGenera
     setLoading(true);
     try {
       const assignments: { teamId: number; groupName: string; position: number }[] = [];
-      
+
       Object.entries(groups).forEach(([groupName, teamsList]) => {
         teamsList.forEach((team, index) => {
           assignments.push({
@@ -169,41 +169,39 @@ export function TournamentGroupsAssignment({ tournament, teams, onSave, onGenera
             </div>
           )}
           <DragDropContext onDragEnd={handleDragEnd}>
-            {/* Equipos sin asignar */}
-            {unassigned.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-sm font-semibold mb-2">Sin Asignar</h3>
-                <Droppable droppableId="unassigned" direction="horizontal">
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={`flex flex-wrap gap-2 min-h-[60px] p-3 rounded-lg border-2 border-dashed transition-colors ${
-                        snapshot.isDraggingOver ? 'border-red-500 bg-red-500/10' : 'border-gray-700'
-                      }`}
-                    >
-                      {unassigned.map((team, index) => (
-                        <Draggable key={team.id} draggableId={`team-${team.id}`} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={`px-3 py-2 bg-background border rounded-lg cursor-move transition-all ${
-                                snapshot.isDragging ? 'shadow-lg scale-105' : ''
-                              }`}
-                            >
-                              <div className="font-medium text-sm">{team.name}</div>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </div>
-            )}
+            {/* Equipos sin asignar (siempre visible para poder sacar equipos de una zona) */}
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold mb-2">Sin Asignar</h3>
+              <Droppable droppableId="unassigned" direction="horizontal">
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`flex flex-wrap gap-2 min-h-[60px] p-3 rounded-lg border-2 border-dashed transition-colors ${
+                      snapshot.isDraggingOver ? 'border-red-500 bg-red-500/10' : 'border-gray-700'
+                    }`}
+                  >
+                    {unassigned.map((team, index) => (
+                      <Draggable key={team.id} draggableId={`team-${team.id}`} index={index}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`px-3 py-2 bg-background border rounded-lg cursor-move transition-all ${
+                              snapshot.isDragging ? 'shadow-lg scale-105' : ''
+                            }`}
+                          >
+                            <div className="font-medium text-sm">{team.name}</div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
 
             {/* Zonas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">

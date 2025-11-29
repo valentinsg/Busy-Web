@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Trophy, Target, TrendingUp, Shield, Zap, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { AlertCircle, Shield, Target, Trophy } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface MatchStatsViewModalProps {
   matchId: number;
@@ -84,7 +84,19 @@ export function MatchStatsViewModal({ matchId, open, onClose }: MatchStatsViewMo
 
   const mvp = getMVP();
   const topScorer = getTopScorer();
-  const winner = data && data.match.team_a_score > data.match.team_b_score ? data.teamA : data.teamB;
+
+  const hasTeamsAndScores =
+    !!data &&
+    !!data.teamA &&
+    !!data.teamB &&
+    typeof data.match.team_a_score === 'number' &&
+    typeof data.match.team_b_score === 'number';
+
+  const winner = hasTeamsAndScores
+    ? data!.match.team_a_score > data!.match.team_b_score
+      ? data!.teamA
+      : data!.teamB
+    : null;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -95,7 +107,7 @@ export function MatchStatsViewModal({ matchId, open, onClose }: MatchStatsViewMo
             <Skeleton className="h-32 w-full" />
             <Skeleton className="h-64 w-full" />
           </div>
-        ) : data ? (
+        ) : data && hasTeamsAndScores ? (
           <div className="space-y-6">
             {/* Header con resultado */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-accent-brand/20 to-purple-600/20 p-8 border border-accent-brand/30">
@@ -298,7 +310,11 @@ export function MatchStatsViewModal({ matchId, open, onClose }: MatchStatsViewMo
         ) : (
           <div className="flex flex-col items-center justify-center py-12">
             <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No se pudieron cargar las estadísticas</p>
+            <p className="text-muted-foreground text-center">
+              Este partido todavía no tiene equipos ni estadísticas definidas.
+              <br />
+              Generá y completá el partido para ver el detalle.
+            </p>
           </div>
         )}
       </DialogContent>

@@ -1,29 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Calendar, 
-  Loader2, 
-  Trophy, 
-  Play, 
-  BarChart3,
-  Zap,
-  CheckCircle2,
-  AlertCircle
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { LiveScorekeeperPro } from './scorekeeper/live-scorekeeper-pro';
-import { ConfirmDialog } from './confirm-dialog';
-import { MatchCard } from './match-card';
-import { FixtureSkeleton, StandingsSkeleton } from './fixture-skeleton';
-import { MatchStatsViewModal } from './match-stats-view-modal';
-import { AdvancePlayoffsDialog } from './advance-playoffs-dialog';
-import type { Tournament, Match, MatchWithTeams, Team, StandingsRow, Group } from '@/types/blacktop';
+import type { Group, Match, MatchWithTeams, StandingsRow, Tournament } from '@/types/blacktop';
+import {
+    AlertCircle,
+    BarChart3,
+    Calendar,
+    CheckCircle2,
+    Trophy,
+    Zap
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { AdvancePlayoffsDialog } from './advance-playoffs-dialog';
+import { ConfirmDialog } from './confirm-dialog';
+import { FixtureSkeleton } from './fixture-skeleton';
+import { MatchCard } from './match-card';
+import { MatchStatsViewModal } from './match-stats-view-modal';
+import { LiveScorekeeperPro } from './scorekeeper/live-scorekeeper-pro';
 
 interface TournamentFixtureV2Props {
   tournamentId: number;
@@ -38,10 +36,11 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupMatches, setGroupMatches] = useState<{ [key: string]: MatchWithTeams[] }>({});
   const [playoffMatches, setPlayoffMatches] = useState<{
+    quarterfinals: MatchWithTeams[];
     semifinals: MatchWithTeams[];
     third_place: MatchWithTeams | null;
     final: MatchWithTeams | null;
-  }>({ semifinals: [], third_place: null, final: null });
+  }>({ quarterfinals: [], semifinals: [], third_place: null, final: null });
   const [standings, setStandings] = useState<{ [key: string]: StandingsRow[] }>({});
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [scorekeeperOpen, setScorekeeperOpen] = useState(false);
@@ -60,17 +59,17 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
       const res = await fetch(`/api/admin/blacktop/tournaments/${tournamentId}/fixtures`);
       if (res.ok) {
         const data = await res.json();
-        
+
         setGroups(data.groups.map((g: any) => g.group));
-        
+
         const matchesByGroup: { [key: string]: MatchWithTeams[] } = {};
         const standingsByGroup: { [key: string]: StandingsRow[] } = {};
-        
+
         data.groups.forEach((g: any) => {
           matchesByGroup[g.group.id] = g.matches;
           standingsByGroup[g.group.id] = g.standings;
         });
-        
+
         setGroupMatches(matchesByGroup);
         setStandings(standingsByGroup);
         setPlayoffMatches(data.playoffs);
@@ -89,22 +88,22 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
         method: 'POST',
         cache: 'no-store'
       });
-      
+
       if (res.ok) {
         const data = await res.json();
-        toast({ 
-          title: '✅ Fixtures generados', 
-          description: `${data.matchesCreated} partidos de grupos creados` 
+        toast({
+          title: '✅ Fixtures generados',
+          description: `${data.matchesCreated} partidos de grupos creados`
         });
         // Refrescar datos (el cache se invalida automáticamente en el servidor)
         await fetchFixtures();
         router.refresh();
       } else {
         const error = await res.json();
-        toast({ 
-          title: 'Error', 
-          description: error.error, 
-          variant: 'destructive' 
+        toast({
+          title: 'Error',
+          description: error.error,
+          variant: 'destructive'
         });
       }
     } catch (error) {
@@ -123,21 +122,21 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
         method: 'POST',
         cache: 'no-store'
       });
-      
+
       if (res.ok) {
         const data = await res.json();
-        toast({ 
-          title: 'Avanzado a playoffs', 
-          description: `${data.playoffMatchesCreated} partidos de playoffs creados` 
+        toast({
+          title: 'Avanzado a playoffs',
+          description: `${data.playoffMatchesCreated} partidos de playoffs creados`
         });
         await fetchFixtures();
         router.refresh();
       } else {
         const error = await res.json();
-        toast({ 
-          title: 'Error', 
-          description: error.error, 
-          variant: 'destructive' 
+        toast({
+          title: 'Error',
+          description: error.error,
+          variant: 'destructive'
         });
       }
     } catch (error) {
@@ -151,13 +150,13 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
 
   const handleSimulatePhase = async () => {
     if (!confirm('¿Simular todos los partidos pendientes de la fase actual?')) return;
-    
+
     setActionLoading(true);
     try {
       const res = await fetch(`/api/admin/blacktop/tournaments/${tournamentId}/simulate-phase`, {
         method: 'POST'
       });
-      
+
       if (res.ok) {
         toast({ title: 'Fase simulada', description: 'Resultados generados automáticamente' });
         await fetchFixtures();
@@ -184,13 +183,13 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
     setStatsModalOpen(true);
   };
 
-  const allGroupsComplete = Object.values(groupMatches).every(matches => 
+  const allGroupsComplete = Object.values(groupMatches).every(matches =>
     matches.every(m => m.status === 'finished')
   );
 
   const totalGroupMatches = Object.values(groupMatches).reduce((sum, matches) => sum + matches.length, 0);
   const finishedGroupMatches = Object.values(groupMatches).reduce(
-    (sum, matches) => sum + matches.filter(m => m.status === 'finished').length, 
+    (sum, matches) => sum + matches.filter(m => m.status === 'finished').length,
     0
   );
 
@@ -211,19 +210,19 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
         <CardContent>
           <div className="flex flex-wrap gap-2">
             {tournament.tournament_status === 'draft' && (
-              <Button 
-                onClick={() => setConfirmGenerateOpen(true)} 
+              <Button
+                onClick={() => setConfirmGenerateOpen(true)}
                 disabled={actionLoading}
               >
                 <Calendar className="h-4 w-4 mr-2" />
                 Generar Fixture de Grupos
               </Button>
             )}
-            
+
             {tournament.tournament_status === 'groups' && (
               <>
-                <Button 
-                  onClick={() => setConfirmPlayoffsOpen(true)} 
+                <Button
+                  onClick={() => setConfirmPlayoffsOpen(true)}
                   disabled={actionLoading || !allGroupsComplete}
                   variant={allGroupsComplete ? 'default' : 'outline'}
                 >
@@ -242,9 +241,9 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
                 )}
               </>
             )}
-            
-            <Button 
-              onClick={handleSimulatePhase} 
+
+            <Button
+              onClick={handleSimulatePhase}
               disabled={actionLoading}
               variant="secondary"
             >
@@ -273,9 +272,9 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
               <CardContent className="space-y-3">
                 {groupMatches[group.id]?.length > 0 ? (
                   groupMatches[group.id].map(match => (
-                    <MatchCard 
-                      key={match.id} 
-                      match={match} 
+                    <MatchCard
+                      key={match.id}
+                      match={match}
                       onManage={openScorekeeper}
                       onViewStats={openStatsModal}
                     />
@@ -292,6 +291,19 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
 
         {/* Playoffs */}
         <TabsContent value="playoffs" className="space-y-4">
+          {playoffMatches.quarterfinals.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Cuartos de Final</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {playoffMatches.quarterfinals.map(match => (
+                  <MatchCard key={match.id} match={match} onManage={openScorekeeper} onViewStats={openStatsModal} />
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
           {playoffMatches.semifinals.length > 0 && (
             <Card>
               <CardHeader>
@@ -327,7 +339,7 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
             </Card>
           )}
 
-          {playoffMatches.semifinals.length === 0 && !playoffMatches.final && (
+          {playoffMatches.quarterfinals.length === 0 && playoffMatches.semifinals.length === 0 && !playoffMatches.final && (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
                 <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -452,6 +464,7 @@ export function TournamentFixtureV2({ tournamentId, tournament }: TournamentFixt
         groupsComplete={allGroupsComplete}
         totalMatches={totalGroupMatches}
         finishedMatches={finishedGroupMatches}
+        thirdPlaceEnabled={tournament.third_place_match}
       />
     </div>
   );
