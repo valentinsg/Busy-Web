@@ -40,12 +40,12 @@ function optimizeMatchOrder(allGroupMatches: Array<{ groupId: number; groupName:
         const [teamA, teamB] = match;
         const lastA = lastPlayedIndex.get(teamA) ?? -1000;
         const lastB = lastPlayedIndex.get(teamB) ?? -1000;
-        
+
         // Score: cuanto mayor, mejor (más tiempo sin jugar)
         const gapA = globalIndex - lastA;
         const gapB = globalIndex - lastB;
         const score = Math.min(gapA, gapB); // Priorizamos el equipo que jugó más recientemente
-        
+
         if (!bestMatch || score > bestMatch.score) {
           bestMatch = { groupIdx, matchIdx, score };
         }
@@ -58,7 +58,7 @@ function optimizeMatchOrder(allGroupMatches: Array<{ groupId: number; groupName:
     const { groupIdx, matchIdx } = bestMatch;
     const selectedGroup = pendingByGroup[groupIdx];
     const [teamA, teamB] = selectedGroup.pending[matchIdx];
-    
+
     orderedMatches.push({
       groupId: selectedGroup.groupId,
       groupName: selectedGroup.groupName,
@@ -80,18 +80,20 @@ function optimizeMatchOrder(allGroupMatches: Array<{ groupId: number; groupName:
 
 export async function generateGroupsFixtures(tournamentId: number): Promise<Match[]> {
   const supabase = getServiceClient();
-  
+
   const { data: groups } = await supabase
     .from('groups')
     .select('*')
     .eq('tournament_id', tournamentId)
     .order('order_index', { ascending: true });
-  
-  if (!groups || groups.length === 0) throw new Error('No hay grupos configurados');
-  
+
+  if (!groups || groups.length === 0) {
+    throw new Error('No hay grupos configurados para este torneo. Configura las zonas en el Admin antes de generar el fixture.');
+  }
+
   // 1. Generar todos los enfrentamientos por grupo
   const allGroupMatches: Array<{ groupId: number; groupName: string; matches: Array<[number, number]> }> = [];
-  
+
   for (const group of groups) {
     const { data: teams } = await supabase
       .from('teams')
@@ -99,9 +101,16 @@ export async function generateGroupsFixtures(tournamentId: number): Promise<Matc
       .eq('tournament_id', tournamentId)
       .eq('group_id', group.id)
       .eq('status', 'approved');
-    
-    if (!teams || teams.length === 0) continue;
-    
+
+    if (!teams || teams.length === 0) {
+      // Grupo sin equipos aprobados: lo saltamos pero dejamos un mensaje claro para debugging
+      console.warn?.(
+        '[BLACKTOP] Grupo sin equipos aprobados al generar fixture',
+        { tournamentId, groupId: group.id, groupName: group.name }
+      );
+      continue;
+    }
+
     const matches = generateRoundRobinMatches(teams);
     allGroupMatches.push({
       groupId: group.id,
@@ -109,10 +118,10 @@ export async function generateGroupsFixtures(tournamentId: number): Promise<Matc
       matches
     });
   }
-  
+
   // 2. Optimizar orden de partidos
   const optimizedMatches = optimizeMatchOrder(allGroupMatches);
-  
+
   // 3. Crear objetos de partido
   const matches = optimizedMatches.map((m, idx) => ({
     tournament_id: tournamentId,
@@ -128,14 +137,14 @@ export async function generateGroupsFixtures(tournamentId: number): Promise<Matc
     fouls_a: 0,
     fouls_b: 0,
   }));
-  
+
   // 4. BORRAR TODOS LOS PARTIDOS DEL TORNEO (no solo grupos)
   await supabase.from('matches').delete().eq('tournament_id', tournamentId);
-  
+
   // 5. Insertar nuevos partidos
   const { data: insertedMatches, error } = await supabase.from('matches').insert(matches).select();
-  
+
   if (error) throw new Error(`Error al generar partidos: ${error.message}`);
-  
+
   return insertedMatches || [];
 }

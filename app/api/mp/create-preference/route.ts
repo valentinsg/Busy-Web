@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server"
-import getServiceClient from "@/lib/supabase/server"
-import { getPreferenceClient } from "@/lib/mp/client"
-import { calcOrderTotals } from "@/lib/checkout/totals"
-import { getSettingsServer } from "@/lib/repo/settings"
 import { validateCouponPercent } from "@/lib/checkout/coupons"
 import { logError, logInfo } from "@/lib/checkout/logger"
+import { calcOrderTotals } from "@/lib/checkout/totals"
+import { getPreferenceClient } from "@/lib/mp/client"
+import { getSettingsServer } from "@/lib/repo/settings"
+import getServiceClient from "@/lib/supabase/server"
+import { NextRequest, NextResponse } from "next/server"
 import crypto from "node:crypto"
 
 const BASE_URL = process.env.BASE_URL || process.env.SITE_URL
@@ -74,15 +74,14 @@ export async function POST(req: NextRequest) {
     const discount_percent = await validateCouponPercent(body.coupon_code)
 
     // Load store settings (shipping)
-    const settings = await getSettingsServer().catch(() => ({ shipping_flat_rate: 25000, shipping_free_threshold: 100000 }))
+    const settings = await getSettingsServer().catch(() => ({ shipping_flat_rate: 8000, shipping_free_threshold: 100000 }))
 
     // Totals
     const totals = calcOrderTotals({
       items: itemsDetailed.map((i) => ({ unit_price: i.unit_price, quantity: i.quantity })),
-      // If client didn't provide shipping, let server rule compute it
       shipping_cost: body.shipping_cost ?? undefined,
       shipping_rule: {
-        flat_rate: Number(settings.shipping_flat_rate ?? 25000),
+        flat_rate: Number(settings.shipping_flat_rate ?? 8000),
         free_threshold: Number(settings.shipping_free_threshold ?? 100000),
       },
       discount_percent: discount_percent ?? null,
@@ -129,46 +128,55 @@ export async function POST(req: NextRequest) {
     // In dev, allow configuring via MP_BINARY_MODE (default true)
     const binaryMode = IS_PROD ? false : String(process.env.MP_BINARY_MODE ?? "true").toLowerCase() !== "false"
 
-    const preference = await pref.create({
-      body: {
-        items: [
-          ...itemsDetailed.map((i) => ({
-            id: i.product_id,
-            title: i.title,
-            quantity: i.quantity,
-            unit_price: Number(i.unit_price.toFixed(2)),
-            currency_id: CURRENCY,
-            picture_url: i.picture_url,
-          })),
-          ...(totals.shipping_cost > 0
-            ? [{ id: "shipping", title: "Envío", quantity: 1, unit_price: Number(totals.shipping_cost.toFixed(2)), currency_id: CURRENCY }]
-            : []),
-          ...(totals.tax > 0
-            ? [{ id: "online_tax", title: "Impuesto online (10%)", quantity: 1, unit_price: Number(totals.tax.toFixed(2)), currency_id: CURRENCY }]
-            : []),
-        ],
-        // If binary_mode is true, MP will reject payments that need manual review.
-        // Allow configuring it via env to reduce security rejections in production.
-        binary_mode: binaryMode,
-        auto_return: "approved",
-        external_reference: session_id,
-        back_urls: {
-          success: `${BASE_URL}/order?session_id=${session_id}`,
-          failure: `${BASE_URL}/order?session_id=${session_id}`,
-          pending: `${BASE_URL}/order?session_id=${session_id}`,
-        },
-        notification_url: `${BASE_URL}/api/mp/webhook?token=${encodeURIComponent(process.env.MP_WEBHOOK_SECRET_TOKEN || "")}`,
-        payer,
-        metadata: {
-          session_id,
-          items: itemsDetailed.map((i) => ({ product_id: i.product_id, quantity: i.quantity, variant_size: i.variant_size })),
-          coupon_code: body.coupon_code ?? null,
-          shipping_cost: totals.shipping_cost,
-          totals,
-          customer: body.customer ?? null,
-          newsletter_opt_in: !!body.newsletter_opt_in,
-        },
+    const mpPayload = {
+      items: [
+        ...itemsDetailed.map((i) => ({
+          id: i.product_id,
+          title: i.variant_size ? `${i.title} - Talle ${i.variant_size}` : i.title,
+          description: i.variant_size ? `Producto: ${i.title} / Talle: ${i.variant_size}` : `Producto: ${i.title}`,
+          quantity: i.quantity,
+          unit_price: Number(i.unit_price.toFixed(2)),
+          currency_id: CURRENCY,
+          picture_url: i.picture_url,
+        })),
+        ...(totals.shipping_cost > 0
+          ? [{ id: "shipping", title: "Envío", quantity: 1, unit_price: Number(totals.shipping_cost.toFixed(2)), currency_id: CURRENCY }]
+          : []),
+        ...(totals.tax > 0
+          ? [{ id: "online_tax", title: "Impuesto online (10%)", quantity: 1, unit_price: Number(totals.tax.toFixed(2)), currency_id: CURRENCY }]
+          : []),
+      ],
+      binary_mode: binaryMode,
+      auto_return: "approved" as const,
+      external_reference: session_id,
+      back_urls: {
+        success: `${BASE_URL}/order?session_id=${session_id}`,
+        failure: `${BASE_URL}/order?session_id=${session_id}`,
+        pending: `${BASE_URL}/order?session_id=${session_id}`,
       },
+      notification_url: `${BASE_URL}/api/mp/webhook?token=${encodeURIComponent(process.env.MP_WEBHOOK_SECRET_TOKEN || "")}`,
+      payer,
+      metadata: {
+        session_id,
+        items: itemsDetailed.map((i) => ({ product_id: i.product_id, quantity: i.quantity, variant_size: i.variant_size })),
+        coupon_code: body.coupon_code ?? null,
+        shipping_cost: totals.shipping_cost,
+        totals,
+        customer: body.customer ?? null,
+        newsletter_opt_in: !!body.newsletter_opt_in,
+      },
+    }
+
+    logInfo("Creating MP preference", {
+      session_id,
+      items: mpPayload.items,
+      shipping_cost: totals.shipping_cost,
+      tax: totals.tax,
+      totals,
+    })
+
+    const preference = await pref.create({
+      body: mpPayload,
     })
 
     // Only use production init_point; avoid sandbox fallback

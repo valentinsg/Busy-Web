@@ -1,7 +1,7 @@
 "use client"
-import { useState } from "react"
 import { useCart } from "@/hooks/use-cart"
 import type { CartItemInput } from "@/lib/checkout/types"
+import { useState } from "react"
 
 export default function PayWithMercadoPago(props: {
   items: CartItemInput[]
@@ -36,8 +36,7 @@ export default function PayWithMercadoPago(props: {
         body: JSON.stringify({
           items: props.items,
           coupon_code: props.couponCode ?? null,
-          // Let server compute shipping based on authoritative rule
-          shipping_cost: null,
+          shipping_cost: props.shippingCost ?? null,
           customer: props.customer ?? null,
           newsletter_opt_in: !!props.newsletterOptIn,
         }),
@@ -50,10 +49,10 @@ export default function PayWithMercadoPago(props: {
       if (data.order_id) {
         try { window.sessionStorage.setItem("mp_session_id", data.order_id) } catch {}
       }
-      
+
       // Limpiar el carrito antes de redirigir a Mercado Pago
       clearCart()
-      
+
       if (data.init_point) {
         window.location.href = data.init_point
       } else {
@@ -68,9 +67,9 @@ export default function PayWithMercadoPago(props: {
 
   return (
     <div>
-      <button 
-        onClick={handlePay} 
-        disabled={loading || props.disabled} 
+      <button
+        onClick={handlePay}
+        disabled={loading || props.disabled}
         className="w-full inline-flex items-center justify-center rounded-lg bg-black px-4 py-3 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/90 transition-colors"
       >
         {loading ? "Redirigiendo..." : props.buttonText ?? "Pagar con Mercado Pago"}

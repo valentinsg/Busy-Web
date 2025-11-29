@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { TournamentFormatConfig } from './tournament-format-config';
-import { TournamentGroupsAssignment } from './tournament-groups-assignment';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import type { Tournament, Team } from '@/types/blacktop';
+import type { Team, Tournament } from '@/types/blacktop';
+import { useEffect, useState } from 'react';
+import { TournamentFormatConfig } from './tournament-format-config';
+import { TournamentGroupsAssignment } from './tournament-groups-assignment';
 
 interface TournamentFormatTabProps {
   tournamentId: number;
@@ -78,19 +78,16 @@ export function TournamentFormatTab({ tournamentId }: TournamentFormatTabProps) 
 
   const handleSaveGroups = async (assignments: { teamId: number; groupName: string; position: number }[]) => {
     try {
-      // Update each team with its group assignment
-      await Promise.all(
-        assignments.map((assignment) =>
-          fetch(`/api/blacktop/teams/${assignment.teamId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              group_name: assignment.groupName,
-              group_position: assignment.position,
-            }),
-          })
-        )
-      );
+      const response = await fetch(`/api/admin/blacktop/tournaments/${tournamentId}/assign-groups`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assignments }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al asignar grupos');
+      }
 
       toast({
         title: 'Zonas guardadas',

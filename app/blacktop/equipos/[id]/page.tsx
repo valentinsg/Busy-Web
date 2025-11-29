@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+ import { Button } from '@/components/ui/button';
 import { getTeamById } from '@/lib/repo/blacktop';
 import { ArrowLeft, Instagram, Trophy, Target, Users, ChevronRight } from 'lucide-react';
 import { getServiceClient } from '@/lib/supabase/server';
