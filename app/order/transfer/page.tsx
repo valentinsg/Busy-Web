@@ -1,18 +1,18 @@
 "use client"
 
-import * as React from "react"
-import { useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { CheckCircle2, Copy, ArrowLeft, Mail, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { formatPrice } from "@/lib/format"
+import { ArrowLeft, CheckCircle2, Copy, Mail, MessageCircle } from "lucide-react"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import * as React from "react"
 
 export default function TransferConfirmationPage() {
   const searchParams = useSearchParams()
-  const orderId = searchParams.get("order_id")
+  const orderId = searchParams?.get("order_id") || ''
   const { toast } = useToast()
   const [orderData, setOrderData] = React.useState<{
     total: number
@@ -35,7 +35,7 @@ export default function TransferConfirmationPage() {
     }
 
     // Obtener el total de la URL
-    const totalParam = searchParams.get("total")
+    const totalParam = searchParams?.get("total")
     const total = totalParam ? parseFloat(totalParam) : 0
 
     setOrderData({
@@ -164,7 +164,7 @@ export default function TransferConfirmationPage() {
                   Si tenés alguna consulta sobre tu pedido o la transferencia, contactanos por WhatsApp y te ayudamos al instante.
                 </p>
               </div>
-              
+
               <div className="space-y-2 text-sm text-muted-foreground">
                 <p className="font-medium text-foreground">Importante:</p>
                 <ul className="list-disc list-inside space-y-1">
@@ -187,15 +187,15 @@ export default function TransferConfirmationPage() {
             <p className="text-sm text-muted-foreground">
               Incluí el número de orden <span className="font-mono font-semibold">#{orderId.slice(0, 8).toUpperCase()}</span> y el comprobante de transferencia
             </p>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Button 
-                asChild 
+              <Button
+                asChild
                 className="w-full h-auto py-4 flex flex-col items-center gap-2"
                 variant="default"
               >
-                <a 
-                  href={`https://wa.me/5492236680041?text=Hola! Realicé una transferencia para la orden ${orderId.slice(0, 8).toUpperCase()}`}
+                <a
+                  href={`https://wa.me/5492236825268?text=Hola! Realicé una transferencia para la orden ${orderId.slice(0, 8).toUpperCase()}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -203,13 +203,13 @@ export default function TransferConfirmationPage() {
                   <span className="text-sm font-medium">WhatsApp</span>
                 </a>
               </Button>
-              
-              <Button 
-                asChild 
+
+              <Button
+                asChild
                 variant="outline"
                 className="w-full h-auto py-4 flex flex-col items-center gap-2"
               >
-                <a 
+                <a
                   href={`mailto:busy.streetwear@gmail.com?subject=Comprobante de transferencia - Orden ${orderId.slice(0, 8).toUpperCase()}&body=Hola! Adjunto el comprobante de transferencia para la orden ${orderId.slice(0, 8).toUpperCase()}.`}
                 >
                   <Mail className="h-5 w-5" />

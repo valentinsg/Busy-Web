@@ -98,7 +98,7 @@ export default function ReturnsPolicy() {
 
             <div className="mt-6 flex flex-wrap gap-4">
               <Button asChild variant="outline" className="gap-2">
-                <a href="https://wa.me/542236680041" target="_blank" rel="noopener noreferrer">
+                <a href="https://wa.me/5492236825268" target="_blank" rel="noopener noreferrer">
                   <MessageSquare className="h-4 w-4" />
                   WhatsApp
                 </a>

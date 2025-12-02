@@ -1,15 +1,15 @@
 "use client"
 
-import * as React from "react"
-import { MapPin, Phone, Mail, Clock } from "lucide-react"
+import { useI18n } from "@/components/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { useI18n } from "@/components/i18n-provider"
+import { Clock, Mail, MapPin, Phone } from "lucide-react"
+import * as React from "react"
 
 export default function ContactPage() {
   const { toast } = useToast()
@@ -93,8 +93,8 @@ export default function ContactPage() {
                   <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <div className="font-medium">Teléfono / WhatsApp</div>
-                    <a href="https://wa.me/5492236680041" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-accent-brand hover:underline">
-                      +54 9 223 668-0041
+                    <a href="https://wa.me/5492236825268" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-accent-brand hover:underline">
+                      +54 9 223 682-5268
                     </a>
                   </div>
                 </div>

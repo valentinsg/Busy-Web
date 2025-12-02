@@ -36,6 +36,7 @@ const footerSections = (t: (k: string) => string) => ({
       { nameKey: "footer.sections.support.links.contact", href: "/contact" },
       { nameKey: "footer.sections.support.links.size_guide", href: "/faq#size-guide" },
       { nameKey: "Calculadora de Talle", href: "/size-calculator" },
+      { nameKey: "Cambios y Devoluciones", href: "/legal/returns" },
       { nameKey: "Nuestros Productos", href: "/products" },
     ],
   },
@@ -155,7 +156,7 @@ export function Footer() {
                 {key === 'social' && (
                   <li className="sm:hidden">
                     <Link
-                      href="https://wa.me/5492236680041"
+                      href="https://wa.me/5492236825268"
                       target="_blank"
                       prefetch={false}
                       className="font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -183,7 +184,7 @@ export function Footer() {
               {t("footer.bottom.cookies")}
             </Link>
             {/* WhatsApp en desktop */}
-            <Link href="https://wa.me/5492236680041" target="_blank" prefetch={false} className="hidden sm:inline font-body hover:text-foreground transition-colors">
+            <Link href="https://wa.me/5492236825268" target="_blank" prefetch={false} className="hidden sm:inline font-body hover:text-foreground transition-colors">
               Soporte por WhatsApp
             </Link>
           </div>
