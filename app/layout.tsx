@@ -1,9 +1,10 @@
+import RouteTracker from '@/components/analytics/route-tracker'
 import { SplashGate } from '@/components/home/splash-gate'
 import { I18nProvider } from '@/components/i18n-provider'
 import { HtmlLang } from '@/components/layout/html-lang'
 import SiteFrame from '@/components/layout/site-frame'
-import SitePopover from '@/components/site-popover'
 import { PromotionsProvider } from '@/components/promotions-provider'
+import SitePopover from '@/components/site-popover'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 import { generateSEO } from '@/lib/seo'
@@ -12,11 +13,10 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
 import dynamic from 'next/dynamic'
-import { Space_Grotesk, Plus_Jakarta_Sans, Abel, DM_Sans, Poppins } from 'next/font/google'
+import { Abel, DM_Sans, Plus_Jakarta_Sans, Poppins, Space_Grotesk } from 'next/font/google'
 import { cookies } from 'next/headers'
-import type React from 'react'
 import Script from 'next/script'
-import RouteTracker from '@/components/analytics/route-tracker'
+import type React from 'react'
 import './globals.css'
 
 // Ensure we always have a valid absolute URL (with scheme) for metadataBase and JSON-LD
@@ -352,6 +352,9 @@ export default function RootLayout({
   return (
     <html lang={htmlLang} suppressHydrationWarning className="dark">
       <head>
+        {/* Google Site Verification */}
+        <meta name="google-site-verification" content="ozNbxcPGbF1jmIx5QHcWduHhaPUkzDAqFziJ2POUpIk" />
+
         {/* Preconnect a Supabase Storage para mejorar LCP */}
         <link rel="preconnect" href="https://wbqbupxoyzczwroqzklj.supabase.co" />
         <link rel="dns-prefetch" href="https://wbqbupxoyzczwroqzklj.supabase.co" />
