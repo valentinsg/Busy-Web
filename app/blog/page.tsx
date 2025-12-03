@@ -9,9 +9,9 @@ export function generateMetadata(): Metadata {
   const ogImage = `${siteUrlStr}/busy-streetwear.png`
 
   return {
-    title: 'Blog Busy | Cultura, Cine, Arte y Streetwear',
+      title: 'Cultura, Deporte y Streetwear',
     description:
-      'Artículos sobre cultura urbana, cine, moda y lifestyle. Contenido editorial curado por Busy Streetwear: guías de estilo, tendencias, cuidado de ropa y conversaciones reales. Busy Talks en desarrollo.',
+      'Artículos sobre cultura urbana, moda y lifestyle. Contenido editorial curado por Busy Streetwear: guías de estilo, tendencias, cuidado de ropa y conversaciones reales. Busy Talks en desarrollo.',
     keywords: [
       'blog cultura urbana',
       'busy talks',
@@ -41,22 +41,22 @@ export function generateMetadata(): Metadata {
       locale: 'es_AR',
       url: canonical,
       siteName: 'Busy Streetwear',
-      title: 'Blog Busy | Cultura, Cine, Arte y Streetwear',
+      title: 'Cultura, Deporte y Streetwear',
       description:
-        'Contenido editorial sobre cultura urbana, cine, moda y lifestyle. Artículos curados por Busy Streetwear. Conversaciones reales, sin frases motivacionales vacías.',
+        'Contenido editorial sobre cultura urbana, moda y lifestyle. Artículos curados por Busy Streetwear',
       images: [
         {
           url: ogImage,
           width: 1200,
           height: 630,
-          alt: 'Blog Busy - Cultura Urbana y Streetwear',
+          alt: 'Cultura, Deporte y Streetwear',
         },
       ],
     },
 
     twitter: {
       card: 'summary_large_image',
-      title: 'Blog de Busy: Streetwear y Moda',
+      title: 'Cultura, Deporte y Streetwear',
       description: 'Descubrí guías útiles relacionadas con la moda, tendencias del streetwear y contenido relacionado a la cultura urbana. Todos los articulos están curados por Busy.',
       images: [ogImage],
     },
