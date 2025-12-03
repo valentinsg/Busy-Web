@@ -172,6 +172,7 @@ export default async function BlogPage() {
         // JSON-LD consolidado (WebSite + Blog + Breadcrumb + ItemList)
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
       <BlogClient allPosts={allPosts} latestPost={latestPost} featuredProducts={featuredProducts} />
     </>
   )
