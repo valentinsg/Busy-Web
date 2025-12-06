@@ -1,25 +1,25 @@
 "use client"
 
-import * as React from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { ArrowLeft, CreditCard, Mail } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { useCart } from "@/hooks/use-cart"
-import { formatPrice, capitalize } from "@/lib/format"
-import { computeShipping, computeTax } from "@/lib/checkout/totals"
-import { getSettingsClient } from "@/lib/repo/settings"
-import { useI18n } from "@/components/i18n-provider"
-import { useToast } from "@/hooks/use-toast"
 import PayWithMercadoPago from "@/components/checkout/pay-with-mercadopago"
 import PayWithTransfer from "@/components/checkout/pay-with-transfer"
+import { useI18n } from "@/components/i18n-provider"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Separator } from "@/components/ui/separator"
+import { useCart } from "@/hooks/use-cart"
+import { useToast } from "@/hooks/use-toast"
 import { trackBeginCheckout } from "@/lib/analytics/ecommerce"
+import { computeShipping, computeTax } from "@/lib/checkout/totals"
+import { capitalize, formatPrice } from "@/lib/format"
+import { getSettingsClient } from "@/lib/repo/settings"
+import { ArrowLeft, CreditCard, Mail } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import * as React from "react"
 
 export default function CheckoutPage() {
   const { items, getTotalItems, getSubtotal, getPromoDiscount, getAppliedPromos, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon } = useCart()
@@ -72,7 +72,7 @@ export default function CheckoutPage() {
     free_threshold: freeThreshold,
   })
   // Tax only applies to card payments (Mercado Pago), not to bank transfers
-  const estimatedTax = paymentMethod === "card" 
+  const estimatedTax = paymentMethod === "card"
     ? computeTax(Number((discountedSubtotal + estimatedShipping).toFixed(2)))
     : 0
   const finalTotal = discountedSubtotal + estimatedShipping + estimatedTax
@@ -267,11 +267,11 @@ export default function CheckoutPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as "card" | "transfer")}>
-                  <Label 
-                    htmlFor="card" 
+                  <Label
+                    htmlFor="card"
                     className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      paymentMethod === "card" 
-                        ? "border-primary bg-primary/5" 
+                      paymentMethod === "card"
+                        ? "border-primary bg-primary/5"
                         : "border-border hover:bg-muted/50"
                     }`}
                   >
@@ -283,11 +283,11 @@ export default function CheckoutPage() {
                     </div>
                   </Label>
 
-                  <Label 
-                    htmlFor="transfer" 
+                  <Label
+                    htmlFor="transfer"
                     className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      paymentMethod === "transfer" 
-                        ? "border-primary bg-primary/5" 
+                      paymentMethod === "transfer"
+                        ? "border-primary bg-primary/5"
                         : "border-border hover:bg-muted/50"
                     }`}
                   >
@@ -401,7 +401,7 @@ export default function CheckoutPage() {
                     <span>{t("checkout.summary.subtotal_items").replace("{count}", String(totalItems))}</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
-                  
+
                   {/* Promociones aplicadas */}
                   {promoDiscount > 0 && (
                     <div className="space-y-1">
@@ -418,7 +418,7 @@ export default function CheckoutPage() {
                       ))}
                     </div>
                   )}
-                  
+
                   {/* Descuento de cupón */}
                   {coupon && discount > promoDiscount && (
                     <div className="flex justify-between text-green-600 dark:text-green-400">
@@ -426,7 +426,7 @@ export default function CheckoutPage() {
                       <span>-{formatPrice(discount - promoDiscount)}</span>
                     </div>
                   )}
-                  
+
                   {discount > 0 && (
                     <div className="flex justify-between font-medium">
                       <span>{t("cart.subtotal_after_discount")}</span>
@@ -437,6 +437,12 @@ export default function CheckoutPage() {
                     <span>{t("checkout.summary.shipping")}</span>
                     <span>{estimatedShipping === 0 ? t("cart.shipping_free") : formatPrice(estimatedShipping)}</span>
                   </div>
+                  {/* Free shipping progress message */}
+                  {estimatedShipping > 0 && discountedSubtotal < freeThreshold && (
+                    <div className="text-xs text-amber-500 dark:text-amber-400 bg-amber-500/10 rounded-md px-3 py-2">
+                      ¡Te faltan <span className="font-semibold">{formatPrice(freeThreshold - discountedSubtotal)}</span> para envío gratis!
+                    </div>
+                  )}
                   {paymentMethod === "card" && estimatedTax > 0 && (
                     <div className="flex justify-between">
                       <span>Impuesto online (10%)</span>

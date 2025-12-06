@@ -75,8 +75,8 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
 
   return (
     <>
-      <SidebarContent className="gap-0 py-0 relative overflow-y-auto bg-black">
-      <div className="relative z-10 px-2 py-3 pb-6">
+      <SidebarContent className="gap-0 py-0 relative overflow-y-auto bg-black scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+      <div className="relative z-10 px-2 py-3 pb-24 md:pb-6">
       {/* Dashboard - siempre visible */}
       <SidebarGroup className="py-0 px-0">
         <SidebarGroupContent>

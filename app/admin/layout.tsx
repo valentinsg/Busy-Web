@@ -1,22 +1,22 @@
 "use client"
 
+import { AdminHeader } from "@/components/admin/admin-header"
 import AdminLayoutGuard from "@/components/admin/admin-layout-guard"
 import AdminSidebarMenu from "@/components/admin/admin-sidebar-menu"
-import { AdminHeader } from "@/components/admin/admin-header"
 import {
-  Sidebar,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarInset,
-  SidebarProvider,
-  SidebarRail,
-  SidebarTrigger,
-  useSidebar
+    Sidebar,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarInset,
+    SidebarProvider,
+    SidebarRail,
+    SidebarTrigger,
+    useSidebar
 } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { ChevronsUpDown } from "lucide-react"
-import React, { useState } from "react"
 import { usePathname } from "next/navigation"
+import React, { useState } from "react"
 
 export const dynamic = "force-dynamic"
 
@@ -77,12 +77,12 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarInset className="overflow-x-hidden">
         {/* Mobile header con trigger */}
-        <div className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-3 sm:px-4 md:hidden">
-          <SidebarTrigger className="h-8 w-8" />
-          <span className="font-heading text-sm font-semibold">Admin</span>
-          <div className="ml-auto">
-            <AdminHeader />
+        <div className="sticky top-0 z-20 flex h-12 items-center gap-3 border-b border-white/10 bg-black/95 backdrop-blur-md px-4 md:hidden">
+          <SidebarTrigger className="h-9 w-9 rounded-lg bg-white/5 hover:bg-white/10 transition-colors" />
+          <div className="flex-1 min-w-0">
+            <span className="font-heading text-sm font-bold tracking-wider text-white">BUSY ADMIN</span>
           </div>
+          <AdminHeader />
         </div>
 
         {/* Desktop header con notificaciones */}
@@ -97,7 +97,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             className="pointer-events-none fixed inset-0 opacity-[0.25] bg-repeat"
             style={{ backgroundImage: "url(/pattern-black.jpg)" }}
           />
-          <div className="relative container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:pt-8 font-body">
+          <div className="relative container mx-auto px-4 sm:px-5 md:px-6 py-4 pb-20 sm:py-6 md:pt-8 font-body">
             {children}
           </div>
         </div>

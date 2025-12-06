@@ -386,6 +386,19 @@ export class ArchiveService {
     return data;
   }
 
+  async decrementLikes(id: string): Promise<number> {
+    const { data, error } = await this.supabase.rpc('decrement_likes', {
+      entry_id: id,
+    });
+
+    if (error) {
+      console.error('Error decrementing likes:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
   // Recommendations - fallback to simple query if RPC fails
   async getRecommendations(
     entryId: string,
@@ -534,21 +547,24 @@ export async function getRecommendedEntries(
   return recommendations.map((r: any) => r.entry || r as ArchiveEntry).filter(Boolean);
 }
 
-// Make supabase instance available for helper functions
+// Singleton supabase client for helper functions (avoid creating new clients)
+let _helperClient: ReturnType<typeof createClient<any>> | null = null;
+
 const getSupabaseClient = () => {
-  // Use a loosely typed client here to allow access to the custom 'archive' schema
-  // without fighting the generated Database types.
-  return createClient<any>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-        detectSessionInUrl: false,
-      },
-    }
-  );
+  if (!_helperClient) {
+    _helperClient = createClient<any>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+          detectSessionInUrl: false,
+        },
+      }
+    );
+  }
+  return _helperClient;
 };
 
 export async function getUniquePlaces(): Promise<string[]> {

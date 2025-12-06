@@ -178,12 +178,12 @@ export async function POST(req: NextRequest) {
       let order_total = typeof metaTotals?.order_total === 'number' ? Number(metaTotals.order_total) : 0
 
       if (!metaTotals || !items_total || order_total <= 0) {
-        const settings = await getSettingsServer().catch(() => ({ shipping_flat_rate: 8000, shipping_free_threshold: 100000 }))
+        const settings = await getSettingsServer().catch(() => ({ shipping_flat_rate: 25000, shipping_free_threshold: 100000, christmas_mode: false }))
         items_total = detailed.reduce((acc, i) => acc + i.unit_price * i.quantity, 0)
         const customerCity = toStr(getPath(metadata, ['customer', 'city'])) || ''
         const isMarDelPlata = customerCity.trim().toLowerCase().includes('mar del plata')
         shipping_cost = computeShipping(items_total, {
-          flat_rate: isMarDelPlata ? 10000 : Number(settings.shipping_flat_rate ?? 8000),
+          flat_rate: isMarDelPlata ? 10000 : Number(settings.shipping_flat_rate ?? 25000),
           free_threshold: Number(settings.shipping_free_threshold ?? 100000),
         })
         const coupon_code = (metaObj?.coupon_code ?? null) as string | null

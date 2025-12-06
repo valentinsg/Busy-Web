@@ -1,7 +1,10 @@
+import { assertAdmin } from "@/app/api/admin/_utils"
 import { NextRequest, NextResponse } from "next/server"
-import getServiceClient from "@/lib/supabase/server"
 
 export async function POST(req: NextRequest) {
+  const auth = await assertAdmin(req)
+  if (!auth.ok) return auth.res
+
   try {
     const body = await req.json()
     const { order_id } = body
@@ -10,9 +13,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "order_id is required" }, { status: 400 })
     }
 
-    const supabase = getServiceClient()
+    const supabase = auth.svc
 
-    // Get order details before deleting (to restore stock)
+    // Get order details to check if we need to restore stock
+    const { data: order, error: orderErr } = await supabase
+      .from("orders")
+      .select("status")
+      .eq("id", order_id)
+      .single()
+
+    if (orderErr) throw orderErr
+
+    // Get order items
     const { data: orderItems, error: itemsErr } = await supabase
       .from("order_items")
       .select("product_id, variant_size, quantity")
@@ -20,8 +32,9 @@ export async function POST(req: NextRequest) {
 
     if (itemsErr) throw itemsErr
 
-    // Restore stock for rejected items
-    if (orderItems && orderItems.length > 0) {
+    // Only restore stock if order was already paid (stock was decremented)
+    // Pending transfers don't have stock decremented, so no need to restore
+    if (order?.status === "paid" && orderItems && orderItems.length > 0) {
       for (const item of orderItems) {
         // Increment stock back
         const stockResult = await supabase.rpc("increment_product_stock", {
@@ -29,7 +42,7 @@ export async function POST(req: NextRequest) {
           p_size: item.variant_size ?? null,
           p_qty: item.quantity,
         })
-        
+
         if (stockResult.error) {
           console.error("Failed to restore stock:", stockResult.error)
           // Continue even if stock restoration fails
@@ -61,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     console.log(`Order ${order_id} deleted successfully. Rows affected: ${count}`)
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       message: "Order rejected and deleted successfully",
       deleted: true

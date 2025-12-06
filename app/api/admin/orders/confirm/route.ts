@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import getServiceClient from "@/lib/supabase/server"
+import { assertAdmin } from "../../_utils"
 
 // Helper to parse customer info from notes
 function parseCustomerFromNotes(notes: string | null): {
@@ -10,13 +10,13 @@ function parseCustomerFromNotes(notes: string | null): {
   address: string | null
 } {
   if (!notes) return { full_name: null, email: null, phone: null, dni: null, address: null }
-  
+
   const emailMatch = notes.match(/Email:\s*([^\s,]+@[^\s,]+)/i)
   const phoneMatch = notes.match(/Tel:\s*([0-9]+)/i)
   const dniMatch = notes.match(/DNI:\s*([0-9]+)/i)
   const nameMatch = notes.match(/Cliente:\s*([^,\.]+)/i)
   const addressMatch = notes.match(/Dirección:\s*([^,]+(?:,[^,]+)*)/i)
-  
+
   return {
     full_name: nameMatch ? nameMatch[1].trim() : null,
     email: emailMatch ? emailMatch[1].trim() : null,
@@ -27,6 +27,9 @@ function parseCustomerFromNotes(notes: string | null): {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await assertAdmin(req)
+  if (!auth.ok) return auth.res
+
   try {
     const body = await req.json()
     const { order_id } = body
@@ -35,7 +38,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "order_id is required" }, { status: 400 })
     }
 
-    const supabase = getServiceClient()
+    const supabase = auth.svc
 
     // Get order details
     const { data: order, error: orderErr } = await supabase
@@ -55,14 +58,14 @@ export async function POST(req: NextRequest) {
 
     // Parse customer info from notes
     const customerInfo = parseCustomerFromNotes(order.notes)
-    
+
     let customerId = order.customer_id
 
     // If no customer_id, try to find or create customer
     if (!customerId && (customerInfo.email || customerInfo.phone)) {
       // Try to find existing customer by email or phone
       let existingCustomer = null
-      
+
       if (customerInfo.email) {
         const { data } = await supabase
           .from("customers")
@@ -71,7 +74,7 @@ export async function POST(req: NextRequest) {
           .single()
         existingCustomer = data
       }
-      
+
       if (!existingCustomer && customerInfo.phone) {
         const { data } = await supabase
           .from("customers")
@@ -106,12 +109,41 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Get order items to decrement stock
+    const { data: orderItems, error: itemsErr } = await supabase
+      .from("order_items")
+      .select("product_id, variant_size, quantity")
+      .eq("order_id", order_id)
+
+    if (itemsErr) {
+      console.error("Failed to get order items:", itemsErr)
+    }
+
+    // Decrement stock for each item
+    if (orderItems && orderItems.length > 0) {
+      for (const item of orderItems) {
+        const { error: stockErr } = await supabase.rpc("decrement_product_stock", {
+          p_product_id: item.product_id,
+          p_size: item.variant_size ?? null,
+          p_qty: item.quantity,
+        })
+        if (stockErr) {
+          console.error("Failed to decrement stock:", {
+            product_id: item.product_id,
+            size: item.variant_size,
+            error: stockErr
+          })
+        }
+      }
+    }
+
     // Update order status to 'paid' and link customer
     const { data: updatedOrder, error: updateErr } = await supabase
       .from("orders")
       .update({
         status: "paid",
         customer_id: customerId,
+        paid_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq("id", order_id)
@@ -121,11 +153,12 @@ export async function POST(req: NextRequest) {
 
     if (updateErr) throw updateErr
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       order: updatedOrder,
       customer_created: !order.customer_id && !!customerId,
-      message: "Order confirmed successfully" 
+      stock_decremented: orderItems?.length ?? 0,
+      message: "Order confirmed and stock updated"
     })
   } catch (error: unknown) {
     console.error("Error confirming order:", error)

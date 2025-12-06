@@ -1,13 +1,16 @@
-import { NextResponse } from "next/server"
-import getServiceClient from "@/lib/supabase/server"
+import { assertAdmin } from "@/app/api/admin/_utils"
+import { NextRequest, NextResponse } from "next/server"
 
 // Disable caching for this endpoint
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await assertAdmin(req)
+  if (!auth.ok) return auth.res
+
   try {
-    const supabase = getServiceClient()
+    const supabase = auth.svc
 
     // Fetch pending orders with customer and items data
     const { data: orders, error: ordersErr } = await supabase

@@ -41,6 +41,10 @@ const VIBES_FILTERS = [
   { id: 'fade', label: 'Fade', class: 'brightness-110 contrast-90 saturate-75' },
   { id: 'cool', label: 'Frío', class: 'hue-rotate-15 saturate-90' },
   { id: 'warm', label: 'Cálido', class: 'hue-rotate-[-15deg] saturate-110' },
+  { id: 'vivid', label: 'Vivid', class: 'saturate-150 contrast-110' },
+  { id: 'muted', label: 'Muted', class: 'saturate-50 brightness-95' },
+  { id: 'noir', label: 'Noir', class: 'grayscale contrast-150 brightness-90' },
+  { id: 'dreamy', label: 'Dreamy', class: 'brightness-105 saturate-75 blur-[0.5px]' },
 ];
 
 const LOCAL_STORAGE_KEY = 'busy-archive-liked-ids';
@@ -251,6 +255,79 @@ export function ArchiveDetail({ entry }: ArchiveDetailProps) {
     await navigator.clipboard.writeText(shareUrl);
   }, [entry.id]);
 
+  // Download image with applied filter
+  const handleDownload = useCallback(async (imageUrl: string, entryId: string) => {
+    // If no filter is applied, download original
+    if (!vibesMode || !selectedFilter) {
+      const a = document.createElement('a');
+      a.href = imageUrl;
+      a.download = `busy-archive-${entryId}.jpg`;
+      a.click();
+      return;
+    }
+
+    // Get filter CSS values
+    const filter = VIBES_FILTERS.find(f => f.id === selectedFilter);
+    if (!filter) return;
+
+    try {
+      // Load image
+      const img = new window.Image();
+      img.crossOrigin = 'anonymous';
+
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+        img.src = imageUrl;
+      });
+
+      // Create canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Parse filter class to CSS filter
+      let cssFilter = '';
+      const filterClass = filter.class;
+
+      if (filterClass.includes('grayscale')) cssFilter += 'grayscale(100%) ';
+      if (filterClass.includes('sepia')) cssFilter += 'sepia(100%) ';
+      if (filterClass.includes('brightness-90')) cssFilter += 'brightness(0.9) ';
+      if (filterClass.includes('brightness-95')) cssFilter += 'brightness(0.95) ';
+      if (filterClass.includes('brightness-105')) cssFilter += 'brightness(1.05) ';
+      if (filterClass.includes('brightness-110')) cssFilter += 'brightness(1.1) ';
+      if (filterClass.includes('contrast-90')) cssFilter += 'contrast(0.9) ';
+      if (filterClass.includes('contrast-110')) cssFilter += 'contrast(1.1) ';
+      if (filterClass.includes('contrast-125')) cssFilter += 'contrast(1.25) ';
+      if (filterClass.includes('contrast-150')) cssFilter += 'contrast(1.5) ';
+      if (filterClass.includes('saturate-50')) cssFilter += 'saturate(0.5) ';
+      if (filterClass.includes('saturate-75')) cssFilter += 'saturate(0.75) ';
+      if (filterClass.includes('saturate-90')) cssFilter += 'saturate(0.9) ';
+      if (filterClass.includes('saturate-110')) cssFilter += 'saturate(1.1) ';
+      if (filterClass.includes('saturate-150')) cssFilter += 'saturate(1.5) ';
+      if (filterClass.includes('hue-rotate-15')) cssFilter += 'hue-rotate(15deg) ';
+      if (filterClass.includes('hue-rotate-[-15deg]')) cssFilter += 'hue-rotate(-15deg) ';
+
+      ctx.filter = cssFilter.trim() || 'none';
+      ctx.drawImage(img, 0, 0);
+
+      // Download
+      const link = document.createElement('a');
+      link.download = `busy-archive-${entryId}-${selectedFilter}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.click();
+    } catch (error) {
+      console.error('Error downloading with filter:', error);
+      // Fallback to original download
+      const a = document.createElement('a');
+      a.href = imageUrl;
+      a.download = `busy-archive-${entryId}.jpg`;
+      a.click();
+    }
+  }, [vibesMode, selectedFilter]);
+
   const dominantColor = entry.colors?.[0] ?? '#020617';
 
   // Get filter class based on vibes mode and selected filter
@@ -319,15 +396,10 @@ export function ArchiveDetail({ entry }: ArchiveDetailProps) {
                     Copiar link
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => {
-                      const a = document.createElement('a');
-                      a.href = getProxyUrl(entry.full_url);
-                      a.download = `busy-archive-${entry.id}.jpg`;
-                      a.click();
-                    }}
+                    onClick={() => handleDownload(getProxyUrl(entry.full_url), entry.id)}
                   >
                     <Download className="mr-2 h-4 w-4" />
-                    Descargar
+                    {vibesMode && selectedFilter ? `Descargar (${VIBES_FILTERS.find(f => f.id === selectedFilter)?.label})` : 'Descargar'}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => window.open(`/archive/${entry.id}`, '_blank')}
@@ -620,15 +692,12 @@ export function ArchiveDetail({ entry }: ArchiveDetailProps) {
                       <Link2 className="h-4 w-4" />
                       Copiar link
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <a
-                        href={getProxyUrl(currentFullscreenEntry.full_url)}
-                        download={`busy-archive-${currentFullscreenEntry.id}.webp`}
-                        className="gap-2 cursor-pointer"
-                      >
-                        <Download className="h-4 w-4" />
-                        Descargar
-                      </a>
+                    <DropdownMenuItem
+                      onClick={() => handleDownload(getProxyUrl(currentFullscreenEntry.full_url), currentFullscreenEntry.id)}
+                      className="gap-2 cursor-pointer"
+                    >
+                      <Download className="h-4 w-4" />
+                      {vibesMode && selectedFilter ? `Descargar (${VIBES_FILTERS.find(f => f.id === selectedFilter)?.label})` : 'Descargar'}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -651,34 +720,34 @@ export function ArchiveDetail({ entry }: ArchiveDetailProps) {
                     <span className="font-body text-xs">Vibes</span>
                   </button>
 
-                  {/* Vibes popover */}
+                  {/* Vibes popover - centered on screen */}
                   {vibesMode && (
                     <div
-                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-black/80 backdrop-blur-md rounded-2xl p-3 animate-in fade-in zoom-in-90 slide-in-from-bottom-2 duration-200"
+                      className="fixed inset-x-0 bottom-28 z-[10001] flex justify-center px-4 animate-in fade-in zoom-in-90 slide-in-from-bottom-2 duration-200"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="flex gap-2">
-                        {VIBES_FILTERS.map((filter) => (
-                          <button
-                            key={filter.id}
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedFilter(selectedFilter === filter.id ? null : filter.id);
-                            }}
-                            className={cn(
-                              'px-3 py-1.5 rounded-full font-body text-xs transition-all whitespace-nowrap',
-                              selectedFilter === filter.id
-                                ? 'bg-purple-500 text-white scale-105'
-                                : 'bg-white/10 hover:bg-white/20 text-white'
-                            )}
-                          >
-                            {filter.label}
-                          </button>
-                        ))}
+                      <div className="bg-black/80 backdrop-blur-md rounded-2xl p-3 max-w-[90vw]">
+                        <div className="flex flex-wrap justify-center gap-2">
+                          {VIBES_FILTERS.map((filter) => (
+                            <button
+                              key={filter.id}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedFilter(selectedFilter === filter.id ? null : filter.id);
+                              }}
+                              className={cn(
+                                'px-3 py-1.5 rounded-full font-body text-xs transition-all whitespace-nowrap',
+                                selectedFilter === filter.id
+                                  ? 'bg-purple-500 text-white scale-105'
+                                  : 'bg-white/10 hover:bg-white/20 text-white'
+                              )}
+                            >
+                              {filter.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                      {/* Arrow pointing down */}
-                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-black/80" />
                     </div>
                   )}
                 </div>

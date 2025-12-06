@@ -1,23 +1,31 @@
--- Function to increment product stock (for order cancellations)
-create or replace function increment_product_stock(
-  p_product_id uuid,
+-- Function to increment product stock (for order cancellations/refunds)
+-- Mirrors decrement_product_stock but adds instead of subtracts
+create or replace function public.increment_product_stock(
+  p_product_id text,
   p_size text,
   p_qty integer
-) returns void as $$
+) returns void
+language plpgsql
+as $$
 begin
-  -- If size is provided, increment size-specific stock
-  if p_size is not null and p_size != '' then
-    update product_variants
-    set stock = stock + p_qty
-    where product_id = p_product_id and size = p_size;
+  if p_qty is null or p_qty <= 0 then
+    return;
   end if;
-  
-  -- Always increment total product stock
-  update products
-  set stock = stock + p_qty
-  where id = p_product_id;
+
+  -- If size is provided, increment size-specific stock in product_sizes
+  if p_size is not null then
+    update public.product_sizes
+      set stock = stock + p_qty,
+          updated_at = now()
+      where product_id = p_product_id and size = p_size;
+  end if;
+
+  -- Always increment aggregate stock on products
+  update public.products
+    set stock = coalesce(stock, 0) + p_qty
+    where id = p_product_id;
 end;
-$$ language plpgsql;
+$$;
 
 -- Grant execute permission
-grant execute on function increment_product_stock(uuid, text, integer) to authenticated, anon;
+grant execute on function public.increment_product_stock(text, text, integer) to authenticated, anon, service_role;

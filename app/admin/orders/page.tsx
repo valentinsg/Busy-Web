@@ -1,34 +1,33 @@
 "use client"
 
-import * as React from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import {
-  ChevronDown,
-  ChevronUp,
-  RefreshCw,
-  Filter,
-  CreditCard,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Banknote,
-  ShoppingCart,
-  DollarSign,
-  BarChart2
-} from "lucide-react"
-import { formatPrice } from "@/lib/format"
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { formatPrice } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+    Banknote,
+    BarChart2,
+    CheckCircle2,
+    ChevronDown,
+    ChevronUp,
+    Clock,
+    CreditCard,
+    DollarSign,
+    RefreshCw,
+    ShoppingCart,
+    XCircle
+} from "lucide-react"
+import * as React from "react"
 
 type Order = {
   id: string
@@ -224,127 +223,125 @@ export default function OrdersListPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold font-heading">Lista de Pedidos</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold font-heading">Pedidos</h1>
+          <p className="text-sm text-muted-foreground">
             {totalCount} pedido{totalCount !== 1 ? 's' : ''} en total
           </p>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
-              <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="pending">Pendientes</SelectItem>
-              <SelectItem value="paid">Pagados</SelectItem>
-              <SelectItem value="cancelled">Cancelados</SelectItem>
-            </SelectContent>
-          </Select>
+        <Button onClick={fetchOrders} disabled={loading} variant="outline" size="sm" className="w-fit">
+          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          Actualizar
+        </Button>
+      </div>
 
-          <Select value={channelFilter} onValueChange={setChannelFilter}>
-            <SelectTrigger className="w-[180px]">
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Canal" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los canales</SelectItem>
-              <SelectItem value="web">Web</SelectItem>
-              <SelectItem value="manual">Manual</SelectItem>
-              <SelectItem value="mercadopago">MercadoPago</SelectItem>
-              <SelectItem value="instagram">Instagram</SelectItem>
-              <SelectItem value="mercado_libre">Mercado Libre</SelectItem>
-              <SelectItem value="feria">Feria</SelectItem>
-              <SelectItem value="marketplace">Marketplace</SelectItem>
-              <SelectItem value="grupo_wsp">Grupo WhatsApp</SelectItem>
-              <SelectItem value="other">Otro</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* Filtros - responsive grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full text-xs sm:text-sm">
+            <SelectValue placeholder="Estado" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="pending">Pendientes</SelectItem>
+            <SelectItem value="paid">Pagados</SelectItem>
+            <SelectItem value="cancelled">Cancelados</SelectItem>
+          </SelectContent>
+        </Select>
 
-          <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-            <SelectTrigger className="w-[200px]">
-              <CreditCard className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Método de pago" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los métodos</SelectItem>
-              <SelectItem value="pending_transfer">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-3.5 w-3.5 text-yellow-600" />
-                  Transferencias pendientes
-                </div>
-              </SelectItem>
-              <SelectItem value="transfer">Transferencia</SelectItem>
-              <SelectItem value="card">Tarjeta</SelectItem>
-              <SelectItem value="cash">Efectivo</SelectItem>
-              <SelectItem value="other">Otro</SelectItem>
-            </SelectContent>
-          </Select>
+        <Select value={channelFilter} onValueChange={setChannelFilter}>
+          <SelectTrigger className="w-full text-xs sm:text-sm">
+            <SelectValue placeholder="Canal" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="web">Web</SelectItem>
+            <SelectItem value="manual">Manual</SelectItem>
+            <SelectItem value="mercadopago">MercadoPago</SelectItem>
+            <SelectItem value="instagram">Instagram</SelectItem>
+            <SelectItem value="mercado_libre">ML</SelectItem>
+            <SelectItem value="feria">Feria</SelectItem>
+            <SelectItem value="marketplace">Marketplace</SelectItem>
+            <SelectItem value="grupo_wsp">WhatsApp</SelectItem>
+            <SelectItem value="other">Otro</SelectItem>
+          </SelectContent>
+        </Select>
 
-          <Button onClick={fetchOrders} disabled={loading} variant="outline">
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            Actualizar
-          </Button>
-        </div>
+        <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+          <SelectTrigger className="w-full col-span-2 sm:col-span-1 text-xs sm:text-sm">
+            <SelectValue placeholder="Pago" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="pending_transfer">
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3 text-yellow-600" />
+                Transf. pend.
+              </span>
+            </SelectItem>
+            <SelectItem value="transfer">Transferencia</SelectItem>
+            <SelectItem value="card">Tarjeta</SelectItem>
+            <SelectItem value="cash">Efectivo</SelectItem>
+            <SelectItem value="other">Otro</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Quick Stats */}
       {!loading && orders.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase">Ingresos</p>
-                  <p className="text-2xl font-bold">{formatPrice(stats.totalRevenue)}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase">Ingresos</p>
+                  <p className="text-lg sm:text-2xl font-bold">{formatPrice(stats.totalRevenue)}</p>
                 </div>
-                <DollarSign className="h-8 w-8 text-green-500 opacity-50" />
+                <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 opacity-50" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase">Pagados</p>
-                  <p className="text-2xl font-bold">{stats.paidCount}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase">Pagados</p>
+                  <p className="text-lg sm:text-2xl font-bold">{stats.paidCount}</p>
                 </div>
-                <CheckCircle2 className="h-8 w-8 text-green-500 opacity-50" />
+                <CheckCircle2 className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 opacity-50" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase">Pendientes</p>
-                  <p className="text-2xl font-bold">{stats.pendingCount}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase">Pendientes</p>
+                  <p className="text-lg sm:text-2xl font-bold">{stats.pendingCount}</p>
                   {stats.pendingTransfers > 0 && (
-                    <p className="text-xs text-yellow-600 mt-1">
-                      {stats.pendingTransfers} transferencia{stats.pendingTransfers !== 1 ? 's' : ''}
+                    <p className="text-[10px] text-yellow-600">
+                      {stats.pendingTransfers} transf.
                     </p>
                   )}
                 </div>
-                <Clock className="h-8 w-8 text-yellow-500 opacity-50" />
+                <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500 opacity-50" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase">Promedio</p>
-                  <p className="text-2xl font-bold">{formatPrice(stats.avgOrderValue)}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase">Promedio</p>
+                  <p className="text-lg sm:text-2xl font-bold">{formatPrice(stats.avgOrderValue)}</p>
                 </div>
-                <BarChart2 className="h-8 w-8 text-blue-500 opacity-50" />
+                <BarChart2 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 opacity-50" />
               </div>
             </CardContent>
           </Card>
@@ -378,55 +375,43 @@ export default function OrdersListPage() {
               <Card key={order.id} className={cn("border-l-4 overflow-hidden", getStatusBorderColor(order.status))}>
                 <CardContent className="p-0">
                   {/* Header compacto */}
-                  <div className="p-4 flex items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="font-mono font-semibold text-sm">
-                          #{order.id.slice(0, 8).toUpperCase()}
-                        </span>
-                        <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0.5", statusInfo.color)}>
-                          <StatusIcon className="h-3 w-3 mr-1" />
-                          {statusInfo.label}
-                        </Badge>
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5">
-                          <ChannelIcon className="h-3 w-3 mr-1" />
-                          {channelInfo.label}
-                        </Badge>
-                        {order.is_barter && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 bg-purple-500/10 text-purple-700 border-purple-500/20">
-                            Trueque
+                  <div className="p-3 sm:p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
+                          <span className="font-mono font-semibold text-xs sm:text-sm">
+                            #{order.id.slice(0, 6).toUpperCase()}
+                          </span>
+                          <Badge variant="outline" className={cn("text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5", statusInfo.color)}>
+                            <StatusIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+                            {statusInfo.label}
                           </Badge>
-                        )}
-                        {order.payment_method === 'transfer' && order.status === 'pending' && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 bg-yellow-500/10 text-yellow-700 border-yellow-500/30 animate-pulse">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Transferencia pendiente
-                          </Badge>
-                        )}
-                        {order.payment_method === 'transfer' && order.status !== 'pending' && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 bg-blue-500/10 text-blue-700 border-blue-500/20">
-                            <Banknote className="h-3 w-3 mr-1" />
-                            Transferencia
-                          </Badge>
-                        )}
+                          {order.payment_method === 'transfer' && order.status === 'pending' && (
+                            <Badge variant="outline" className="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 bg-yellow-500/10 text-yellow-700 border-yellow-500/30 animate-pulse">
+                              <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5" />
+                              <span className="hidden sm:inline">Transferencia pendiente</span>
+                              <span className="sm:hidden">Transf.</span>
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">
+                          {getTimeSince(order.placed_at)}
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {formatDate(order.placed_at)} • {getTimeSince(order.placed_at)}
-                      </p>
-                    </div>
 
-                    <div className="flex items-center gap-2">
-                      <div className="text-right">
-                        <div className="text-2xl font-bold">{formatPrice(order.total)}</div>
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <div className="text-right">
+                          <div className="text-base sm:text-xl font-bold">{formatPrice(order.total)}</div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleExpand(order.id)}
+                          className="shrink-0 h-8 w-8 p-0"
+                        >
+                          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleExpand(order.id)}
-                        className="shrink-0"
-                      >
-                        {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                      </Button>
                     </div>
                   </div>
 

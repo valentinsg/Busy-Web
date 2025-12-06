@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
-import getServiceClient from "@/lib/supabase/server"
 import { validateCouponPercent } from "@/lib/checkout/coupons"
 import { logError, logInfo } from "@/lib/checkout/logger"
+import getServiceClient from "@/lib/supabase/server"
+import { NextRequest, NextResponse } from "next/server"
 import crypto from "node:crypto"
 
 const CURRENCY = "ARS"
@@ -183,18 +183,10 @@ export async function POST(req: NextRequest) {
 
     if (itemsErr) throw itemsErr
 
-    // Decrement stock
-    for (const it of itemsDetailed) {
-      const stockResult = await supabase.rpc("decrement_product_stock", {
-        p_product_id: it.product_id,
-        p_size: it.variant_size ?? null,
-        p_qty: it.quantity,
-      })
-      // Ignore stock errors for now
-      if (stockResult.error) {
-        logError("Stock decrement failed", { product_id: it.product_id, error: stockResult.error })
-      }
-    }
+    // NOTE: Stock is NOT decremented here for transfers.
+    // Stock will be decremented only when admin confirms the transfer payment
+    // via the /api/admin/orders/[id]/confirm-transfer endpoint.
+    // This prevents "phantom stock" issues when transfers are never completed.
 
     // Handle newsletter opt-in
     if (body.newsletter_opt_in && customer?.email && customer_id) {

@@ -2,15 +2,15 @@
 
 import { useI18n } from "@/components/i18n-provider"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -44,7 +44,7 @@ export function CartSheet({ children }: CartSheetProps) {
   const appliedPromos = mounted ? getAppliedPromos() : []
   const subtotalAfterPromo = Math.max(0, subtotal - promoDiscount)
   const [freeThreshold, setFreeThreshold] = useState<number>(100000)
-  const [flatRate, setFlatRate] = useState<number>(8000)
+  const [flatRate, setFlatRate] = useState<number>(25000)
   useEffect(() => {
     let cancelled = false
     ;(async () => {
@@ -52,7 +52,7 @@ export function CartSheet({ children }: CartSheetProps) {
         const s = await getSettingsClient()
         if (!cancelled) {
           setFreeThreshold(Number(s.shipping_free_threshold ?? 100000))
-          setFlatRate(Number(s.shipping_flat_rate ?? 8000))
+          setFlatRate(Number(s.shipping_flat_rate ?? 25000))
         }
       } catch {
         // ignore, keep defaults

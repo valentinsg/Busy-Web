@@ -3,30 +3,41 @@
 export const dynamic = 'force-dynamic'
 
 import { useToast } from "@/hooks/use-toast"
-import { Snowflake } from "lucide-react"
+import { formatPrice } from "@/lib/format"
+import { Snowflake, Truck } from "lucide-react"
 import * as React from "react"
 
 export default function SettingsPage() {
   const [loading, setLoading] = React.useState(true)
-  const [saving, setSaving] = React.useState(false)
+
+  // Shipping settings
   const [flat, setFlat] = React.useState<number>(25000)
   const [free, setFree] = React.useState<number>(100000)
+  const [savingShipping, setSavingShipping] = React.useState(false)
+
+  // Theme settings
   const [christmasMode, setChristmasMode] = React.useState<boolean>(false)
+  const [savingTheme, setSavingTheme] = React.useState(false)
+
   const { toast } = useToast()
 
   React.useEffect(() => {
     let cancelled = false
     async function load() {
       try {
-        const res = await fetch("/api/admin/settings", { cache: "no-store" })
+        const res = await fetch("/api/admin/settings", {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" }
+        })
         const data = await res.json()
+        console.log("[Settings] Loaded from API:", data)
         if (!cancelled && res.ok) {
-          setFlat(Number(data.shipping_flat_rate ?? 25000))
-          setFree(Number(data.shipping_free_threshold ?? 100000))
-          setChristmasMode(Boolean(data.christmas_mode ?? false))
+          setFlat(Number(data.shipping_flat_rate))
+          setFree(Number(data.shipping_free_threshold))
+          setChristmasMode(Boolean(data.christmas_mode))
         }
-      } catch {
-        // ignore
+      } catch (err) {
+        console.error("[Settings] Error loading:", err)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -37,20 +48,21 @@ export default function SettingsPage() {
     }
   }, [])
 
-  async function onSubmit(e: React.FormEvent) {
+  // Save only shipping settings
+  async function saveShipping(e: React.FormEvent) {
     e.preventDefault()
-    setSaving(true)
+    setSavingShipping(true)
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch("/api/admin/settings/shipping", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ shipping_flat_rate: flat, shipping_free_threshold: free, christmas_mode: christmasMode }),
+        body: JSON.stringify({ shipping_flat_rate: flat, shipping_free_threshold: free }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data?.error || "Error guardando cambios")
       toast({
-        title: "✅ Configuración guardada",
-        description: "Los cambios se aplicaron correctamente",
+        title: "✅ Envío actualizado",
+        description: `Precio: ${formatPrice(flat)} | Gratis desde: ${formatPrice(free)}`,
       })
     } catch (err: unknown) {
       toast({
@@ -59,19 +71,64 @@ export default function SettingsPage() {
         variant: "destructive",
       })
     } finally {
-      setSaving(false)
+      setSavingShipping(false)
     }
   }
 
-  return (
-    <div>
-      <h1 className="text-xl font-semibold mb-1">Settings</h1>
-      <p className="text-sm text-muted-foreground mb-6">Configuración de la tienda</p>
+  // Save only theme settings
+  async function saveTheme() {
+    setSavingTheme(true)
+    try {
+      const res = await fetch("/api/admin/settings/theme", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ christmas_mode: !christmasMode }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error || "Error guardando cambios")
+      setChristmasMode(!christmasMode)
+      toast({
+        title: !christmasMode ? "🎄 Modo Navidad activado" : "Modo Navidad desactivado",
+        description: !christmasMode ? "Los copos de nieve ya están cayendo" : "Efectos navideños desactivados",
+      })
+    } catch (err: unknown) {
+      toast({
+        title: "❌ Error",
+        description: err?.toString() || "Error al guardar la configuración",
+        variant: "destructive",
+      })
+    } finally {
+      setSavingTheme(false)
+    }
+  }
 
-      {loading ? (
+  if (loading) {
+    return (
+      <div>
+        <h1 className="text-xl font-semibold mb-1">Settings</h1>
         <p className="text-sm text-muted-foreground">Cargando…</p>
-      ) : (
-        <form onSubmit={onSubmit} className="max-w-lg space-y-5">
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-xl font-semibold mb-1">Settings</h1>
+        <p className="text-sm text-muted-foreground">Configuración de la tienda</p>
+      </div>
+
+      {/* ========== SHIPPING SECTION ========== */}
+      <section className="max-w-lg rounded-lg border p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Truck className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-lg font-medium">Configuración de Envío</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Estos valores se usan en el carrito, checkout y cálculo de órdenes.
+        </p>
+
+        <form onSubmit={saveShipping} className="space-y-4">
           <div>
             <label className="block text-sm mb-1">Precio de envío (ARS)</label>
             <input
@@ -83,7 +140,9 @@ export default function SettingsPage() {
               onChange={(e) => setFlat(Number(e.target.value))}
               required
             />
-            <p className="mt-1 text-xs text-muted-foreground">Costo fijo del envío.</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Costo fijo del envío. Mar del Plata siempre tiene envío de $10.000.
+            </p>
           </div>
 
           <div>
@@ -97,47 +156,55 @@ export default function SettingsPage() {
               onChange={(e) => setFree(Number(e.target.value))}
               required
             />
-            <p className="mt-1 text-xs text-muted-foreground">Si el subtotal supera este monto, el envío es gratuito.</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Si el subtotal supera este monto, el envío es gratuito.
+            </p>
           </div>
 
-          {/* Seasonal Themes Section */}
-          <div className="border-t pt-6 mt-6">
-            <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
-              <Snowflake className="h-5 w-5 text-blue-400" />
-              Temas Estacionales
-            </h2>
+          <button
+            type="submit"
+            disabled={savingShipping}
+            className="rounded-md bg-white text-black px-4 py-2 text-sm font-medium hover:bg-white/90 disabled:opacity-50"
+          >
+            {savingShipping ? "Guardando…" : "Guardar Envío"}
+          </button>
+        </form>
+      </section>
 
-            <div className="flex items-center justify-between p-4 rounded-lg border bg-gradient-to-r from-red-950/20 to-green-950/20">
-              <div className="flex items-center gap-3">
-                <div className="text-2xl">🎄</div>
-                <div>
-                  <p className="font-medium">Modo Navidad</p>
-                  <p className="text-xs text-muted-foreground">Activa copos de nieve y efectos festivos en toda la web</p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={christmasMode}
-                  onChange={(e) => setChristmasMode(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-              </label>
+      {/* ========== THEMES SECTION ========== */}
+      <section className="max-w-lg rounded-lg border p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Snowflake className="h-5 w-5 text-blue-400" />
+          <h2 className="text-lg font-medium">Temas Estacionales</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Activa efectos visuales temporales en toda la web.
+        </p>
+
+        <div className="flex items-center justify-between p-4 rounded-lg border bg-gradient-to-r from-red-950/20 to-green-950/20">
+          <div className="flex items-center gap-3">
+            <div className="text-2xl">🎄</div>
+            <div>
+              <p className="font-medium">Modo Navidad</p>
+              <p className="text-xs text-muted-foreground">Copos de nieve y efectos festivos</p>
             </div>
           </div>
-
-          <div className="flex items-center gap-3 pt-4">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
-            >
-              {saving ? "Guardando…" : "Guardar"}
-            </button>
-          </div>
-        </form>
-      )}
+          <button
+            type="button"
+            onClick={saveTheme}
+            disabled={savingTheme}
+            className="relative inline-flex items-center cursor-pointer disabled:opacity-50"
+            aria-label={christmasMode ? "Desactivar modo navidad" : "Activar modo navidad"}
+          >
+            <div className={`w-11 h-6 rounded-full transition-colors ${christmasMode ? 'bg-green-600' : 'bg-muted'}`}>
+              <div className={`absolute top-[2px] h-5 w-5 bg-white border border-gray-300 rounded-full transition-transform ${christmasMode ? 'translate-x-[22px]' : 'translate-x-[2px]'}`} />
+            </div>
+          </button>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          El cambio se aplica inmediatamente. No se muestra en páginas de admin.
+        </p>
+      </section>
     </div>
   )
 }
