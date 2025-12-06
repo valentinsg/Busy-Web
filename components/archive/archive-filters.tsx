@@ -109,7 +109,12 @@ export function ArchiveFilters({ initialFilters, places, moods }: ArchiveFilters
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64 p-4 space-y-4">
+          <PopoverContent
+            align="center"
+            side="bottom"
+            sideOffset={8}
+            className="w-[calc(100vw-2rem)] max-w-xs sm:w-64 p-4 space-y-4 mx-auto"
+          >
             <div className="space-y-2">
               <Label className="font-body text-xs">Mood</Label>
               <div className="flex flex-wrap gap-2">

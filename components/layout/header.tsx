@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { useCart } from '@/hooks/use-cart'
 import { supabase } from '@/lib/supabase/client'
-import { Menu, Search } from 'lucide-react'
+import { ChevronDown, Menu, Search } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -35,6 +35,7 @@ export function Header() {
   const [isOpen, setIsOpen] = React.useState(false)
   const [searchQuery, setSearchQuery] = React.useState('')
   const [heroInView, setHeroInView] = React.useState(true)
+  const [expandedMenu, setExpandedMenu] = React.useState<string | null>(null)
   const pathname = usePathname()
   const { t } = useI18n()
   const [isAdmin, setIsAdmin] = React.useState(false)
@@ -327,23 +328,37 @@ export function Header() {
                     }
 
                     const children = (item as any).children as { label: string; href: string }[]
+                    const isExpanded = expandedMenu === item.label
 
                     return (
                       <div key={item.label} className="space-y-1">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-2">
-                          {item.label}
+                        <button
+                          type="button"
+                          onClick={() => setExpandedMenu(isExpanded ? null : item.label)}
+                          className="w-full flex items-center justify-between text-sm font-medium py-2 px-2 rounded-md hover:bg-accent transition-colors"
+                        >
+                          <span>{item.label}</span>
+                          <ChevronDown
+                            className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                          />
+                        </button>
+                        <div
+                          className={`overflow-hidden transition-all duration-200 ease-out ${isExpanded ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}
+                        >
+                          <div className="flex flex-col pl-4 border-l border-muted ml-2 space-y-1">
+                            {children.map((child) => (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                prefetch={false}
+                                onClick={() => setIsOpen(false)}
+                                className="text-sm font-medium py-2 px-2 rounded-md hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+                              >
+                                {child.label}
+                              </Link>
+                            ))}
+                          </div>
                         </div>
-                        {children.map((child) => (
-                          <Link
-                            key={child.href}
-                            href={child.href}
-                            prefetch={false}
-                            onClick={() => setIsOpen(false)}
-                            className="text-sm font-medium py-2 px-2 rounded-md hover:bg-accent transition-colors"
-                          >
-                            {child.label}
-                          </Link>
-                        ))}
                       </div>
                     )
                   })}

@@ -58,6 +58,8 @@ export function ArchiveDetail({ entry }: ArchiveDetailProps) {
   const [showLikeAnimation, setShowLikeAnimation] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [imageKey, setImageKey] = useState(0); // For slide transitions
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Fetch recommendations for fullscreen navigation
   const { data: recommendations = [] } = useQuery({
@@ -143,6 +145,31 @@ export function ArchiveDetail({ entry }: ArchiveDetailProps) {
     setImageKey((k) => k + 1); // Trigger transition
   };
 
+  // Touch handlers for swipe navigation
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && recommendations.length > 0) {
+      goToNext();
+    } else if (isRightSwipe && recommendations.length > 0) {
+      goToPrev();
+    }
+  };
+
   // Toggle like (for button click)
   const toggleLike = async () => {
     const newLiked = !liked;
@@ -201,20 +228,21 @@ export function ArchiveDetail({ entry }: ArchiveDetailProps) {
 
   const handleShare = useCallback(async () => {
     const shareUrl = `https://busy.com.ar/archive/${entry.id}`;
-    const shareTitle = entry.title || entry.microcopy || 'Busy Archive';
+    const shareTitle = entry.title || 'Busy Archive';
+    const shareText = `Mirá lo que encontré en Busy 👀🔥\n\n${shareTitle}`;
 
     if (navigator.share) {
       try {
         await navigator.share({
           title: shareTitle,
-          text: entry.microcopy || 'Mirá esto en Busy Archive',
+          text: shareText,
           url: shareUrl,
         });
       } catch {
         // User cancelled
       }
     } else {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
     }
   }, [entry]);
 
@@ -426,7 +454,7 @@ export function ArchiveDetail({ entry }: ArchiveDetailProps) {
       {/* Fullscreen mode - rendered via portal to cover everything */}
       {fullscreen && currentFullscreenEntry && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black touch-pan-y"
           onClick={(e) => {
             e.stopPropagation();
             setShowUI((prev) => !prev); // Toggle UI on tap
@@ -435,6 +463,9 @@ export function ArchiveDetail({ entry }: ArchiveDetailProps) {
             e.stopPropagation();
             handleLike();
           }}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
           {/* Instagram-style like animation */}
           {showLikeAnimation && (
