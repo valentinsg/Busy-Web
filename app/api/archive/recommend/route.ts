@@ -2,6 +2,7 @@ import { archiveService } from '@/lib/supabase/archive';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 // Allow caching for 5 minutes - recommendations don't change often
 export const revalidate = 300;
 

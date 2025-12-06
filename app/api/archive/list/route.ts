@@ -2,6 +2,7 @@ import { archiveService } from '@/lib/supabase/archive';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 // Cache list results for 2 minutes
 export const revalidate = 120;
 
