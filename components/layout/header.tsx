@@ -18,9 +18,16 @@ const navigation = [
   { label: 'Inicio', href: '/' },
   { label: 'Productos', href: '/products' },
   { label: 'Blacktop', href: '/blacktop' },
-  { label: 'Playlists', href: '/playlists' },
   { label: 'Blog', href: '/blog' },
-  { label: 'Cultura', href: '/about' },
+  {
+    label: 'Cultura',
+    href: '#',
+    children: [
+      { label: 'Nuestra historia', href: '/about' },
+      { label: 'Archive', href: '/archive' },
+      { label: 'Playlists', href: '/playlists' },
+    ],
+  },
   { label: 'Contactanos', href: '/contact' },
 ]
 
@@ -166,17 +173,51 @@ export function Header() {
             (showHeroVariant ? 'opacity-0 pointer-events-none' : 'opacity-100')
           }
         >
-          {navigation.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              prefetch={false}
-              className="text-sm font-medium transition-all hover:text-accent-brand relative group"
-            >
-              {item.label}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent-brand transition-all group-hover:w-full" />
-            </Link>
-          ))}
+          {navigation.map((item) => {
+            const hasChildren = Array.isArray((item as any).children) && (item as any).children.length > 0
+
+            if (!hasChildren) {
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  prefetch={false}
+                  className="text-sm font-medium transition-all hover:text-accent-brand relative group"
+                >
+                  {item.label}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent-brand transition-all group-hover:w-full" />
+                </Link>
+              )
+            }
+
+            const children = (item as any).children as { label: string; href: string }[]
+
+            return (
+              <div key={item.label} className="relative group">
+                <button
+                  type="button"
+                  className="text-sm font-medium transition-all hover:text-accent-brand relative flex items-center gap-1 pb-2 -mb-2"
+                >
+                  {item.label}
+                  <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-accent-brand transition-all group-hover:w-full" />
+                </button>
+                <div className="pointer-events-none absolute left-0 top-full min-w-[180px] rounded-md border bg-background/95 shadow-lg opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-hover:pointer-events-auto z-50">
+                  <div className="py-2">
+                    {children.map((child) => (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        prefetch={false}
+                        className="block px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/40"
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </nav>
 
         {/* Search, Theme Toggle, Cart */}
@@ -268,17 +309,44 @@ export function Header() {
 
                 {/* Mobile Navigation */}
                 <nav className="flex flex-col space-y-2 font-body">
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      prefetch={false}
-                      onClick={() => setIsOpen(false)}
-                      className="text-sm font-medium py-2 px-2 rounded-md hover:bg-accent transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
+                  {navigation.map((item) => {
+                    const hasChildren = Array.isArray((item as any).children) && (item as any).children.length > 0
+
+                    if (!hasChildren) {
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          prefetch={false}
+                          onClick={() => setIsOpen(false)}
+                          className="text-sm font-medium py-2 px-2 rounded-md hover:bg-accent transition-colors"
+                        >
+                          {item.label}
+                        </Link>
+                      )
+                    }
+
+                    const children = (item as any).children as { label: string; href: string }[]
+
+                    return (
+                      <div key={item.label} className="space-y-1">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-2">
+                          {item.label}
+                        </div>
+                        {children.map((child) => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            prefetch={false}
+                            onClick={() => setIsOpen(false)}
+                            className="text-sm font-medium py-2 px-2 rounded-md hover:bg-accent transition-colors"
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )
+                  })}
                 </nav>
 
                 {/* Language toggle inside menu */}

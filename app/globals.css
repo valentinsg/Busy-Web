@@ -475,7 +475,7 @@ html {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -488,4 +488,14 @@ html {
 
 [data-radix-dialog-content] {
   z-index: 10000 !important;
+}
+
+/* Pinterest-style shimmer animation for skeletons */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }

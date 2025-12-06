@@ -1,51 +1,52 @@
 "use client"
 
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+    SidebarContent,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubButton,
+    SidebarMenuSubItem,
+    useSidebar,
+} from "@/components/ui/sidebar"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+    BadgePercent,
+    BarChart2,
+    Bell,
+    Boxes,
+    Camera,
+    ChevronRight,
+    Clock,
+    DollarSign,
+    Factory,
+    FileText,
+    Film,
+    HandCoins,
+    LayoutDashboard,
+    List,
+    Mail,
+    Megaphone,
+    MessageCircle,
+    Music2,
+    Package,
+    Plus,
+    Settings,
+    ShoppingBag,
+    ShoppingCart,
+    Tag,
+    Trophy,
+    Users,
+    Wallet
+} from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  LayoutDashboard,
-  Package,
-  Boxes,
-  FileText,
-  Mail,
-  Plus,
-  BadgePercent,
-  MessageCircle,
-  BarChart2,
-  HandCoins,
-  Users,
-  Factory,
-  Wallet,
-  Clock,
-  Music2,
-  ChevronRight,
-  ShoppingBag,
-  Megaphone,
-  DollarSign,
-  Settings,
-  Bell,
-  ShoppingCart,
-  List,
-  Tag,
-  Film,
-  Trophy
-} from "lucide-react"
-import {
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  useSidebar,
-} from "@/components/ui/sidebar"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { useState, useEffect } from "react"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useEffect, useState } from "react"
 
 export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen: boolean }) {
   const pathname = usePathname()
@@ -397,7 +398,42 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                   </Link>
                 </SidebarMenuItem>
 
-                
+                <Collapsible>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        isActive={isActive("/admin/archive") || isActive("/admin/archive/entries")}
+                        className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200"
+                      >
+                        <Camera className="h-4 w-4" />
+                        <span>Busy Archive</span>
+                        <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:slide-in-from-top-1">
+                      <SidebarMenuSub className="gap-1 ml-3 mt-1.5 mb-1.5 border-l-2 border-white/10 pl-3">
+                        <SidebarMenuSubItem>
+                          <Link href="/admin/archive" legacyBehavior>
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
+                              <a className="flex items-center gap-2">
+                                <Camera className="h-3.5 w-3.5" /> Uploader
+                              </a>
+                            </SidebarMenuSubButton>
+                          </Link>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <Link href="/admin/archive/entries" legacyBehavior>
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
+                              <a className="flex items-center gap-2">
+                                <List className="h-3.5 w-3.5" /> Ver archivo
+                              </a>
+                            </SidebarMenuSubButton>
+                          </Link>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
 
                 <Collapsible>
                   <SidebarMenuItem>

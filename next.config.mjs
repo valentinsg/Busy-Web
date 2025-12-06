@@ -1,6 +1,6 @@
 import createMDX from '@next/mdx'
-import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
+import remarkGfm from 'remark-gfm'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -17,28 +17,32 @@ const nextConfig = {
   images: {
     // Modern formats: AVIF first (better compression), WebP fallback
     formats: ['image/avif', 'image/webp'],
-    
+
     // OPTIMIZED: Reduced from 16 to 6 widths = 62.5% fewer transformations
     // Strategic widths covering mobile (384, 640), tablet (828), desktop (1200, 1920, 2048)
     deviceSizes: [640, 828, 1200, 1920, 2048],
     imageSizes: [384], // Only one small size for icons/thumbnails
-    
+
     // Cache optimized images for 1 year (immutable)
     minimumCacheTTL: 31536000,
-    
+
     // SVG handling
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    
-    // Remote patterns for Supabase Storage
+
+    // Remote patterns for Supabase Storage + R2 archive bucket
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**.supabase.co',
       },
+      {
+        protocol: 'https',
+        hostname: '**.r2.dev', // Allow all R2 public URLs (pub-*.r2.dev)
+      },
     ],
-    
+
     // Disable device size optimization to use exact widths
     // This prevents Next.js from generating additional sizes
     unoptimized: false,

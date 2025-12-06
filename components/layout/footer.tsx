@@ -27,6 +27,7 @@ const footerSections = (t: (k: string) => string) => ({
       { nameKey: "footer.sections.brand.links.blog", href: "/blog" },
       { nameKey: "Playlists", href: "/playlists" },
       { nameKey: "Blacktop", href: "/blacktop" },
+      { nameKey: "Archive", href: "/archive" },
     ],
   },
   support: {
