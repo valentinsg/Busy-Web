@@ -2,14 +2,16 @@
 
 export const dynamic = 'force-dynamic'
 
-import * as React from "react"
 import { useToast } from "@/hooks/use-toast"
+import { Snowflake } from "lucide-react"
+import * as React from "react"
 
 export default function SettingsPage() {
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
   const [flat, setFlat] = React.useState<number>(25000)
   const [free, setFree] = React.useState<number>(100000)
+  const [christmasMode, setChristmasMode] = React.useState<boolean>(false)
   const { toast } = useToast()
 
   React.useEffect(() => {
@@ -21,6 +23,7 @@ export default function SettingsPage() {
         if (!cancelled && res.ok) {
           setFlat(Number(data.shipping_flat_rate ?? 25000))
           setFree(Number(data.shipping_free_threshold ?? 100000))
+          setChristmasMode(Boolean(data.christmas_mode ?? false))
         }
       } catch {
         // ignore
@@ -41,7 +44,7 @@ export default function SettingsPage() {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ shipping_flat_rate: flat, shipping_free_threshold: free }),
+        body: JSON.stringify({ shipping_flat_rate: flat, shipping_free_threshold: free, christmas_mode: christmasMode }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data?.error || "Error guardando cambios")
@@ -97,7 +100,34 @@ export default function SettingsPage() {
             <p className="mt-1 text-xs text-muted-foreground">Si el subtotal supera este monto, el envío es gratuito.</p>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Seasonal Themes Section */}
+          <div className="border-t pt-6 mt-6">
+            <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
+              <Snowflake className="h-5 w-5 text-blue-400" />
+              Temas Estacionales
+            </h2>
+
+            <div className="flex items-center justify-between p-4 rounded-lg border bg-gradient-to-r from-red-950/20 to-green-950/20">
+              <div className="flex items-center gap-3">
+                <div className="text-2xl">🎄</div>
+                <div>
+                  <p className="font-medium">Modo Navidad</p>
+                  <p className="text-xs text-muted-foreground">Activa copos de nieve y efectos festivos en toda la web</p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={christmasMode}
+                  onChange={(e) => setChristmasMode(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pt-4">
             <button
               type="submit"
               disabled={saving}

@@ -1,4 +1,5 @@
 import RouteTracker from '@/components/analytics/route-tracker'
+import { ChristmasProvider } from '@/components/christmas-provider'
 import { SplashGate } from '@/components/home/splash-gate'
 import { I18nProvider } from '@/components/i18n-provider'
 import { HtmlLang } from '@/components/layout/html-lang'
@@ -413,12 +414,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               forcedTheme="dark"
               disableTransitionOnChange
             >
-              <PromotionsProvider />
-              <SplashGate />
-              <SiteFrame>
-                {children}
-              </SiteFrame>
-              <Toaster />
+              <ChristmasProvider>
+                <PromotionsProvider />
+                <SplashGate />
+                <SiteFrame>
+                  {children}
+                </SiteFrame>
+                <Toaster />
+              </ChristmasProvider>
             </ThemeProvider>
           </I18nProvider>
         </ReducedMotionProvider>

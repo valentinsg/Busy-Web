@@ -50,8 +50,9 @@ import { useEffect, useState } from "react"
 
 export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen: boolean }) {
   const pathname = usePathname()
-  const { state } = useSidebar()
-  const isCollapsed = state === "collapsed"
+  const { state, isMobile } = useSidebar()
+  // En mobile nunca mostrar versión colapsada
+  const isCollapsed = !isMobile && state === "collapsed"
   const isActive = (href: string) => pathname === href || pathname?.startsWith(href + "/")
 
   // Estado para controlar qué secciones están abiertas
@@ -74,7 +75,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
 
   return (
     <>
-      <SidebarContent className="gap-0 py-0 relative overflow-y-auto">
+      <SidebarContent className="gap-0 py-0 relative overflow-y-auto bg-black">
       <div className="relative z-10 px-2 py-3 pb-6">
       {/* Dashboard - siempre visible */}
       <SidebarGroup className="py-0 px-0">
