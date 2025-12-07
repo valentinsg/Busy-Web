@@ -12,6 +12,10 @@ export type Customer = {
   last_seen_at: string | null
 }
 
+/**
+ * Orden de compra
+ * Representa una transacción completada o pendiente
+ */
 export type Order = {
   id: UUID
   customer_id: UUID | null
@@ -24,9 +28,14 @@ export type Order = {
   tax: number
   total: number
   notes: string | null
+  /** Fecha de creación de la orden (ISO 8601) */
   placed_at: string
+  /** Alias de placed_at para compatibilidad */
+  created_at?: string
   updated_at: string
   is_barter: boolean
+  /** Items de la orden (solo disponible cuando se hace join) */
+  items?: OrderItem[]
 }
 
 export type OrderItem = {

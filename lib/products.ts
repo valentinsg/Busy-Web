@@ -1,5 +1,5 @@
-import type { Product, FilterOptions } from "./types"
 import productsData from "@/data/products.json"
+import type { FilterOptions, Product } from "@/types"
 
 export const products: Product[] = productsData
 
@@ -96,7 +96,7 @@ export function searchProducts(query: string): Product[] {
     (p) =>
       p.name.toLowerCase().includes(lowercaseQuery) ||
       p.description.toLowerCase().includes(lowercaseQuery) ||
-      p.tags.some((tag) => tag.toLowerCase().includes(lowercaseQuery)),
+      p.tags.some((tag: string) => tag.toLowerCase().includes(lowercaseQuery)),
   )
 }
 

@@ -38,9 +38,11 @@ export async function GET() {
             'content-type': response.headers.get('content-type') || '',
             'access-control-allow-origin': response.headers.get('access-control-allow-origin') || 'not set',
           };
-        } catch (e: any) {
+        } catch (e: unknown) {
           status = 'fetch_error';
-          headers = { error: e.message };
+          headers = {
+            error: e instanceof Error ? e.message : 'Unknown fetch error',
+          };
         }
 
         return {
@@ -75,7 +77,8 @@ export async function GET() {
         '5. Optionally configure CORS to allow your domain',
       ] : null,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

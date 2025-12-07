@@ -1,9 +1,13 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Trophy } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import type { MatchWithTeams } from '@/types/blacktop';
+import { Play, Trophy } from 'lucide-react';
+
+interface MatchWithMvp extends MatchWithTeams {
+  mvp_name?: string | null;
+}
 
 interface MatchCardProps {
   match: MatchWithTeams;
@@ -26,10 +30,10 @@ export function MatchCard({ match, onManage, onViewStats }: MatchCardProps) {
   };
 
   return (
-    <div 
+    <div
       className={`relative p-4 border rounded-lg transition-colors bg-gradient-to-r from-zinc-900/50 to-black/50 ${
-        match.status === 'finished' && onViewStats 
-          ? 'hover:border-accent-brand/50 cursor-pointer' 
+        match.status === 'finished' && onViewStats
+          ? 'hover:border-accent-brand/50 cursor-pointer'
           : 'hover:border-accent-brand/50'
       }`}
       onClick={() => {
@@ -89,11 +93,11 @@ export function MatchCard({ match, onManage, onViewStats }: MatchCardProps) {
 
         {/* Botón Gestionar */}
         {match.status !== 'finished' && match.team_a_id && match.team_b_id && (
-          <Button 
+          <Button
             onClick={(e) => {
               e.stopPropagation();
               onManage(match);
-            }} 
+            }}
             size="sm"
             variant="outline"
             className="border-accent-brand/50 hover:bg-accent-brand/20 hover:border-accent-brand"
@@ -105,11 +109,11 @@ export function MatchCard({ match, onManage, onViewStats }: MatchCardProps) {
       </div>
 
       {/* MVP Badge */}
-      {match.status === 'finished' && (match as any).mvp_name && (
+      {match.status === 'finished' && (match as MatchWithMvp).mvp_name && (
         <div className="mt-2 flex items-center gap-2">
           <Trophy className="h-4 w-4 text-yellow-500" />
           <span className="text-sm text-yellow-500 font-semibold">
-            MVP: {(match as any).mvp_name}
+            MVP: {(match as MatchWithMvp).mvp_name}
           </span>
         </div>
       )}

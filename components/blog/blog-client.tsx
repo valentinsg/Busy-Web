@@ -1,6 +1,6 @@
 "use client"
 
-import { useI18n } from "@/components/i18n-provider"
+import { useI18n } from "@/components/providers/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -14,7 +14,7 @@ import * as React from "react"
 import { BlogCategories, CategoryBadge } from "./blog-categories"
 import { MarketingSidebar } from "./marketing-sidebar"
 
-import type { Product } from "@/lib/types"
+import type { Product } from "@/types"
 
 interface BlogClientProps {
   allPosts: BlogPost[]

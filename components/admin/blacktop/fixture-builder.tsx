@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Plus, Trophy, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import type { Team, Match, Tournament } from '@/types/blacktop';
+import type { Match, Team, Tournament } from '@/types/blacktop';
+import { DragDropContext, Draggable, DropResult, Droppable } from '@hello-pangea/dnd';
+import { AlertCircle, Clock, Plus, Trophy } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface FixtureBuilderProps {
   tournamentId: number;
@@ -33,11 +33,7 @@ export function FixtureBuilder({ tournamentId, tournament }: FixtureBuilderProps
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadData();
-  }, [tournamentId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [teamsRes, matchesRes] = await Promise.all([
         fetch(`/api/blacktop/tournaments/${tournamentId}/teams`),
@@ -75,12 +71,16 @@ export function FixtureBuilder({ tournamentId, tournament }: FixtureBuilderProps
     } finally {
       setLoading(false);
     }
-  };
+  }, [tournamentId, toast]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleGenerateFixture = async () => {
     // Auto-generar fixture según formato del torneo
     const formatType = tournament.format_type || 'groups_playoff';
-    
+
     if (formatType === 'groups_playoff') {
       // Generar partidos de fase de grupos
       await generateGroupStageMatches();
@@ -108,7 +108,7 @@ export function FixtureBuilder({ tournamentId, tournament }: FixtureBuilderProps
 
   const handleDragEnd = (result: DropResult) => {
     // Lógica de drag & drop
-    const { source, destination } = result;
+    const { destination } = result;
     if (!destination) return;
 
     toast({
@@ -200,10 +200,10 @@ export function FixtureBuilder({ tournamentId, tournament }: FixtureBuilderProps
           </CardHeader>
           <CardContent>
             {matches.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
                 <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No hay partidos creados</p>
-                <p className="text-sm">Usa "Generar Fixture" para crear los partidos automáticamente</p>
+                <p className="text-sm">Usa &quot;Generar Fixture&quot; para crear los partidos automáticamente</p>
               </div>
             ) : (
               <div className="space-y-4">

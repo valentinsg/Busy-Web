@@ -1,23 +1,23 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
+import type { PromoType } from "@/types"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import type { PromoType } from "@/lib/types"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 export default function NewPromotionPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
-  
+
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -47,8 +47,8 @@ export default function NewPromotionPage() {
 
     try {
       // Construir config según el tipo
-      let config: any = {}
-      
+      let config: Record<string, unknown> = {}
+
       switch (form.promo_type) {
         case 'nxm':
           config = {
@@ -76,7 +76,7 @@ export default function NewPromotionPage() {
           break
         case 'bundle':
           config = {
-            sku_groups: form.sku_groups.split('|').map(group => 
+            sku_groups: form.sku_groups.split('|').map(group =>
               group.split(',').map(s => s.trim())
             ),
             discount_percent: form.discount_percent ? parseFloat(form.discount_percent) : undefined,

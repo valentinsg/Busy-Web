@@ -4,27 +4,26 @@
 // TUTORIAL INTERACTIVO PASO A PASO
 // =====================================================
 
-import { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
-  FileText,
-  Layout,
-  Film,
-  GitBranch,
-  MessageSquare,
-  Paperclip,
-  Download,
-  Sparkles,
-  ChevronLeft,
-  ChevronRight,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    ChevronLeft,
+    ChevronRight,
+    Download,
+    FileText,
+    Film,
+    GitBranch,
+    Layout,
+    MessageSquare,
+    Paperclip,
+    Sparkles,
 } from 'lucide-react';
+import { useState } from 'react';
 
 interface TutorialDialogProps {
   open: boolean;

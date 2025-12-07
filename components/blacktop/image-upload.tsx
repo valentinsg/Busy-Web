@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { ImagePlus, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ImagePlus, X } from 'lucide-react';
 import Image from 'next/image';
+import { useRef, useState } from 'react';
 
 interface ImageUploadProps {
   value?: File | null;
@@ -19,7 +18,7 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({
-  value,
+  value: _value,
   onChange,
   label,
   description,
@@ -95,12 +94,6 @@ export function ImageUpload({
     if (inputRef.current) {
       inputRef.current.value = '';
     }
-  };
-
-  const aspectRatioClasses = {
-    square: 'aspect-square',
-    portrait: 'aspect-[3/4]',
-    landscape: 'aspect-[16/9]',
   };
 
   const getRecommendedSize = () => {

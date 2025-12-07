@@ -20,7 +20,7 @@ export function RecommendationRow({ entryId }: RecommendationRowProps) {
     return null;
   }
 
-  const recommendations = data?.map((r: any) => r.entry).filter(Boolean) ?? [];
+  const recommendations = data?.map((r) => r.entry).filter(Boolean) ?? [];
 
   if (!recommendations.length) return null;
 

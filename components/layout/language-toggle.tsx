@@ -1,6 +1,6 @@
 "use client"
 
-import { useI18n } from "@/components/i18n-provider"
+import { useI18n } from "@/components/providers/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Globe } from "lucide-react"
 

@@ -1,7 +1,16 @@
 "use client"
-import { useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
 import { trackPurchase } from "@/lib/analytics/ecommerce"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect } from "react"
+
+interface OrderItem {
+  product_id: string
+  product_name: string
+  unit_price?: number
+  quantity: number
+  variant_size?: string
+  variant_color?: string
+}
 
 export function SuccessClient() {
   const q = useSearchParams()
@@ -29,7 +38,7 @@ export function SuccessClient() {
                 tax: Number(order.tax || 0),
                 shipping: Number(order.shipping || 0),
                 coupon: null,
-                items: orderItems.map((item: any) => ({
+                items: orderItems.map((item: OrderItem) => ({
                   item_id: item.product_id,
                   item_name: item.product_name,
                   price: Number(item.unit_price || 0),

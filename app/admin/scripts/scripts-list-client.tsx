@@ -4,33 +4,33 @@
 // LISTADO DE GUIONES (CLIENT)
 // =====================================================
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Plus, Search, FolderPlus, FileText, Calendar, Tag } from 'lucide-react';
+import { createProjectAction, createScriptAction } from '@/app/actions/scripts';
 import { TutorialButton } from '@/components/scripts/tutorial-dialog';
-import { createScriptAction, createProjectAction } from '@/app/actions/scripts';
-import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import type { Script, ScriptProject, ScriptStatus } from '@/types/scripts';
+import { Calendar, FileText, FolderPlus, Plus, Search, Tag } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface ScriptsListClientProps {
   initialScripts: Script[];
@@ -44,7 +44,7 @@ export function ScriptsListClient({
   teamId,
 }: ScriptsListClientProps) {
   const router = useRouter();
-  const [scripts, setScripts] = useState(initialScripts);
+  const [scripts] = useState(initialScripts);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ScriptStatus | 'all'>('all');
   const [projectFilter, setProjectFilter] = useState<string>('all');
@@ -111,7 +111,7 @@ export function ScriptsListClient({
 
         <div className="flex items-center gap-2">
           <TutorialButton />
-          
+
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline">
@@ -164,7 +164,10 @@ export function ScriptsListClient({
             />
           </div>
 
-          <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
+          <Select
+            value={statusFilter}
+            onValueChange={(v: ScriptStatus | 'all') => setStatusFilter(v)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Estado" />
             </SelectTrigger>

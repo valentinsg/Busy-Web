@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase/client"
-import type { Product, SizeMeasurement, BenefitItem } from "@/lib/types"
+import type { BenefitItem, Product, SizeMeasurement } from "@/types"
 
 function mapRowToProduct(row: unknown, stockBySize?: Record<string, number>): Product {
   // Build sizes from multiple sources to avoid losing variants

@@ -1,6 +1,6 @@
 import AuthorCard from '@/components/blog/author-card'
-import LatestPostsSidebar from '@/components/blog/latest-posts-sidebar'
 import LatestPlaylistsSidebar from '@/components/blog/latest-playlists-sidebar'
+import LatestPostsSidebar from '@/components/blog/latest-posts-sidebar'
 import SocialLinksInline from '@/components/blog/social-links-inline'
 import MdxRenderer from '@/components/mdx/MdxRenderer'
 import { Button } from '@/components/ui/button'
@@ -8,15 +8,15 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { getAllPostsAsync, getPostBySlugAsync } from '@/lib/blog'
 import getServiceClient from '@/lib/supabase/server'
-import { Author } from '@/lib/types'
+import type { Author } from '@/types'
 import type { BlogPost } from '@/types/blog'
 import { format } from 'date-fns'
 import { enUS, es } from 'date-fns/locale'
 import {
-  ArrowUpRight,
-  Calendar,
-  ChevronDown,
-  Clock,
+    ArrowUpRight,
+    Calendar,
+    ChevronDown,
+    Clock,
 } from 'lucide-react'
 import type { Metadata } from 'next'
 import NextDynamic from 'next/dynamic'
@@ -300,7 +300,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
               />
             )}
-            
+
             <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-3 text-balance">
               {post.title}
             </h1>

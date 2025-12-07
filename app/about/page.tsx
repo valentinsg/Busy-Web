@@ -1,6 +1,6 @@
 'use client'
 import NewsletterSignup from '@/components/blog/newsletter-signup'
-import { useI18n } from '@/components/i18n-provider'
+import { useI18n } from '@/components/providers/i18n-provider'
 import { Button } from '@/components/ui/button'
 import { gsap } from 'gsap'
 import Image from 'next/image'
@@ -431,7 +431,7 @@ function AboutContent() {
                 <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative w-full h-full">
                   <Image
-                    src="/showcase-busy-2.jpg"
+                    src="/showcase/showcase-busy-2.jpg"
                     alt="Busy Streetwear - Identidad de marca"
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -463,7 +463,7 @@ function AboutContent() {
                 <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative w-full h-full">
                   <Image
-                    src="/showcase-busy-1.jpg"
+                    src="/showcase/showcase-busy-1.jpg"
                     alt="Busy Since 2024 - Colección"
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -495,7 +495,7 @@ function AboutContent() {
                 <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative w-full h-full">
                   <Image
-                    src="/busy-community.jpg"
+                    src="/showcase/busy-community.jpg"
                     alt="Busy Community"
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"

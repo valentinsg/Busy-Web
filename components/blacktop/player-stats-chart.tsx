@@ -1,8 +1,8 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import type { TournamentLeaderboard } from '@/types/blacktop';
+import { Bar, BarChart, CartesianGrid, Legend, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 interface PlayerStatsChartProps {
   leaderboard: TournamentLeaderboard[];
@@ -32,16 +32,22 @@ export function PlayerStatsChart({ leaderboard, accentColor }: PlayerStatsChartP
   ] : [];
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: unknown }) => {
+    const items = Array.isArray(payload) ? payload : [];
+
+    if (active && items.length > 0) {
+      const first = items[0] as { payload?: { name?: string } };
       return (
         <div className="bg-black/90 border border-white/20 rounded-lg p-3">
-          <p className="font-bold text-white mb-1">{payload[0].payload.name}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {entry.value}
+          <p className="font-bold text-white mb-1">{first.payload?.name}</p>
+          {items.map((entry, index: number) => {
+            const e = entry as { name?: string; value?: number; color?: string };
+            return (
+              <p key={index} className="text-sm" style={{ color: e.color }}>
+                {e.name}: {e.value}
             </p>
-          ))}
+            );
+          })}
         </div>
       );
     }
@@ -59,17 +65,17 @@ export function PlayerStatsChart({ leaderboard, accentColor }: PlayerStatsChartP
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={topScorers}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-              <XAxis 
-                dataKey="name" 
+              <XAxis
+                dataKey="name"
                 stroke="rgba(255,255,255,0.6)"
                 style={{ fontSize: '12px' }}
               />
-              <YAxis 
+              <YAxis
                 stroke="rgba(255,255,255,0.6)"
                 style={{ fontSize: '12px' }}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend 
+              <Legend
                 wrapperStyle={{ color: 'white', fontSize: '12px' }}
               />
               <Bar dataKey="PTS" fill={accentColor} radius={[8, 8, 0, 0]} />
@@ -92,18 +98,18 @@ export function PlayerStatsChart({ leaderboard, accentColor }: PlayerStatsChartP
             <ResponsiveContainer width="100%" height={300}>
               <RadarChart data={radarData}>
                 <PolarGrid stroke="rgba(255,255,255,0.2)" />
-                <PolarAngleAxis 
-                  dataKey="stat" 
+                <PolarAngleAxis
+                  dataKey="stat"
                   stroke="rgba(255,255,255,0.6)"
                   style={{ fontSize: '12px' }}
                 />
-                <PolarRadiusAxis 
+                <PolarRadiusAxis
                   stroke="rgba(255,255,255,0.3)"
                   style={{ fontSize: '10px' }}
                 />
-                <Radar 
+                <Radar
                   name={topPlayer.player.full_name}
-                  dataKey="value" 
+                  dataKey="value"
                   stroke={accentColor}
                   fill={accentColor}
                   fillOpacity={0.6}

@@ -1,11 +1,11 @@
 "use client"
 
+import LatestPlaylistsSidebarClient from "@/components/blog/latest-playlists-sidebar-client"
 import NewsletterSignup from "@/components/blog/newsletter-signup"
 import SocialLinksInline from "@/components/blog/social-links-inline"
-import LatestPlaylistsSidebarClient from "@/components/blog/latest-playlists-sidebar-client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { Product } from "@/lib/types"
+import type { Product } from "@/types"
 import type { BlogPost } from "@/types/blog"
 import { ArrowRight, ShoppingBag } from "lucide-react"
 import Link from "next/link"
@@ -36,7 +36,7 @@ export function MarketingSidebar({ latestPost, featuredProducts = [] }: Marketin
                   <h3 className="font-heading text-sm font-semibold leading-tight line-clamp-3 break-words group-hover:text-accent-brand transition-colors">{latestPost.title}</h3>
                 </div>
               </Link>
-              
+
               {/* Botón abajo con texto truncado */}
               <Button asChild size="sm" className="font-body w-full h-8 text-sm">
                 <Link href={latestPost.cta?.url || `/blog/${latestPost.slug}`} prefetch={false} className="truncate">

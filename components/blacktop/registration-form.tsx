@@ -46,37 +46,6 @@ interface FormErrors {
   general?: string;
 }
 
-// Helper function to adjust color brightness
-const adjustBrightness = (color: string, percent: number): string => {
-  // Convert hex to RGB
-  const r = parseInt(color.substring(1, 3), 16);
-  const g = parseInt(color.substring(3, 5), 16);
-  const b = parseInt(color.substring(5, 7), 16);
-
-  // Adjust brightness
-  const adjust = (value: number) => {
-    const newValue = Math.max(0, Math.min(255, value + (value * percent) / 100));
-    return Math.round(newValue);
-  };
-
-  // Convert back to hex
-  return `#${[
-    adjust(r).toString(16).padStart(2, '0'),
-    adjust(g).toString(16).padStart(2, '0'),
-    adjust(b).toString(16).padStart(2, '0')
-  ].join('')}`;
-};
-
-// Helper function to adjust color opacity
-const adjustOpacity = (color: string, opacity: number): string => {
-  // Convert hex to RGB
-  const r = parseInt(color.substring(1, 3), 16);
-  const g = parseInt(color.substring(3, 5), 16);
-  const b = parseInt(color.substring(5, 7), 16);
-
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
 export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -96,13 +65,6 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
   const [rulesModalOpen, setRulesModalOpen] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
-  const [form, setForm] = useState({
-    teamName: '',
-    captainName: '',
-    captainInstagram: '',
-    email: '',
-    phone: '',
-  });
 
   // Players state
   const [players, setPlayers] = useState<PlayerFormData[]>([
@@ -227,7 +189,7 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
     else if (phone.length < 8) newErrors.phone = 'Teléfono inválido';
 
     // Validar jugadores
-    const playerErrors: { [key: number]: any } = {};
+    const playerErrors: { [key: number]: PlayerErrors } = {};
     // Detección de emails duplicados (case-insensitive, trim)
     const normalizedEmails = players.map(p => p.email?.trim().toLowerCase());
     const duplicates = new Set<string>();
@@ -239,7 +201,7 @@ export function RegistrationForm({ tournament, onSuccessChange }: RegistrationFo
     });
 
     players.forEach((player, index) => {
-      const pErrors: any = {};
+      const pErrors: PlayerErrors = {};
 
       if (!player.full_name.trim()) pErrors.full_name = 'Nombre obligatorio';
       else if (player.full_name.length < 3) pErrors.full_name = 'Mínimo 3 caracteres';

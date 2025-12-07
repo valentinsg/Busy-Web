@@ -80,9 +80,7 @@ async function getUniquePlaces(): Promise<string[]> {
   const { data, error } = await supabase
     .schema('archive')
     .from('entries')
-    .select('place')
-    .not('place', 'is', null)
-    .neq('place', '');
+    .select('place');
 
   if (error) {
     console.error('Error fetching places:', error);
@@ -91,8 +89,9 @@ async function getUniquePlaces(): Promise<string[]> {
 
   // Normalize places to avoid duplicates like "Mar del Plata" vs "Mar Del Plata"
   const placesMap = new Map<string, string>();
-  data?.forEach((item: any) => {
-    const place = item.place as string;
+  const rows = (data ?? []) as { place: string | null }[];
+  rows.forEach((item) => {
+    const place = item.place;
     if (place) {
       const normalized = place.toLowerCase().trim();
       // Keep the first occurrence (or prefer title case)
@@ -117,7 +116,8 @@ async function getUniqueMoods(): Promise<string[]> {
     return [];
   }
 
-  const allMoods = data?.flatMap((entry: any) => entry.mood || []) || [];
+  const rows = (data ?? []) as { mood: string[] | null }[];
+  const allMoods = rows.flatMap((entry) => entry.mood || []);
   return [...new Set(allMoods)].filter(Boolean) as string[];
 }
 
@@ -134,7 +134,8 @@ async function getUniqueColors(): Promise<string[]> {
   }
 
   // Flatten and count colors
-  const allColors = data?.flatMap((entry: any) => entry.colors || []) || [];
+  const rows = (data ?? []) as { colors: string[] | null }[];
+  const allColors = rows.flatMap((entry) => entry.colors || []);
   const colorCounts = allColors.reduce((acc: Record<string, number>, color: string) => {
     acc[color] = (acc[color] || 0) + 1;
     return acc;

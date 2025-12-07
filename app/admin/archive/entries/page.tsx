@@ -86,11 +86,15 @@ function ArchiveEntriesList() {
       setHasMore(Boolean(data.hasMore));
       setTotal(data.total || 0);
       setPage(pageToLoad);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "No se pudieron cargar las entradas del Archive.";
       toast({
         title: "Error",
-        description: error?.message || "No se pudieron cargar las entradas del Archive.",
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -135,11 +139,13 @@ function ArchiveEntriesList() {
         title: 'Entrada eliminada',
         description: 'La pieza fue eliminada del Busy Archive.',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
+      const message =
+        error instanceof Error ? error.message : 'No se pudo eliminar la entrada.';
       toast({
         title: 'Error al eliminar',
-        description: error?.message || 'No se pudo eliminar la entrada.',
+        description: message,
         variant: 'destructive',
       });
     } finally {

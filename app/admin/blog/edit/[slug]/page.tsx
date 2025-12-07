@@ -1,20 +1,20 @@
 "use client"
 
+import MarkdownPreview from "@/components/blog/markdown-preview"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import MarkdownPreview from "@/components/blog/markdown-preview"
 import authors from "@/data/authors.json"
+import { useToast } from "@/hooks/use-toast"
 import supabase from "@/lib/supabase/client"
-import { Author } from "@/lib/types"
+import type { Author } from "@/types"
 import Image from "next/image"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useToast } from "@/hooks/use-toast"
 
 function slugify(input: string) {
   return (input || "")
@@ -163,10 +163,10 @@ export default function AdminBlogEditPage() {
   function applyFormat(before: string, after = "", preserveScroll = true) {
     const el = textareaRef.current
     if (!el) return
-    
+
     // Save scroll position
     const scrollTop = preserveScroll ? el.scrollTop : 0
-    
+
     const start = el.selectionStart || 0
     const end = el.selectionEnd || 0
 
@@ -665,7 +665,7 @@ Recomendación final basada en diferentes perfiles de usuario.
                 <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("**", "**") }}>Bold</Button>
                 <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("*", "*") }}>Italic</Button>
                 <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("<u>", "</u>") }}>Underline</Button>
-                
+
                 {/* Link button */}
                 <Popover open={linkOpen} onOpenChange={setLinkOpen}>
                   <PopoverTrigger asChild>

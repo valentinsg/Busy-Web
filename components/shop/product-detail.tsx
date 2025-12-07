@@ -1,24 +1,24 @@
 "use client"
-import * as React from "react"
-import Link from "next/link"
-import { ArrowLeft, Star, Truck, Shield, RotateCcw, Plane, Flag } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ProductGallery } from "@/components/shop/product-gallery"
 import { AddToCart } from "@/components/shop/add-to-cart"
 import { ProductCard } from "@/components/shop/product-card"
-import type { Product } from "@/lib/types"
-import { formatPrice, formatRating } from "@/lib/format"
-import { getSettingsClient } from "@/lib/repo/settings"
+import { ProductGallery } from "@/components/shop/product-gallery"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { addReview, averageRating, getReviews, type Review } from "@/lib/reviews"
 import { useTranslations } from "@/hooks/use-translations"
+import { formatPrice, formatRating } from "@/lib/format"
+import { getSettingsClient } from "@/lib/repo/settings"
+import { addReview, averageRating, getReviews, type Review } from "@/lib/reviews"
+import type { Product } from "@/types"
+import { ArrowLeft, Flag, Plane, RotateCcw, Shield, Star, Truck } from "lucide-react"
+import Link from "next/link"
+import * as React from "react"
 
 interface ProductDetailProps {
   product: Product
@@ -28,7 +28,7 @@ interface ProductDetailProps {
 // Helper function to get icon based on benefit text
 const getBenefitIcon = (title: string) => {
   const text = title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-  
+
   if (text.includes("envio") || text.includes("gratis") || text.includes("shipping")) {
     return Truck
   }
@@ -44,7 +44,7 @@ const getBenefitIcon = (title: string) => {
   if (text.includes("devolucion") || text.includes("return")) {
     return RotateCcw
   }
-  
+
   return Shield // Default icon
 }
 
@@ -67,8 +67,10 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
 
   React.useEffect(() => {
     try {
-      if (typeof window !== "undefined" && (window as any).dataLayer) {
-        ;(window as any).dataLayer.push({
+      if (typeof window !== "undefined") {
+        const w = window as Window & { dataLayer?: unknown[] }
+        if (Array.isArray(w.dataLayer)) {
+          w.dataLayer.push({
           event: "view_item",
           ecommerce: {
             currency: product.currency || "ARS",
@@ -84,6 +86,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
             ],
           },
         })
+        }
       }
     } catch {}
   }, [product.id, product.name, product.category, product.price, product.currency])
@@ -225,8 +228,8 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                 {product.benefits.map((b, idx) => {
                   const IconComponent = getBenefitIcon(b.title)
                   // If benefit is "Envío gratis" and has no subtitle, add the threshold
-                  const displaySubtitle = b.subtitle || 
-                    (b.title.toLowerCase().includes('envío') && b.title.toLowerCase().includes('gratis') 
+                  const displaySubtitle = b.subtitle ||
+                    (b.title.toLowerCase().includes('envío') && b.title.toLowerCase().includes('gratis')
                       ? t('free_shipping_from', { amount: formatPrice(freeThreshold) })
                       : undefined)
                   return (
@@ -449,7 +452,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                     ))}
                   </ul>
                 )}
-                
+
                 {/* Formulario de reseña */}
                 <div className="mt-8 pt-8 border-t">
                   <h3 className="font-medium mb-4 font-heading">Dejar una reseña</h3>

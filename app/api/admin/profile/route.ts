@@ -1,4 +1,4 @@
- import { getAuthorByEmail, updateAuthor, uploadAuthorAvatar, createAuthor } from '@/lib/repo/authors'
+ import { createAuthor, getAuthorByEmail, updateAuthor } from '@/lib/repo/authors'
 import getServiceClient from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 

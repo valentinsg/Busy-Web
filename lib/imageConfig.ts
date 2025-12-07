@@ -1,9 +1,9 @@
 /**
  * Centralized Image Optimization Configuration
- * 
+ *
  * This module defines the allowed image widths and provides utilities
  * to minimize CDN transformations while maintaining visual quality.
- * 
+ *
  * Strategy:
  * - Limit to 6 strategic widths (down from 16)
  * - Use fixed dimensions where possible
@@ -49,70 +49,70 @@ export const IMAGE_DIMENSIONS = {
     height: 1080,
     sizes: '100vw',
   },
-  
+
   // Product cards in grid
   productCard: {
     width: 640,
     height: 640,
     sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw',
   },
-  
+
   // Product gallery main image
   productGallery: {
     width: 1200,
     height: 1200,
     sizes: '(max-width: 768px) 100vw, 50vw',
   },
-  
+
   // Product gallery thumbnails
   productThumbnail: {
     width: 384,
     height: 384,
     sizes: '(max-width: 768px) 25vw, 10vw',
   },
-  
+
   // Blog post cards
   blogCard: {
     width: 828,
     height: 620, // 4:3 aspect ratio
     sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
   },
-  
+
   // Category cards
   categoryCard: {
     width: 828,
     height: 828,
     sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
   },
-  
+
   // Logo
   logo: {
     width: 200,
     height: 200,
     sizes: '200px',
   },
-  
+
   // Icons
   icon: {
     width: 48,
     height: 48,
     sizes: '48px',
   },
-  
+
   // Avatar/Profile
   avatar: {
     width: 384,
     height: 384,
     sizes: '(max-width: 640px) 96px, 128px',
   },
-  
+
   // Background patterns
   pattern: {
     width: 640,
     height: 640,
     sizes: '100vw',
   },
-  
+
   // Community/Social icons (large circular)
   socialIcon: {
     width: 384,
@@ -131,7 +131,7 @@ export const IMAGE_DIMENSIONS = {
  */
 export function normalizeImageUrl(url: string): string {
   if (!url) return url
-  
+
   try {
     const urlObj = new URL(url, 'https://placeholder.com')
     // Remove query string and hash
@@ -156,7 +156,7 @@ export function getClosestAllowedWidth(targetWidth: number): number {
  * Validates if a width is in the allowed list
  */
 export function isAllowedWidth(width: number): boolean {
-  return ALLOWED_IMAGE_WIDTHS.includes(width as any)
+  return (ALLOWED_IMAGE_WIDTHS as readonly number[]).includes(width)
 }
 
 /**
@@ -177,7 +177,7 @@ export function generateSizesAttribute(config: {
   default: string
 }): string {
   const parts: string[] = []
-  
+
   if (config.mobile) {
     parts.push(`(max-width: 640px) ${config.mobile}`)
   }
@@ -188,7 +188,7 @@ export function generateSizesAttribute(config: {
     parts.push(`(max-width: 1536px) ${config.desktop}`)
   }
   parts.push(config.default)
-  
+
   return parts.join(', ')
 }
 
@@ -217,10 +217,10 @@ export function optimizeSupabaseUrl(
   } = {}
 ): string {
   if (!isSupabaseStorageUrl(url)) return url
-  
+
   const normalized = normalizeImageUrl(url)
   const params = new URLSearchParams()
-  
+
   if (options.width) {
     const allowedWidth = getClosestAllowedWidth(options.width)
     params.set('width', allowedWidth.toString())
@@ -234,7 +234,7 @@ export function optimizeSupabaseUrl(
   if (options.format) {
     params.set('format', options.format)
   }
-  
+
   const separator = normalized.includes('?') ? '&' : '?'
   return `${normalized}${separator}${params.toString()}`
 }

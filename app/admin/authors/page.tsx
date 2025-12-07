@@ -1,37 +1,37 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { useEffect, useState } from "react"
-import { Loader2, Plus, Pencil, Trash2, Instagram, Twitter, Linkedin } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
+import { Instagram, Linkedin, Loader2, Pencil, Plus, Trash2, Twitter } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 
 interface Author {
   id: string
@@ -65,11 +65,7 @@ export default function AuthorsPage() {
     active: true,
   })
 
-  useEffect(() => {
-    loadAuthors()
-  }, [])
-
-  async function loadAuthors() {
+  const loadAuthors = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/authors", { cache: "no-store" })
       if (!res.ok) throw new Error("Failed to load authors")
@@ -86,7 +82,11 @@ export default function AuthorsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    void loadAuthors()
+  }, [loadAuthors])
 
   function openCreateDialog() {
     setEditingAuthor(null)

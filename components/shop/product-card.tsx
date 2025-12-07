@@ -1,21 +1,21 @@
 'use client'
 
-import * as React from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { useCart } from '@/hooks/use-cart'
+import { formatPrice, formatRating } from '@/lib/format'
+import { getImageConfig, normalizeImageUrl } from '@/lib/imageConfig'
+import type { Product } from '@/types'
+import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import type { Product } from '@/lib/types'
-import { formatPrice, formatRating } from '@/lib/format'
-import { useCart } from '@/hooks/use-cart'
-import { getImageConfig, normalizeImageUrl } from '@/lib/imageConfig'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import * as React from 'react'
 
 interface ProductCardProps {
   product: Product
@@ -60,7 +60,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
   const handlePrevImage = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? product.images.length - 1 : prev - 1
     )
   }
@@ -68,7 +68,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
   const handleNextImage = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === product.images.length - 1 ? 0 : prev + 1
     )
   }

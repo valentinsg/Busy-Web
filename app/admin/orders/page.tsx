@@ -190,17 +190,6 @@ export default function OrdersListPage() {
     })
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date)
-  }
-
   const getTimeSince = (dateString: string) => {
     const date = new Date(dateString)
     const now = new Date()
@@ -369,7 +358,6 @@ export default function OrdersListPage() {
             const statusInfo = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending
             const channelInfo = channelConfig[order.channel as keyof typeof channelConfig] || channelConfig.web
             const StatusIcon = statusInfo.icon
-            const ChannelIcon = channelInfo.icon
 
             return (
               <Card key={order.id} className={cn("border-l-4 overflow-hidden", getStatusBorderColor(order.status))}>

@@ -1,10 +1,10 @@
 "use client"
 
-import { create } from "zustand"
-import { persist, createJSONStorage } from "zustand/middleware"
-import type { Product, CartItem, Promotion, AppliedPromo } from "@/lib/types"
-import { validateCoupon, type Coupon } from "@/lib/coupons"
 import { calculateAllPromotions } from "@/lib/checkout/promo-engine"
+import { validateCoupon, type Coupon } from "@/lib/coupons"
+import type { AppliedPromo, CartItem, Product, Promotion } from "@/types"
+import { create } from "zustand"
+import { createJSONStorage, persist } from "zustand/middleware"
 
 interface CartStore {
   items: CartItem[]
@@ -181,15 +181,15 @@ export const useCart = create<CartStore>()(
       getDiscount: () => {
         // Primero aplicamos descuentos de promociones (2x1, 3x2)
         const promoDiscount = get().getPromoDiscount()
-        
+
         // Luego aplicamos cupones sobre el subtotal después de promos
         const coupon = get().coupon
         if (!coupon) return promoDiscount
-        
+
         const subtotal = get().getSubtotal()
         const subtotalAfterPromo = Math.max(0, subtotal - promoDiscount)
         const couponDiscount = (subtotalAfterPromo * coupon.percent) / 100
-        
+
         return promoDiscount + Math.max(0, Math.min(couponDiscount, subtotalAfterPromo))
       },
 

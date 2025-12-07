@@ -13,7 +13,7 @@ import { ArchiveFilters } from '@/types/archive';
 import { ArrowLeft, Home, Search, SlidersHorizontal, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useState, useTransition } from 'react';
+import { useCallback, useMemo, useState, useTransition } from 'react';
 
 interface ArchiveSearchProps {
   places: string[];
@@ -34,13 +34,16 @@ export function ArchiveSearch({ places, moods, colors, showFilters = true, showB
     searchParams?.get('q') || ''
   );
 
-  // Get current filters from URL
-  const currentFilters = {
-    q: searchParams?.get('q') || '',
-    color: searchParams?.get('color') || '',
-    mood: searchParams?.getAll('mood') || [],
-    place: searchParams?.get('place') || '',
-  };
+  // Get current filters from URL (memoized for stable dependencies)
+  const currentFilters = useMemo(
+    () => ({
+      q: searchParams?.get('q') || '',
+      color: searchParams?.get('color') || '',
+      mood: searchParams?.getAll('mood') || [],
+      place: searchParams?.get('place') || '',
+    }),
+    [searchParams]
+  );
 
   // Check if any filters are active
   const hasActiveFilters =
@@ -122,7 +125,13 @@ export function ArchiveSearch({ places, moods, colors, showFilters = true, showB
             {/* Back button */}
             <button
               type="button"
-              onClick={() => window.history.back()}
+              onClick={() => {
+                if (window.history.length > 1) {
+                  window.history.back();
+                } else {
+                  router.push(backHref);
+                }
+              }}
               className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
               aria-label="Volver atrás"
             >
@@ -130,7 +139,7 @@ export function ArchiveSearch({ places, moods, colors, showFilters = true, showB
             </button>
             {/* Archive home button */}
             <Link
-              href="/archive"
+              href={backHref}
               className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
               aria-label="Ir al archivo"
             >
@@ -281,7 +290,7 @@ export function ArchiveSearch({ places, moods, colors, showFilters = true, showB
         <div className="flex flex-wrap items-center gap-2">
           {currentFilters.q && (
             <Badge variant="secondary" className="font-body text-xs gap-1 pr-1">
-              "{currentFilters.q}"
+              &quot;{currentFilters.q}&quot;
               <button
                 onClick={() => {
                   setSearchValue('');

@@ -1,7 +1,7 @@
 "use client"
 
+import { useI18n } from "@/components/providers/i18n-provider"
 import { useEffect } from "react"
-import { useI18n } from "@/components/i18n-provider"
 
 export function HtmlLang() {
   const { locale } = useI18n()

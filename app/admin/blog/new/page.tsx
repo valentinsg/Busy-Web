@@ -1,19 +1,19 @@
 "use client"
 
-import { useMemo, useRef, useState, useEffect } from "react"
-import Link from "next/link"
-import authors from "@/data/authors.json"
-import dynamic from "next/dynamic"
-import supabase from "@/lib/supabase/client"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Author } from "@/lib/types"
-import Image from "next/image"
+import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import authors from "@/data/authors.json"
 import { useToast } from "@/hooks/use-toast"
+import supabase from "@/lib/supabase/client"
+import type { Author } from "@/types"
+import dynamic from "next/dynamic"
+import Image from "next/image"
+import Link from "next/link"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 const MarkdownPreview = dynamic(() => import("@/components/blog/markdown-preview"), {
   ssr: false,
@@ -120,10 +120,10 @@ export default function AdminBlogNewPage() {
   function applyFormat(before: string, after = "", preserveScroll = true) {
     const el = textareaRef.current
     if (!el) return
-    
+
     // Save scroll position
     const scrollTop = preserveScroll ? el.scrollTop : 0
-    
+
     const start = el.selectionStart || 0
     const end = el.selectionEnd || 0
 
@@ -566,7 +566,7 @@ Recomendación final basada en diferentes perfiles de usuario.
                 <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("**", "**") }}>Bold</Button>
                 <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("*", "*") }}>Italic</Button>
                 <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("<u>", "</u>") }}>Underline</Button>
-                
+
                 {/* Link button */}
                 <Popover open={linkOpen} onOpenChange={setLinkOpen}>
                   <PopoverTrigger asChild>

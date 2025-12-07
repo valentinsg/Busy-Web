@@ -3,12 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "build": "next build",
     "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
+    "clean": "rm -rf .next node_modules/.cache",
+    "clean:full": "rm -rf .next node_modules pnpm-lock.yaml && pnpm install",
     "postbuild": "next-sitemap",
-    "sitemap": "next-sitemap"
+    "sitemap": "next-sitemap",
+    "db:types": "echo 'Run: npx supabase gen types typescript --project-id YOUR_PROJECT_ID > types/supabase.ts'"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.943.0",
@@ -111,10 +118,13 @@
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/web-push": "^3.6.4",
     "eslint": "^8.57.1",
     "eslint-config-next": "15.5.2",
     "next-sitemap": "^4.2.3",
     "postcss": "^8.5",
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.9",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   }

@@ -59,7 +59,7 @@ export async function advanceToPlayoffs(tournamentId: number): Promise<Match[]> 
     throw new Error('Se requieren al menos 2 grupos con equipos para generar playoffs');
   }
 
-  const playoffMatches: any[] = [];
+  const playoffMatches: Partial<Match>[] = [];
   let matchNumber = 1;
 
   const { data: lastMatch } = await supabase

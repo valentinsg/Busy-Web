@@ -4,13 +4,13 @@
 // EDITOR MDX CON PREVIEW
 // =====================================================
 
-import { useState, useEffect, useCallback } from 'react';
-import dynamic from 'next/dynamic';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import matter from 'gray-matter';
+import dynamic from 'next/dynamic';
+import { useCallback, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import matter from 'gray-matter';
 
 // Importar MDEditor dinámicamente para evitar SSR issues
 const MDEditor = dynamic(
@@ -21,7 +21,7 @@ const MDEditor = dynamic(
 interface MDXEditorProps {
   value: string;
   onChange: (value: string) => void;
-  onFrontmatterChange?: (frontmatter: any) => void;
+  onFrontmatterChange?: (frontmatter: Record<string, unknown>) => void;
   autoSave?: boolean;
   autoSaveDelay?: number;
 }
@@ -34,14 +34,12 @@ export function MDXEditor({
   autoSaveDelay = 2000,
 }: MDXEditorProps) {
   const [localValue, setLocalValue] = useState(value);
-  const [frontmatter, setFrontmatter] = useState<any>({});
   const [content, setContent] = useState('');
 
   // Parsear MDX con front-matter
   useEffect(() => {
     try {
       const parsed = matter(localValue);
-      setFrontmatter(parsed.data);
       setContent(parsed.content);
       onFrontmatterChange?.(parsed.data);
     } catch (error) {

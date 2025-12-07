@@ -1,7 +1,7 @@
 import { ProductDetail } from "@/components/shop/product-detail"
 import { getProductById, getProductsByCategory } from "@/lib/products"
 import { getProductByIdAsync, getProductsAsync } from "@/lib/repo/products"
-import type { Product } from "@/lib/types"
+import type { Product } from "@/types"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 

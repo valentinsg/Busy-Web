@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase/client"
 import getServiceClient from "@/lib/supabase/server"
-import type { Product } from "@/lib/types"
+import type { Product } from "@/types"
 
 // Fetch manually curated related products (upsell/cross-sell)
 export async function getRelatedProducts(productId: string, limit = 8): Promise<Product[]> {

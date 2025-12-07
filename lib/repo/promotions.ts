@@ -1,23 +1,23 @@
 import getServiceClient from "@/lib/supabase/server"
-import type { Promotion } from "@/lib/types"
+import type { Promotion } from "@/types"
 
 /**
  * Obtiene todas las promociones activas
  */
 export async function getActivePromotionsAsync(): Promise<Promotion[]> {
   const supabase = await getServiceClient()
-  
+
   const { data, error } = await supabase
     .from('promotions')
     .select('*')
     .eq('active', true)
     .order('priority', { ascending: false })
-  
+
   if (error) {
     console.error('Error fetching active promotions:', error)
     return []
   }
-  
+
   return (data || []).map(row => ({
     id: row.id,
     name: row.name,
@@ -44,17 +44,17 @@ export async function getActivePromotionsAsync(): Promise<Promotion[]> {
  */
 export async function getAllPromotionsAsync(): Promise<Promotion[]> {
   const supabase = await getServiceClient()
-  
+
   const { data, error } = await supabase
     .from('promotions')
     .select('*')
     .order('priority', { ascending: false })
-  
+
   if (error) {
     console.error('Error fetching all promotions:', error)
     return []
   }
-  
+
   return (data || []).map(row => ({
     id: row.id,
     name: row.name,
@@ -81,18 +81,18 @@ export async function getAllPromotionsAsync(): Promise<Promotion[]> {
  */
 export async function getPromotionByIdAsync(id: string): Promise<Promotion | null> {
   const supabase = await getServiceClient()
-  
+
   const { data, error } = await supabase
     .from('promotions')
     .select('*')
     .eq('id', id)
     .single()
-  
+
   if (error || !data) {
     console.error('Error fetching promotion:', error)
     return null
   }
-  
+
   return {
     id: data.id,
     name: data.name,
@@ -119,7 +119,7 @@ export async function getPromotionByIdAsync(id: string): Promise<Promotion | nul
  */
 export async function createPromotionAsync(promotion: Omit<Promotion, 'id' | 'created_at' | 'updated_at' | 'current_uses'>): Promise<Promotion | null> {
   const supabase = await getServiceClient()
-  
+
   const { data, error } = await supabase
     .from('promotions')
     .insert({
@@ -139,12 +139,12 @@ export async function createPromotionAsync(promotion: Omit<Promotion, 'id' | 'cr
     })
     .select()
     .single()
-  
+
   if (error || !data) {
     console.error('Error creating promotion:', error)
     return null
   }
-  
+
   return {
     id: data.id,
     name: data.name,
@@ -171,19 +171,19 @@ export async function createPromotionAsync(promotion: Omit<Promotion, 'id' | 'cr
  */
 export async function updatePromotionAsync(id: string, updates: Partial<Omit<Promotion, 'id' | 'created_at' | 'updated_at'>>): Promise<Promotion | null> {
   const supabase = await getServiceClient()
-  
+
   const { data, error } = await supabase
     .from('promotions')
     .update(updates)
     .eq('id', id)
     .select()
     .single()
-  
+
   if (error || !data) {
     console.error('Error updating promotion:', error)
     return null
   }
-  
+
   return {
     id: data.id,
     name: data.name,
@@ -210,17 +210,17 @@ export async function updatePromotionAsync(id: string, updates: Partial<Omit<Pro
  */
 export async function deletePromotionAsync(id: string): Promise<boolean> {
   const supabase = await getServiceClient()
-  
+
   const { error } = await supabase
     .from('promotions')
     .delete()
     .eq('id', id)
-  
+
   if (error) {
     console.error('Error deleting promotion:', error)
     return false
   }
-  
+
   return true
 }
 
@@ -229,13 +229,13 @@ export async function deletePromotionAsync(id: string): Promise<boolean> {
  */
 export async function incrementPromotionUsageAsync(id: string): Promise<boolean> {
   const supabase = await getServiceClient()
-  
+
   const { error } = await supabase.rpc('increment_promotion_usage', { promo_id: id })
-  
+
   if (error) {
     console.error('Error incrementing promotion usage:', error)
     return false
   }
-  
+
   return true
 }

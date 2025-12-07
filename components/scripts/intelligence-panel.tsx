@@ -4,41 +4,40 @@
 // PANEL DE INTELIGENCIA ÚTIL
 // =====================================================
 
-import { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Lightbulb,
-  Wand2,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
-  Sparkles,
-} from 'lucide-react';
-import type {
-  Script,
-  ScriptScene,
-  ValidationResult,
-  PlatformChecklist,
-  ScriptTemplate,
-} from '@/types/scripts';
 import { SCRIPT_TEMPLATES } from '@/lib/scripts/templates';
-import { validateScript, getPlatformChecklist } from '@/lib/scripts/validators';
+import { getPlatformChecklist, validateScript } from '@/lib/scripts/validators';
+import type {
+    PlatformChecklist,
+    Script,
+    ScriptScene,
+    ScriptTemplate,
+    ValidationResult,
+} from '@/types/scripts';
+import {
+    AlertTriangle,
+    CheckCircle2,
+    Info,
+    Lightbulb,
+    Sparkles,
+    Wand2,
+} from 'lucide-react';
 
 interface IntelligencePanelProps {
   script: Script;
@@ -155,8 +154,6 @@ function TemplatesSection({
 }: {
   onApplyTemplate: (template: ScriptTemplate) => void;
 }) {
-  const [selectedTemplate, setSelectedTemplate] = useState<ScriptTemplate | null>(null);
-
   return (
     <div className="space-y-3 pt-2">
       <p className="text-xs text-muted-foreground">
@@ -171,7 +168,6 @@ function TemplatesSection({
                 variant="outline"
                 size="sm"
                 className="w-full justify-start text-left"
-                onClick={() => setSelectedTemplate(template)}
               >
                 <div className="flex-1">
                   <div className="font-medium text-sm">{template.name}</div>

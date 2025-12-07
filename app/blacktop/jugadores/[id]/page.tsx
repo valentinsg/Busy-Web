@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getServiceClient } from '@/lib/supabase/server';
-import type { Player, Team } from '@/types/blacktop';
+import type { Player, Team, Tournament } from '@/types/blacktop';
 import { ArrowLeft, Award, ChevronRight, Instagram, Target, TrendingUp, Trophy } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -27,7 +27,7 @@ async function getPlayerWithTeam(playerId: number) {
     .single();
 
   if (error) return null;
-  return data as Player & { team: Team & { tournament: any } };
+  return data as Player & { team: Team & { tournament: Tournament | null } };
 }
 
 async function getPlayerStats(playerId: number) {
@@ -279,7 +279,16 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
               </div>
             ) : (
               <div className="space-y-3">
-                {matches.map((match: any) => (
+                {matches.map((match: {
+                  id: number;
+                  team_a?: { name?: string | null } | null;
+                  team_b?: { name?: string | null } | null;
+                  team_a_score: number | null;
+                  team_b_score: number | null;
+                  scheduled_time?: string | null;
+                  winner_id?: number | null;
+                  winner?: { name?: string | null } | null;
+                }) => (
                   <div key={match.id} className="p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex-1 text-right">

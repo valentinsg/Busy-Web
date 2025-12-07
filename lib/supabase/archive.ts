@@ -10,197 +10,8 @@ import {
 } from '@/types/archive';
 import { createClient } from '@supabase/supabase-js';
 
-// Define the Supabase database types
-type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
-
-type Database = {
-  public: {
-    Tables: {
-      'archive.entries': {
-        Row: {
-          id: string;
-          thumb_url: string;
-          medium_url: string;
-          full_url: string;
-          colors: string[];
-          mood: string[];
-          place: string | null;
-          person: string | null;
-          tags: string[];
-          microcopy: string | null;
-          likes: number;
-          views: number;
-          is_public: boolean;
-          created_at: string;
-          updated_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          thumb_url: string;
-          medium_url: string;
-          full_url: string;
-          colors: string[];
-          mood: string[];
-          place?: string | null;
-          person?: string | null;
-          tags?: string[];
-          microcopy?: string | null;
-          likes?: number;
-          views?: number;
-          is_public?: boolean;
-          created_at?: string;
-          updated_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          thumb_url?: string;
-          medium_url?: string;
-          full_url?: string;
-          colors?: string[];
-          mood?: string[];
-          place?: string | null;
-          person?: string | null;
-          tags?: string[];
-          microcopy?: string | null;
-          likes?: number;
-          views?: number;
-          is_public?: boolean;
-          created_at?: string;
-          updated_at?: string | null;
-        };
-      };
-      'archive.playlists': {
-        Row: {
-          id: string;
-          user_id: string;
-          name: string;
-          description: string | null;
-          is_public: boolean;
-          created_at: string;
-          updated_at: string;
-          cover_image: string | null;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          name: string;
-          description?: string | null;
-          is_public?: boolean;
-          created_at?: string;
-          updated_at?: string;
-          cover_image?: string | null;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          name?: string;
-          description?: string | null;
-          is_public?: boolean;
-          created_at?: string;
-          updated_at?: string;
-          cover_image?: string | null;
-        };
-      };
-      'archive.playlist_items': {
-        Row: {
-          id: string;
-          playlist_id: string;
-          entry_id: string;
-          position: number;
-          added_at: string;
-        };
-        Insert: {
-          id?: string;
-          playlist_id: string;
-          entry_id: string;
-          position?: number;
-          added_at?: string;
-        };
-        Update: {
-          id?: string;
-          playlist_id?: string;
-          entry_id?: string;
-          position?: number;
-          added_at?: string;
-        };
-      };
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      increment_views: {
-        Args: {
-          entry_id: string;
-        };
-        Returns: undefined;
-      };
-      increment_likes: {
-        Args: {
-          entry_id: string;
-        };
-        Returns: number;
-      };
-      get_recommendations: {
-        Args: {
-          entry_id: string;
-          max_results?: number;
-          min_score?: number;
-          exclude_ids?: string[];
-        };
-        Returns: {
-          entry_id: string;
-          score: number;
-          entry: Json;
-        }[];
-      };
-      get_timeline_entries: {
-        Args: Record<PropertyKey, never>;
-        Returns: {
-          year: number;
-          month: number;
-          month_name: string;
-          entries: Json[];
-        }[];
-      };
-      get_archive_stats: {
-        Args: Record<PropertyKey, never>;
-        Returns: {
-          total_entries: number;
-          total_likes: number;
-          total_views: number;
-          top_tags: Json[];
-          top_places: Json[];
-          top_moods: Json[];
-        };
-      };
-      get_admin_archive_stats: {
-        Args: Record<PropertyKey, never>;
-        Returns: {
-          total_entries: number;
-          total_storage: number;
-          entries_by_month: { month: string; count: number }[];
-          recent_activity: Json[];
-        };
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-  };
-};
-
-// Initialize Supabase client
-type ArchiveEntryRow = Database['public']['Tables']['archive.entries']['Row'];
-
 export class ArchiveService {
-  private supabase = createClient<any>(
+  private supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.SUPABASE_SERVICE_ROLE_KEY || '',
     {
@@ -444,8 +255,8 @@ export class ArchiveService {
 
     if (!similar) return [];
 
-    // Return as RecommendationScore format
-    return similar.map((entry: any) => ({
+    // Return as RecommendationScore format (best-effort typing)
+    return (similar as unknown as ArchiveEntry[]).map((entry) => ({
       entryId: entry.id,
       score: 0.5,
       factors: { color: 0, mood: 0, place: 0, tags: 0, recency: 0, popularity: 0 },
@@ -502,7 +313,7 @@ export class ArchiveService {
     totalEntries: number;
     totalStorage: number;
     entriesByMonth: { month: string; count: number }[];
-    recentActivity: any[];
+    recentActivity: unknown[];
   }> {
     const { data, error } = await this.supabase.rpc('get_admin_archive_stats');
 
@@ -544,15 +355,17 @@ export async function getRecommendedEntries(
   limit = 4
 ): Promise<ArchiveEntry[]> {
   const recommendations = await archiveService.getRecommendations(entryId, { limit });
-  return recommendations.map((r: any) => r.entry || r as ArchiveEntry).filter(Boolean);
+  return recommendations
+    .map((r: RecommendationScore & { entry?: ArchiveEntry }) => r.entry ?? (r as unknown as ArchiveEntry))
+    .filter(Boolean);
 }
 
 // Singleton supabase client for helper functions (avoid creating new clients)
-let _helperClient: ReturnType<typeof createClient<any>> | null = null;
+let _helperClient: ReturnType<typeof createClient> | null = null;
 
 const getSupabaseClient = () => {
   if (!_helperClient) {
-    _helperClient = createClient<any>(
+    _helperClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
@@ -570,8 +383,7 @@ const getSupabaseClient = () => {
 export async function getUniquePlaces(): Promise<string[]> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
-    .schema('archive')
-    .from('entries')
+    .from('archive.entries')
     .select('place')
     .not('place', 'is', null)
     .not('place', 'eq', '');
@@ -588,8 +400,7 @@ export async function getUniquePlaces(): Promise<string[]> {
 export async function getUniqueMoods(): Promise<string[]> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
-    .schema('archive')
-    .from('entries')
+    .from('archive.entries')
     .select('mood');
 
   if (error) {
@@ -605,8 +416,7 @@ export async function getUniqueMoods(): Promise<string[]> {
 export async function getUniqueColors(): Promise<string[]> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
-    .schema('archive')
-    .from('entries')
+    .from('archive.entries')
     .select('colors');
 
   if (error) {
@@ -633,8 +443,7 @@ export async function getUniqueColors(): Promise<string[]> {
 export async function getUniqueTags(): Promise<string[]> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
-    .schema('archive')
-    .from('entries')
+    .from('archive.entries')
     .select('tags');
 
   if (error) {

@@ -1,11 +1,11 @@
 "use client"
 
-import * as React from "react"
-import { supabase } from "@/lib/supabase/client"
-import { useToast } from "@/hooks/use-toast"
-import { SimpleSelect } from "@/components/ui/simple-select"
 import { Menu } from "@/components/ui/menu"
-import { Subscriber } from "@/lib/types"
+import { SimpleSelect } from "@/components/ui/simple-select"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/lib/supabase/client"
+import type { Subscriber } from "@/types"
+import * as React from "react"
 
 export default function NewsletterAdminPage() {
   const { toast } = useToast()

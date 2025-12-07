@@ -6,7 +6,8 @@ export type MatchStatus = 'pending' | 'live' | 'halftime' | 'finished' | 'cancel
 export type TournamentStatus = 'draft' | 'groups' | 'playoffs' | 'finished';
 export type MatchPhase = 'groups' | 'quarterfinals' | 'semifinals' | 'third_place' | 'final';
 export type TeamStatus = 'pending' | 'approved' | 'rejected';
-export type MatchRound = 'group_a' | 'group_b' | 'semifinal' | 'final' | 'third_place';
+// Round labels are free-form (e.g. "Semifinal 1", "Cuartos de Final 2", "Tercer Puesto")
+export type MatchRound = string;
 export type MediaType = 'image' | 'video';
 
 export type TournamentFormatType = 'groups_playoff' | 'single_elimination' | 'round_robin' | 'custom';

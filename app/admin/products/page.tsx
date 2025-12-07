@@ -1,8 +1,8 @@
-import Link from "next/link"
-import { getProductsAsync } from "@/lib/repo/products"
-import { ProductCard } from "@/components/shop/product-card"
-import type { Product } from "@/lib/types"
 import ProductFeatureToggle from "@/components/admin/product-feature-toggle"
+import { ProductCard } from "@/components/shop/product-card"
+import { getProductsAsync } from "@/lib/repo/products"
+import type { Product } from "@/types"
+import Link from "next/link"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0

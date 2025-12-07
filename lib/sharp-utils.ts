@@ -115,20 +115,24 @@ export async function extractDominantColors(
     const vibrant = new Vibrant(buffer, { colorCount: count });
     const palette = await vibrant.getPalette();
 
-    const rawValues = Object.values(palette as any).filter(Boolean);
+    type VibrantSwatch = { getHex?: () => string; hex?: string } | string | null | undefined;
+
+    const rawValues = Object.values(palette as Record<string, VibrantSwatch>).filter(Boolean) as VibrantSwatch[];
 
     const colors = rawValues
-      .map((swatch: any) => {
+      .map((swatch) => {
         // Direct string value
         if (typeof swatch === 'string') return swatch;
 
+        if (!swatch) return null;
+
         // Classic node-vibrant Swatch with getHex()
-        if (swatch && typeof swatch.getHex === 'function') {
+        if (typeof swatch.getHex === 'function') {
           return swatch.getHex();
         }
 
         // Some builds expose hex as a plain property
-        if (swatch && typeof swatch.hex === 'string') {
+        if (typeof swatch.hex === 'string') {
           return swatch.hex;
         }
 

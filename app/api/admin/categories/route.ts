@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getAllCategories, createCategory, type CreateCategoryInput } from '@/lib/repo/categories'
+import { createCategory, getAllCategories, type CreateCategoryInput } from '@/lib/repo/categories'
 import { getServiceClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 /**
  * GET /api/admin/categories
@@ -26,7 +26,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     // Validate required fields
     if (!body.slug || !body.name) {
       return NextResponse.json(
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
+
     // Compute next display_order if not provided
     let nextOrder = 0
     try {
@@ -57,21 +57,23 @@ export async function POST(request: NextRequest) {
       display_order: (body.display_order ?? nextOrder),
       is_active: body.is_active !== undefined ? body.is_active : true,
     }
-    
+
     const category = await createCategory(input)
-    
+
     if (!category) {
       return NextResponse.json(
         { error: 'Failed to create category' },
         { status: 500 }
       )
     }
-    
+
     return NextResponse.json(category, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating category:', error)
+    const message =
+      error instanceof Error ? error.message : 'Failed to create category'
     return NextResponse.json(
-      { error: error.message || 'Failed to create category' },
+      { error: message },
       { status: 500 }
     )
   }

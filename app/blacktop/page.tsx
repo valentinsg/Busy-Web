@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { getPublicTournaments, getTournamentWithStats } from '@/lib/repo/blacktop';
 import { generateSEO } from '@/lib/seo';
 import { generateBreadcrumbSchema } from '@/lib/structured-data';
+import type { Tournament } from '@/types/blacktop';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, MapPin } from 'lucide-react';
@@ -216,7 +217,13 @@ export default async function BlacktopPage() {
   );
 }
 
-function BlacktopStructuredData({ tournaments }: { tournaments: Array<any> }) {
+type TournamentWithStats = Tournament & {
+  teams_count?: number | null;
+  banner_url?: string | null;
+  flyer_images?: string[] | null;
+};
+
+function BlacktopStructuredData({ tournaments }: { tournaments: TournamentWithStats[] }) {
   const RAW_SITE_URL = process.env.SITE_URL || '';
   const SITE_URL = /^https?:\/\//.test(RAW_SITE_URL) && RAW_SITE_URL ? RAW_SITE_URL : 'https://busy.com.ar';
   const breadcrumb = generateBreadcrumbSchema([

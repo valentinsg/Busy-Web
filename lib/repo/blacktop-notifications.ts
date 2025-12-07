@@ -1,6 +1,5 @@
 import { getServiceClient } from '@/lib/supabase/server';
-import type { BlacktopTeamRegistrationMetadata, BlacktopMatchUpcomingMetadata, BlacktopMatchResultMetadata } from '@/types/notifications';
-import { createNotification } from './notifications';
+import type { BlacktopMatchResultMetadata, BlacktopMatchUpcomingMetadata, BlacktopTeamRegistrationMetadata } from '@/types/notifications';
 
 /**
  * Create notification when a team registers for a tournament
@@ -72,7 +71,7 @@ export async function notifyUpcomingMatch(params: {
   };
 
   const supabase = getServiceClient();
-  
+
   const matchDate = new Date(params.scheduledTime).toLocaleDateString('es-AR', {
     day: 'numeric',
     month: 'long',
@@ -128,7 +127,7 @@ export async function notifyMatchResult(params: {
   };
 
   const supabase = getServiceClient();
-  
+
   const { data, error } = await supabase
     .from('blacktop_notifications')
     .insert({

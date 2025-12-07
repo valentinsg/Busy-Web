@@ -4,21 +4,21 @@
 
 import { getServiceClient } from '@/lib/supabase/server';
 import type {
-  Tournament,
-  TournamentFormData,
-  Team,
-  TeamWithPlayers,
-  Player,
-  Match,
-  MatchWithTeams,
-  PlayerMatchStats,
-  TournamentMedia,
-  TournamentWithStats,
-  TournamentLeaderboard,
-  TeamRegistrationFormData,
-  MatchFormData,
-  PlayerStatsFormData,
-  TournamentMediaFormData,
+    Match,
+    MatchFormData,
+    MatchWithTeams,
+    Player,
+    PlayerMatchStats,
+    PlayerStatsFormData,
+    Team,
+    TeamRegistrationFormData,
+    TeamWithPlayers,
+    Tournament,
+    TournamentFormData,
+    TournamentLeaderboard,
+    TournamentMedia,
+    TournamentMediaFormData,
+    TournamentWithStats,
 } from '@/types/blacktop';
 
 // =====================================================
@@ -95,7 +95,7 @@ export async function getTournamentWithStats(id: number): Promise<TournamentWith
 export async function createTournament(data: TournamentFormData): Promise<Tournament> {
   const supabase = getServiceClient();
   // Omit fields that are not real DB columns (e.g., 'time') and undefined values
-  const { time, ...rest } = (data as any) ?? {};
+  const { time, ...rest } = (data as unknown as Record<string, unknown>) ?? {};
   const payload = Object.fromEntries(
     Object.entries(rest).filter(([, v]) => v !== undefined)
   );
@@ -112,7 +112,7 @@ export async function createTournament(data: TournamentFormData): Promise<Tourna
 export async function updateTournament(id: number, data: Partial<TournamentFormData>): Promise<Tournament> {
   const supabase = getServiceClient();
   // Omit fields that are not real DB columns (e.g., 'time') and undefined values
-  const { time, ...rest } = (data as any) ?? {};
+  const { time, ...rest } = (data as unknown as Record<string, unknown>) ?? {};
   const payload = Object.fromEntries(
     Object.entries(rest).filter(([, v]) => v !== undefined)
   );
@@ -405,18 +405,23 @@ export async function getTournamentLeaderboard(tournamentId: number): Promise<To
   if (!players) return [];
 
   // Calcular totales
-  const leaderboard: TournamentLeaderboard[] = players.map((player: any) => {
-    const stats = player.stats || [];
+  type PlayerWithTeamAndStats = Player & {
+    team: { id: number; name: string };
+    stats?: Pick<PlayerMatchStats, 'points' | 'assists' | 'rebounds' | 'steals' | 'blocks' | 'turnovers' | 'is_mvp'>[];
+  };
+
+  const leaderboard: TournamentLeaderboard[] = (players as PlayerWithTeamAndStats[]).map((player) => {
+    const stats = player.stats ?? [];
     return {
       player: player,
       team: player.team,
-      total_points: stats.reduce((sum: number, s: any) => sum + (s.points || 0), 0),
-      total_assists: stats.reduce((sum: number, s: any) => sum + (s.assists || 0), 0),
-      total_rebounds: stats.reduce((sum: number, s: any) => sum + (s.rebounds || 0), 0),
-      total_steals: stats.reduce((sum: number, s: any) => sum + (s.steals || 0), 0),
-      total_blocks: stats.reduce((sum: number, s: any) => sum + (s.blocks || 0), 0),
-      total_turnovers: stats.reduce((sum: number, s: any) => sum + (s.turnovers || 0), 0),
-      mvp_count: stats.filter((s: any) => s.is_mvp).length,
+      total_points: stats.reduce((sum, s) => sum + (s.points ?? 0), 0),
+      total_assists: stats.reduce((sum, s) => sum + (s.assists ?? 0), 0),
+      total_rebounds: stats.reduce((sum, s) => sum + (s.rebounds ?? 0), 0),
+      total_steals: stats.reduce((sum, s) => sum + (s.steals ?? 0), 0),
+      total_blocks: stats.reduce((sum, s) => sum + (s.blocks ?? 0), 0),
+      total_turnovers: stats.reduce((sum, s) => sum + (s.turnovers ?? 0), 0),
+      mvp_count: stats.filter((s) => s.is_mvp).length,
       games_played: stats.length,
     };
   });
@@ -531,7 +536,7 @@ export async function registerTeam(formData: TeamRegistrationFormData, teamLogoU
     }
 
     // 2. Crear nuevo equipo
-    const teamData: any = {
+    const teamData: Omit<Team, 'id' | 'created_at' | 'updated_at'> = {
       tournament_id: formData.tournament_id,
       name: formData.team_name,
       captain_name: formData.captain_name,
@@ -552,8 +557,10 @@ export async function registerTeam(formData: TeamRegistrationFormData, teamLogoU
     const team = await createTeam(teamData);
 
     // 3. Crear jugadores con sus fotos
-    const players = formData.players.map((p: any) => {
-      const playerData: any = {
+    type PlayerInput = TeamRegistrationFormData['players'][number] & { photo_url?: string | null };
+
+    const players = formData.players.map((p: PlayerInput) => {
+      const playerData: Omit<Player, 'id' | 'created_at' | 'updated_at'> = {
         tournament_id: formData.tournament_id,
         team_id: team.id,
         full_name: p.full_name,

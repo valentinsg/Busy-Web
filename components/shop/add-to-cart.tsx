@@ -1,14 +1,14 @@
 "use client"
 
-import * as React from "react"
-import { Plus, Minus, ShoppingCart } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import type { Product } from "@/lib/types"
 import { useCart } from "@/hooks/use-cart"
-import { capitalize } from "@/lib/format"
 import { useTranslations } from "@/hooks/use-translations"
+import { capitalize } from "@/lib/format"
+import type { Product } from "@/types"
+import { Minus, Plus, ShoppingCart } from "lucide-react"
+import * as React from "react"
 
 interface AddToCartProps {
   product: Product
@@ -23,7 +23,7 @@ export function AddToCart({ product, className = "", sizeLabel }: AddToCartProps
   const [quantity, setQuantity] = React.useState(1)
 
   const { addItem, getItemCount, openCart } = useCart()
-  
+
   // Determine label based on product type or use provided sizeLabel
   const effectiveSizeLabel = sizeLabel || (product.tags?.includes('pin') || product.tags?.includes('accessory') ? t('type') : t('size'))
 
@@ -32,8 +32,10 @@ export function AddToCart({ product, className = "", sizeLabel }: AddToCartProps
   const handleAddToCart = () => {
     addItem(product, selectedSize, selectedColor, quantity)
     try {
-      if (typeof window !== "undefined" && (window as any).dataLayer) {
-        ;(window as any).dataLayer.push({
+      if (typeof window !== "undefined") {
+        const w = window as Window & { dataLayer?: unknown[] }
+        if (Array.isArray(w.dataLayer)) {
+          w.dataLayer.push({
           event: "add_to_cart",
           ecommerce: {
             currency: product.currency || "ARS",
@@ -50,6 +52,7 @@ export function AddToCart({ product, className = "", sizeLabel }: AddToCartProps
             ],
           },
         })
+        }
       }
     } catch {}
     openCart()

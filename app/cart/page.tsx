@@ -1,27 +1,27 @@
 "use client"
-import * as React from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { ArrowLeft, Plus, Minus, X, ShoppingBag } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useI18n } from "@/components/providers/i18n-provider"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/hooks/use-cart"
-import { formatPrice, capitalize } from "@/lib/format"
 import { computeShipping, computeTax } from "@/lib/checkout/totals"
-import { useI18n } from "@/components/i18n-provider"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { capitalize, formatPrice } from "@/lib/format"
+import { ArrowLeft, Minus, Plus, ShoppingBag, X } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import * as React from "react"
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalItems, getSubtotal, clearCart } = useCart()

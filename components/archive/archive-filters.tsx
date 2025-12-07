@@ -6,17 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { ArchiveFilters } from '@/types/archive';
+import type { ArchiveFilters as ArchiveFiltersType } from '@/types/archive';
 import { Filter, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface ArchiveFiltersProps {
-  initialFilters: ArchiveFilters;
+  initialFilters: ArchiveFiltersType;
   places: string[];
   moods: string[];
 }
 
-export function ArchiveFilters({ initialFilters, places, moods }: ArchiveFiltersProps) {
+export function ArchiveFilters({ initialFilters: _initialFilters, places, moods }: ArchiveFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -39,7 +39,7 @@ export function ArchiveFilters({ initialFilters, places, moods }: ArchiveFilters
   );
 
   // Update URL with new filters
-  const updateFilters = (newFilters: Partial<ArchiveFilters>) => {
+  const updateFilters = (newFilters: Partial<ArchiveFiltersType>) => {
     const params = new URLSearchParams();
 
     // Keep existing filters

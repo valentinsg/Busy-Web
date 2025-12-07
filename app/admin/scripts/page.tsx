@@ -1,12 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase/client';
-import { ScriptsListClient } from './scripts-list-client';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import type { Script, ScriptProject } from '@/types/scripts';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { supabase } from '@/lib/supabase/client';
+import type { Script, ScriptProject } from '@/types/scripts';
+import { useEffect, useState } from 'react';
+import { ScriptsListClient } from './scripts-list-client';
 
 export default function ScriptsPage() {
   const [scripts, setScripts] = useState<Script[]>([]);
@@ -63,27 +61,6 @@ export default function ScriptsPage() {
         projects={projects}
         teamId={teamId}
       />
-    </div>
-  );
-}
-
-function ScriptsListSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-10 w-48" />
-        <div className="flex gap-2">
-          <Skeleton className="h-10 w-32" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-      </div>
-      <Card className="p-6">
-        <div className="space-y-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-24 w-full" />
-          ))}
-        </div>
-      </Card>
     </div>
   );
 }

@@ -1,15 +1,15 @@
-import { Suspense } from 'react';
-import { notFound } from 'next/navigation';
-import { getTournamentBySlug, getTeamsByTournament, getMatchesByTournament, getTournamentMedia, getTournamentLeaderboard } from '@/lib/repo/blacktop';
-import { TournamentHeader } from '@/components/blacktop/tournament-header';
-import { TournamentTabsNav, TournamentTabPanels } from '@/components/blacktop/tournament-content-tabs';
+import { TournamentTabPanels, TournamentTabsNav } from '@/components/blacktop/tournament-content-tabs';
 import { TournamentGalleryPublic } from '@/components/blacktop/tournament-gallery-public';
+import { TournamentHeader } from '@/components/blacktop/tournament-header';
 import { UpcomingMatchesNotification } from '@/components/blacktop/upcoming-matches-notification';
 import { Tabs } from '@/components/ui/tabs';
-import type { Metadata } from 'next';
+import { getMatchesByTournament, getTeamsByTournament, getTournamentBySlug, getTournamentLeaderboard, getTournamentMedia } from '@/lib/repo/blacktop';
 import { generateSEO } from '@/lib/seo';
 import { generateBreadcrumbSchema } from '@/lib/structured-data';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import Script from 'next/script';
+import { Suspense } from 'react';
 
 interface TournamentPageProps {
   params: {
@@ -110,7 +110,7 @@ async function TournamentContent({ slug }: { slug: string }) {
       )}
 
       {/* Notificaciones de próximos partidos */}
-      <UpcomingMatchesNotification 
+      <UpcomingMatchesNotification
         matches={matches}
         accentColor={tournament.accent_color}
       />
@@ -149,7 +149,7 @@ function StructuredData({
     { name: tournamentName, url: `${SITE_URL}/blacktop/${slug}` },
   ]);
 
-  const event: any = {
+  const event: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'SportsEvent',
     name: tournamentName,

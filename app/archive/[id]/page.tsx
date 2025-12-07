@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: ArchiveEntryPageProps): Promi
       title: `${title} | Busy Archive`,
       description,
       images: [ogImage],
-    } as any,
+    },
   };
 }
 
@@ -100,15 +100,14 @@ async function getUniquePlaces(): Promise<string[]> {
   const { data, error } = await supabase
     .schema('archive')
     .from('entries')
-    .select('place')
-    .not('place', 'is', null)
-    .neq('place', '');
+    .select('place');
 
   if (error) return [];
 
   const placesMap = new Map<string, string>();
-  data?.forEach((item: any) => {
-    const place = item.place as string;
+  const rows = (data ?? []) as { place: string | null }[];
+  rows.forEach((item) => {
+    const place = item.place;
     if (place) {
       const normalized = place.toLowerCase().trim();
       if (!placesMap.has(normalized)) {
@@ -129,7 +128,8 @@ async function getUniqueMoods(): Promise<string[]> {
 
   if (error) return [];
 
-  const allMoods = data?.flatMap((entry: any) => entry.mood || []) || [];
+  const rows = (data ?? []) as { mood: string[] | null }[];
+  const allMoods = rows.flatMap((entry) => entry.mood || []);
   return [...new Set(allMoods)].filter(Boolean) as string[];
 }
 
@@ -142,7 +142,8 @@ async function getUniqueColors(): Promise<string[]> {
 
   if (error) return [];
 
-  const allColors = data?.flatMap((entry: any) => entry.colors || []) || [];
+  const rows = (data ?? []) as { colors: string[] | null }[];
+  const allColors = rows.flatMap((entry) => entry.colors || []);
   const colorCounts = allColors.reduce((acc: Record<string, number>, color: string) => {
     acc[color] = (acc[color] || 0) + 1;
     return acc;

@@ -3,6 +3,7 @@ import { getTeamById } from '@/lib/repo/blacktop';
 import { generateSEO } from '@/lib/seo';
 import { generateBreadcrumbSchema } from '@/lib/structured-data';
 import { getServiceClient } from '@/lib/supabase/server';
+import type { Player, Team, Tournament } from '@/types/blacktop';
 import { ArrowLeft, Instagram, Target, Trophy, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -413,7 +414,13 @@ export default async function TeamProfilePage({ params }: TeamProfilePageProps) 
   );
 }
 
-function StructuredData({ team, tournament }: { team: any; tournament: any | null }) {
+interface TeamWithPlayers extends Team {
+  players?: Player[];
+}
+
+type SportsTeamJsonLd = Record<string, unknown>;
+
+function StructuredData({ team, tournament }: { team: TeamWithPlayers; tournament: Tournament | null }) {
   const RAW_SITE_URL = process.env.SITE_URL || '';
   const SITE_URL = /^https?:\/\//.test(RAW_SITE_URL) && RAW_SITE_URL ? RAW_SITE_URL : 'https://busy.com.ar';
 
@@ -423,7 +430,7 @@ function StructuredData({ team, tournament }: { team: any; tournament: any | nul
     { name: team.name, url: `${SITE_URL}/blacktop/equipos/${team.id}` },
   ]);
 
-  const sportsTeam = {
+  const sportsTeam: SportsTeamJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SportsTeam',
     name: team.name,
@@ -439,12 +446,12 @@ function StructuredData({ team, tournament }: { team: any; tournament: any | nul
       '@type': 'Person',
       name: team.captain_name,
     } : undefined,
-    member: Array.isArray(team.players) ? team.players.map((p: any) => ({
+    member: Array.isArray(team.players) ? team.players.map((p: Player) => ({
       '@type': 'Person',
       name: p.full_name,
       sameAs: p.instagram_handle ? `https://instagram.com/${String(p.instagram_handle).replace('@','')}` : undefined,
     })) : undefined,
-  } as any;
+  };
 
   return (
     <>

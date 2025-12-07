@@ -1,12 +1,12 @@
 import RouteTracker from '@/components/analytics/route-tracker'
-import { ChristmasProvider } from '@/components/christmas-provider'
 import { SplashGate } from '@/components/home/splash-gate'
-import { I18nProvider } from '@/components/i18n-provider'
 import { HtmlLang } from '@/components/layout/html-lang'
 import SiteFrame from '@/components/layout/site-frame'
-import { PromotionsProvider } from '@/components/promotions-provider'
-import SitePopover from '@/components/site-popover'
-import { ThemeProvider } from '@/components/theme-provider'
+import { ChristmasProvider } from '@/components/providers/christmas-provider'
+import { I18nProvider } from '@/components/providers/i18n-provider'
+import { PromotionsProvider } from '@/components/providers/promotions-provider'
+import { ThemeProvider } from '@/components/providers/theme-provider'
+import SitePopover from '@/components/shared/site-popover'
 import { Toaster } from '@/components/ui/toaster'
 import { generateSEO } from '@/lib/seo'
 import { ReducedMotionProvider } from '@/motion/providers/ReducedMotionProvider'
@@ -29,8 +29,6 @@ const SITE_URL = /^https?:\/\//.test(RAW_SITE_URL) && RAW_SITE_URL
 const IS_PROD = process.env.NODE_ENV === 'production'
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
-const DEBUG_ANALYTICS = process.env.NEXT_PUBLIC_ANALYTICS_DEBUG === 'true'
 
 const AdminQuickFAB = dynamic(() => import('@/components/admin/admin-quick-fab'), {
   ssr: false,

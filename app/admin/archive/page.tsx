@@ -153,19 +153,14 @@ function ArchiveUploader() {
       }
 
       toast({
-        title: '✅ Subida completa',
+        title: '&#10004; Subida completa',
         description: `${uploadedCount} entr${uploadedCount === 1 ? 'ada' : 'adas'} al Busy Archive.`,
       });
       setItems([{ ...EMPTY_ITEM, id: 1 }]);
       setExpandedItem(1);
-    } catch (err: any) {
-      const message = err?.message || 'Ocurrió un error inesperado.';
-      setError(message);
-      toast({
-        title: '❌ Error al subir',
-        description: message,
-        variant: 'destructive',
-      });
+    } catch (error: unknown) {
+      console.error(error);
+      setError('Ocurrió un error al subir las imágenes. Por favor, intentá de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
@@ -371,7 +366,7 @@ function ArchiveUploader() {
                         />
                         {showFieldTips && (
                           <p className="text-[10px] text-muted-foreground">
-                            Ej: "Noche de pickup en la Bristol"
+                            Ej: &quot;Noche de pickup en la Bristol&quot;
                           </p>
                         )}
                       </div>

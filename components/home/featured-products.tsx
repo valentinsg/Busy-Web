@@ -1,11 +1,11 @@
 'use client'
 
+import { useI18n } from '@/components/providers/i18n-provider'
 import { ProductCard } from '@/components/shop/product-card'
 import { Button } from '@/components/ui/button'
-import { useI18n } from '@/components/i18n-provider'
+import type { Product } from '@/types'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import type { Product } from '@/lib/types'
 
 interface FeaturedProductsProps {
   products: Product[]

@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { updateCategory, deleteCategory, type UpdateCategoryInput } from '@/lib/repo/categories'
+import { deleteCategory, updateCategory, type UpdateCategoryInput } from '@/lib/repo/categories'
 import { getServiceClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 /**
  * PATCH /api/admin/categories/[id]
@@ -13,9 +13,9 @@ export async function PATCH(
   try {
     const body = await request.json()
     const { id } = params
-    
+
     const input: UpdateCategoryInput = {}
-    
+
     if (body.slug !== undefined) input.slug = body.slug
     if (body.name !== undefined) input.name = body.name
     if (body.description !== undefined) input.description = body.description
@@ -53,21 +53,23 @@ export async function PATCH(
       }
     }
     if (body.is_active !== undefined) input.is_active = body.is_active
-    
+
     const category = await updateCategory(id, input)
-    
+
     if (!category) {
       return NextResponse.json(
         { error: 'Category not found' },
         { status: 404 }
       )
     }
-    
+
     return NextResponse.json(category)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating category:', error)
+    const message =
+      error instanceof Error ? error.message : 'Failed to update category'
     return NextResponse.json(
-      { error: error.message || 'Failed to update category' },
+      { error: message },
       { status: 500 }
     )
   }
@@ -85,10 +87,12 @@ export async function DELETE(
     const { id } = params
     await deleteCategory(id)
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting category:', error)
+    const message =
+      error instanceof Error ? error.message : 'Failed to delete category'
     return NextResponse.json(
-      { error: error.message || 'Failed to delete category' },
+      { error: message },
       { status: 500 }
     )
   }

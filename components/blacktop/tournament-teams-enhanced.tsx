@@ -1,6 +1,5 @@
 'use client';
 
-import { Instagram } from 'lucide-react';
 import type { TeamWithPlayers } from '@/types/blacktop';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -18,8 +17,8 @@ export function TournamentTeamsEnhanced({ teams, accentColor }: TournamentTeamsE
     if (team.logo_url) {
       return (
         <div className="relative w-20 h-20 rounded-full overflow-hidden bg-white/10 border-2" style={{ borderColor: `${accentColor}40` }}>
-          <Image 
-            src={team.logo_url} 
+          <Image
+            src={team.logo_url}
             alt={team.name}
             fill
             className="object-cover"
@@ -27,13 +26,13 @@ export function TournamentTeamsEnhanced({ teams, accentColor }: TournamentTeamsE
         </div>
       );
     }
-    
+
     // Template logo con inicial del equipo
     return (
-      <div 
+      <div
         className="w-20 h-20 rounded-full flex items-center justify-center font-bold text-3xl border-2"
-        style={{ 
-          backgroundColor: `${accentColor}20`, 
+        style={{
+          backgroundColor: `${accentColor}20`,
           color: accentColor,
           borderColor: `${accentColor}40`
         }}
@@ -54,14 +53,14 @@ export function TournamentTeamsEnhanced({ teams, accentColor }: TournamentTeamsE
           >
             {/* Accent line */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent opacity-50" style={{ color: accentColor }} />
-            
+
             {/* Team Header */}
             <div className="p-5 sm:p-6">
               <div className="flex items-start gap-4 mb-4">
                 <div className="relative">
                   {renderTeamLogo(team)}
                   {team.group_name && (
-                    <div 
+                    <div
                       className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 border-black"
                       style={{ backgroundColor: accentColor }}
                     >
@@ -90,7 +89,7 @@ export function TournamentTeamsEnhanced({ teams, accentColor }: TournamentTeamsE
                       <div className="w-1 h-1 rounded-full" style={{ backgroundColor: accentColor }} />
                       <span className="flex-1 truncate">{player.full_name}</span>
                       {player.is_captain && (
-                        <span 
+                        <span
                           className="text-[10px] px-1.5 py-0.5 rounded font-bold"
                           style={{ backgroundColor: `${accentColor}20`, color: accentColor }}
                         >

@@ -1,10 +1,10 @@
 "use client"
 export const dynamic = "force-dynamic"
 
-import { useEffect, useMemo, useState } from "react"
-import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { Order, CartItem } from "@/lib/types"
+import type { Order, OrderItem } from "@/types"
+import Link from "next/link"
+import { useEffect, useMemo, useState } from "react"
 
 type Metric = "spend" | "frequency" | "recency"
 
@@ -221,7 +221,7 @@ export default function CustomersRankingPage() {
                               <div className="flex flex-wrap justify-between text-xs">
                                 <div>
                                   <div><span className="text-muted-foreground">Orden</span>: {o.id}</div>
-                                  <div><span className="text-muted-foreground">Fecha</span>: {new Date(o.created_at).toLocaleString()}</div>
+                                  <div><span className="text-muted-foreground">Fecha</span>: {new Date(o.created_at || o.placed_at).toLocaleString()}</div>
                                 </div>
                                 <div className="text-right">
                                   <div>Subtotal: ${" "}{Number(o.total).toFixed(2)} {o.currency}</div>
@@ -245,13 +245,13 @@ export default function CustomersRankingPage() {
                                       </tr>
                                     </thead>
                                     <tbody>
-                                      {o.items.map((it: CartItem, i: number) => (
+                                      {(o.items || []).map((it: OrderItem, i: number) => (
                                         <tr key={i} className="border-t">
-                                          <td className="px-2 py-1">{it.product.name}</td>
-                                          <td className="px-2 py-1">{it.selectedSize || '-'}</td>
+                                          <td className="px-2 py-1">{it.product_name || it.product_id}</td>
+                                          <td className="px-2 py-1">{it.variant_size || '-'}</td>
                                           <td className="px-2 py-1">{it.quantity}</td>
-                                          <td className="px-2 py-1">${" "}{Number(it.product.price).toFixed(2)}</td>
-                                          <td className="px-2 py-1">${" "}{Number(it.product.price * it.quantity).toFixed(2)}</td>
+                                          <td className="px-2 py-1">${" "}{Number(it.unit_price).toFixed(2)}</td>
+                                          <td className="px-2 py-1">${" "}{Number(it.total).toFixed(2)}</td>
                                         </tr>
                                       ))}
                                     </tbody>

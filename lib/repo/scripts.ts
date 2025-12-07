@@ -4,14 +4,14 @@
 
 import { getServiceClient } from '@/lib/supabase/server';
 import type {
-  Script,
-  ScriptProject,
-  ScriptScene,
-  ScriptVersion,
-  ScriptComment,
-  ScriptAsset,
-  ScriptSearchFilters,
-  ScriptSearchResult,
+    Script,
+    ScriptAsset,
+    ScriptComment,
+    ScriptProject,
+    ScriptScene,
+    ScriptSearchFilters,
+    ScriptSearchResult,
+    ScriptVersion,
 } from '@/types/scripts';
 
 // =====================================================
@@ -271,7 +271,7 @@ export async function reorderScenes(
   sceneIds: string[]
 ): Promise<void> {
   const supabase = getServiceClient();
-  
+
   // Actualizar índices en batch
   const updates = sceneIds.map((id, idx) => ({
     id,
@@ -316,7 +316,7 @@ export async function getVersions(scriptId: string): Promise<ScriptVersion[]> {
 export async function createVersion(
   scriptId: string,
   mdx: string,
-  mdxFrontmatter: any
+  mdxFrontmatter: Record<string, unknown>
 ): Promise<ScriptVersion> {
   const supabase = getServiceClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -358,7 +358,7 @@ export async function revertToVersion(
   versionId: string
 ): Promise<Script> {
   const supabase = getServiceClient();
-  
+
   // Obtener la versión
   const { data: version, error: versionError } = await supabase
     .from('script_versions')
@@ -491,7 +491,7 @@ export async function uploadAssetFile(
   const fileExt = file.name.split('.').pop();
   const fileName = `${scriptId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-  const { data, error } = await supabase.storage
+  const { data: uploadData, error } = await supabase.storage
     .from('scripts-assets')
     .upload(fileName, file);
 

@@ -1,35 +1,31 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, Power, PowerOff } from "lucide-react"
-import type { Promotion } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import type { Promotion } from "@/types"
+import { Edit, Plus, Power, PowerOff, Trash2 } from "lucide-react"
+import Link from "next/link"
+import { useCallback, useEffect, useState } from "react"
 
 export default function PromotionsAdminPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
 
-  useEffect(() => {
-    loadPromotions()
-  }, [])
-
-  async function loadPromotions() {
+  const loadPromotions = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/promotions')
       if (response.ok) {
@@ -46,7 +42,11 @@ export default function PromotionsAdminPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    void loadPromotions()
+  }, [loadPromotions])
 
   async function togglePromotion(id: string, currentState: boolean) {
     try {

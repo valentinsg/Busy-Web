@@ -84,8 +84,8 @@ export async function checkFileExists(key: string): Promise<boolean> {
       })
     );
     return true;
-  } catch (error: any) {
-    if (error.name === 'NotFound') {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'name' in error && (error as { name: string }).name === 'NotFound') {
       return false;
     }
     throw error;

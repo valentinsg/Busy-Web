@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { Expense } from "@/lib/types"
+import type { Expense } from "@/types"
+import Link from "next/link"
+import { useEffect, useMemo, useState } from "react"
 
 const categories = ["supplier", "fixed_cost", "marketing", "shipping", "taxes", "other"]
 

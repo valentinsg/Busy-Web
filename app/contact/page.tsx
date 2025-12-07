@@ -1,6 +1,6 @@
 "use client"
 
-import { useI18n } from "@/components/i18n-provider"
+import { useI18n } from "@/components/providers/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"

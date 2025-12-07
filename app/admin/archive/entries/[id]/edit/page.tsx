@@ -88,10 +88,12 @@ function EditArchiveEntry() {
         setPlace(data.place || '');
         setPerson(data.person || '');
         setIsPublic(data.is_public ?? true);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : 'No se pudo cargar la entrada';
         toast({
           title: 'Error',
-          description: error?.message || 'No se pudo cargar la entrada',
+          description: message,
           variant: 'destructive',
         });
         router.push('/admin/archive/entries');
@@ -135,10 +137,12 @@ function EditArchiveEntry() {
       });
 
       router.push('/admin/archive/entries');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'No se pudieron guardar los cambios';
       toast({
         title: 'Error al guardar',
-        description: error?.message || 'No se pudieron guardar los cambios',
+        description: message,
         variant: 'destructive',
       });
     } finally {

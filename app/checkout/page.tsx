@@ -2,7 +2,7 @@
 
 import PayWithMercadoPago from "@/components/checkout/pay-with-mercadopago"
 import PayWithTransfer from "@/components/checkout/pay-with-transfer"
-import { useI18n } from "@/components/i18n-provider"
+import { useI18n } from "@/components/providers/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"

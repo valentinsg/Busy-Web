@@ -1,30 +1,30 @@
 'use client'
 
-import { useI18n } from '@/components/i18n-provider'
+import { useI18n } from '@/components/providers/i18n-provider'
 import { ProductCard } from '@/components/shop/product-card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
 } from '@/components/ui/sheet'
+import { getColorDisplayName, getColorHex, normalizeColors, type StandardColor } from '@/lib/color-utils'
 import { capitalize } from '@/lib/format'
 import { getProductsAsync, searchProductsAsync, type SortBy } from '@/lib/repo/products'
-import type { FilterOptions, Product } from '@/lib/types'
-import { normalizeColors, getColorDisplayName, getColorHex, type StandardColor } from '@/lib/color-utils'
+import type { FilterOptions, Product } from '@/types'
 import { Filter, Search, SlidersHorizontal } from 'lucide-react'
 import Image from 'next/image'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -33,6 +33,16 @@ import * as React from 'react'
 type ProductsClientProps = {
   initialCategory?: string
   initialProducts?: Product[]
+}
+
+type ProductWithDiscount = Product & {
+  discountActive?: boolean
+  discountPercentage?: number
+}
+
+function hasActiveDiscount(product: ProductWithDiscount | Product): boolean {
+  const p = product as ProductWithDiscount
+  return Boolean(p.discountActive && p.discountPercentage && p.discountPercentage > 0)
 }
 
 export default function ProductsClient({ initialCategory, initialProducts = [] }: ProductsClientProps) {
@@ -77,7 +87,7 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
   }, [])
 
   const categories = React.useMemo(() => allCategories.map(c => c.slug) as string[], [allCategories])
-  
+
   // Category display names
   const categoryNames: Record<string, string> = React.useMemo(() => {
     const map: Record<string, string> = {}
@@ -134,8 +144,7 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
           const filtered = list.filter((p) => {
             if (filters.category === 'ofertas') {
               // Filter only products with active discount
-              const hasDiscount = (p as any).discountActive && (p as any).discountPercentage && (p as any).discountPercentage > 0
-              if (!hasDiscount) return false
+              if (!hasActiveDiscount(p)) return false
             } else if (filters.category && p.category !== filters.category) {
               return false
             }
@@ -157,11 +166,8 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
             ? list.filter((p) => normalizeColors(p.colors).includes(filters.color as StandardColor))
             : list
           // Filter for "ofertas" category
-          const finalList = filters.category === 'ofertas' 
-            ? afterColor.filter((p) => {
-                const hasDiscount = (p as any).discountActive && (p as any).discountPercentage && (p as any).discountPercentage > 0
-                return hasDiscount
-              })
+          const finalList = filters.category === 'ofertas'
+            ? afterColor.filter((p) => hasActiveDiscount(p))
             : afterColor
           if (!cancelled) setAsyncProducts(finalList)
         }

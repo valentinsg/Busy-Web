@@ -1,6 +1,6 @@
 'use client';
 
-import { ArchiveFilters } from '@/types/archive';
+import { ArchiveEntry, ArchiveFilters } from '@/types/archive';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -18,11 +18,12 @@ export function ArchiveGrid({ filters }: { filters: ArchiveFilters }) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    status,
+    isLoading,
+    isError,
   } = useInfiniteQuery({
     queryKey: ['archive-entries', filters],
-    queryFn: async ({ pageParam }: { pageParam?: number }) => {
-      const page = pageParam ?? 1;
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number | undefined) ?? 1;
       const pageSize = 12; // items per page
 
       const params = new URLSearchParams();
@@ -42,7 +43,7 @@ export function ArchiveGrid({ filters }: { filters: ArchiveFilters }) {
       }
 
       const json = await res.json();
-      return json as { data: any[]; hasMore: boolean; nextCursor?: string };
+      return json as { data: ArchiveEntry[]; hasMore: boolean; nextCursor?: string };
     },
     getNextPageParam: (lastPage: { hasMore: boolean }, allPages) => {
       return lastPage.hasMore ? allPages.length + 1 : undefined;
@@ -56,7 +57,7 @@ export function ArchiveGrid({ filters }: { filters: ArchiveFilters }) {
     }
   }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-  if (status === 'pending') {
+  if (isLoading) {
     return <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {[...Array(8)].map((_, i) => (
         <div key={i} className="aspect-square bg-muted rounded-lg animate-pulse" />
@@ -64,11 +65,12 @@ export function ArchiveGrid({ filters }: { filters: ArchiveFilters }) {
     </div>;
   }
 
-  if (status === 'error') {
-    return <div>Error: {error.message}</div>;
+  if (isError) {
+    return <div>Error: {error instanceof Error ? error.message : 'Error loading archive entries'}</div>;
   }
 
-  const entries = data?.pages.flatMap(page => page.data) || [];
+  const pages = (data?.pages ?? []) as unknown as { data: ArchiveEntry[] }[];
+  const entries: ArchiveEntry[] = pages.flatMap((page) => page.data);
 
   if (entries.length === 0) {
     return (

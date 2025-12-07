@@ -4,9 +4,9 @@
 // SERVER ACTIONS PARA GUIONES
 // =====================================================
 
-import { revalidatePath } from 'next/cache';
 import * as repo from '@/lib/repo/scripts';
-import type { Script, ScriptScene, ScriptFrontmatter } from '@/types/scripts';
+import type { Script, ScriptFrontmatter, ScriptScene } from '@/types/scripts';
+import { revalidatePath } from 'next/cache';
 
 // =====================================================
 // PROYECTOS
@@ -17,8 +17,8 @@ export async function createProjectAction(teamId: string, name: string, descript
     const project = await repo.createProject(teamId, name, description);
     revalidatePath('/admin/scripts');
     return { success: true, data: project };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -30,8 +30,8 @@ export async function updateProjectAction(
     const project = await repo.updateProject(id, updates);
     revalidatePath('/admin/scripts');
     return { success: true, data: project };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -40,8 +40,8 @@ export async function deleteProjectAction(id: string) {
     await repo.deleteProject(id);
     revalidatePath('/admin/scripts');
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -54,8 +54,8 @@ export async function createScriptAction(teamId: string, title: string, projectI
     const script = await repo.createScript(teamId, title, projectId);
     revalidatePath('/admin/scripts');
     return { success: true, data: script };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -68,8 +68,8 @@ export async function updateScriptAction(
     revalidatePath('/admin/scripts');
     revalidatePath(`/admin/scripts/${id}`);
     return { success: true, data: script };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -78,8 +78,8 @@ export async function deleteScriptAction(id: string) {
     await repo.deleteScript(id);
     revalidatePath('/admin/scripts');
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -95,8 +95,8 @@ export async function createSceneAction(
     const newScene = await repo.createScene(scriptId, scene);
     revalidatePath(`/admin/scripts/${scriptId}`);
     return { success: true, data: newScene };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -109,8 +109,8 @@ export async function updateSceneAction(
     const scene = await repo.updateScene(id, updates);
     revalidatePath(`/admin/scripts/${scriptId}`);
     return { success: true, data: scene };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -119,8 +119,8 @@ export async function reorderScenesAction(scriptId: string, sceneIds: string[]) 
     await repo.reorderScenes(scriptId, sceneIds);
     revalidatePath(`/admin/scripts/${scriptId}`);
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -129,8 +129,8 @@ export async function deleteSceneAction(id: string, scriptId: string) {
     await repo.deleteScene(id);
     revalidatePath(`/admin/scripts/${scriptId}`);
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -146,8 +146,8 @@ export async function bulkCreateScenesAction(
     }
     revalidatePath(`/admin/scripts/${scriptId}`);
     return { success: true, data: createdScenes };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -164,8 +164,8 @@ export async function createVersionAction(
     const version = await repo.createVersion(scriptId, mdx, mdxFrontmatter);
     revalidatePath(`/admin/scripts/${scriptId}`);
     return { success: true, data: version };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -174,8 +174,8 @@ export async function revertToVersionAction(scriptId: string, versionId: string)
     const script = await repo.revertToVersion(scriptId, versionId);
     revalidatePath(`/admin/scripts/${scriptId}`);
     return { success: true, data: script };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -188,8 +188,8 @@ export async function createCommentAction(scriptId: string, body: string) {
     const comment = await repo.createComment(scriptId, body);
     revalidatePath(`/admin/scripts/${scriptId}`);
     return { success: true, data: comment };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: Error | unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -198,8 +198,8 @@ export async function resolveCommentAction(id: string, scriptId: string, resolve
     const comment = await repo.resolveComment(id, resolved);
     revalidatePath(`/admin/scripts/${scriptId}`);
     return { success: true, data: comment };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
@@ -218,17 +218,18 @@ export async function createAssetAction(
     const asset = await repo.createAsset(scriptId, name, url, kind, sizeBytes);
     revalidatePath(`/admin/scripts/${scriptId}`);
     return { success: true, data: asset };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
 
-export async function deleteAssetAction(id: string, scriptId: string) {
+export async function deleteAssetAction(scriptId: string, id: string) {
   try {
     await repo.deleteAsset(id);
     revalidatePath(`/admin/scripts/${scriptId}`);
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: (error as Error).message };
   }
 }
+

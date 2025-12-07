@@ -1,15 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, Upload, Trash2, X } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Author } from "@/lib/types"
+import type { Author } from "@/types"
+import { Loader2, Upload, X } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
@@ -26,15 +26,11 @@ export default function ProfilePage() {
   })
   const { toast } = useToast()
 
-  useEffect(() => {
-    loadProfile()
-  }, [])
-
-  async function loadProfile() {
+  const loadProfile = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/profile", { cache: "no-store" })
       if (!res.ok) throw new Error("Failed to load profile")
-      
+
       const data = await res.json()
       setProfile(data)
       setFormData({
@@ -55,7 +51,11 @@ export default function ProfilePage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    void loadProfile()
+  }, [loadProfile])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -226,7 +226,7 @@ export default function ProfilePage() {
               <div>
                 <Label className="text-xs text-muted-foreground">Miembro desde</Label>
                 <p className="text-sm font-medium">
-                  {profile.created_at 
+                  {profile.created_at
                     ? new Date(profile.created_at).toLocaleDateString('es-AR', {
                         year: 'numeric',
                         month: 'long',

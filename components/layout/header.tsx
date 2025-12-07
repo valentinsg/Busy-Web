@@ -1,7 +1,7 @@
 'use client'
 
-import { useI18n } from '@/components/i18n-provider'
 import { LanguageToggle } from '@/components/layout/language-toggle'
+import { useI18n } from '@/components/providers/i18n-provider'
 import { CartSheet } from '@/components/shop/cart-sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +14,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
 
-const navigation = [
+type NavChild = { label: string; href: string };
+type NavItem = { label: string; href: string; children?: NavChild[] };
+
+const navigation: NavItem[] = [
   { label: 'Inicio', href: '/' },
   { label: 'Productos', href: '/products' },
   { label: 'Blacktop', href: '/blacktop' },
@@ -175,7 +178,7 @@ export function Header() {
           }
         >
           {navigation.map((item) => {
-            const hasChildren = Array.isArray((item as any).children) && (item as any).children.length > 0
+            const hasChildren = Array.isArray(item.children) && item.children.length > 0
 
             if (!hasChildren) {
               return (
@@ -191,7 +194,7 @@ export function Header() {
               )
             }
 
-            const children = (item as any).children as { label: string; href: string }[]
+            const children = item.children as NavChild[]
 
             return (
               <div key={item.label} className="relative group">
@@ -311,7 +314,7 @@ export function Header() {
                 {/* Mobile Navigation */}
                 <nav className="flex flex-col space-y-2 font-body">
                   {navigation.map((item) => {
-                    const hasChildren = Array.isArray((item as any).children) && (item as any).children.length > 0
+                    const hasChildren = Array.isArray(item.children) && item.children.length > 0
 
                     if (!hasChildren) {
                       return (
@@ -327,7 +330,7 @@ export function Header() {
                       )
                     }
 
-                    const children = (item as any).children as { label: string; href: string }[]
+                    const children = item.children as NavChild[]
                     const isExpanded = expandedMenu === item.label
 
                     return (

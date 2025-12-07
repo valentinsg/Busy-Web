@@ -1,17 +1,17 @@
 "use client"
 
-import * as React from "react"
-import Image from "next/image"
-import { supabase } from "@/lib/supabase/client"
-import { useRouter } from "next/navigation"
-import { useToast } from "@/hooks/use-toast"
-import { getProductByIdAsync } from "@/lib/repo/products"
-import type { Product } from "@/lib/types"
 import { CategorySelector } from "@/components/admin/category-selector"
-import { COLOR_PALETTE } from "@/lib/color-utils"
+import { useToast } from "@/hooks/use-toast"
 import { PREDEFINED_BENEFITS, buildBenefitsFromKeys } from "@/lib/benefits"
-import { getSettingsClient } from "@/lib/repo/settings"
+import { COLOR_PALETTE } from "@/lib/color-utils"
 import { formatPrice } from "@/lib/format"
+import { getProductByIdAsync } from "@/lib/repo/products"
+import { getSettingsClient } from "@/lib/repo/settings"
+import { supabase } from "@/lib/supabase/client"
+import type { Product } from "@/types"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import * as React from "react"
 
 // Format slug: lowercase and replace spaces with hyphens
 function formatSlug(value: string): string {
@@ -52,7 +52,7 @@ export default function EditProductPage({ params }: PageProps) {
     discountActive?: boolean
   }
   const [form, setForm] = React.useState<FormState>({})
-  const [stockBySize, setStockBySize] = React.useState<Record<string, number>>({})
+  const [, setStockBySize] = React.useState<Record<string, number>>({})
   const [uploading, setUploading] = React.useState(false)
   const [sizeRows, setSizeRows] = React.useState<
     Array<{
@@ -445,18 +445,18 @@ export default function EditProductPage({ params }: PageProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className="text-sm">
                 Texto del Badge (ej: &quot;2x1&quot;, &quot;NUEVO&quot;, &quot;OFERTA&quot;)
-                <input 
-                  value={form.badgeText||""} 
-                  onChange={(e)=>setForm({...form, badgeText: e.target.value})} 
-                  className="w-full border rounded px-3 py-2 bg-transparent" 
+                <input
+                  value={form.badgeText||""}
+                  onChange={(e)=>setForm({...form, badgeText: e.target.value})}
+                  className="w-full border rounded px-3 py-2 bg-transparent"
                   placeholder="2x1"
                 />
               </label>
               <label className="text-sm">
                 Estilo del Badge
-                <select 
-                  value={form.badgeVariant||"default"} 
-                  onChange={(e)=>setForm({...form, badgeVariant: e.target.value})} 
+                <select
+                  value={form.badgeVariant||"default"}
+                  onChange={(e)=>setForm({...form, badgeVariant: e.target.value})}
                   className="w-full border rounded px-3 py-2 bg-background text-foreground"
                 >
                   <option value="default" className="bg-background text-foreground">Default (Gris Oscuro)</option>
@@ -470,22 +470,22 @@ export default function EditProductPage({ params }: PageProps) {
               </label>
               <label className="text-sm">
                 Porcentaje de Descuento (0-100)
-                <input 
-                  type="number" 
-                  min="0" 
-                  max="100" 
-                  value={form.discountPercentage||0} 
-                  onChange={(e)=>setForm({...form, discountPercentage: Number(e.target.value)})} 
-                  className="w-full border rounded px-3 py-2 bg-transparent" 
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={form.discountPercentage||0}
+                  onChange={(e)=>setForm({...form, discountPercentage: Number(e.target.value)})}
+                  className="w-full border rounded px-3 py-2 bg-transparent"
                   placeholder="20"
                 />
               </label>
               <div className="flex items-center gap-2 pt-6">
-                <input 
-                  id="discountActive" 
-                  type="checkbox" 
-                  checked={!!form.discountActive} 
-                  onChange={(e)=>setForm({...form, discountActive: e.target.checked})} 
+                <input
+                  id="discountActive"
+                  type="checkbox"
+                  checked={!!form.discountActive}
+                  onChange={(e)=>setForm({...form, discountActive: e.target.checked})}
                 />
                 <label htmlFor="discountActive" className="text-sm">Descuento activo</label>
               </div>
@@ -537,91 +537,91 @@ export default function EditProductPage({ params }: PageProps) {
                   {sizeRows.map((row, idx) => (
                     <tr key={idx} className="border-t border-border hover:bg-muted/30 transition-colors">
                       <td className="p-3">
-                        <input 
-                          value={row.size} 
+                        <input
+                          value={row.size}
                           onChange={(e)=>{
                             const v = e.target.value
                             setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, size: v }: r))
-                          }} 
-                          className="w-full max-w-[120px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          }}
+                          className="w-full max-w-[120px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow"
                           placeholder="S, M, L..."
                         />
                       </td>
                       <td className="p-3">
-                        <input 
-                          type="number" 
-                          value={row.stock ?? 0} 
+                        <input
+                          type="number"
+                          value={row.stock ?? 0}
                           onChange={(e)=>{
                             const v = Number(e.target.value)
                             setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, stock: v }: r))
-                          }} 
-                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          }}
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow"
                         />
                       </td>
                       <td className="p-3">
-                        <input 
-                          type="number" 
-                          value={row.chest ?? ''} 
+                        <input
+                          type="number"
+                          value={row.chest ?? ''}
                           onChange={(e)=>{
                             const v = e.target.value === '' ? undefined : Number(e.target.value)
                             setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, chest: v }: r))
-                          }} 
-                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          }}
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow"
                           placeholder="-"
                         />
                       </td>
                       <td className="p-3">
-                        <input 
-                          type="number" 
-                          value={row.length ?? ''} 
+                        <input
+                          type="number"
+                          value={row.length ?? ''}
                           onChange={(e)=>{
                             const v = e.target.value === '' ? undefined : Number(e.target.value)
                             setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, length: v }: r))
-                          }} 
-                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          }}
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow"
                           placeholder="-"
                         />
                       </td>
                       <td className="p-3">
-                        <input 
-                          type="number" 
-                          value={row.sleeve ?? ''} 
+                        <input
+                          type="number"
+                          value={row.sleeve ?? ''}
                           onChange={(e)=>{
                             const v = e.target.value === '' ? undefined : Number(e.target.value)
                             setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, sleeve: v }: r))
-                          }} 
-                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          }}
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow"
                           placeholder="-"
                         />
                       </td>
                       <td className="p-3">
-                        <input 
-                          type="number" 
-                          value={row.waist ?? ''} 
+                        <input
+                          type="number"
+                          value={row.waist ?? ''}
                           onChange={(e)=>{
                             const v = e.target.value === '' ? undefined : Number(e.target.value)
                             setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, waist: v }: r))
-                          }} 
-                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          }}
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow"
                           placeholder="-"
                         />
                       </td>
                       <td className="p-3">
-                        <input 
-                          type="number" 
-                          value={row.hip ?? ''} 
+                        <input
+                          type="number"
+                          value={row.hip ?? ''}
                           onChange={(e)=>{
                             const v = e.target.value === '' ? undefined : Number(e.target.value)
                             setSizeRows((rows)=>rows.map((r,i)=> i===idx? { ...r, hip: v }: r))
-                          }} 
-                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow" 
+                          }}
+                          className="w-full max-w-[100px] border rounded px-3 py-2 bg-background focus:ring-2 focus:ring-accent-brand/20 transition-shadow"
                           placeholder="-"
                         />
                       </td>
                       <td className="p-3 text-right">
-                        <button 
-                          type="button" 
-                          className="text-sm text-red-600 hover:text-red-700 hover:underline font-medium transition-colors" 
+                        <button
+                          type="button"
+                          className="text-sm text-red-600 hover:text-red-700 hover:underline font-medium transition-colors"
                           onClick={()=>{
                             const sizeToRemove = sizeRows[idx].size
                             // Remove from sizeRows
@@ -655,16 +655,16 @@ export default function EditProductPage({ params }: PageProps) {
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <button 
-              type="button" 
-              className="rounded-lg px-4 py-2 border border-border hover:bg-muted transition-colors font-medium text-sm" 
+            <button
+              type="button"
+              className="rounded-lg px-4 py-2 border border-border hover:bg-muted transition-colors font-medium text-sm"
               onClick={()=>setSizeRows(rows=>[...rows, { size: '' }])}
             >
               + Agregar fila
             </button>
-            <button 
-              type="button" 
-              className="rounded-lg px-4 py-2 border border-border hover:bg-muted transition-colors font-medium text-sm" 
+            <button
+              type="button"
+              className="rounded-lg px-4 py-2 border border-border hover:bg-muted transition-colors font-medium text-sm"
               onClick={()=>{
                 setSizeRows([
                   { size: 'S' },

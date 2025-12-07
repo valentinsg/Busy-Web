@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Plus, Trophy, Save, Play, Pause, Clock } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import type { Match, Player, TeamWithPlayers, Tournament } from '@/types/blacktop';
+import { Clock, Pause, Play, Plus, Save, Trophy } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface LiveScorekeeperProps {
   match: Match;
@@ -81,6 +81,56 @@ export function LiveScorekeeperV2({ match: initialMatch, tournament, open, onClo
     setTimeRemaining(remaining);
   }, [tournament.period_duration_minutes]);
 
+  const loadTeams = useCallback(async () => {
+    try {
+      const [teamARes, teamBRes] = await Promise.all([
+        fetch(`/api/blacktop/teams/${match.team_a_id}`),
+        fetch(`/api/blacktop/teams/${match.team_b_id}`),
+      ]);
+
+      if (teamARes.ok && teamBRes.ok) {
+        const teamAData: TeamWithPlayers = await teamARes.json();
+        const teamBData: TeamWithPlayers = await teamBRes.json();
+        setTeamA(teamAData);
+        setTeamB(teamBData);
+
+        setStatsA(teamAData.players?.map((p: Player) => ({
+          player_id: p.id,
+          player_name: p.full_name,
+          points: 0,
+          assists: 0,
+          rebounds: 0,
+          steals: 0,
+          blocks: 0,
+          turnovers: 0,
+          is_mvp: false,
+        })) ?? []);
+
+        setStatsB(teamBData.players?.map((p: Player) => ({
+          player_id: p.id,
+          player_name: p.full_name,
+          points: 0,
+          assists: 0,
+          rebounds: 0,
+          steals: 0,
+          blocks: 0,
+          turnovers: 0,
+          is_mvp: false,
+        })) ?? []);
+
+        if (teamAData.players && teamAData.players.length > 0) setSelectedPlayerA(teamAData.players[0].id);
+        if (teamBData.players && teamBData.players.length > 0) setSelectedPlayerB(teamBData.players[0].id);
+      }
+    } catch (error) {
+      console.error('Error loading teams:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron cargar los equipos',
+        variant: 'destructive',
+      });
+    }
+  }, [match.team_a_id, match.team_b_id, toast]);
+
   useEffect(() => {
     calculateTimeRemaining(match);
   }, [match, calculateTimeRemaining]);
@@ -89,52 +139,7 @@ export function LiveScorekeeperV2({ match: initialMatch, tournament, open, onClo
     if (open && match.team_a_id && match.team_b_id) {
       loadTeams();
     }
-  }, [open, match]);
-
-  const loadTeams = async () => {
-    try {
-      const [teamARes, teamBRes] = await Promise.all([
-        fetch(`/api/blacktop/teams/${match.team_a_id}`),
-        fetch(`/api/blacktop/teams/${match.team_b_id}`),
-      ]);
-
-      if (teamARes.ok && teamBRes.ok) {
-        const teamAData = await teamARes.json();
-        const teamBData = await teamBRes.json();
-        setTeamA(teamAData);
-        setTeamB(teamBData);
-
-        setStatsA(teamAData.players.map((p: Player) => ({
-          player_id: p.id,
-          player_name: p.full_name,
-          points: 0,
-          assists: 0,
-          rebounds: 0,
-          steals: 0,
-          blocks: 0,
-          turnovers: 0,
-          is_mvp: false,
-        })));
-
-        setStatsB(teamBData.players.map((p: Player) => ({
-          player_id: p.id,
-          player_name: p.full_name,
-          points: 0,
-          assists: 0,
-          rebounds: 0,
-          steals: 0,
-          blocks: 0,
-          turnovers: 0,
-          is_mvp: false,
-        })));
-
-        if (teamAData.players.length > 0) setSelectedPlayerA(teamAData.players[0].id);
-        if (teamBData.players.length > 0) setSelectedPlayerB(teamBData.players[0].id);
-      }
-    } catch (error) {
-      console.error('Error loading teams:', error);
-    }
-  };
+  }, [open, match.team_a_id, match.team_b_id, loadTeams]);
 
   const handleStart = async () => {
     try {
@@ -217,7 +222,7 @@ export function LiveScorekeeperV2({ match: initialMatch, tournament, open, onClo
   const toggleMVP = (team: 'A' | 'B', playerId: number) => {
     const clearedA = statsA.map(s => ({ ...s, is_mvp: false }));
     const clearedB = statsB.map(s => ({ ...s, is_mvp: false }));
-    
+
     if (team === 'A') {
       setStatsA(clearedA.map(s => s.player_id === playerId ? { ...s, is_mvp: true } : s));
       setStatsB(clearedB);

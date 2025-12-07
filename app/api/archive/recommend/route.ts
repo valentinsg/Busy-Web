@@ -36,7 +36,9 @@ export async function GET(request: Request) {
     const rawRecommendations = await archiveService.getRecommendations(id, { limit });
 
     // Extract just the entry objects for the frontend
-    const recommendations = rawRecommendations.map((r: any) => r.entry || r).filter(Boolean);
+    const recommendations = rawRecommendations
+      .map((r) => (r as { entry?: unknown }).entry ?? r)
+      .filter(Boolean);
 
     // Store in cache
     cache.set(cacheKey, { data: recommendations, timestamp: Date.now() });

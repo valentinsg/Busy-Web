@@ -1,4 +1,4 @@
-import { Author } from '@/lib/types'
+import type { Author } from '@/types'
 import { SupabaseClient } from '@supabase/supabase-js'
 
 export interface AuthorCreateInput {

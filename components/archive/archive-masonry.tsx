@@ -88,11 +88,12 @@ export function ArchiveMasonry({ filters }: ArchiveMasonryProps) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    status,
+    isLoading,
+    isError,
   } = useInfiniteQuery({
     queryKey: ['archive-entries-masonry', filters],
-    queryFn: async ({ pageParam }: { pageParam?: number }) => {
-      const page = pageParam ?? 1;
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number | undefined) ?? 1;
       const pageSize = 16; // Reduced for better performance
 
       const params = new URLSearchParams();
@@ -129,7 +130,7 @@ export function ArchiveMasonry({ filters }: ArchiveMasonryProps) {
     }
   }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-  if (status === 'pending') {
+  if (isLoading) {
     // Distribute skeletons across columns like real masonry
     const skeletonColumns: number[][] = Array.from({ length: columns }, () => []);
     SKELETON_ASPECTS.forEach((_, i) => {
@@ -176,15 +177,18 @@ export function ArchiveMasonry({ filters }: ArchiveMasonryProps) {
     );
   }
 
-  if (status === 'error') {
+  if (isError) {
     return (
       <div className="text-center py-12">
-        <p className="font-body text-destructive">Error: {error?.message}</p>
+        <p className="font-body text-destructive">
+          Error: {error instanceof Error ? error.message : 'No se pudo cargar el archivo.'}
+        </p>
       </div>
     );
   }
 
-  const entries = data?.pages.flatMap((page: any) => page.data) || [];
+  const pages = (data?.pages ?? []) as unknown as { data: ArchiveEntry[] }[];
+  const entries: ArchiveEntry[] = pages.flatMap((page) => page.data);
 
   if (entries.length === 0) {
     return (

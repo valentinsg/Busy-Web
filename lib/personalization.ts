@@ -1,5 +1,5 @@
-import type { Product } from '@/lib/types'
 import type { BusySession } from '@/lib/session'
+import type { Product } from '@/types'
 
 // --- Internal helpers ---
 function hashToJitter(id: string): number {

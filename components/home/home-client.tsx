@@ -1,12 +1,12 @@
 'use client'
 
-import { useI18n } from '@/components/i18n-provider'
+import { useI18n } from '@/components/providers/i18n-provider'
 import { Button } from '@/components/ui/button'
+import { getImageConfig } from '@/lib/imageConfig'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getImageConfig } from '@/lib/imageConfig'
 
 export default function HomeClient() {
   const { t } = useI18n()

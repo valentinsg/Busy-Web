@@ -1,16 +1,30 @@
 "use client"
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase/client"
-import { useToast } from "@/hooks/use-toast"
-import { getProductByIdAsync } from "@/lib/repo/products"
 import { ProductForm, type ProductFormData, type SizeRow } from "@/components/admin/product-form"
-import { buildBenefitsFromKeys, PREDEFINED_BENEFITS } from "@/lib/benefits"
-import type { Product } from "@/lib/types"
+import { useToast } from "@/hooks/use-toast"
+import { PREDEFINED_BENEFITS, buildBenefitsFromKeys } from "@/lib/benefits"
+import { getProductByIdAsync } from "@/lib/repo/products"
+import { supabase } from "@/lib/supabase/client"
+import type { Product } from "@/types"
+import { useRouter } from "next/navigation"
+import * as React from "react"
 
-interface PageProps { 
-  params: { id: string } 
+interface PageProps {
+  params: { id: string }
+}
+
+type ProductBenefit = { title: string; subtitle?: string }
+
+type ProductWithExtras = Product & {
+  benefits?: ProductBenefit[]
+  imported?: boolean
+  careInstructions?: string
+  badgeText?: string
+  badgeVariant?: string
+  discountPercentage?: number
+  discountActive?: boolean
+  measurementsBySize?: Record<string, unknown>
+  stockBySize?: Record<string, number>
 }
 
 export default function EditProductPage({ params }: PageProps) {
@@ -31,10 +45,11 @@ export default function EditProductPage({ params }: PageProps) {
         const p = await getProductByIdAsync(params.id)
         if (!cancelled && p) {
           setProduct(p)
-          
+
           // Split product benefits into predefined vs custom
-          const rawBenefits: Array<{ title: string; subtitle?: string }> = Array.isArray((p as any).benefits)
-            ? ((p as any).benefits as Array<{title:string; subtitle?:string}>)
+          const extended = p as ProductWithExtras
+          const rawBenefits: ProductBenefit[] = Array.isArray(extended.benefits)
+            ? extended.benefits
             : []
           const predefinedKeys = new Set(PREDEFINED_BENEFITS.map(b=>b.key))
           const titleToKey = new Map(PREDEFINED_BENEFITS.map(b=>[b.title.toLowerCase(), b.key]))
@@ -64,19 +79,19 @@ export default function EditProductPage({ params }: PageProps) {
             sku: p.sku,
             stock: p.stock,
             description: p.description ?? "",
-            imported: !!(p as any).imported,
-            careInstructions: (p as any).careInstructions || "",
+            imported: !!extended.imported,
+            careInstructions: extended.careInstructions || "",
             benefitsText: customLines.join("\n"),
             selectedBenefitKeys: Array.from(new Set(selectedKeys)),
-            badgeText: (p as any).badgeText || "",
-            badgeVariant: (p as any).badgeVariant || "default",
-            discountPercentage: (p as any).discountPercentage || 0,
-            discountActive: !!(p as any).discountActive,
+            badgeText: extended.badgeText || "",
+            badgeVariant: extended.badgeVariant || "default",
+            discountPercentage: extended.discountPercentage || 0,
+            discountActive: !!extended.discountActive,
           })
 
           const sizes = p.sizes || []
           const rows = sizes.map((s) => {
-            const mRaw = (p as any).measurementsBySize?.[s]
+            const mRaw = (extended.measurementsBySize as Record<string, unknown> | undefined)?.[s]
             const m = (mRaw && typeof mRaw === 'object' ? mRaw as Record<string, unknown> : {})
             return {
               size: s,
@@ -85,7 +100,7 @@ export default function EditProductPage({ params }: PageProps) {
               sleeve: typeof m.sleeve === 'number' ? (m.sleeve as number) : undefined,
               waist: typeof m.waist === 'number' ? (m.waist as number) : undefined,
               hip: typeof m.hip === 'number' ? (m.hip as number) : undefined,
-              stock: (p.stockBySize || {})[s] ?? undefined,
+              stock: (extended.stockBySize || {})[s] ?? undefined,
             }
           })
           setInitialSizeRows(rows)
@@ -112,7 +127,7 @@ export default function EditProductPage({ params }: PageProps) {
       const { data: session } = await supabase.auth.getSession()
       const token = session.session?.access_token
       if (!token) throw new Error("No auth token")
-      
+
       // Build sizes/measurements from table rows
       const uniqueSizes = Array.from(
         new Set(
@@ -210,7 +225,7 @@ export default function EditProductPage({ params }: PageProps) {
         },
         body: JSON.stringify(payload),
       })
-      
+
       const json = await res.json()
       if (!res.ok || !json.ok) {
         throw new Error(json.error || "Error al guardar el producto")
@@ -226,7 +241,7 @@ export default function EditProductPage({ params }: PageProps) {
         },
         body: JSON.stringify({ stockBySize: stockMap }),
       })
-      
+
       const json2 = await res2.json()
       if (!res2.ok || !json2.ok) {
         throw new Error(json2.error || "Error al guardar stock por talle")
@@ -262,22 +277,22 @@ export default function EditProductPage({ params }: PageProps) {
       const { data: session } = await supabase.auth.getSession()
       const token = session.session?.access_token
       if (!token) throw new Error("No auth token")
-      
+
       const res = await fetch(`/api/admin/products/${params.id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       })
-      
+
       const json = await res.json()
       if (!res.ok || !json.ok) {
         throw new Error(json.error || "Error al eliminar")
       }
-      
+
       toast({
         title: "Producto eliminado",
         description: "Se actualizó el listado.",
       })
-      
+
       router.push("/admin/products")
       router.refresh()
     } catch (e: unknown) {
@@ -306,7 +321,7 @@ export default function EditProductPage({ params }: PageProps) {
           Eliminar
         </button>
       </div>
-      <ProductForm 
+      <ProductForm
         initialData={initialData}
         initialSizeRows={initialSizeRows}
         onSubmit={handleSubmit}

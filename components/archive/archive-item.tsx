@@ -92,7 +92,7 @@ export function ArchiveItem({ entry, className, aspectRatio = 'square' }: Archiv
         aria-label={`Ver ${entry.microcopy || 'entrada del archivo'}`}
       >
         <div
-          className="relative overflow-hidden rounded-xl"
+          className={cn('relative overflow-hidden rounded-xl', aspectClass)}
           style={{ backgroundColor: dominantColor }}
         >
           {/* Image with error handling and fallback chain */}

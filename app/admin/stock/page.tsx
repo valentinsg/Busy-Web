@@ -1,11 +1,11 @@
 "use client"
 
-import * as React from "react"
-import { supabase } from "@/lib/supabase/client"
-import { getProductsAsync } from "@/lib/repo/products"
-import type { Product } from "@/lib/types"
-import { useToast } from "@/hooks/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useToast } from "@/hooks/use-toast"
+import { getProductsAsync } from "@/lib/repo/products"
+import { supabase } from "@/lib/supabase/client"
+import type { Product } from "@/types"
+import * as React from "react"
 
 type StockMap = Record<string, number>
 
@@ -69,12 +69,12 @@ export default function AdminStockPage() {
   }
 
   // Separate products and accessories
-  const regularProducts = React.useMemo(() => 
+  const regularProducts = React.useMemo(() =>
     products.filter(p => p.category !== "Accesorios"),
     [products]
   )
-  
-  const accessories = React.useMemo(() => 
+
+  const accessories = React.useMemo(() =>
     products.filter(p => p.category === "Accesorios"),
     [products]
   )
@@ -86,7 +86,7 @@ export default function AdminStockPage() {
     }
     return Array.from(set)
   }, [regularProducts])
-  
+
   const allSizesAccessories = React.useMemo(() => {
     const set = new Set<string>()
     for (const p of accessories) {
@@ -103,7 +103,7 @@ export default function AdminStockPage() {
       (p.sku || "").toLowerCase().includes(q)
     )
   }, [regularProducts, query])
-  
+
   const filteredAccessories = React.useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return accessories
@@ -201,7 +201,7 @@ export default function AdminStockPage() {
             Accesorios ({accessories.length})
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="products" className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
@@ -210,7 +210,7 @@ export default function AdminStockPage() {
           </div>
           {renderStockTable(filteredRegular, allSizesRegular, "Sin productos")}
         </TabsContent>
-        
+
         <TabsContent value="accessories" className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
@@ -220,7 +220,7 @@ export default function AdminStockPage() {
           {renderStockTable(filteredAccessories, allSizesAccessories, "Sin accesorios")}
         </TabsContent>
       </Tabs>
-      
+
       <p className="text-sm text-muted-foreground">Tip: haz click en una fila para seleccionarla. La fila seleccionada se resalta.</p>
     </div>
   )

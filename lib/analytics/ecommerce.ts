@@ -9,8 +9,11 @@ export type EcommerceItem = {
 
 function pushEvent(data: Record<string, unknown>) {
   try {
-    if (typeof window !== 'undefined' && (window as any).dataLayer) {
-      ;(window as any).dataLayer.push(data)
+    if (typeof window !== 'undefined') {
+      const w = window as Window & { dataLayer?: unknown[] }
+      if (Array.isArray(w.dataLayer)) {
+        w.dataLayer.push(data)
+      }
     }
   } catch {}
 }

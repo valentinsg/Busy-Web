@@ -1,6 +1,7 @@
 import { invalidateTournamentCache } from '@/lib/blacktop/cache';
 import { propagatePlayoffProgress } from '@/lib/blacktop/playoffs';
 import { getServiceClient } from '@/lib/supabase/server';
+import type { Match } from '@/types/blacktop';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
@@ -28,13 +29,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     if (error) throw error;
 
-    await propagatePlayoffProgress(currentMatch.tournament_id, match as any);
+    await propagatePlayoffProgress(currentMatch.tournament_id, match as Match);
 
     // Invalidar cache del torneo
     invalidateTournamentCache(currentMatch.tournament_id);
 
     return NextResponse.json(match);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -19,8 +19,10 @@ function generateRoundRobinMatches(teams: { id: number; name: string }[]) {
  * Algoritmo mejorado que distribuye partidos evitando que un equipo juegue 3 veces seguidas
  * Usa un enfoque greedy: prioriza partidos donde los equipos llevan más tiempo sin jugar
  */
+type OptimizedMatch = { groupId: number; groupName: string; teamA: number; teamB: number };
+
 function optimizeMatchOrder(allGroupMatches: Array<{ groupId: number; groupName: string; matches: Array<[number, number]> }>) {
-  const orderedMatches: any[] = [];
+  const orderedMatches: OptimizedMatch[] = [];
   const lastPlayedIndex: Map<number, number> = new Map(); // teamId -> último índice donde jugó
   let globalIndex = 0;
 
@@ -96,14 +98,14 @@ export async function generateGroupsFixtures(tournamentId: number): Promise<Matc
 
   for (const group of groups) {
     // 1) Fuente principal: equipos vinculados por group_id
-    let teamsResult = await supabase
+    const { data: teamsResult } = await supabase
       .from('teams')
       .select('id, name')
       .eq('tournament_id', tournamentId)
       .eq('group_id', group.id)
       .eq('status', 'approved');
 
-    let teams = teamsResult.data;
+    let teams = teamsResult;
 
     // 2) Fallback legacy: si no hay equipos por group_id, intentar resolver por group_name
     if (!teams || teams.length === 0) {

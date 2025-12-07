@@ -1,30 +1,30 @@
 'use client'
 
-import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
 import type { ProductCategory } from '@/lib/repo/categories'
+import { ArrowDown, ArrowUp, Pencil, Plus, Trash2 } from 'lucide-react'
+import * as React from 'react'
 
 export default function CategoriesPage() {
   const { toast } = useToast()
@@ -32,7 +32,7 @@ export default function CategoriesPage() {
   const [loading, setLoading] = React.useState(true)
   const [dialogOpen, setDialogOpen] = React.useState(false)
   const [editingCategory, setEditingCategory] = React.useState<ProductCategory | null>(null)
-  
+
   // Form state
   const [formData, setFormData] = React.useState({
     slug: '',
@@ -108,9 +108,9 @@ export default function CategoriesPage() {
       const url = editingCategory
         ? `/api/admin/categories/${editingCategory.id}`
         : '/api/admin/categories'
-      
+
       const method = editingCategory ? 'PATCH' : 'POST'
-      
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -131,11 +131,13 @@ export default function CategoriesPage() {
 
       setDialogOpen(false)
       loadCategories()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving category:', error)
+      const message =
+        error instanceof Error ? error.message : 'No se pudo guardar la categoría'
       toast({
         title: 'Error',
-        description: error.message || 'No se pudo guardar la categoría',
+        description: message,
         variant: 'destructive',
       })
     }
@@ -170,8 +172,8 @@ export default function CategoriesPage() {
 
   // Move category up/down
   const handleMove = async (category: ProductCategory, direction: 'up' | 'down') => {
-    const newOrder = direction === 'up' 
-      ? category.display_order - 1 
+    const newOrder = direction === 'up'
+      ? category.display_order - 1
       : category.display_order + 1
 
     try {
