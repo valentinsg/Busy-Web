@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/lib/supabase/client"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { supabase } from "@/lib/supabase/client"
-import { useToast } from "@/hooks/use-toast"
+import { useEffect, useMemo, useState } from "react"
 
 function arrFromInput(v: string): string[] {
   return v
@@ -95,7 +95,7 @@ export default function NewPopoverPage() {
     <div className="space-y-6">
       <section className="flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-xl font-semibold mb-2">{isEdit ? "Editar popover" : "Nuevo popover"}</h2>
+          <h2 className="font-heading text-xl font-semibold mb-2">{isEdit ? "Editar popup" : "Nuevo popup"}</h2>
           <p className="font-body text-muted-foreground">Define título, contenido, ventanas de tiempo y segmentación por secciones o rutas.</p>
         </div>
         <Link href="/admin/popovers" className="text-sm text-muted-foreground hover:underline">Volver</Link>
@@ -132,14 +132,14 @@ export default function NewPopoverPage() {
             const json = await res.json()
             if (!res.ok) throw new Error(json?.error || "Error")
             toast({
-              title: isEdit ? "✅ Popover actualizado" : "✅ Popover creado",
-              description: isEdit ? "Los cambios se guardaron correctamente" : "El popover se creó correctamente",
+              title: isEdit ? "✅ Popup actualizado" : "✅ Popup creado",
+              description: isEdit ? "Los cambios se guardaron correctamente" : "El popup se creó correctamente",
             })
             setTimeout(() => router.push("/admin/popovers"), 600)
           } catch (err: unknown) {
             toast({
               title: "❌ Error",
-              description: err?.toString() || "Error al guardar el popover",
+              description: err?.toString() || "Error al guardar el popup",
               variant: "destructive",
             })
           } finally {
@@ -213,9 +213,9 @@ export default function NewPopoverPage() {
           )}
         </div>
 
-        {/* Tipo de popover */}
+        {/* Tipo de popup */}
         <div className="grid gap-2">
-          <label className="text-sm font-medium">Tipo de Popover</label>
+          <label className="text-sm font-medium">Tipo de Popup</label>
           <select
             className="rounded-md border bg-background px-3 py-2 text-sm"
             value={type}
@@ -278,7 +278,7 @@ export default function NewPopoverPage() {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          Delay: Segundos antes de mostrar el popover (0 = inmediato, recomendado: 3-5 segundos)
+          Delay: Segundos antes de mostrar el popup (0 = inmediato, recomendado: 3-5 segundos)
         </p>
 
         {/* Opciones de interacción */}
@@ -351,14 +351,14 @@ export default function NewPopoverPage() {
         </div>
         <div className="flex items-center gap-3">
           <button disabled={saving} className="rounded-md border bg-primary text-primary-foreground px-3 py-2 text-sm hover:opacity-90 disabled:opacity-60">
-            {saving ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear popover"}
+            {saving ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear popup"}
           </button>
           {isEdit && (
             <button
               type="button"
               onClick={async () => {
                 if (!editingId) return
-                if (!confirm("¿Eliminar popover?")) return
+                if (!confirm("¿Eliminar popup?")) return
                 setSaving(true)
                 try {
                   const headers = await getAuthHeaders()
@@ -366,14 +366,14 @@ export default function NewPopoverPage() {
                   const json = await res.json()
                   if (!res.ok) throw new Error(json?.error || "Error")
                   toast({
-                    title: "✅ Popover eliminado",
-                    description: "El popover se eliminó correctamente",
+                    title: "✅ Popup eliminado",
+                    description: "El popup se eliminó correctamente",
                   })
                   router.push("/admin/popovers")
                 } catch (err: unknown) {
                   toast({
                     title: "❌ Error",
-                    description: err?.toString() || "Error al eliminar el popover",
+                    description: err?.toString() || "Error al eliminar el popup",
                     variant: "destructive",
                   })
                 } finally {

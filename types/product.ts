@@ -126,6 +126,12 @@ export interface Product {
   discountActive?: boolean
   /** Si el producto está activo/visible en la tienda */
   isActive?: boolean
+  /**
+   * Peso del producto en gramos
+   * Si es null/undefined, se usa el peso por defecto según categoría
+   * Solo visible/editable desde admin
+   */
+  weight?: number | null
 }
 
 /**

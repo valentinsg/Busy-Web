@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/hooks/use-cart"
 import { useToast } from "@/hooks/use-toast"
@@ -16,10 +17,50 @@ import { trackBeginCheckout } from "@/lib/analytics/ecommerce"
 import { computeShipping, computeTax } from "@/lib/checkout/totals"
 import { capitalize, formatPrice } from "@/lib/format"
 import { getSettingsClient } from "@/lib/repo/settings"
-import { ArrowLeft, CreditCard, Mail } from "lucide-react"
+import { getProvinceFromPostalCode, isMarDelPlataPostalCode, isPostalCodeValidForProvince } from "@/lib/shipping/postal-codes"
+import { AlertTriangle, ArrowLeft, CreditCard, Gift, Loader2, Mail, Package, Truck } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import * as React from "react"
+
+// Provincias de Argentina
+const ARGENTINA_PROVINCES = [
+  { code: "BA", name: "Buenos Aires" },
+  { code: "CABA", name: "Ciudad Autónoma de Buenos Aires" },
+  { code: "CAT", name: "Catamarca" },
+  { code: "CHA", name: "Chaco" },
+  { code: "CHU", name: "Chubut" },
+  { code: "COR", name: "Córdoba" },
+  { code: "CRR", name: "Corrientes" },
+  { code: "ER", name: "Entre Ríos" },
+  { code: "FOR", name: "Formosa" },
+  { code: "JUJ", name: "Jujuy" },
+  { code: "LP", name: "La Pampa" },
+  { code: "LR", name: "La Rioja" },
+  { code: "MZA", name: "Mendoza" },
+  { code: "MIS", name: "Misiones" },
+  { code: "NQN", name: "Neuquén" },
+  { code: "RN", name: "Río Negro" },
+  { code: "SAL", name: "Salta" },
+  { code: "SJ", name: "San Juan" },
+  { code: "SL", name: "San Luis" },
+  { code: "SC", name: "Santa Cruz" },
+  { code: "SF", name: "Santa Fe" },
+  { code: "SE", name: "Santiago del Estero" },
+  { code: "TDF", name: "Tierra del Fuego" },
+  { code: "TUC", name: "Tucumán" },
+]
+
+// Shipping option type from Envia
+type ShippingOption = {
+  carrier: string
+  service: string
+  serviceName: string
+  price: number
+  currency: string
+  estimatedDelivery: string | null
+  logo?: string
+}
 
 export default function CheckoutPage() {
   const { items, getTotalItems, getSubtotal, getPromoDiscount, getAppliedPromos, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon } = useCart()
@@ -41,6 +82,13 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = React.useState<"card" | "transfer">("card")
   const [couponCode, setCouponCode] = React.useState("")
 
+  // Envia shipping options
+  const [shippingOptions, setShippingOptions] = React.useState<ShippingOption[]>([])
+  const [selectedShipping, setSelectedShipping] = React.useState<ShippingOption | null>(null)
+  const [loadingShipping, setLoadingShipping] = React.useState(false)
+  const [shippingError, setShippingError] = React.useState<string | null>(null)
+  const [shippingSource, setShippingSource] = React.useState<"envia" | "fallback" | null>(null)
+
 
   const totalItems = getTotalItems()
   const subtotal = getSubtotal()
@@ -51,6 +99,10 @@ export default function CheckoutPage() {
   // Settings-based free shipping threshold + city-aware flat rate
   const [freeThreshold, setFreeThreshold] = React.useState<number>(100000)
   const [flatRate, setFlatRate] = React.useState<number>(25000)
+  const [marDelPlataRate, setMarDelPlataRate] = React.useState<number>(10000)
+  const [freeShippingEnabled, setFreeShippingEnabled] = React.useState<boolean>(false)
+  const [freeShippingMessage, setFreeShippingMessage] = React.useState<string>("")
+
   React.useEffect(() => {
     let cancelled = false
     ;(async () => {
@@ -59,6 +111,9 @@ export default function CheckoutPage() {
         if (!cancelled) {
           setFreeThreshold(Number(s.shipping_free_threshold ?? 100000))
           setFlatRate(Number(s.shipping_flat_rate ?? 25000))
+          setMarDelPlataRate(Number(s.mar_del_plata_rate ?? 10000))
+          setFreeShippingEnabled(Boolean(s.free_shipping_enabled))
+          setFreeShippingMessage(s.free_shipping_message || "Envío gratis en todas las compras")
         }
       } catch {
         // ignore
@@ -66,11 +121,96 @@ export default function CheckoutPage() {
     })()
     return () => { cancelled = true }
   }, [])
-  const isMarDelPlata = (shippingData.city || "").trim().toLowerCase().includes("mar del plata")
-  const estimatedShipping = computeShipping(discountedSubtotal, {
-    flat_rate: isMarDelPlata ? 10000 : flatRate,
-    free_threshold: freeThreshold,
-  })
+
+  // Validación de código postal vs provincia
+  const postalCodeMismatch = shippingData.state && shippingData.zipCode &&
+    !isPostalCodeValidForProvince(shippingData.zipCode, shippingData.state)
+  const suggestedProvince = postalCodeMismatch ? getProvinceFromPostalCode(shippingData.zipCode) : null
+
+  // Mar del Plata: CP 7600-7613 Y provincia Buenos Aires (para evitar fraude)
+  const isMarDelPlataCP = isMarDelPlataPostalCode(shippingData.zipCode)
+  const isMarDelPlata = isMarDelPlataCP && shippingData.state === "Buenos Aires"
+
+  // Check if free shipping applies (global toggle OR threshold reached OR Mar del Plata válido)
+  const isFreeShipping = freeShippingEnabled || discountedSubtotal >= freeThreshold || isMarDelPlata
+
+  // Use selected shipping option price, or fallback to flat rate
+  const estimatedShipping = isFreeShipping
+    ? 0
+    : selectedShipping
+      ? selectedShipping.price
+      : computeShipping(discountedSubtotal, {
+          flat_rate: isMarDelPlata ? marDelPlataRate : flatRate,
+          free_threshold: freeThreshold,
+        })
+
+  // Fetch shipping options when address is complete
+  const fetchShippingOptions = React.useCallback(async () => {
+    // Need at least city and postal code
+    if (!shippingData.city.trim() || !shippingData.zipCode.trim()) {
+      return
+    }
+
+    setLoadingShipping(true)
+    setShippingError(null)
+
+    try {
+      const response = await fetch("/api/shipping/rates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          destination: {
+            name: `${shippingData.firstName} ${shippingData.lastName}`.trim() || "Cliente",
+            phone: shippingData.phone || "0000000000",
+            street: shippingData.address || "Sin dirección",
+            city: shippingData.city,
+            state: shippingData.state || shippingData.city,
+            postalCode: shippingData.zipCode,
+            country: "AR",
+          },
+          items: items.map(it => ({
+            product_id: it.product.id,
+            quantity: it.quantity,
+            weight: (it.product as { weight?: number }).weight,
+            category: it.product.category,
+          })),
+          totalValue: discountedSubtotal,
+          itemCount: getTotalItems(),
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success && data.options && data.options.length > 0) {
+        setShippingOptions(data.options)
+        setShippingSource(data.source || "fallback")
+        // Auto-select cheapest option
+        const cheapest = data.options.reduce((min: ShippingOption, opt: ShippingOption) =>
+          opt.price < min.price ? opt : min, data.options[0])
+        setSelectedShipping(cheapest)
+      } else {
+        setShippingError(data.error || "No se encontraron opciones de envío")
+        setShippingOptions([])
+        setSelectedShipping(null)
+      }
+    } catch (err) {
+      console.error("Error fetching shipping:", err)
+      setShippingError("Error al calcular envío")
+    } finally {
+      setLoadingShipping(false)
+    }
+  }, [shippingData, items, discountedSubtotal, getTotalItems])
+
+  // Debounce shipping fetch when address changes
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (shippingData.city && shippingData.zipCode) {
+        fetchShippingOptions()
+      }
+    }, 800) // Wait 800ms after user stops typing
+
+    return () => clearTimeout(timer)
+  }, [shippingData.city, shippingData.zipCode, shippingData.state, fetchShippingOptions])
   // Tax only applies to card payments (Mercado Pago), not to bank transfers
   const estimatedTax = paymentMethod === "card"
     ? computeTax(Number((discountedSubtotal + estimatedShipping).toFixed(2)))
@@ -100,9 +240,9 @@ export default function CheckoutPage() {
     setShippingData((prev) => ({ ...prev, [field]: value }))
   }
 
-  // Validar que todos los campos requeridos estén completos
+  // Validar que todos los campos requeridos estén completos Y que el CP coincida con la provincia
   const isFormValid = () => {
-    return (
+    const fieldsComplete = (
       shippingData.firstName.trim() !== "" &&
       shippingData.lastName.trim() !== "" &&
       shippingData.email.trim() !== "" &&
@@ -113,6 +253,8 @@ export default function CheckoutPage() {
       shippingData.state.trim() !== "" &&
       shippingData.zipCode.trim() !== ""
     )
+    // Bloquear si hay mismatch entre CP y provincia
+    return fieldsComplete && !postalCodeMismatch
   }
 
 
@@ -220,42 +362,87 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="city" className="font-body">{t("checkout.fields.city")}</Label>
-                    <Input
-                      id="city"
-                      value={shippingData.city}
-                      onChange={(e) => handleInputChange("city", e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="state" className="font-body">{t("checkout.fields.state")}</Label>
-                    <Input
-                      id="state"
-                      value={shippingData.state}
-                      onChange={(e) => handleInputChange("state", e.target.value)}
-                      required
-                    />
-                  </div>
+                <div>
+                  <Label htmlFor="state" className="font-body">{t("checkout.fields.state")}</Label>
+                  <Select
+                    value={shippingData.state}
+                    onValueChange={(value) => {
+                      handleInputChange("state", value)
+                      // Limpiar ciudad cuando cambia la provincia
+                      handleInputChange("city", "")
+                    }}
+                  >
+                    <SelectTrigger id="state" className="w-full">
+                      <SelectValue placeholder="Seleccionar provincia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ARGENTINA_PROVINCES.map((province) => (
+                        <SelectItem key={province.code} value={province.name}>
+                          {province.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="zipCode" className="font-body">{t("checkout.fields.zip")}</Label>
-                    <Input
-                      id="zipCode"
-                      value={shippingData.zipCode}
-                      onChange={(e) => handleInputChange("zipCode", e.target.value)}
-                      required
-                    />
+                <div>
+                  <Label htmlFor="city" className="font-body">{t("checkout.fields.city")}</Label>
+                  <Input
+                    id="city"
+                    value={shippingData.city}
+                    onChange={(e) => handleInputChange("city", e.target.value)}
+                    placeholder={shippingData.state ? `Ciudad en ${shippingData.state}` : "Primero seleccioná la provincia"}
+                    disabled={!shippingData.state}
+                    required
+                  />
+                  {shippingData.state === "Buenos Aires" && (
+                    <p className="text-xs text-muted-foreground mt-1">Ej: Mar del Plata, La Plata, Bahía Blanca...</p>
+                  )}
+                </div>
+
+                {/* Mar del Plata free shipping notice */}
+                {isMarDelPlata && (
+                  <div className="text-sm text-green-600 dark:text-green-400 bg-green-500/10 rounded-md px-3 py-2 flex items-center gap-2">
+                    <Gift className="h-4 w-4" />
+                    <span>¡Envío gratis a Mar del Plata! 🏖️</span>
                   </div>
-                  {/* Country removed: default to Argentina */}
-                  <div className="hidden">
-                    <Label htmlFor="country" className="font-body">{t("checkout.fields.country")}</Label>
-                    <Input id="country" value={shippingData.country} readOnly />
-                  </div>
+                )}
+
+                <div>
+                  <Label htmlFor="zipCode" className="font-body">{t("checkout.fields.zip")}</Label>
+                  <Input
+                    id="zipCode"
+                    value={shippingData.zipCode}
+                    onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                    className={postalCodeMismatch ? "border-amber-500" : ""}
+                    required
+                  />
+                  {postalCodeMismatch && (
+                    <div className="mt-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded-md px-3 py-2 flex items-start gap-2">
+                      <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p>El código postal <strong>{shippingData.zipCode}</strong> no corresponde a <strong>{shippingData.state}</strong>.</p>
+                        {suggestedProvince && (
+                          <p className="mt-1">
+                            Parece ser de <strong>{suggestedProvince}</strong>.{" "}
+                            <button
+                              type="button"
+                              className="underline hover:no-underline"
+                              onClick={() => handleInputChange("state", suggestedProvince)}
+                            >
+                              Corregir provincia
+                            </button>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Country removed: default to Argentina */}
+                <div className="hidden">
+                  <Label htmlFor="country" className="font-body">{t("checkout.fields.country")}</Label>
+                  <Input id="country" value={shippingData.country} readOnly />
                 </div>
               </CardContent>
             </Card>
@@ -337,7 +524,7 @@ export default function CheckoutPage() {
                       <div className="flex-1">
                         <h4 className="font-medium text-sm line-clamp-2">{item.product.name}</h4>
                         <div className="text-xs text-muted-foreground">
-                          {capitalize(item.selectedColor)} • {item.selectedSize} • Qty: {item.quantity}
+                          {capitalize(item.selectedColor)} • {item.selectedSize} • Cant: {item.quantity}
                         </div>
                         <div className="font-medium text-sm">{formatPrice(item.product.price * item.quantity)}</div>
                       </div>
@@ -433,12 +620,101 @@ export default function CheckoutPage() {
                       <span>{formatPrice(discountedSubtotal)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span>{t("checkout.summary.shipping")}</span>
-                    <span>{estimatedShipping === 0 ? t("cart.shipping_free") : formatPrice(estimatedShipping)}</span>
+                  {/* Shipping Options Section */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <Truck className="h-4 w-4" />
+                        {t("checkout.summary.shipping")}
+                      </span>
+                      {loadingShipping && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                    </div>
+
+                    {/* Show shipping options if available */}
+                    {shippingOptions.length > 0 && !loadingShipping && (
+                      <div className="space-y-2 mt-2">
+                        {shippingSource === "envia" && (
+                          <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                            <Package className="h-3 w-3" />
+                            Tarifas en tiempo real
+                          </div>
+                        )}
+                        <RadioGroup
+                          value={selectedShipping ? `${selectedShipping.carrier}-${selectedShipping.service}` : ""}
+                          onValueChange={(val) => {
+                            const option = shippingOptions.find(o => `${o.carrier}-${o.service}` === val)
+                            if (option) setSelectedShipping(option)
+                          }}
+                          className="space-y-2"
+                        >
+                          {shippingOptions.slice(0, 4).map((option) => (
+                            <Label
+                              key={`${option.carrier}-${option.service}`}
+                              htmlFor={`shipping-${option.carrier}-${option.service}`}
+                              className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all ${
+                                selectedShipping?.carrier === option.carrier && selectedShipping?.service === option.service
+                                  ? "border-primary bg-primary/5"
+                                  : "border-border hover:bg-muted/50"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <RadioGroupItem
+                                  value={`${option.carrier}-${option.service}`}
+                                  id={`shipping-${option.carrier}-${option.service}`}
+                                />
+                                <div>
+                                  <div className="font-medium text-sm">{option.serviceName}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {option.carrier !== "standard" && <span className="capitalize">{option.carrier}</span>}
+                                    {option.estimatedDelivery && (
+                                      <span> • {option.estimatedDelivery}</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="font-semibold text-sm">
+                                {isFreeShipping ? (
+                                  <span className="text-green-600">Gratis</span>
+                                ) : (
+                                  formatPrice(option.price)
+                                )}
+                              </div>
+                            </Label>
+                          ))}
+                        </RadioGroup>
+                      </div>
+                    )}
+
+                    {/* Fallback: show simple shipping line */}
+                    {shippingOptions.length === 0 && !loadingShipping && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          {shippingData.city && shippingData.zipCode
+                            ? "Envío estándar"
+                            : "Completá tu dirección para ver opciones"}
+                        </span>
+                        <span>{estimatedShipping === 0 ? t("cart.shipping_free") : formatPrice(estimatedShipping)}</span>
+                      </div>
+                    )}
+
+                    {/* Error message */}
+                    {shippingError && (
+                      <div className="text-xs text-amber-600 dark:text-amber-400">
+                        {shippingError}
+                      </div>
+                    )}
                   </div>
-                  {/* Free shipping progress message */}
-                  {estimatedShipping > 0 && discountedSubtotal < freeThreshold && (
+
+                  {/* Free shipping banner when globally enabled */}
+                  {freeShippingEnabled && (
+                    <div className="text-xs text-green-600 dark:text-green-400 bg-green-500/10 rounded-md px-3 py-2 flex items-center gap-2">
+                      <Gift className="h-4 w-4" />
+                      <span className="font-medium">{freeShippingMessage}</span>
+                    </div>
+                  )}
+
+                  {/* Free shipping progress message (only show if global free shipping is OFF) */}
+                  {!freeShippingEnabled && estimatedShipping > 0 && discountedSubtotal < freeThreshold && (
                     <div className="text-xs text-amber-500 dark:text-amber-400 bg-amber-500/10 rounded-md px-3 py-2">
                       ¡Te faltan <span className="font-semibold">{formatPrice(freeThreshold - discountedSubtotal)}</span> para envío gratis!
                     </div>
@@ -465,7 +741,10 @@ export default function CheckoutPage() {
                 {/* Validation Warning */}
                 {!isFormValid() && (
                   <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-sm text-yellow-600 dark:text-yellow-500">
-                    ⚠️ Por favor completá todos los campos de envío para continuar
+                    {postalCodeMismatch
+                      ? "⚠️ El código postal no coincide con la provincia seleccionada. Corregí los datos para continuar."
+                      : "⚠️ Por favor completá todos los campos de envío para continuar"
+                    }
                   </div>
                 )}
 

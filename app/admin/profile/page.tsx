@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/lib/supabase/client"
 import type { Author } from "@/types"
 import { Loader2, Upload, X } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
@@ -28,7 +29,14 @@ export default function ProfilePage() {
 
   const loadProfile = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/profile", { cache: "no-store" })
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      if (!token) throw new Error("No auth token")
+
+      const res = await fetch("/api/admin/profile", {
+        cache: "no-store",
+        headers: { Authorization: `Bearer ${token}` },
+      })
       if (!res.ok) throw new Error("Failed to load profile")
 
       const data = await res.json()
@@ -62,9 +70,16 @@ export default function ProfilePage() {
     setSaving(true)
 
     try {
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      if (!token) throw new Error("No auth token")
+
       const res = await fetch("/api/admin/profile", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(formData),
       })
 
@@ -115,12 +130,17 @@ export default function ProfilePage() {
     setUploading(true)
 
     try {
-      const formData = new FormData()
-      formData.append("file", file)
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      if (!token) throw new Error("No auth token")
+
+      const uploadFormData = new FormData()
+      uploadFormData.append("file", file)
 
       const res = await fetch("/api/admin/profile/avatar", {
         method: "POST",
-        body: formData,
+        headers: { Authorization: `Bearer ${token}` },
+        body: uploadFormData,
       })
 
       if (!res.ok) throw new Error("Failed to upload avatar")
@@ -149,8 +169,13 @@ export default function ProfilePage() {
     setUploading(true)
 
     try {
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      if (!token) throw new Error("No auth token")
+
       const res = await fetch("/api/admin/profile/avatar", {
         method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       })
 
       if (!res.ok) throw new Error("Failed to delete avatar")

@@ -1,9 +1,10 @@
 "use client"
 
+import { ChristmasRibbonDecoration } from "@/components/christmas"
 import { useI18n } from "@/components/providers/i18n-provider"
+import { BusyLogo } from "@/components/shared/busy-logo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import Image from "next/image"
 import Link from "next/link"
 import * as React from "react"
 
@@ -91,16 +92,20 @@ export function Footer() {
 
   return (
     <footer className="transition-[background-color,border-color,backdrop-filter] duration-500 ease-out">
-      <div className="container px-3 sm:px-4 py-14 sm:py-16">
+      <div className="container px-3 sm:px-4 py-14 sm:py-16 relative">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-6 gap-6">
           {/* Brand Section */}
           <div className="sm:col-span-2 lg:col-span-2">
-            <Link href="/" prefetch={false} className="flex w-32 -mt-4 mb-2">
-              <div className="relative h-12 w-32">
-                <Image src="/brand/BUSY_LOGO TRANSPARENTE-3.png" alt="Busy" fill className="object-contain" unoptimized />
-              </div>
-            </Link>
+            <div className="flex items-center gap-3 -mt-4 mb-2">
+              <Link href="/" prefetch={false} className="flex w-32">
+                <div className="relative h-12 w-32">
+                  <BusyLogo variant="full" fill />
+                </div>
+              </Link>
+              {/* Christmas ribbon decoration next to logo */}
+              <ChristmasRibbonDecoration size="md" />
+            </div>
             <p className="font-body text-sm text-muted-foreground mb-4">
               {t("footer.brand.description")}
             </p>

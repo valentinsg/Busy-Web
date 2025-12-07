@@ -1,5 +1,6 @@
 'use client'
 
+import { ChristmasPromoSection } from '@/components/christmas'
 import { useI18n } from '@/components/providers/i18n-provider'
 import { Button } from '@/components/ui/button'
 import { getImageConfig } from '@/lib/imageConfig'
@@ -31,6 +32,9 @@ export default function HomeClient() {
 
   return (
     <>
+      {/* Christmas Promo Section - only shows when christmas_mode is enabled */}
+      <ChristmasPromoSection />
+
       <section className="relative py-14 sm:py-16 md:py-24 lg:py-28">
         <div className="container px-6 sm:px-4">
           <motion.div className="text-center mb-12">

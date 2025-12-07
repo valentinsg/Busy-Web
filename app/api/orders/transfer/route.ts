@@ -120,9 +120,18 @@ export async function POST(req: NextRequest) {
     // Create order with status "pending" for transfers
     const order_id = crypto.randomUUID()
 
-    // Try to insert with payment_method, fallback if column doesn't exist
-    let order: { id: string } | null = null
-    let orderErr: Error | null = null
+    // Build shipping address object
+    const shippingAddress = customer ? {
+      name: `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim(),
+      street: customer.address ?? "",
+      city: customer.city ?? "",
+      state: customer.state ?? "",
+      postal_code: customer.zip ?? "",
+      country: "AR",
+      phone: customer.phone ?? null,
+      dni: customer.dni ?? null,
+      notes: null,
+    } : null
 
     const orderPayload = {
       id: order_id,
@@ -137,28 +146,16 @@ export async function POST(req: NextRequest) {
       total,
       notes: `Pago por transferencia. Cliente: ${customer?.first_name} ${customer?.last_name}. Email: ${customer?.email}. Tel: ${customer?.phone}. DNI: ${customer?.dni || "N/A"}. Dirección: ${customer?.address || ""}, ${customer?.city || ""}, ${customer?.state || ""}, CP: ${customer?.zip || ""}`,
       placed_at: new Date().toISOString(),
+      payment_method: "transfer",
+      shipping_address: shippingAddress,
+      shipping_status: "pending",
     }
 
-    // Try with payment_method first
-    const firstTry = await supabase
+    const { data: order, error: orderErr } = await supabase
       .from("orders")
-      .insert({ ...orderPayload, payment_method: "transfer" })
+      .insert(orderPayload)
       .select("*")
       .single()
-
-    order = firstTry.data
-    orderErr = firstTry.error
-
-    // If payment_method column doesn't exist, retry without it
-    if (orderErr && String(orderErr.message || "").toLowerCase().includes("payment_method")) {
-      const secondTry = await supabase
-        .from("orders")
-        .insert(orderPayload)
-        .select("*")
-        .single()
-      order = secondTry.data
-      orderErr = secondTry.error
-    }
 
     if (orderErr) throw orderErr
     if (!order) throw new Error("Failed to create order")

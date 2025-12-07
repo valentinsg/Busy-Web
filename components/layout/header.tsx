@@ -2,6 +2,7 @@
 
 import { LanguageToggle } from '@/components/layout/language-toggle'
 import { useI18n } from '@/components/providers/i18n-provider'
+import { BusyLogo } from '@/components/shared/busy-logo'
 import { CartSheet } from '@/components/shop/cart-sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -161,14 +162,7 @@ export function Header() {
           }
           aria-label="Busy Home"
         >
-          <Image
-            src="/busy-gothic.png"
-            alt="Busy"
-            width={100}
-            height={24}
-            className="object-contain"
-            unoptimized
-          />
+          <BusyLogo variant="gothic" width={100} height={24} />
         </Link>
 
         {/* Desktop Navigation */}
@@ -302,14 +296,7 @@ export function Header() {
                 {/* Logo at top */}
                 <div className="flex items-center justify-center py-2">
                   <Link href="/" onClick={() => setIsOpen(false)}>
-                    <Image
-                      src="/busy-gothic.png"
-                      alt="Busy"
-                      width={120}
-                      height={28}
-                      className="object-contain"
-                      unoptimized
-                    />
+                    <BusyLogo variant="gothic" width={120} height={28} />
                   </Link>
                 </div>
 

@@ -1,8 +1,29 @@
-import { getAuthorByEmail, updateAuthor, uploadAuthorAvatar, deleteAuthorAvatar } from '@/lib/repo/authors'
+import { deleteAuthorAvatar, getAuthorByEmail, updateAuthor, uploadAuthorAvatar } from '@/lib/repo/authors'
 import getServiceClient from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+
+/**
+ * Helper to get user from Authorization header
+ */
+async function getUserFromRequest(request: NextRequest) {
+  const auth = request.headers.get('authorization') || request.headers.get('Authorization')
+  if (!auth || !auth.toLowerCase().startsWith('bearer ')) {
+    return null
+  }
+  const token = auth.slice(7)
+  const client = createClient(supabaseUrl, anonKey)
+  const { data, error } = await client.auth.getUser(token)
+  if (error || !data?.user) {
+    return null
+  }
+  return data.user
+}
 
 /**
  * POST /api/admin/profile/avatar
@@ -10,14 +31,12 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = getServiceClient()
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const user = await getUserFromRequest(request)
     if (!user || !user.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const supabase = getServiceClient()
 
     // Get current author profile
     const currentAuthor = await getAuthorByEmail(supabase, user.email)
@@ -73,16 +92,14 @@ export async function POST(request: NextRequest) {
  * DELETE /api/admin/profile/avatar
  * Delete avatar for current user
  */
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
   try {
-    const supabase = getServiceClient()
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const user = await getUserFromRequest(request)
     if (!user || !user.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const supabase = getServiceClient()
 
     // Get current author profile
     const currentAuthor = await getAuthorByEmail(supabase, user.email)

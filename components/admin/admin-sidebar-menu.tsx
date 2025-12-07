@@ -383,7 +383,7 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                   <Link href="/admin/popovers" legacyBehavior>
                     <SidebarMenuButton asChild isActive={isActive("/admin/popovers")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                       <a className="flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4" /> Popovers
+                        <MessageCircle className="h-4 w-4" /> Popups
                       </a>
                     </SidebarMenuButton>
                   </Link>

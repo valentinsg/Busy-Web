@@ -177,11 +177,30 @@ export async function POST(req: NextRequest) {
 
     if (updateErr) throw updateErr
 
+    // Auto-generate shipping label if Envia is configured
+    let labelResult = null
+    if (isAutoLabelEnabled()) {
+      try {
+        labelResult = await generateAutoLabel(order_id)
+        if (labelResult.success) {
+          console.log("Auto-label generated for transfer order", {
+            order_id,
+            tracking_number: labelResult.tracking_number,
+            carrier: labelResult.carrier,
+          })
+        }
+      } catch (labelErr) {
+        console.error("Auto-label generation error for transfer", labelErr)
+      }
+    }
+
     return NextResponse.json({
       success: true,
       order: updatedOrder,
       customer_created: !order.customer_id && !!customerId,
       stock_decremented: stockDecrementedCount,
+      label_generated: labelResult?.success || false,
+      tracking_number: labelResult?.tracking_number || null,
       message: "Order confirmed and stock updated"
     })
   } catch (error: unknown) {

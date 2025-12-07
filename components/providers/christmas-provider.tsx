@@ -7,7 +7,7 @@ import * as React from "react"
 function Snowflake({ style }: { style: React.CSSProperties }) {
   return (
     <div
-      className="pointer-events-none fixed text-white/80 select-none"
+      className="pointer-events-none fixed text-white/30 select-none"
       style={style}
     >
       ❄
@@ -15,15 +15,15 @@ function Snowflake({ style }: { style: React.CSSProperties }) {
   )
 }
 
-// Generate random snowflakes
+// Generate random snowflakes - fewer and more subtle
 function generateSnowflakes(count: number) {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
     left: `${Math.random() * 100}%`,
-    animationDuration: `${8 + Math.random() * 12}s`,
-    animationDelay: `${Math.random() * 5}s`,
-    fontSize: `${8 + Math.random() * 16}px`,
-    opacity: 0.4 + Math.random() * 0.6,
+    animationDuration: `${12 + Math.random() * 15}s`,
+    animationDelay: `${Math.random() * 8}s`,
+    fontSize: `${6 + Math.random() * 10}px`,
+    opacity: 0.15 + Math.random() * 0.25,
   }))
 }
 
@@ -40,7 +40,7 @@ function SnowfallEffect() {
   if (!mounted) return null
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden">
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       {snowflakes.map((flake) => (
         <Snowflake
           key={flake.id}
@@ -56,17 +56,20 @@ function SnowfallEffect() {
       <style jsx global>{`
         @keyframes snowfall {
           0% {
-            transform: translateY(-20px) rotate(0deg);
+            transform: translateY(-20px) rotate(0deg) translateX(0);
             opacity: 0;
           }
           10% {
-            opacity: 1;
+            opacity: 0.3;
+          }
+          50% {
+            transform: translateY(50vh) rotate(180deg) translateX(20px);
           }
           90% {
-            opacity: 1;
+            opacity: 0.2;
           }
           100% {
-            transform: translateY(100vh) rotate(360deg);
+            transform: translateY(100vh) rotate(360deg) translateX(-10px);
             opacity: 0;
           }
         }

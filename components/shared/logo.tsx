@@ -1,19 +1,14 @@
-import { getImageConfig } from "@/lib/imageConfig"
-import Image from "next/image"
+"use client"
 
+import { BusyLogo } from "@/components/shared/busy-logo"
+
+/**
+ * @deprecated Use BusyLogo component directly for more control
+ */
 export function Logo() {
-  const config = getImageConfig('logo')
   return (
     <div className="relative w-24 h-24">
-      <Image
-        src="/logo-busy-white.png"
-        alt="Busy Logo"
-        width={config.width}
-        height={config.height}
-        unoptimized
-        sizes={config.sizes}
-        className="object-contain"
-      />
+      <BusyLogo variant="white" fill />
     </div>
   )
 }

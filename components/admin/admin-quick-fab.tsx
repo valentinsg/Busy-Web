@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import Link from "next/link"
+import * as React from "react"
 
 export default function AdminQuickFAB() {
   const [open, setOpen] = React.useState(false)
@@ -102,7 +102,7 @@ export default function AdminQuickFAB() {
               className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/90 hover:bg-white/5 transition-all duration-200 transform hover:translate-x-1"
               onClick={() => setOpen(false)}
             >
-              <span className="text-lg">💬</span> Nuevo popover
+              <span className="text-lg">💬</span> Nuevo popup
             </Link>
           </nav>
         </div>

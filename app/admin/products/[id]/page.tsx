@@ -18,6 +18,27 @@ function formatSlug(value: string): string {
   return value.toLowerCase().replace(/\s+/g, '-')
 }
 
+// Default weights by category (in grams) - mirrors lib/shipping/weights.ts
+const DEFAULT_WEIGHTS: Record<string, number> = {
+  remera: 220, remeras: 220,
+  hoodie: 750, hoodies: 750, buzo: 750, buzos: 750,
+  pantalon: 500, pantalones: 500, jogger: 500, joggers: 500,
+  gorra: 200, gorras: 200,
+  accesorio: 50, accesorios: 50,
+  default: 300,
+}
+
+function getDefaultWeightForCategory(category?: string | null): number {
+  if (!category) return DEFAULT_WEIGHTS.default
+  const normalized = category.toLowerCase().trim()
+  if (DEFAULT_WEIGHTS[normalized]) return DEFAULT_WEIGHTS[normalized]
+  // Partial match
+  for (const [key, weight] of Object.entries(DEFAULT_WEIGHTS)) {
+    if (key !== "default" && normalized.includes(key)) return weight
+  }
+  return DEFAULT_WEIGHTS.default
+}
+
 interface PageProps { params: { id: string } }
 
 export default function EditProductPage({ params }: PageProps) {
@@ -50,6 +71,7 @@ export default function EditProductPage({ params }: PageProps) {
     badgeVariant?: string
     discountPercentage?: number
     discountActive?: boolean
+    weight?: number | null // Weight in grams for shipping calculation
   }
   const [form, setForm] = React.useState<FormState>({})
   const [, setStockBySize] = React.useState<Record<string, number>>({})
@@ -162,6 +184,7 @@ export default function EditProductPage({ params }: PageProps) {
               badgeVariant: (p as unknown as { badgeVariant?: string }).badgeVariant || "default",
               discountPercentage: (p as unknown as { discountPercentage?: number }).discountPercentage || 0,
               discountActive: !!(p as unknown as { discountActive?: boolean }).discountActive,
+              weight: (p as unknown as { weight?: number | null }).weight ?? null,
             })
             setStockBySize(p.stockBySize || {})
             const sizes = p.sizes || []
@@ -270,6 +293,7 @@ export default function EditProductPage({ params }: PageProps) {
         badge_variant: form.badgeVariant || "default",
         discount_percentage: form.discountPercentage ? Math.floor(Number(form.discountPercentage)) : null,
         discount_active: !!form.discountActive,
+        weight: form.weight && form.weight > 0 ? Math.floor(Number(form.weight)) : null,
       }
       const res = await fetch(`/api/admin/products/${params.id}`, {
         method: "PUT",
@@ -353,6 +377,26 @@ export default function EditProductPage({ params }: PageProps) {
           />
           <label className="text-sm">SKU
             <input value={form.sku||""} onChange={(e)=>setForm({...form, sku: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent" required />
+          </label>
+          <label className="text-sm">
+            <span className="flex items-center gap-2">
+              Peso (gramos)
+              <span className="text-xs text-muted-foreground font-normal">para cálculo de envío</span>
+            </span>
+            <input
+              type="number"
+              min="0"
+              value={form.weight ?? ""}
+              onChange={(e)=>setForm({...form, weight: e.target.value === "" ? null : Number(e.target.value)})}
+              className="w-full border rounded px-3 py-2 bg-transparent"
+              placeholder={`Por defecto: ${getDefaultWeightForCategory(form.category)}g`}
+            />
+            <span className="text-xs text-muted-foreground mt-1 block">
+              {form.weight && form.weight > 0
+                ? `✓ Peso configurado: ${form.weight}g`
+                : `⚠️ Sin peso → se usará ${getDefaultWeightForCategory(form.category)}g (${form.category || "default"})`
+              }
+            </span>
           </label>
           <label className="text-sm md:col-span-2">Descripción
             <textarea value={form.description||""} onChange={(e)=>setForm({...form, description: e.target.value})} className="w-full border rounded px-3 py-2 bg-transparent [field-sizing:content]" rows={4} />

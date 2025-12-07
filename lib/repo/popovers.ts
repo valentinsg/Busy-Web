@@ -86,9 +86,11 @@ export async function deletePopover(id: string): Promise<void> {
   if (error) throw error
 }
 
-export async function getActivePopoverFor(pathname: string, section?: string | null): Promise<Popover | null> {
+export async function getActivePopoverFor(pathname: string, section?: string | null, excludeIds?: string[]): Promise<Popover | null> {
   const sb = getServiceClient()
   const now = new Date().toISOString()
+  console.log('[Popover API] Now:', now, 'Path:', pathname, 'Exclude:', excludeIds)
+
   // Fetch enabled candidates and filter in JS for time window and prefix matching on paths
   const { data, error } = await sb
     .from("popovers")
@@ -97,19 +99,35 @@ export async function getActivePopoverFor(pathname: string, section?: string | n
     .order("priority", { ascending: false })
   if (error) throw error
   const list = (data as Popover[]) || []
-  
+  console.log('[Popover API] Found', list.length, 'enabled popovers')
+
   const matches = list.filter((p) => {
+    // Excluir popovers ya cerrados por el usuario
+    if (excludeIds && excludeIds.length > 0 && excludeIds.includes(p.id)) {
+      console.log('[Popover API] Excluded by localStorage:', p.id, p.title)
+      return false
+    }
+
     // time window
     const okTime = (!p.start_at || p.start_at <= now) && (!p.end_at || p.end_at >= now)
-    if (!okTime) return false
-    
+    if (!okTime) {
+      console.log('[Popover API] Excluded by time window:', p.id, p.title, 'start:', p.start_at, 'end:', p.end_at)
+      return false
+    }
+
     const sec = (p.sections || []) as string[]
     const pat = ((p.paths || []) as string[]).map(s => s.trim()).filter(Boolean)
     const secOk = !section || sec.length === 0 || sec.includes(section)
     const pathOk = pat.length === 0 || pat.some((prefix) => pathname.startsWith(prefix))
-    
-    return secOk && pathOk
+
+    if (!secOk || !pathOk) {
+      console.log('[Popover API] Excluded by section/path:', p.id, p.title, 'secOk:', secOk, 'pathOk:', pathOk)
+      return false
+    }
+
+    console.log('[Popover API] MATCH:', p.id, p.title)
+    return true
   })
-  
+
   return matches[0] ?? null
 }

@@ -1,5 +1,7 @@
 'use client'
 
+import { ChristmasTreeBackground, SnowAccumulation } from '@/components/christmas'
+import { useChristmas } from '@/components/providers/christmas-provider'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -34,6 +36,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
   const { addItem, openCart } = useCart()
   const router = useRouter()
   const overlayRef = React.useRef<HTMLDivElement | null>(null)
+  const { isChristmasMode } = useChristmas()
 
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -236,14 +239,21 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
             {/* gentle sheen on hover */}
             <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-15 transition-opacity duration-500" />
 
-            {/* Background pattern */}
-            <Image
-              src={'/backgrounds/product-bg.jpg'}
-              alt={'Busy Pattern white, diseñado por @agus.mxlina'}
-              fill
-              className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
-              sizes={getImageConfig('pattern').sizes}
-            />
+            {/* Background pattern - Christmas or regular */}
+            {isChristmasMode ? (
+              <ChristmasTreeBackground />
+            ) : (
+              <Image
+                src={'/backgrounds/product-bg.jpg'}
+                alt={'Busy Pattern white, diseñado por @agus.mxlina'}
+                fill
+                className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+                sizes={getImageConfig('pattern').sizes}
+              />
+            )}
+
+            {/* Snow accumulation on top - Christmas only */}
+            <SnowAccumulation />
             <Image
               src={normalizeImageUrl(
                 product.images[currentImageIndex] ||

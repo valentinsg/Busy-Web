@@ -1,11 +1,12 @@
 "use client"
 
-import * as React from "react"
-import { usePathname } from "next/navigation"
-import { X, Copy, Check } from "lucide-react"
-import Image from "next/image"
+import { BusyLogo } from "@/components/shared/busy-logo"
 import { AnimatedPopover } from "@/motion/components/AnimatedPopover"
 import { Confetti } from "@/motion/components/Confetti"
+import { Check, Copy, X } from "lucide-react"
+import Image from "next/image"
+import { usePathname } from "next/navigation"
+import * as React from "react"
 
 export default function SitePopover({ section }: { section?: string }) {
   const pathname = usePathname()
@@ -58,8 +59,21 @@ export default function SitePopover({ section }: { section?: string }) {
 
     const run = async () => {
       try {
-        console.log('[Popover] Fetching active popover...')
-        const res = await fetch(`/api/popovers/active?path=${encodeURIComponent(pathname || '')}${section ? `&section=${encodeURIComponent(section)}` : ""}`)
+        // Obtener IDs de popovers ya cerrados del localStorage
+        const dismissedIds: string[] = []
+        if (typeof window !== 'undefined') {
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i)
+            if (key?.startsWith('dismiss_popover_')) {
+              const id = key.replace('dismiss_popover_', '')
+              if (id) dismissedIds.push(id)
+            }
+          }
+        }
+
+        console.log('[Popover] Fetching active popover... Dismissed IDs:', dismissedIds)
+        const excludeParam = dismissedIds.length > 0 ? `&exclude=${encodeURIComponent(dismissedIds.join(','))}` : ''
+        const res = await fetch(`/api/popovers/active?path=${encodeURIComponent(pathname || '')}${section ? `&section=${encodeURIComponent(section)}` : ""}${excludeParam}`)
 
         if (cancelled) return
 
@@ -69,39 +83,33 @@ export default function SitePopover({ section }: { section?: string }) {
         console.log('[Popover] Response:', p)
 
         if (p && !cancelled) {
-          const lsKey = `dismiss_popover_${p.id}`
-          const already = typeof window !== "undefined" ? localStorage.getItem(lsKey) || '' : ''
+          // La API ya excluye los popovers cerrados, así que podemos mostrar directamente
+          console.log('[Popover] Setting up popover data')
+          isInitializedRef.current = true
+          const delayMs = (p.delay_seconds || 0) * 1000
 
-          if (!already) {
-            console.log('[Popover] Setting up popover data')
-            isInitializedRef.current = true
-            const delayMs = (p.delay_seconds || 0) * 1000
+          setData({
+            id: p.id,
+            title: p.title,
+            body: p.body,
+            discount_code: p.discount_code,
+            image_url: p.image_url,
+            type: p.type || 'simple',
+            require_email: p.require_email || false,
+            show_newsletter: p.show_newsletter || false,
+            cta_text: p.cta_text,
+            cta_url: p.cta_url,
+            delay_seconds: p.delay_seconds || 0
+          })
 
-            setData({
-              id: p.id,
-              title: p.title,
-              body: p.body,
-              discount_code: p.discount_code,
-              image_url: p.image_url,
-              type: p.type || 'simple',
-              require_email: p.require_email || false,
-              show_newsletter: p.show_newsletter || false,
-              cta_text: p.cta_text,
-              cta_url: p.cta_url,
-              delay_seconds: p.delay_seconds || 0
-            })
-
-            // Trigger visibility immediately for testing
-            console.log('[Popover] Making visible in', delayMs, 'ms')
-            timeoutId = setTimeout(() => {
-              if (!cancelled) {
-                console.log('[Popover] NOW VISIBLE')
-                setIsVisible(true)
-              }
-            }, delayMs)
-          } else {
-            console.log('[Popover] Already dismissed in localStorage')
-          }
+          // Trigger visibility after delay
+          console.log('[Popover] Making visible in', delayMs, 'ms')
+          timeoutId = setTimeout(() => {
+            if (!cancelled) {
+              console.log('[Popover] NOW VISIBLE')
+              setIsVisible(true)
+            }
+          }, delayMs)
         }
       } catch (e: unknown) {
         if (!cancelled) {
@@ -228,13 +236,7 @@ export default function SitePopover({ section }: { section?: string }) {
               />
               {/* Logo Busy en la esquina - más pequeño en móvil */}
               <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 opacity-90">
-                <Image
-                  src="/logo-busy-white.png"
-                  alt="Busy"
-                  width={40}
-                  height={40}
-                  className="drop-shadow-lg md:w-[52px] md:h-[52px]"
-                />
+                <BusyLogo variant="white" width={40} height={40} className="drop-shadow-lg md:w-[52px] md:h-[52px]" />
               </div>
             </div>
           )}

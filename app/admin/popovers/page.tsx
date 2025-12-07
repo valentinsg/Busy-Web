@@ -1,6 +1,6 @@
-import Link from "next/link"
-import { getServiceClient } from "@/lib/supabase/server"
 import { DeletePopoverButton } from "@/components/admin/delete-popover-button"
+import { getServiceClient } from "@/lib/supabase/server"
+import Link from "next/link"
 
 export const dynamic = "force-dynamic"
 
@@ -19,20 +19,20 @@ export default async function AdminPopoversPage() {
     <div className="space-y-6">
       <section className="flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-xl font-semibold mb-2">Popovers</h2>
-          <p className="font-body text-muted-foreground">Configurar popovers de descuento por tiempo y sección/ruta.</p>
+          <h2 className="font-heading text-xl font-semibold mb-2">Popups</h2>
+          <p className="font-body text-muted-foreground">Configurar popups de descuento por tiempo y sección/ruta.</p>
         </div>
         <Link href="/admin/popovers/new" className="rounded-md border bg-primary text-primary-foreground px-3 py-2 text-sm hover:opacity-90">
-          Nuevo popover
+          Nuevo popup
         </Link>
       </section>
 
       <div className="rounded-lg border bg-muted/10 divide-y">
         {error && (
-          <div className="p-4 text-sm text-muted-foreground">Error cargando popovers: {error.message}</div>
+          <div className="p-4 text-sm text-muted-foreground">Error cargando popups: {error.message}</div>
         )}
         {!error && items.length === 0 && (
-          <div className="p-4 text-sm text-muted-foreground">No hay popovers todavía.</div>
+          <div className="p-4 text-sm text-muted-foreground">No hay popups todavía.</div>
         )}
         {items.map((p) => (
           <div key={p.id} className="p-4 flex items-center justify-between gap-3">

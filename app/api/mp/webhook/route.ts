@@ -4,6 +4,7 @@ import { computeShipping, computeTax } from "@/lib/checkout/totals"
 import { sendInvoiceEmail } from "@/lib/email/resend"
 import { getPaymentClient } from "@/lib/mp/client"
 import { getSettingsServer } from "@/lib/repo/settings"
+import { generateAutoLabel, isAutoLabelEnabled } from "@/lib/shipping"
 import getServiceClient from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -196,20 +197,54 @@ export async function POST(req: NextRequest) {
 
       // Resolve customer if email provided
       let customer_id: string | null = null
-      const customer = (metaObj?.customer ?? {}) as { email?: string | null; first_name?: string | null; last_name?: string | null; phone?: string | null }
+      const customer = (metaObj?.customer ?? {}) as {
+        email?: string | null
+        first_name?: string | null
+        last_name?: string | null
+        phone?: string | null
+        dni?: string | null
+        address?: string | null
+        city?: string | null
+        state?: string | null
+        zip?: string | null
+      }
       if (customer?.email) {
         const { data: existing } = await supabase.from("customers").select("id").eq("email", customer.email).maybeSingle()
         if (existing?.id) {
           customer_id = existing.id
+          // Update customer info with latest data
+          await supabase.from("customers").update({
+            full_name: `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim() || null,
+            phone: customer.phone ?? null,
+            last_seen_at: new Date().toISOString(),
+          }).eq("id", customer_id)
         } else {
           const { data: created, error: custErr } = await supabase
             .from("customers")
-            .insert({ email: customer.email, full_name: `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim(), phone: customer.phone ?? null, last_seen_at: new Date().toISOString() })
+            .insert({
+              email: customer.email,
+              full_name: `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim(),
+              phone: customer.phone ?? null,
+              last_seen_at: new Date().toISOString()
+            })
             .select("id")
             .single()
           if (!custErr && created?.id) customer_id = created.id
         }
       }
+
+      // Build shipping address object from customer metadata
+      const shippingAddress = customer ? {
+        name: `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim(),
+        street: customer.address ?? "",
+        city: customer.city ?? "",
+        state: customer.state ?? "",
+        postal_code: customer.zip ?? "",
+        country: "AR",
+        phone: customer.phone ?? null,
+        dni: customer.dni ?? null,
+        notes: null,
+      } : null
 
       // Idempotency: if an order with this payment_id already exists, do not create another
       const { data: existingOrder } = await supabase
@@ -222,6 +257,11 @@ export async function POST(req: NextRequest) {
         logInfo("Order already exists for payment_id, skipping creation", { order_id: existingOrder.id, paymentId, session_id })
         return ok()
       }
+
+      // Build notes with customer info for legacy compatibility
+      const orderNotes = customer?.email
+        ? `Pago por Mercado Pago. Cliente: ${customer.first_name ?? ""} ${customer.last_name ?? ""}. Email: ${customer.email}. Tel: ${customer.phone ?? "N/A"}. DNI: ${customer.dni ?? "N/A"}. Dirección: ${customer.address ?? ""}, ${customer.city ?? ""}, ${customer.state ?? ""}, CP: ${customer.zip ?? ""}`
+        : null
 
       // Create order (status created) and items, then mark paid via RPC (which also decrements stock)
       const { data: order, error: orderErr } = await supabase
@@ -236,9 +276,12 @@ export async function POST(req: NextRequest) {
           shipping: shipping_cost,
           tax,
           total: order_total,
-          notes: null,
+          notes: orderNotes,
           placed_at: new Date().toISOString(),
           payment_id: String(paymentId),
+          payment_method: "mercadopago",
+          shipping_address: shippingAddress,
+          shipping_status: "pending",
         })
         .select("*")
         .single()
@@ -246,6 +289,14 @@ export async function POST(req: NextRequest) {
         logError("Failed to create order on approved webhook", { paymentId, error: orderErr?.message })
         return ok()
       }
+
+      logInfo("Order created with shipping address", {
+        order_id: order.id,
+        paymentId,
+        customer_id,
+        has_shipping_address: !!shippingAddress,
+        shipping_city: shippingAddress?.city,
+      })
 
       const itemsPayload = detailed.map((i) => ({
         order_id: order.id,
@@ -342,6 +393,30 @@ export async function POST(req: NextRequest) {
         await supabase
           .from("newsletter_subscribers")
           .upsert({ email: customer.email, status: "subscribed" }, { onConflict: "email", ignoreDuplicates: true })
+      }
+
+      // Auto-generate shipping label if Envia is configured
+      if (isAutoLabelEnabled()) {
+        try {
+          const labelResult = await generateAutoLabel(order.id)
+          if (labelResult.success) {
+            logInfo("Auto-label generated for order", {
+              order_id: order.id,
+              tracking_number: labelResult.tracking_number,
+              carrier: labelResult.carrier,
+            })
+          } else {
+            logInfo("Auto-label skipped or failed", {
+              order_id: order.id,
+              error: labelResult.error,
+            })
+          }
+        } catch (labelErr) {
+          logError("Auto-label generation error", {
+            order_id: order.id,
+            error: String((labelErr as Error)?.message || labelErr),
+          })
+        }
       }
     } else if (mapped === "rejected" || mapped === "pending" || mapped === "in_process") {
       // Do nothing: we only create order/customer on approved as requested

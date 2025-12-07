@@ -1,20 +1,20 @@
 'use client'
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { supabase } from '@/lib/supabase/client'
 import { Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase/client'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 
 interface DeletePopoverButtonProps {
   id: number
@@ -32,7 +32,7 @@ export function DeletePopoverButton({ id, title }: DeletePopoverButtonProps) {
       // Get auth token
       const { data: session } = await supabase.auth.getSession()
       const token = session?.session?.access_token
-      
+
       if (!token) {
         throw new Error('No auth token')
       }
@@ -45,7 +45,7 @@ export function DeletePopoverButton({ id, title }: DeletePopoverButtonProps) {
       })
 
       const data = await res.json()
-      
+
       if (!res.ok) {
         throw new Error(data.error || 'Error al eliminar')
       }
@@ -54,7 +54,7 @@ export function DeletePopoverButton({ id, title }: DeletePopoverButtonProps) {
       router.refresh()
       setShowDeleteDialog(false)
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error al eliminar el popover')
+      alert(error instanceof Error ? error.message : 'Error al eliminar el popup')
     } finally {
       setIsDeleting(false)
     }
@@ -67,7 +67,7 @@ export function DeletePopoverButton({ id, title }: DeletePopoverButtonProps) {
         size="icon"
         onClick={() => setShowDeleteDialog(true)}
         className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-        title="Eliminar popover"
+        title="Eliminar popup"
       >
         <Trash2 className="h-4 w-4" />
       </Button>
@@ -75,9 +75,9 @@ export function DeletePopoverButton({ id, title }: DeletePopoverButtonProps) {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar popover?</AlertDialogTitle>
+            <AlertDialogTitle>¿Eliminar popup?</AlertDialogTitle>
             <AlertDialogDescription>
-              Estás por eliminar el popover <strong>&quot;{title}&quot;</strong>.
+              Estás por eliminar el popup <strong>&quot;{title}&quot;</strong>.
               <br />
               Esta acción no se puede deshacer.
             </AlertDialogDescription>

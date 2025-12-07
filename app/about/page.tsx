@@ -1,6 +1,7 @@
 'use client'
 import NewsletterSignup from '@/components/blog/newsletter-signup'
 import { useI18n } from '@/components/providers/i18n-provider'
+import { BusyLogo } from '@/components/shared/busy-logo'
 import { Button } from '@/components/ui/button'
 import { gsap } from 'gsap'
 import Image from 'next/image'
@@ -343,13 +344,7 @@ function AboutContent() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="hero-logo flex flex-row items-center justify-center gap-3 mb-2 md:mb-2">
               <div className="relative h-20 w-20 md:h-28 md:w-28">
-                <Image
-                  src="/logo-busy-white.png"
-                  alt={t('about.image.alt')}
-                  fill
-                  className="object-contain"
-                  unoptimized
-                />
+                <BusyLogo variant="white" fill alt={t('about.image.alt')} />
               </div>
             </div>
             <h1
@@ -532,13 +527,7 @@ function AboutContent() {
               <div className="showcase-panel group relative overflow-hidden rounded-2xl md:rounded-3xl aspect-square bg-black shadow-2xl flex items-center justify-center border border-white/10">
                 <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl blur-3xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative w-40 h-40 md:w-48 md:h-48 transition-transform duration-500 group-hover:scale-110">
-                  <Image
-                    src="/logo-busy-white.png"
-                    alt="Busy Logo"
-                    fill
-                    className="object-contain drop-shadow-2xl"
-                    unoptimized
-                  />
+                  <BusyLogo variant="white" fill className="drop-shadow-2xl" />
                 </div>
               </div>
             </div>

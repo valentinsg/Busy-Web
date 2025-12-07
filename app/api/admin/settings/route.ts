@@ -7,16 +7,23 @@ export const revalidate = 0
 export async function GET() {
   try {
     const sb = getServiceClient()
+    // Select all columns - new columns may not exist yet if migration hasn't run
     const { data, error } = await sb
       .from("shop_settings")
-      .select("shipping_flat_rate, shipping_free_threshold, christmas_mode")
+      .select("*")
       .limit(1)
       .maybeSingle()
     if (error) throw error
+
+    // Build payload with safe defaults for all fields
     const payload = {
       shipping_flat_rate: Number(data?.shipping_flat_rate ?? 25000),
       shipping_free_threshold: Number(data?.shipping_free_threshold ?? 100000),
       christmas_mode: Boolean(data?.christmas_mode ?? false),
+      free_shipping_enabled: Boolean(data?.free_shipping_enabled ?? false),
+      free_shipping_message: String(data?.free_shipping_message || "Envío gratis en todas las compras"),
+      mar_del_plata_rate: Number(data?.mar_del_plata_rate ?? 10000),
+      province_rates: data?.province_rates || {},
     }
     return NextResponse.json(payload)
   } catch (error: unknown) {

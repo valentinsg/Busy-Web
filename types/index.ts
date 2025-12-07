@@ -12,9 +12,9 @@
 // PRODUCTO Y CATÁLOGO
 // ============================================
 export type {
-  BenefitItem,
-  FilterOptions, Product,
-  SizeMeasurement
+    BenefitItem,
+    FilterOptions, Product,
+    SizeMeasurement
 } from './product'
 
 // ============================================
@@ -26,9 +26,9 @@ export type { CartItem } from './cart'
 // PROMOCIONES Y DESCUENTOS
 // ============================================
 export type {
-  AppliedPromo, BundleConfig, ComboConfig, FixedAmountConfig, NthUnitDiscountConfig, NxMConfig,
-  PercentageOffConfig, PromoConfig, PromoType,
-  Promotion
+    AppliedPromo, BundleConfig, ComboConfig, FixedAmountConfig, NthUnitDiscountConfig, NxMConfig,
+    PercentageOffConfig, PromoConfig, PromoType,
+    Promotion
 } from './promotion'
 
 // ============================================
@@ -40,12 +40,12 @@ export type { Coupon } from './coupon'
 // COMERCIO (Órdenes, Clientes, Proveedores)
 // ============================================
 export type {
-  Customer,
-  CustomerStats, Expense, Order,
-  OrderItem, ProductPopularity, ProductSupplier, ProductView,
-  RelatedProduct,
-  Supplier, SupplierPurchase,
-  SupplierPurchaseItem
+    Customer,
+    CustomerStats, Expense, Order,
+    OrderItem, ProductPopularity, ProductSupplier, ProductView,
+    RelatedProduct, ShippingAddress, ShippingStatus,
+    Supplier, SupplierPurchase,
+    SupplierPurchaseItem
 } from './commerce'
 
 // ============================================
@@ -72,24 +72,24 @@ export type { ArtistSubmission, Playlist } from './playlists'
 // ARCHIVE (Galería)
 // ============================================
 export type {
-  AdminArchiveStats, ArchiveEntry,
-  ArchiveFilters, ArchiveStats, FilmStripSettings, PaginatedResponse, PlaylistItem, RecommendationOptions, RecommendationScore, ShareCardOptions, TimelineEntry,
-  TimelineGroup, UploadResponse, VibesModeSettings
+    AdminArchiveStats, ArchiveEntry,
+    ArchiveFilters, ArchiveStats, FilmStripSettings, PaginatedResponse, PlaylistItem, RecommendationOptions, RecommendationScore, ShareCardOptions, TimelineEntry,
+    TimelineGroup, UploadResponse, VibesModeSettings
 } from './archive'
 
 // ============================================
 // BLACKTOP (Torneos)
 // ============================================
 export type {
-  FixturesResponse, Group, Match, MatchFormData, MatchPhase, MatchRound, MatchStatus, MatchWithTeams, Player, PlayerMatchStats, PlayerProfile, PlayerStatsFormData, PlayerWithStats, PlayoffFormat, StandingsRow, Team, TeamLeaderboard, TeamMatchStats, TeamRegistrationFormData, TeamStatus, TeamWithPlayers, Tournament, TournamentFormData, TournamentFormatConfig, TournamentFormatType, TournamentLeaderboard, TournamentMedia, TournamentMediaFormData, TournamentStatus, TournamentWithStats
+    FixturesResponse, Group, Match, MatchFormData, MatchPhase, MatchRound, MatchStatus, MatchWithTeams, Player, PlayerMatchStats, PlayerProfile, PlayerStatsFormData, PlayerWithStats, PlayoffFormat, StandingsRow, Team, TeamLeaderboard, TeamMatchStats, TeamRegistrationFormData, TeamStatus, TeamWithPlayers, Tournament, TournamentFormData, TournamentFormatConfig, TournamentFormatType, TournamentLeaderboard, TournamentMedia, TournamentMediaFormData, TournamentStatus, TournamentWithStats
 } from './blacktop'
 
 // ============================================
 // SCRIPTS (Guiones)
 // ============================================
 export type {
-  AssetKind, PlatformChecklist, Script, ScriptAsset, ScriptComment, ScriptFrontmatter, ScriptPlatform, ScriptProject, ScriptScene, ScriptSearchFilters,
-  ScriptSearchResult, ScriptStatus, ScriptTemplate, ScriptVersion, ShotType, ShotlistRow, ValidationResult
+    AssetKind, PlatformChecklist, Script, ScriptAsset, ScriptComment, ScriptFrontmatter, ScriptPlatform, ScriptProject, ScriptScene, ScriptSearchFilters,
+    ScriptSearchResult, ScriptStatus, ScriptTemplate, ScriptVersion, ShotType, ShotlistRow, ValidationResult
 } from './scripts'
 
 // ============================================
@@ -101,21 +101,21 @@ export type { Popover, PopoverType } from './popover'
 // EMAIL
 // ============================================
 export type {
-  ArtistSubmissionEmailData, EmailConfig, EmailLogEntry, EmailSendResult, EmailTemplate, LowStockEmailData, NewOrderEmailData, NewsletterWelcomeEmailData, OrderCancelledEmailData, PendingTransferEmailData, TestEmailData
+    ArtistSubmissionEmailData, EmailConfig, EmailLogEntry, EmailSendResult, EmailTemplate, LowStockEmailData, NewOrderEmailData, NewsletterWelcomeEmailData, OrderCancelledEmailData, PendingTransferEmailData, TestEmailData
 } from './email'
 
 // ============================================
 // NOTIFICACIONES
 // ============================================
 export type {
-  Notification, NotificationChannel, NotificationLog, NotificationPreference, NotificationPriority, NotificationStatus, NotificationType, PushNotificationPayload, PushSubscription
+    Notification, NotificationChannel, NotificationLog, NotificationPreference, NotificationPriority, NotificationStatus, NotificationType, PushNotificationPayload, PushSubscription
 } from './notifications'
 
 // ============================================
 // CALCULADORA DE TALLES
 // ============================================
 export type {
-  BodyType, CalculatorResult, FitPreference, ProductMeasurements,
-  SizeRecommendation, UserMeasurements
+    BodyType, CalculatorResult, FitPreference, ProductMeasurements,
+    SizeRecommendation, UserMeasurements
 } from './size-calculator'
 

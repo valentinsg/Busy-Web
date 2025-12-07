@@ -13,6 +13,34 @@ export type Customer = {
 }
 
 /**
+ * Dirección de envío estructurada
+ */
+export type ShippingAddress = {
+  name: string
+  street: string
+  city: string
+  state: string
+  postal_code: string
+  country: string
+  phone: string | null
+  dni: string | null
+  notes: string | null
+}
+
+/**
+ * Estados de envío
+ */
+export type ShippingStatus =
+  | 'pending'           // Esperando generación de etiqueta
+  | 'label_created'     // Etiqueta generada, listo para enviar
+  | 'shipped'           // Paquete entregado al carrier
+  | 'in_transit'        // En tránsito
+  | 'out_for_delivery'  // En camino de entrega
+  | 'delivered'         // Entregado
+  | 'failed'            // Entrega fallida
+  | 'returned'          // Devuelto al remitente
+
+/**
  * Orden de compra
  * Representa una transacción completada o pendiente
  */
@@ -20,7 +48,7 @@ export type Order = {
   id: UUID
   customer_id: UUID | null
   channel: 'web' | 'instagram' | 'mercado_libre' | 'feria' | 'manual' | 'marketplace' | 'grupo_wsp' | 'other'
-  status: 'paid' | 'pending' | 'refunded' | 'cancelled'
+  status: 'created' | 'paid' | 'pending' | 'refunded' | 'cancelled'
   currency: string
   subtotal: number
   discount: number
@@ -34,6 +62,33 @@ export type Order = {
   created_at?: string
   updated_at: string
   is_barter: boolean
+  /** Payment ID from Mercado Pago */
+  payment_id?: string | null
+  /** Payment method used */
+  payment_method?: 'card' | 'transfer' | 'cash' | 'mercadopago' | null
+  /** When the order was paid */
+  paid_at?: string | null
+
+  // ===== SHIPPING FIELDS (Envia.com integration) =====
+  /** Full shipping address as JSON */
+  shipping_address?: ShippingAddress | null
+  /** Shipping carrier name (e.g., andreani, oca, correo_argentino) */
+  carrier?: string | null
+  /** Tracking number from carrier */
+  tracking_number?: string | null
+  /** URL to download shipping label PDF */
+  label_url?: string | null
+  /** Current shipping status */
+  shipping_status?: ShippingStatus | null
+  /** Envia.com shipment ID for API reference */
+  shipment_id?: string | null
+  /** Actual shipping cost charged by carrier */
+  shipping_cost_actual?: number | null
+  /** When the package was shipped */
+  shipped_at?: string | null
+  /** When the package was delivered */
+  delivered_at?: string | null
+
   /** Items de la orden (solo disponible cuando se hace join) */
   items?: OrderItem[]
 }

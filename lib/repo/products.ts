@@ -52,6 +52,7 @@ function mapRowToProduct(row: unknown, stockBySize?: Record<string, number>): Pr
     discountPercentage: (row as { discount_percentage?: number }).discount_percentage ?? undefined,
     discountActive: Boolean((row as { discount_active?: boolean }).discount_active),
     isActive: (row as { is_active?: boolean }).is_active !== false,
+    weight: (row as { weight?: number | null }).weight ?? null,
   }
 }
 
