@@ -124,6 +124,8 @@ export interface Product {
   discountPercentage?: number
   /** Si el descuento está activo */
   discountActive?: boolean
+  /** Si el producto está activo/visible en la tienda */
+  isActive?: boolean
 }
 
 /**

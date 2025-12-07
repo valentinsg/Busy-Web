@@ -42,7 +42,7 @@ El sitio corre en **http://localhost:3000**
 | `pnpm typecheck` | Verifica tipos de TypeScript |
 | `pnpm format` | Formatea el código con Prettier |
 | `pnpm clean` | Limpia cache de Next.js |
-
+| Errores de Next Remove-Item -Recurse -Force .next |
 ---
 
 ## 🌿 Flujo de Trabajo con Git

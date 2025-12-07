@@ -272,28 +272,69 @@ export async function POST(req: NextRequest) {
 
       const { error: rpcErr } = await supabase.rpc("process_order_paid", { p_order_id: order.id, p_payment_id: String(paymentId) })
       if (rpcErr) {
-        logError("process_order_paid failed", { order_id: order.id, paymentId, error: rpcErr.message })
-      } else {
-        logInfo("Order created and marked paid", { order_id: order.id, paymentId, session_id })
-        // Send invoice email if possible
-        try {
-          const emailTo = (metaObj?.customer && typeof metaObj.customer === 'object'
-            ? (metaObj.customer as { email?: string | null }).email ?? null
-            : null) as string | null
-          if (emailTo) {
-            await sendInvoiceEmail({
-              to: emailTo,
-              order,
-              items: itemsPayload,
-              paymentId: String(paymentId),
-              tax,
-              shipping: shipping_cost,
-              discount,
-            })
+        logError("process_order_paid failed, using fallback", { order_id: order.id, paymentId, error: rpcErr.message })
+
+        // Fallback: manually decrement stock and update order status
+        for (const item of detailed) {
+          // Try RPC first
+          const { error: stockRpcErr } = await supabase.rpc("decrement_product_stock", {
+            p_product_id: item.product_id,
+            p_size: item.variant_size ?? null,
+            p_qty: item.quantity,
+          })
+
+          if (stockRpcErr) {
+            // Direct update fallback
+            const { data: product } = await supabase
+              .from("products")
+              .select("stock")
+              .eq("id", item.product_id)
+              .single()
+
+            if (product) {
+              const newStock = Math.max(0, (product.stock || 0) - item.quantity)
+              await supabase
+                .from("products")
+                .update({ stock: newStock })
+                .eq("id", item.product_id)
+              logInfo(`Stock decremented (fallback) for ${item.product_id}: ${product.stock} -> ${newStock}`)
+            }
+          } else {
+            logInfo(`Stock decremented via RPC for ${item.product_id}, qty: ${item.quantity}`)
           }
-        } catch (e: unknown) {
-          logError("sendInvoiceEmail failed", { error: String((e as Error)?.message || String(e)), order_id: order.id })
         }
+
+        // Update order status to paid
+        await supabase
+          .from("orders")
+          .update({ status: "paid", payment_id: String(paymentId), paid_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+          .eq("id", order.id)
+
+        logInfo("Order marked paid via fallback", { order_id: order.id, paymentId })
+      }
+
+      if (!rpcErr) {
+        logInfo("Order created and marked paid", { order_id: order.id, paymentId, session_id })
+      }
+
+      // Send invoice email (both for RPC success and fallback)
+      try {
+        const emailTo = (metaObj?.customer && typeof metaObj.customer === 'object'
+          ? (metaObj.customer as { email?: string | null }).email ?? null
+          : null) as string | null
+        if (emailTo) {
+          await sendInvoiceEmail({
+            to: emailTo,
+            order,
+            items: itemsPayload,
+            paymentId: String(paymentId),
+            tax,
+            shipping: shipping_cost,
+            discount,
+          })
+        }
+      } catch (e: unknown) {
+        logError("sendInvoiceEmail failed", { error: String((e as Error)?.message || String(e)), order_id: order.id })
       }
 
       // Newsletter opt-in (idempotent by PK: email)

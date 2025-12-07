@@ -51,6 +51,7 @@ function mapRowToProduct(row: unknown, stockBySize?: Record<string, number>): Pr
     badgeVariant: (row as { badge_variant?: string }).badge_variant as 'default' | 'destructive' | 'secondary' | 'outline' | 'success' | 'warning' | 'promo' | undefined,
     discountPercentage: (row as { discount_percentage?: number }).discount_percentage ?? undefined,
     discountActive: Boolean((row as { discount_active?: boolean }).discount_active),
+    isActive: (row as { is_active?: boolean }).is_active !== false,
   }
 }
 
@@ -65,8 +66,14 @@ export async function getProductsAsync(params?: {
   sortBy?: SortBy
   tagsContains?: string[]
   featuredOnly?: boolean
+  includeInactive?: boolean
 }): Promise<Product[]> {
   let query = supabase.from("products").select("*")
+
+  // By default, only show active products (unless includeInactive is true)
+  if (!params?.includeInactive) {
+    query = query.neq("is_active", false)
+  }
 
   if (params?.category) query = query.ilike("category", params.category)
   if (params?.color) query = query.contains("colors", [params.color])

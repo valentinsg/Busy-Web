@@ -96,9 +96,9 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-6 gap-6">
           {/* Brand Section */}
           <div className="sm:col-span-2 lg:col-span-2">
-            <Link href="/" prefetch={false} className="flex w-28 -mt-6">
-              <div className="relative h-28 w-28">
-                <Image src="/busy-parche.png" alt="Busy" fill className="object-contain hidden dark:block contrast-40" unoptimized />
+            <Link href="/" prefetch={false} className="flex w-32 -mt-4 mb-2">
+              <div className="relative h-12 w-32">
+                <Image src="/brand/BUSY_LOGO TRANSPARENTE-3.png" alt="Busy" fill className="object-contain" unoptimized />
               </div>
             </Link>
             <p className="font-body text-sm text-muted-foreground mb-4">

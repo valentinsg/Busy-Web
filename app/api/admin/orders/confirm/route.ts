@@ -120,19 +120,43 @@ export async function POST(req: NextRequest) {
     }
 
     // Decrement stock for each item
+    let stockDecrementedCount = 0
     if (orderItems && orderItems.length > 0) {
       for (const item of orderItems) {
+        // Try RPC first
         const { error: stockErr } = await supabase.rpc("decrement_product_stock", {
           p_product_id: item.product_id,
           p_size: item.variant_size ?? null,
           p_qty: item.quantity,
         })
+
         if (stockErr) {
-          console.error("Failed to decrement stock:", {
-            product_id: item.product_id,
-            size: item.variant_size,
-            error: stockErr
-          })
+          console.error("RPC decrement_product_stock failed, trying direct update:", stockErr)
+
+          // Fallback: direct update if RPC doesn't exist
+          const { data: product } = await supabase
+            .from("products")
+            .select("stock")
+            .eq("id", item.product_id)
+            .single()
+
+          if (product) {
+            const newStock = Math.max(0, (product.stock || 0) - item.quantity)
+            const { error: updateErr } = await supabase
+              .from("products")
+              .update({ stock: newStock })
+              .eq("id", item.product_id)
+
+            if (updateErr) {
+              console.error("Direct stock update also failed:", updateErr)
+            } else {
+              console.log(`Stock decremented for ${item.product_id}: ${product.stock} -> ${newStock}`)
+              stockDecrementedCount++
+            }
+          }
+        } else {
+          console.log(`Stock decremented via RPC for ${item.product_id}, qty: ${item.quantity}`)
+          stockDecrementedCount++
         }
       }
     }
@@ -157,7 +181,7 @@ export async function POST(req: NextRequest) {
       success: true,
       order: updatedOrder,
       customer_created: !order.customer_id && !!customerId,
-      stock_decremented: orderItems?.length ?? 0,
+      stock_decremented: stockDecrementedCount,
       message: "Order confirmed and stock updated"
     })
   } catch (error: unknown) {

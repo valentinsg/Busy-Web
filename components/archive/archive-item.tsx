@@ -48,7 +48,6 @@ export function ArchiveItem({ entry, className, aspectRatio = 'square' }: Archiv
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
   const dominantColor = entry.colors?.[0] || '#1a1a1a';
-  const aspectClass = ASPECT_RATIO_CLASSES[aspectRatio];
 
   // Long press handlers for mobile
   const handleTouchStart = useCallback(() => {
@@ -92,7 +91,7 @@ export function ArchiveItem({ entry, className, aspectRatio = 'square' }: Archiv
         aria-label={`Ver ${entry.microcopy || 'entrada del archivo'}`}
       >
         <div
-          className={cn('relative overflow-hidden rounded-xl', aspectClass)}
+          className="relative overflow-hidden rounded-xl"
           style={{ backgroundColor: dominantColor }}
         >
           {/* Image with error handling and fallback chain */}
@@ -100,11 +99,11 @@ export function ArchiveItem({ entry, className, aspectRatio = 'square' }: Archiv
             <Image
               src={getProxyUrl(entry.thumb_url) || getProxyUrl(entry.medium_url) || getProxyUrl(entry.full_url)}
               alt={entry.microcopy || 'Imagen del archivo'}
-              width={400}
-              height={400}
+              width={800}
+              height={800}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className={cn(
-                'w-full h-auto object-cover transition-all duration-500',
+                'w-full h-auto transition-all duration-500',
                 'group-hover:scale-105',
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               )}
@@ -119,7 +118,7 @@ export function ArchiveItem({ entry, className, aspectRatio = 'square' }: Archiv
           ) : (
             // Fallback for broken images - show URL for debugging
             <div
-              className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-2"
+              className="aspect-square flex flex-col items-center justify-center gap-2 p-2"
               style={{ backgroundColor: dominantColor }}
             >
               <span className="font-body text-xs text-white/60 text-center">

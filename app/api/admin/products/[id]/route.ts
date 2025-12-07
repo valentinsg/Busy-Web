@@ -26,16 +26,18 @@ const updateSchema = z.object({
   discount_percentage: z.number().nullable().optional(),
   discount_active: z.boolean().optional(),
   stockBySize: z.record(z.number()).optional(),
+  is_active: z.boolean().optional(),
 }).passthrough()
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const admin = await assertAdmin(req)
   if (!admin.ok) return admin.res
   const svc = admin.svc
+  const { id } = await params
   try {
     const body = await req.json()
     const patch = updateSchema.parse(body)
-    const { error } = await svc.from("products").update(patch).eq("id", params.id)
+    const { error } = await svc.from("products").update(patch).eq("id", id)
     if (error) throw error
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
@@ -46,15 +48,46 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const admin = await assertAdmin(_req)
   if (!admin.ok) return admin.res
   const svc = admin.svc
+  const { id } = await params
   try {
-    const { error } = await svc.from("products").delete().eq("id", params.id)
-    if (error) throw error
+    // Try to delete first
+    const { error } = await svc.from("products").delete().eq("id", id)
+
+    if (error) {
+      // If foreign key constraint, offer soft delete instead
+      if (error.code === "23503") {
+        // Soft delete: set stock to 0 and mark as unavailable
+        const { error: updateError } = await svc
+          .from("products")
+          .update({ stock: 0, is_active: false })
+          .eq("id", id)
+
+        if (updateError) {
+          // If is_active column doesn't exist, just set stock to 0
+          const { error: stockError } = await svc
+            .from("products")
+            .update({ stock: 0 })
+            .eq("id", id)
+
+          if (stockError) throw stockError
+        }
+
+        return NextResponse.json({
+          ok: true,
+          soft_deleted: true,
+          message: "Producto desactivado (tiene órdenes asociadas)"
+        })
+      }
+      throw new Error(error.message || "Error al eliminar")
+    }
+
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
-    return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 400 })
+    const msg = e instanceof Error ? e.message : JSON.stringify(e)
+    return NextResponse.json({ ok: false, error: msg }, { status: 400 })
   }
 }
