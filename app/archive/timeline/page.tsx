@@ -5,14 +5,45 @@ import { TimelineGroup } from '@/types/archive';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Busy Archive Timeline | Vista Cronológica',
-  description: 'Explorá el Busy Archive cronológicamente. Momentos organizados por año y mes.',
-  keywords: ['archive', 'timeline', 'busy', 'chronological', 'history', 'cultura'],
+  title: 'Busy Archive Timeline | Historia Visual del Streetwear',
+  description: 'Explorá el Busy Archive cronológicamente. Momentos de cultura urbana y streetwear organizados por año y mes desde Mar del Plata.',
+  keywords: [
+    'busy archive timeline',
+    'historia streetwear',
+    'busy streetwear',
+    'cultura urbana argentina',
+    'mar del plata streetwear',
+    'galería cronológica',
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    'max-image-preview': 'large',
+  },
   openGraph: {
-    title: 'Busy Archive Timeline',
-    description: 'Una vista cronológica de momentos y cultura Busy',
+    title: 'Busy Archive Timeline | Historia Visual',
+    description: 'Una vista cronológica de momentos y cultura Busy. Streetwear desde Mar del Plata.',
     type: 'website',
-    url: 'https://busystreetwear.com/archive/timeline',
+    url: 'https://busy.com.ar/archive/timeline',
+    siteName: 'Busy Streetwear',
+    locale: 'es_AR',
+    images: [
+      {
+        url: 'https://busy.com.ar/busy-parche.png',
+        width: 1200,
+        height: 630,
+        alt: 'Busy Archive Timeline',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Busy Archive Timeline',
+    description: 'Historia visual del streetwear argentino',
+    site: '@busy.streetwear',
+  },
+  alternates: {
+    canonical: 'https://busy.com.ar/archive/timeline',
   },
 };
 

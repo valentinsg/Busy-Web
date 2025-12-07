@@ -44,6 +44,7 @@ export default async function PlaylistsPage() {
                   alt="Busy Playlists"
                   width={120}
                   height={120}
+                  unoptimized
                   className="object-contain sm:w-[120px] sm:h-[120px]"
                   style={{ filter: 'brightness(0) saturate(100%) invert(65%) sepia(89%) saturate(2476%) hue-rotate(92deg) brightness(95%) contrast(80%)' }}
                 />

@@ -176,6 +176,7 @@ export default async function BlacktopPage() {
                   alt="Busy Blacktop"
                   width={120}
                   height={120}
+                  unoptimized
                   className="object-contain sm:w-[120px] sm:h-[120px]"
                   style={{ filter: 'brightness(0) saturate(100%) invert(17%) sepia(93%) saturate(5606%) hue-rotate(350deg) brightness(92%) contrast(106%)' }}
                 />

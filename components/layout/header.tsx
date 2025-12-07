@@ -167,6 +167,7 @@ export function Header() {
             width={100}
             height={24}
             className="object-contain"
+            unoptimized
           />
         </Link>
 
@@ -307,6 +308,7 @@ export function Header() {
                       width={120}
                       height={28}
                       className="object-contain"
+                      unoptimized
                     />
                   </Link>
                 </div>

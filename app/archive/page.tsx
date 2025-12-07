@@ -7,14 +7,49 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Busy Archive | Cultura, Momentos y Streetwear',
-  description: 'Explorá el Busy Archive: momentos, cultura y streetwear de Mar del Plata. Buscá por palabras clave, lugar y color.',
-  keywords: ['busy archive', 'busy streetwear', 'cultura urbana', 'mar del plata', 'streetwear argentina'],
+  title: 'Busy Archive | Galería de Cultura Urbana y Streetwear',
+  description: 'Explorá el Busy Archive: galería visual de momentos, cultura urbana y streetwear de Mar del Plata, Argentina. Buscá por lugar, mood y color.',
+  keywords: [
+    'busy archive',
+    'busy streetwear',
+    'cultura urbana',
+    'mar del plata',
+    'streetwear argentina',
+    'galería streetwear',
+    'fotos streetwear',
+    'moda urbana argentina',
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    'max-image-preview': 'large',
+    'max-snippet': -1,
+  },
   openGraph: {
-    title: 'Busy Archive',
-    description: 'Una línea de tiempo visual de momentos y cultura Busy',
+    title: 'Busy Archive | Galería de Cultura Urbana',
+    description: 'Una línea de tiempo visual de momentos y cultura Busy. Streetwear desde Mar del Plata.',
     type: 'website',
     url: 'https://busy.com.ar/archive',
+    siteName: 'Busy Streetwear',
+    locale: 'es_AR',
+    images: [
+      {
+        url: 'https://busy.com.ar/busy-parche.png',
+        width: 1200,
+        height: 630,
+        alt: 'Busy Archive - Galería de Cultura Urbana',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Busy Archive | Galería de Cultura Urbana',
+    description: 'Explorá momentos y cultura streetwear de Mar del Plata',
+    site: '@busy.streetwear',
+    images: ['https://busy.com.ar/busy-parche.png'],
+  },
+  alternates: {
+    canonical: 'https://busy.com.ar/archive',
   },
 };
 

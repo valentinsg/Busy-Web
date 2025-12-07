@@ -98,7 +98,7 @@ export function Footer() {
           <div className="sm:col-span-2 lg:col-span-2">
             <Link href="/" prefetch={false} className="flex w-28 -mt-6">
               <div className="relative h-28 w-28">
-                <Image src="/busy-parche.png" alt="Busy" fill className="object-contain hidden dark:block contrast-40" />
+                <Image src="/busy-parche.png" alt="Busy" fill className="object-contain hidden dark:block contrast-40" unoptimized />
               </div>
             </Link>
             <p className="font-body text-sm text-muted-foreground mb-4">

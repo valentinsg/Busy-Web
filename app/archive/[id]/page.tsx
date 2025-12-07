@@ -29,22 +29,35 @@ export async function generateMetadata({ params }: ArchiveEntryPageProps): Promi
   const description = entry.microcopy || 'Un momento del Busy Archive';
   const ogImage = entry.full_url;
 
+  // Build keywords from entry data
+  const keywords = ['busy archive', 'busy streetwear', 'cultura urbana', 'mar del plata'];
+  if (entry.place) keywords.push(entry.place.toLowerCase());
+  if (entry.mood?.length) keywords.push(...entry.mood.slice(0, 3));
+
   return {
     title: `${title} | Busy Archive`,
     description,
-    // Don't expose internal tags/mood in keywords - use generic ones
-    keywords: ['busy archive', 'busy streetwear', 'cultura urbana', 'mar del plata'],
+    keywords,
+    robots: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
     openGraph: {
       title: `${title} | Busy Archive`,
       description,
       type: 'article',
       url: `https://busy.com.ar/archive/${entry.id}`,
+      siteName: 'Busy Streetwear',
+      locale: 'es_AR',
       images: [
         {
           url: ogImage,
-          width: 1600,
-          height: 1600,
+          width: 1200,
+          height: 1200,
           alt: title,
+          type: 'image/jpeg',
         },
       ],
     },
@@ -53,6 +66,10 @@ export async function generateMetadata({ params }: ArchiveEntryPageProps): Promi
       title: `${title} | Busy Archive`,
       description,
       images: [ogImage],
+      site: '@busy.streetwear',
+    },
+    alternates: {
+      canonical: `https://busy.com.ar/archive/${entry.id}`,
     },
   };
 }
@@ -71,8 +88,59 @@ export default async function ArchiveEntryPage({ params }: ArchiveEntryPageProps
     getUniqueColors(),
   ]);
 
+  // JSON-LD structured data for Google Images and rich results
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ImageObject',
+    name: entry.title || entry.microcopy || 'Busy Archive',
+    description: entry.microcopy || 'Momento capturado del Busy Archive',
+    contentUrl: entry.full_url,
+    thumbnailUrl: entry.thumb_url || entry.medium_url || entry.full_url,
+    url: `https://busy.com.ar/archive/${entry.id}`,
+    datePublished: entry.created_at,
+    dateModified: entry.updated_at || entry.created_at,
+    author: {
+      '@type': 'Organization',
+      name: 'Busy Streetwear',
+      url: 'https://busy.com.ar',
+    },
+    copyrightHolder: {
+      '@type': 'Organization',
+      name: 'Busy Streetwear',
+    },
+    ...(entry.place && {
+      contentLocation: {
+        '@type': 'Place',
+        name: entry.place,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: entry.place,
+          addressCountry: 'AR',
+        },
+      },
+    }),
+    isPartOf: {
+      '@type': 'CreativeWork',
+      name: 'Busy Archive',
+      url: 'https://busy.com.ar/archive',
+    },
+    keywords: [
+      'busy streetwear',
+      'cultura urbana',
+      'streetwear argentina',
+      ...(entry.mood || []),
+      entry.place,
+    ].filter(Boolean).join(', '),
+  };
+
   return (
     <ArchiveQueryProvider>
+      {/* JSON-LD for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <div className="min-h-screen pt-20 md:pt-24">
         {/* Search - same as archive page */}
         <div className="container mx-auto px-4 py-6 md:py-8">

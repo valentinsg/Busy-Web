@@ -348,6 +348,7 @@ function AboutContent() {
                   alt={t('about.image.alt')}
                   fill
                   className="object-contain"
+                  unoptimized
                 />
               </div>
             </div>
@@ -399,6 +400,7 @@ function AboutContent() {
                     alt={t('about.image.alt')}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    unoptimized
                   />
                 </div>
               </div>
@@ -436,6 +438,7 @@ function AboutContent() {
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                     priority
+                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   {/* Parche Busy - Marca de agua pequeña */}
@@ -445,6 +448,7 @@ function AboutContent() {
                       alt="Busy"
                       fill
                       className="object-contain"
+                      unoptimized
                     />
                   </div>
                   <div className="absolute bottom-6 left-6 right-6">
@@ -468,6 +472,7 @@ function AboutContent() {
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                     priority
+                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
                   {/* Parche Busy - Marca de agua pequeña */}
@@ -477,6 +482,7 @@ function AboutContent() {
                       alt="Busy"
                       fill
                       className="object-contain"
+                      unoptimized
                     />
                   </div>
                   <div className="absolute bottom-6 left-6 right-6">
@@ -499,6 +505,7 @@ function AboutContent() {
                     alt="Busy Community"
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   {/* Parche Busy - Marca de agua pequeña */}
@@ -530,6 +537,7 @@ function AboutContent() {
                     alt="Busy Logo"
                     fill
                     className="object-contain drop-shadow-2xl"
+                    unoptimized
                   />
                 </div>
               </div>
@@ -693,6 +701,7 @@ function AboutContent() {
                                     alt="Busy Logo Original"
                                     fill
                                     className="object-contain p-2"
+                                    unoptimized
                                   />
                                 </div>
                               ) : index === 1 ? (
@@ -702,6 +711,7 @@ function AboutContent() {
                                     alt="Creadores Busy"
                                     fill
                                     className="object-cover"
+                                    unoptimized
                                   />
                                 </div>
                               ) : index === 2 ? (
@@ -711,6 +721,7 @@ function AboutContent() {
                                     alt="Sold Out - Zakool"
                                     fill
                                     className="object-cover"
+                                    unoptimized
                                   />
                                 </div>
                               ) : (
