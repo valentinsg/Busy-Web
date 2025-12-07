@@ -198,7 +198,7 @@ export default function HomeClient() {
           <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {[
               {
-                iconSrc: '/blog.png',
+                iconSrc: '/blog/blog.png',
                 title: t('home.social.items.rating.title', {
                   default: 'Guías y noticias',
                 }),
@@ -208,7 +208,7 @@ export default function HomeClient() {
                 href: '/blog',
               },
               {
-                iconSrc: '/spotify.png',
+                iconSrc: '/blog/spotify.png',
                 title: t('home.social.items.customers.title', {
                   default: 'Playlist',
                 }),
@@ -218,7 +218,7 @@ export default function HomeClient() {
                 href: '/playlists',
               },
               {
-                iconSrc: '/drops.png',
+                iconSrc: '/blog/drops.png',
                 title: t('home.social.items.quality.title', {
                   default: 'Calidad Busy',
                 }),
