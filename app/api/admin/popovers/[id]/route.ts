@@ -1,7 +1,7 @@
+import { syncPopoverCoupon } from "@/lib/repo/sync-popover-coupon"
+import { getServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { assertAdmin } from "../../_utils"
-import { getServiceClient } from "@/lib/supabase/server"
-import { syncPopoverCoupon } from "@/lib/repo/sync-popover-coupon"
 
 export const dynamic = "force-dynamic"
 
@@ -26,6 +26,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       enabled,
       priority,
       delay_seconds,
+      persist_dismissal,
       start_at,
       end_at,
       sections,
@@ -44,7 +45,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (!auth.ok) return auth.res
   const id = params.id
   const body = await req.json()
-  
+
   // Sincronizar cupón si se actualiza discount_code
   if (body.discount_code !== undefined && body.discount_code) {
     const syncResult = await syncPopoverCoupon(
@@ -56,7 +57,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       console.warn("Failed to sync coupon:", syncResult.error)
     }
   }
-  
+
   const svc = getServiceClient()
   const { data, error } = await svc
     .from("popovers")
@@ -71,6 +72,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       ...(body.cta_text !== undefined ? { cta_text: body.cta_text } : {}),
       ...(body.cta_url !== undefined ? { cta_url: body.cta_url } : {}),
       ...(body.delay_seconds !== undefined ? { delay_seconds: Number(body.delay_seconds) } : {}),
+      ...(body.persist_dismissal !== undefined ? { persist_dismissal: !!body.persist_dismissal } : {}),
       ...(body.enabled !== undefined ? { enabled: !!body.enabled } : {}),
       ...(body.priority !== undefined ? { priority: Number(body.priority) } : {}),
       ...(body.start_at !== undefined ? { start_at: body.start_at || null } : {}),
@@ -109,6 +111,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       enabled,
       priority,
       delay_seconds,
+      persist_dismissal,
       start_at,
       end_at,
       sections,

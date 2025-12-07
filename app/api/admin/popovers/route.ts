@@ -1,7 +1,7 @@
+import { syncPopoverCoupon } from "@/lib/repo/sync-popover-coupon"
+import { getServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { assertAdmin } from "../_utils"
-import { getServiceClient } from "@/lib/supabase/server"
-import { syncPopoverCoupon } from "@/lib/repo/sync-popover-coupon"
 
 export const dynamic = "force-dynamic"
 
@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
     cta_text: body.cta_text ?? null,
     cta_url: body.cta_url ?? null,
     delay_seconds: Number(body.delay_seconds ?? 0),
+    persist_dismissal: body.persist_dismissal ?? true,
     enabled: body.enabled ?? true,
     priority: Number(body.priority ?? 0),
     start_at: body.start_at || null,
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
       : [],
   }
   if (!payload.title) return NextResponse.json({ error: "Missing title" }, { status: 400 })
-  
+
   // Sincronizar cupón si hay discount_code
   if (payload.discount_code) {
     const syncResult = await syncPopoverCoupon(
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
       console.warn("Failed to sync coupon:", syncResult.error)
     }
   }
-  
+
   const svc = getServiceClient()
   const { data, error } = await svc
     .from("popovers")
@@ -81,6 +82,7 @@ export async function POST(req: NextRequest) {
       enabled,
       priority,
       delay_seconds,
+      persist_dismissal,
       start_at,
       end_at,
       sections,

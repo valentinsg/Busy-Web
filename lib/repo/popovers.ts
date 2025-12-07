@@ -104,8 +104,9 @@ export async function getActivePopoverFor(pathname: string, section?: string | n
   console.log('[Popover API] Found', list.length, 'enabled popovers')
 
   const matches = list.filter((p) => {
-    // Excluir popovers ya cerrados por el usuario
-    if (excludeIds && excludeIds.length > 0 && excludeIds.includes(p.id)) {
+    // Excluir popovers ya cerrados por el usuario, SOLO si persist_dismissal es true
+    // Si persist_dismissal es false, el popover debe mostrarse siempre (cada sesión)
+    if (excludeIds && excludeIds.length > 0 && excludeIds.includes(p.id) && p.persist_dismissal !== false) {
       console.log('[Popover API] Excluded by localStorage:', p.id, p.title)
       return false
     }
