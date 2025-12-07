@@ -1,10 +1,10 @@
 'use client'
 
-import * as React from 'react'
-import Image from 'next/image'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getImageConfig, normalizeImageUrl } from '@/lib/imageConfig'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Image from 'next/image'
+import * as React from 'react'
 
 interface ProductGalleryProps {
   images: string[]
@@ -26,7 +26,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
     return (
       <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
         <Image
-          src={'/product-bg.jpg'}
+          src={'/backgrounds/product-bg.jpg'}
           alt={'Busy Pattern white, diseñado por @agus.mxlina'}
           fill
           className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
@@ -42,7 +42,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
       {/* Main Image */}
       <div className="relative aspect-square bg-muted rounded-lg overflow-hidden group">
         <Image
-          src={'/product-bg.jpg'}
+          src={'/backgrounds/product-bg.jpg'}
           alt={'Busy Pattern white, diseñado por @agus.mxlina'}
           fill
           className="object-cover absolute transition-transform duration-300 group-hover:scale-105"

@@ -238,7 +238,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
 
             {/* Background pattern */}
             <Image
-              src={'/product-bg.jpg'}
+              src={'/backgrounds/product-bg.jpg'}
               alt={'Busy Pattern white, diseñado por @agus.mxlina'}
               fill
               className="object-cover absolute transition-transform duration-300 group-hover:scale-105"

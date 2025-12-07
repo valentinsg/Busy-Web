@@ -63,7 +63,7 @@ export function MarketingSidebar({ latestPost, featuredProducts = [] }: Marketin
           {featuredProducts.map((p) => (
             <Link key={p.id} href={`/product/${p.id}`} prefetch={false} className="group flex items-center gap-2 rounded-md p-1.5 hover:bg-muted/50 transition-colors">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.images?.[0] || "/product-bg.jpg"} alt={p.name} className="h-10 w-10 rounded object-cover border" />
+              <img src={p.images?.[0] || "/backgrounds/product-bg.jpg"} alt={p.name} className="h-10 w-10 rounded object-cover border" />
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium truncate group-hover:text-accent-brand">{p.name}</div>
                 <div className="text-xs text-muted-foreground">Desde ${p.price.toLocaleString()}</div>
