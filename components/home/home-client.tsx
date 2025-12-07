@@ -15,17 +15,17 @@ export default function HomeClient() {
     {
       name: t('footer.sections.shop.links.hoodies', { default: 'Hoodies' }),
       href: '/products/category/buzos',
-      image: '/hoodies-background.png',
+      image: '/backgrounds/hoodies-background.png',
     },
     {
       name: t('footer.sections.shop.links.tshirts', { default: 'Remeras' }),
       href: '/products/category/remeras',
-      image: '/t-shirts-background.png',
+      image: '/backgrounds/t-shirts-background.png',
     },
     {
       name: t('footer.sections.shop.links.pants', { default: 'Pantalones' }),
       href: '/products/category/pantalones',
-      image: '/pants-background.png',
+      image: '/backgrounds/pants-background.png',
     },
   ]
 
@@ -112,7 +112,7 @@ export default function HomeClient() {
           <div
             className="pointer-events-none absolute inset-0 -z-10 bg-repeat opacity-25"
             style={{
-              backgroundImage: 'url(/pattern-black.jpg)',
+              backgroundImage: 'url(/backgrounds/pattern-black.jpg)',
             }}
           />
           {/* Fade lateral izquierdo */}
@@ -170,7 +170,7 @@ export default function HomeClient() {
                   <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-15 transition-opacity duration-500" />
                   <div
                     className="w-full h-full bg-cover object-contain"
-                    style={{ backgroundImage: "url('/ciro-gif.gif')" }}
+                    style={{ backgroundImage: "url('/docs/archive/ciro-gif.gif')" }}
                   />
                 </div>
               </div>

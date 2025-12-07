@@ -95,7 +95,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           <div
             aria-hidden
             className="pointer-events-none fixed inset-0 opacity-[0.25] bg-repeat"
-            style={{ backgroundImage: "url(/pattern-black.jpg)" }}
+            style={{ backgroundImage: "url(/backgrounds/pattern-black.jpg)" }}
           />
           <div className="relative container mx-auto px-4 sm:px-5 md:px-6 py-4 pb-20 sm:py-6 md:pt-8 font-body">
             {children}
@@ -131,7 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div
           aria-hidden
           className="pointer-events-none fixed inset-0 opacity-[0.25] bg-repeat"
-          style={{ backgroundImage: "url(/pattern-black.jpg)" }}
+          style={{ backgroundImage: "url(/backgrounds/pattern-black.jpg)" }}
         />
         <div className="relative container mx-auto px-0 py-6 pt-24 md:pt-8 font-body">
           {children}

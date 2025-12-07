@@ -2,6 +2,7 @@
 
 import PostCard, { type PostCardData } from "@/components/blog/post-card"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { ArrowRight, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -35,7 +36,34 @@ export default function HomeLatestBlog() {
     return () => { cancelled = true }
   }, [])
 
-  if (loading) return null
+  if (loading) {
+    return (
+      <section className="py-10 md:py-16">
+        <div className="container px-6 sm:px-4">
+          <h2 className="font-heading text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] font-bold text-center my-6 sm:my-10">
+            Últimas entradas del Blog
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-3 sm:space-y-4">
+                <Skeleton className="w-full aspect-[4/3] rounded-lg" />
+                <Skeleton className="h-3 w-24 sm:w-28" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-3 w-20 sm:w-24" />
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-8 sm:mt-10">
+            <Skeleton className="inline-flex h-11 sm:h-12 w-40 sm:w-48 rounded-full" />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   if (!posts.length) return null
 
   // Mostrar solo los últimos 4 artículos

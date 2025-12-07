@@ -1,10 +1,10 @@
-import { PlaylistCardWrapper } from '@/components/playlists/playlist-card-wrapper'
 import { ArtistSubmissionForm } from '@/components/playlists/artist-submission-form'
+import { PlaylistCardWrapper } from '@/components/playlists/playlist-card-wrapper'
 import { Button } from '@/components/ui/button'
 import { getPublishedPlaylists } from '@/lib/repo/playlists'
 import { Music2, Sparkles } from 'lucide-react'
-import Image from 'next/image'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,7 +32,7 @@ export default async function PlaylistsPage() {
     <div className="min-h-screen bg-black font-body overflow-x-hidden">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-black via-[#1DB954]/10 to-black py-20 sm:py-20 md:py-24 lg:py-32">
-        <div className="absolute inset-0 bg-[url('/pattern-black.jpg')] opacity-10" />
+        <div className="absolute inset-0 bg-[url('/backgrounds/pattern-black.jpg')] opacity-10" />
 
         <div className="container relative z-0 px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
@@ -101,7 +101,7 @@ export default async function PlaylistsPage() {
 
       {/* CTA Section for Artists */}
       <section className="relative overflow-hidden bg-gradient-to-b from-black via-[#1DB954]/10 to-black py-12 sm:py-16 md:py-20 lg:py-24">
-        <div className="absolute inset-0 bg-[url('/pattern-black.jpg')] opacity-10" />
+        <div className="absolute inset-0 bg-[url('/backgrounds/pattern-black.jpg')] opacity-10" />
 
         <div className="container relative z-0 px-4 sm:px-6">
           <div className="max-w-3xl mx-auto">

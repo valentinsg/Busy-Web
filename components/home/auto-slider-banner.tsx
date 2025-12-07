@@ -1,16 +1,16 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { getImageConfig } from "@/lib/imageConfig"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import { getImageConfig } from "@/lib/imageConfig"
 
 // Usar imágenes estáticas locales en lugar de GIFs externos
 const images = [
-  "/hero-1.gif", // Reemplazar con imagen local optimizada
-  "/hero-2.gif", // Reemplazar con imagen local optimizada
-  "/hero-3.gif"
+  "/hero/hero-1.gif",
+  "/hero/hero-2.gif",
+  "/hero/hero-3.gif"
 ]
 
 export function AutoSliderBanner() {
@@ -59,13 +59,13 @@ export function AutoSliderBanner() {
         className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center"
       >
         <motion.div>
-          <Image 
-            src="/busy-streetwear.png" 
-            alt="Busy Streetwear" 
-            width={325} 
-            height={325} 
+          <Image
+            src="/busy-streetwear.png"
+            alt="Busy Streetwear"
+            width={325}
+            height={325}
             sizes="325px"
-            priority 
+            priority
           />
         </motion.div>
         <motion.a

@@ -2,11 +2,11 @@ import { AutoSliderBanner } from '@/components/home/auto-slider-banner'
 import HomeLatestBlogServer from '@/components/home/latest-blog-server'
 import { ProductCard } from '@/components/shop/product-card'
 import { Button } from '@/components/ui/button'
+import { getImageConfig } from '@/lib/imageConfig'
 import { getProductsAsync } from '@/lib/repo/products'
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getImageConfig } from '@/lib/imageConfig'
 
 export const revalidate = 3600 // Revalidar cada hora
 
@@ -19,17 +19,17 @@ export default async function Home() {
     {
       name: 'Hoodies',
       href: '/products/category/buzos',
-      image: '/hoodies-background.png',
+      image: '/backgrounds/hoodies-background.png',
     },
     {
       name: 'Remeras',
       href: '/products/category/remeras',
-      image: '/t-shirts-background.png',
+      image: '/backgrounds/t-shirts-background.png',
     },
     {
       name: 'Pantalones',
       href: '/products/category/pantalones',
-      image: '/pants-background.png',
+      image: '/backgrounds/pants-background.png',
     },
   ]
 
@@ -144,7 +144,7 @@ export default async function Home() {
           <div
             className="pointer-events-none absolute inset-0 -z-10 bg-repeat opacity-25"
             style={{
-              backgroundImage: 'url(/pattern-black.jpg)',
+              backgroundImage: 'url(/backgrounds/pattern-black.jpg)',
             }}
           />
           <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center justify-center justify-items-center place-content-center">
@@ -182,7 +182,7 @@ export default async function Home() {
                 <div className="relative h-full w-full overflow-hidden rounded-[16px] bg-muted opacity-80 ring-1 ring-white/10 shadow-[0_8px_40px_rgba(25,25,25,0.2)]">
                   <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-15 transition-opacity duration-500" />
                   <Image
-                    src="/ciro-gif.gif"
+                    src="/docs/archive/ciro-gif.gif"
                     alt="Busy Streetwear"
                     fill
                     sizes={getImageConfig('hero').sizes}

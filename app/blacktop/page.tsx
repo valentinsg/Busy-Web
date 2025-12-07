@@ -75,7 +75,7 @@ async function TournamentsList() {
                     className="object-cover"
                   />
                 ) : (
-                  <div className="absolute inset-0 bg-[url('/pattern-black.jpg')] bg-cover bg-center opacity-30 group-hover:opacity-40 transition-opacity" />
+                  <div className="absolute inset-0 bg-[url('/backgrounds/pattern-black.jpg')] bg-cover bg-center opacity-30 group-hover:opacity-40 transition-opacity" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <div className="absolute inset-0 flex items-end p-6">
@@ -164,7 +164,7 @@ export default async function BlacktopPage() {
     <div className="min-h-screen bg-black font-body overflow-x-hidden">
       {/* Hero (same layout as Playlists, but red and without button) */}
       <section className="relative overflow-hidden bg-gradient-to-b from-black via-[#ef4444]/10 to-black py-20 sm:py-20 md:py-24 lg:py-32">
-        <div className="absolute inset-0 bg-[url('/pattern-black.jpg')] opacity-10" />
+        <div className="absolute inset-0 bg-[url('/backgrounds/pattern-black.jpg')] opacity-10" />
 
         <div className="container relative z-0 px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">

@@ -333,7 +333,7 @@ function AboutContent() {
         <div
           className="pointer-events-none absolute bg-repeat bg-cover opacity-80"
           style={{
-            backgroundImage: 'url(/pattern.png)',
+            backgroundImage: 'url(/backgrounds/pattern.png)',
             backgroundSize: '40% ',
             width: '100%',
             height: '100%',
@@ -416,7 +416,7 @@ function AboutContent() {
         <div
           className="pointer-events-none absolute bg-repeat bg-cover opacity-30"
           style={{
-            backgroundImage: 'url(/pattern-black.jpg)',
+            backgroundImage: 'url(/backgrounds/pattern-black.jpg)',
             backgroundSize: '50%',
             width: '100%',
             height: '100%',
