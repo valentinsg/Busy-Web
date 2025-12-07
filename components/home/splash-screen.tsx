@@ -34,14 +34,16 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
   const [progress, setProgress] = useState(0)
   const [, setMatrixText] = useState("")
   const [isComplete, setIsComplete] = useState(false)
-  const [isChristmasMode, setIsChristmasMode] = useState(false)
+  // Start with Christmas mode ON by default, then disable if API says no
+  // This way snow shows immediately instead of waiting for API
+  const [isChristmasMode, setIsChristmasMode] = useState(true)
 
-  // Fetch christmas mode quickly on mount
+  // Check if christmas mode is actually disabled
   useEffect(() => {
     fetch("/api/admin/settings", { cache: "no-store" })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
-        if (data?.christmas_mode) setIsChristmasMode(true)
+        if (!data?.christmas_mode) setIsChristmasMode(false)
       })
       .catch(() => {})
   }, [])

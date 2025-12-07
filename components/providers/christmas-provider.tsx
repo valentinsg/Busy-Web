@@ -23,7 +23,7 @@ function generateSnowflakes(count: number) {
     animationDuration: `${12 + Math.random() * 15}s`,
     animationDelay: `${Math.random() * 8}s`,
     fontSize: `${6 + Math.random() * 10}px`,
-    opacity: 0.15 + Math.random() * 0.25,
+    opacity: 0.25 + Math.random() * 0.35,
   }))
 }
 

@@ -12,6 +12,7 @@ export type Popover = {
   cta_text: string | null // Texto del botón CTA personalizado
   cta_url: string | null // URL del botón CTA
   delay_seconds: number // Segundos antes de mostrar el popover
+  persist_dismissal: boolean // Si true, recordar que el usuario lo cerró (no vuelve a aparecer). Si false, vuelve a aparecer en cada sesión.
   enabled: boolean
   priority: number
   start_at: string | null

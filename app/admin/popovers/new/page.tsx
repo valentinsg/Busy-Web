@@ -50,6 +50,7 @@ export default function NewPopoverPage() {
   const [endAt, setEndAt] = useState("")
   const [sections, setSections] = useState("")
   const [paths, setPaths] = useState("")
+  const [persistDismissal, setPersistDismissal] = useState(true)
 
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -81,6 +82,7 @@ export default function NewPopoverPage() {
           setEndAt(p.end_at ? p.end_at.slice(0, 16) : "")
           setSections((p.sections || []).join(", "))
           setPaths((p.paths || []).join(", "))
+          setPersistDismissal(p.persist_dismissal !== false)
         }
       } catch {
         // ignore
@@ -118,6 +120,7 @@ export default function NewPopoverPage() {
               cta_text: ctaText.trim() || null,
               cta_url: ctaUrl.trim() || null,
               delay_seconds: Number(delaySeconds),
+              persist_dismissal: persistDismissal,
               enabled,
               priority: Number(priority),
               start_at: startAt ? new Date(startAt).toISOString() : null,
@@ -304,6 +307,25 @@ export default function NewPopoverPage() {
           </div>
           <p className="text-xs text-muted-foreground">
             Si marcas &quot;Requiere email&quot;, el código se mostrará solo después de que el usuario ingrese su email.
+          </p>
+        </div>
+
+        {/* Persistencia del cierre */}
+        <div className="grid gap-2 p-4 rounded-lg border bg-muted/30">
+          <h4 className="text-sm font-medium">Comportamiento al cerrar</h4>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={persistDismissal}
+              onChange={(e) => setPersistDismissal(e.target.checked)}
+            />
+            Recordar que el usuario cerró el popup
+          </label>
+          <p className="text-xs text-muted-foreground">
+            {persistDismissal
+              ? "Si el usuario cierra el popup, NO volverá a verlo (se guarda en localStorage)"
+              : "El popup volverá a aparecer cada vez que el usuario recargue la página"
+            }
           </p>
         </div>
 

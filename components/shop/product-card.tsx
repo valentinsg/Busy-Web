@@ -304,7 +304,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
           {product.badgeText && (
             <Badge
               variant={(product.badgeVariant as 'default' | 'destructive' | 'secondary' | 'outline' | 'success' | 'warning' | 'promo') || 'default'}
-              className="absolute top-1 left-1 text-[10px] sm:text-xs font-body px-1.5 py-0.5 sm:px-2 sm:py-1 font-semibold"
+              className="absolute top-1 left-1 z-10 text-[10px] sm:text-xs font-body px-1.5 py-0.5 sm:px-2 sm:py-1 font-semibold"
             >
               {product.badgeText}
             </Badge>
@@ -314,7 +314,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
           {!product.badgeText && product.stock < 4 && product.stock > 0 && (
             <Badge
               variant="destructive"
-              className="absolute top-1 left-1 text-[10px] sm:text-xs font-body px-1.5 py-0.5 sm:px-2 sm:py-1"
+              className="absolute top-1 left-1 z-10 text-[10px] sm:text-xs font-body px-1.5 py-0.5 sm:px-2 sm:py-1"
             >
               Últimas Unidades
             </Badge>

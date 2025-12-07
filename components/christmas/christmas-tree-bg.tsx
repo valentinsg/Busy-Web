@@ -43,6 +43,7 @@ export function ChristmasTreeBackground({ className = "" }: { className?: string
 
 /**
  * Snow accumulation effect for the top of product cards
+ * z-[5] to be below badges, positioned higher up
  */
 export function SnowAccumulation({ className = "" }: { className?: string }) {
   const { isChristmasMode } = useChristmas()
@@ -51,18 +52,24 @@ export function SnowAccumulation({ className = "" }: { className?: string }) {
 
   return (
     <div
-      className={`absolute top-0 left-0 right-0 h-3 pointer-events-none z-10 ${className}`}
+      className={`absolute -top-10 left-0 right-0 h-12 pointer-events-none z-[5] ${className}`}
       style={{
         background: `
-          radial-gradient(ellipse 8px 4px at 10% 100%, rgba(255,255,255,0.9) 50%, transparent 50%),
-          radial-gradient(ellipse 12px 5px at 25% 100%, rgba(255,255,255,0.85) 50%, transparent 50%),
-          radial-gradient(ellipse 10px 4px at 40% 100%, rgba(255,255,255,0.9) 50%, transparent 50%),
-          radial-gradient(ellipse 14px 6px at 55% 100%, rgba(255,255,255,0.85) 50%, transparent 50%),
-          radial-gradient(ellipse 9px 4px at 70% 100%, rgba(255,255,255,0.9) 50%, transparent 50%),
-          radial-gradient(ellipse 11px 5px at 85% 100%, rgba(255,255,255,0.85) 50%, transparent 50%),
-          radial-gradient(ellipse 8px 4px at 95% 100%, rgba(255,255,255,0.9) 50%, transparent 50%)
+          /* Main snow layer - bigger piles */
+          radial-gradient(ellipse 18px 10px at 5% 100%, rgba(255,255,255,0.95) 50%, transparent 50%),
+          radial-gradient(ellipse 25px 12px at 18% 100%, rgba(255,255,255,0.92) 50%, transparent 50%),
+          radial-gradient(ellipse 20px 9px at 35% 100%, rgba(255,255,255,0.95) 50%, transparent 50%),
+          radial-gradient(ellipse 28px 14px at 52% 100%, rgba(255,255,255,0.9) 50%, transparent 50%),
+          radial-gradient(ellipse 22px 10px at 70% 100%, rgba(255,255,255,0.95) 50%, transparent 50%),
+          radial-gradient(ellipse 24px 11px at 85% 100%, rgba(255,255,255,0.92) 50%, transparent 50%),
+          radial-gradient(ellipse 16px 8px at 97% 100%, rgba(255,255,255,0.95) 50%, transparent 50%),
+          /* Secondary layer - smaller details */
+          radial-gradient(ellipse 10px 5px at 12% 95%, rgba(255,255,255,0.8) 50%, transparent 50%),
+          radial-gradient(ellipse 8px 4px at 42% 92%, rgba(255,255,255,0.75) 50%, transparent 50%),
+          radial-gradient(ellipse 12px 6px at 62% 95%, rgba(255,255,255,0.8) 50%, transparent 50%),
+          radial-gradient(ellipse 9px 4px at 78% 93%, rgba(255,255,255,0.75) 50%, transparent 50%)
         `,
-        filter: "blur(0.5px)",
+        filter: "blur(0.3px)",
       }}
     />
   )

@@ -23,6 +23,7 @@ export default function SitePopover({ section }: { section?: string }) {
     cta_text?: string | null
     cta_url?: string | null
     delay_seconds?: number
+    persist_dismissal?: boolean
   }>(null)
   const [dismissed, setDismissed] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
@@ -99,7 +100,8 @@ export default function SitePopover({ section }: { section?: string }) {
             show_newsletter: p.show_newsletter || false,
             cta_text: p.cta_text,
             cta_url: p.cta_url,
-            delay_seconds: p.delay_seconds || 0
+            delay_seconds: p.delay_seconds || 0,
+            persist_dismissal: p.persist_dismissal ?? true
           })
 
           // Trigger visibility after delay
@@ -135,13 +137,16 @@ export default function SitePopover({ section }: { section?: string }) {
   if (!data) return null
 
   const onDismiss = () => {
-    console.log('[Popover] User dismissed')
+    console.log('[Popover] User dismissed, persist_dismissal:', data.persist_dismissal)
     setIsVisible(false)
     setTimeout(() => {
       setDismissed(true)
-      try {
-        localStorage.setItem(`dismiss_popover_${data.id}`, "1")
-      } catch {}
+      // Solo guardar en localStorage si persist_dismissal es true
+      if (data.persist_dismissal !== false) {
+        try {
+          localStorage.setItem(`dismiss_popover_${data.id}`, "1")
+        } catch {}
+      }
     }, 300)
   }
 

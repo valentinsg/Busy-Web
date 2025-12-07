@@ -3,9 +3,11 @@
 import { useChristmas } from "@/components/providers/christmas-provider"
 import { BusyLogo } from "@/components/shared/busy-logo"
 import { Button } from "@/components/ui/button"
-import { Gift } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Gift, Mail } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
 import { ChristmasLights } from "./christmas-lights"
 
 /**
@@ -14,6 +16,30 @@ import { ChristmasLights } from "./christmas-lights"
  */
 export function ChristmasPromoSection() {
   const { isChristmasMode } = useChristmas()
+  const [email, setEmail] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+
+  const handleSubscribe = async () => {
+    if (!email) return
+    setSubmitting(true)
+    setMessage(null)
+    try {
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      const json = await res.json()
+      if (!res.ok || !json.ok) throw new Error(json.error || "Error")
+      setEmail("")
+      setMessage(json.already ? "¡Ya estás suscripto!" : "¡Gracias por suscribirte! 🎄")
+    } catch {
+      setMessage("No se pudo suscribir")
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   if (!isChristmasMode) return null
 
@@ -118,6 +144,38 @@ export function ChristmasPromoSection() {
               Ver ofertas navideñas
             </Link>
           </Button>
+
+          {/* Newsletter subscription */}
+          <div className="mt-12 pt-8 border-t border-white/10">
+            <p className="font-body text-sm text-muted-foreground mb-4">
+              Suscribite para recibir ofertas exclusivas y novedades
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+              <div className="relative w-full sm:w-auto sm:flex-1">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Tu email"
+                  className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-green-500 font-body"
+                  onKeyDown={(e) => e.key === "Enter" && handleSubscribe()}
+                />
+              </div>
+              <Button
+                onClick={handleSubscribe}
+                disabled={submitting || !email}
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-body"
+              >
+                {submitting ? "..." : "Suscribirme"}
+              </Button>
+            </div>
+            {message && (
+              <p className={`font-body text-sm mt-3 ${message.includes("Gracias") || message.includes("Ya") ? "text-green-400" : "text-red-400"}`}>
+                {message}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </section>

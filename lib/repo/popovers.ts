@@ -5,7 +5,7 @@ export async function listPopovers(): Promise<Popover[]> {
   const sb = getServiceClient()
   const { data, error } = await sb
     .from("popovers")
-    .select("id, title, body, discount_code, image_url, type, require_email, show_newsletter, cta_text, cta_url, delay_seconds, enabled, priority, start_at, end_at, sections, paths, created_at, updated_at")
+    .select("id, title, body, discount_code, image_url, type, require_email, show_newsletter, cta_text, cta_url, delay_seconds, persist_dismissal, enabled, priority, start_at, end_at, sections, paths, created_at, updated_at")
     .order("enabled", { ascending: false })
     .order("priority", { ascending: false })
     .order("created_at", { ascending: false })
@@ -17,7 +17,7 @@ export async function getPopover(id: string): Promise<Popover | null> {
   const sb = getServiceClient()
   const { data, error } = await sb
     .from("popovers")
-    .select("id, title, body, discount_code, image_url, type, require_email, show_newsletter, cta_text, cta_url, delay_seconds, enabled, priority, start_at, end_at, sections, paths, created_at, updated_at")
+    .select("id, title, body, discount_code, image_url, type, require_email, show_newsletter, cta_text, cta_url, delay_seconds, persist_dismissal, enabled, priority, start_at, end_at, sections, paths, created_at, updated_at")
     .eq("id", id)
     .single()
   if (error) return null
@@ -39,6 +39,7 @@ export async function createPopover(input: SavePopoverInput): Promise<Popover> {
     cta_text: input.cta_text ?? null,
     cta_url: input.cta_url ?? null,
     delay_seconds: input.delay_seconds ?? 0,
+    persist_dismissal: input.persist_dismissal ?? true,
     enabled: input.enabled ?? true,
     priority: input.priority ?? 0,
     start_at: input.start_at ?? null,
@@ -66,6 +67,7 @@ export async function updatePopover(id: string, input: Partial<SavePopoverInput>
       ...(input.cta_text !== undefined ? { cta_text: input.cta_text } : {}),
       ...(input.cta_url !== undefined ? { cta_url: input.cta_url } : {}),
       ...(input.delay_seconds !== undefined ? { delay_seconds: input.delay_seconds } : {}),
+      ...(input.persist_dismissal !== undefined ? { persist_dismissal: input.persist_dismissal } : {}),
       ...(input.enabled !== undefined ? { enabled: input.enabled } : {}),
       ...(input.priority !== undefined ? { priority: input.priority } : {}),
       ...(input.start_at !== undefined ? { start_at: input.start_at } : {}),

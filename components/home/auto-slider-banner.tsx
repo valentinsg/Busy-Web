@@ -1,6 +1,5 @@
 "use client"
 
-import { ChristmasTreeDecoration } from "@/components/christmas"
 import { Button } from "@/components/ui/button"
 import { getImageConfig } from "@/lib/imageConfig"
 import { motion } from "framer-motion"
@@ -59,9 +58,6 @@ export function AutoSliderBanner() {
       <motion.div
         className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center"
       >
-        {/* Christmas tree above logo */}
-        <ChristmasTreeDecoration size="lg" className="mb-4" />
-
         <motion.div>
           <Image
             src="/busy-streetwear.png"

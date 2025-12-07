@@ -2,6 +2,7 @@
 
 import PayWithMercadoPago from "@/components/checkout/pay-with-mercadopago"
 import PayWithTransfer from "@/components/checkout/pay-with-transfer"
+import { useChristmas } from "@/components/providers/christmas-provider"
 import { useI18n } from "@/components/providers/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -66,6 +67,7 @@ export default function CheckoutPage() {
   const { items, getTotalItems, getSubtotal, getPromoDiscount, getAppliedPromos, getDiscount, getSubtotalAfterDiscount, coupon, applyCoupon, removeCoupon } = useCart()
   const { t } = useI18n()
   const { toast } = useToast()
+  const { isChristmasMode } = useChristmas()
   const [shippingData, setShippingData] = React.useState({
     firstName: "",
     lastName: "",
@@ -788,6 +790,15 @@ export default function CheckoutPage() {
                     }}
                     newsletterOptIn={newsletterOptIn}
                   />
+                )}
+
+                {/* Christmas message */}
+                {isChristmasMode && (
+                  <div className="font-body text-sm text-center p-3 bg-gradient-to-r from-red-500/10 via-green-500/10 to-red-500/10 rounded-lg border border-green-500/20">
+                    <span className="text-green-400">🎄</span>{" "}
+                    <span className="text-muted-foreground italic">Felices fiestas de parte de Busy</span>{" "}
+                    <span className="text-red-400">🎁</span>
+                  </div>
                 )}
 
                 {/* Security Notice */}
