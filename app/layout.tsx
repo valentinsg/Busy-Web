@@ -429,7 +429,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         {/* Vercel Web Analytics - only sends events in production, loaded after interactive */}
         <Analytics mode="production" />
         {/* Vercel Speed Insights - Web Vitals reporting, loaded after interactive */}
-        <SpeedInsights sampleRate={1.0} />
+        <SpeedInsights sampleRate={0.1} />
       </body>
     </html>
   )
