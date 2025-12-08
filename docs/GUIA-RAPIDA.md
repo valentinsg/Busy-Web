@@ -66,14 +66,14 @@ const { items, addItem, removeItem, clearCart, total } = useCart()
 
 ---
 
-## 🖼️ Archive (Galería)
+## 🖼️ Files (Galería)
 
 ### Estructura
-- **Página**: `app/archive/page.tsx`
-- **Admin**: `app/admin/archive/`
-- **Componentes**: `components/archive/`
+- **Página**: `app/files/page.tsx`
+- **Admin**: `app/admin/files/`
+- **Componentes**: `components/files/`
 - **Storage**: Cloudflare R2 (`lib/r2.ts`)
-- **Tipos**: `types/archive.ts`
+- **Tipos**: `types/files.ts`
 
 ---
 

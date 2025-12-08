@@ -260,6 +260,18 @@ export default function CartPage() {
 
                 {/* Security Notice */}
                 <div className="font-body text-xs text-center text-muted-foreground">{t("checkout.security_notice")}</div>
+
+                {/* Quick Links */}
+                <div className="pt-4 border-t border-border space-y-2">
+                  <p className="text-xs text-muted-foreground text-center">¿Necesitás ayuda?</p>
+                  <div className="flex flex-wrap justify-center gap-2 text-xs">
+                    <Link href="/faq" className="text-accent-brand hover:underline">Preguntas frecuentes</Link>
+                    <span className="text-muted-foreground">·</span>
+                    <Link href="/size-calculator" className="text-accent-brand hover:underline">Calculadora de talles</Link>
+                    <span className="text-muted-foreground">·</span>
+                    <Link href="/legal/returns" className="text-accent-brand hover:underline">Cambios</Link>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

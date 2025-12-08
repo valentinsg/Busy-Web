@@ -16,7 +16,7 @@ import { formatPrice, formatRating } from "@/lib/format"
 import { getSettingsClient } from "@/lib/repo/settings"
 import { addReview, averageRating, getReviews, type Review } from "@/lib/reviews"
 import type { Product } from "@/types"
-import { ArrowLeft, Flag, Plane, RotateCcw, Shield, Star, Truck } from "lucide-react"
+import { ArrowLeft, ArrowRight, Flag, Plane, RotateCcw, Shield, Star, Truck } from "lucide-react"
 import Link from "next/link"
 import * as React from "react"
 
@@ -299,13 +299,13 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
       {/* Product Details Tabs */}
       <div className="mb-8 sm:mb-16">
         <Tabs defaultValue="description" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
-            <TabsTrigger value="description" className="text-xs sm:text-sm">Descripción</TabsTrigger>
+          <TabsList className="flex w-full overflow-x-auto no-scrollbar sm:grid sm:grid-cols-3 md:grid-cols-4 gap-1">
+            <TabsTrigger value="description" className="flex-shrink-0 text-xs sm:text-sm px-3">Descripción</TabsTrigger>
             {showSizing && (
-              <TabsTrigger value="sizing" className="text-xs sm:text-sm">Guía de Talles</TabsTrigger>
+              <TabsTrigger value="sizing" className="flex-shrink-0 text-xs sm:text-sm px-3 whitespace-nowrap">Guía de Talles</TabsTrigger>
             )}
-            {showCare && <TabsTrigger value="care" className="text-xs sm:text-sm">Cuidados</TabsTrigger>}
-            <TabsTrigger value="reviews" className="text-xs sm:text-sm">Reseñas</TabsTrigger>
+            {showCare && <TabsTrigger value="care" className="flex-shrink-0 text-xs sm:text-sm px-3">Cuidados</TabsTrigger>}
+            <TabsTrigger value="reviews" className="flex-shrink-0 text-xs sm:text-sm px-3">Reseñas</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className={isAccessory ? "mt-4" : "mt-6"}>
             <div className="prose prose-neutral dark:prose-invert max-w-none">
@@ -502,6 +502,36 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           </div>
         </div>
       )}
+
+      {/* Category Interlinking - SEO */}
+      <div className="mt-12 pt-8 border-t border-border">
+        <h3 className="font-heading text-lg font-semibold mb-4 text-muted-foreground">Quizás te interese</h3>
+        <div className="flex overflow-x-auto gap-2 no-scrollbar pb-2">
+          {[
+            { name: 'Remeras', slug: 'remeras' },
+            { name: 'Buzos', slug: 'buzos' },
+            { name: 'Pantalones', slug: 'pantalones' },
+            { name: 'Camperas', slug: 'camperas' },
+            { name: 'Accesorios', slug: 'accesorios' },
+            { name: 'Ofertas', slug: 'ofertas', highlight: true },
+          ]
+            .filter((cat) => cat.slug.toLowerCase() !== (product.category || '').toLowerCase())
+            .map((cat) => (
+              <Link
+                key={cat.slug}
+                href={cat.slug === 'ofertas' ? '/products/ofertas' : `/products/category/${cat.slug}`}
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+                  cat.highlight
+                    ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
+                    : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {cat.name}
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            ))}
+        </div>
+      </div>
     </div>
   )
 }

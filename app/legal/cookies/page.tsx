@@ -1,5 +1,5 @@
-import type { Metadata } from "next"
 import { generateSEO } from "@/lib/seo"
+import type { Metadata } from "next"
 
 export const metadata: Metadata = generateSEO({
   title: "Política de Cookies - Busy",
@@ -49,7 +49,7 @@ export default function CookiesPage() {
         <h2>Contacto</h2>
         <p>
           Si tenés preguntas sobre esta política, escribinos a {" "}
-          <a href="mailto:contacto@busy.com.ar">contacto@busy.com.ar</a>.
+          <a href="mailto:busystreetwear@gmail.com" className="text-accent-brand hover:underline">busystreetwear@gmail.com</a>. También podés consultar nuestras <a href="/faq" className="text-accent-brand hover:underline">preguntas frecuentes</a>.
         </p>
       </div>
     </div>

@@ -1,6 +1,8 @@
 import ProductsClient from '@/components/products/ProductsClient'
 import { getProductsAsync } from '@/lib/repo/products'
+import { ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const revalidate = 1800 // Revalidar cada 30 minutos
 
@@ -54,10 +56,10 @@ export function generateMetadata(): Metadata {
 
 export default async function OfertasPage() {
   const siteUrl = process.env.SITE_URL || 'https://busy.com.ar'
-  
+
   // Pre-fetch products on server
   const initialProducts = await getProductsAsync().catch(() => [])
-  
+
   return (
     <div className="container px-4 py-8 pt-28">
       <script
@@ -104,7 +106,33 @@ export default async function OfertasPage() {
       />
 
       <div className="max-w-7xl mx-auto">
-        <ProductsClient 
+        {/* SEO Header */}
+        <header className="mb-8">
+          <h1 className="font-heading text-2xl md:text-3xl font-bold mb-3">Ofertas</h1>
+          <p className="text-muted-foreground font-body max-w-2xl">
+            Aprovechá nuestras ofertas especiales en productos seleccionados. Descuentos exclusivos en remeras, buzos y accesorios de streetwear.
+          </p>
+          {/* Category quick links */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            {[
+              { name: 'Remeras', slug: 'remeras' },
+              { name: 'Buzos', slug: 'buzos' },
+              { name: 'Pantalones', slug: 'pantalones' },
+              { name: 'Accesorios', slug: 'accesorios' },
+            ].map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/products/category/${cat.slug}`}
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {cat.name}
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            ))}
+          </div>
+        </header>
+
+        <ProductsClient
           initialCategory="ofertas"
           initialProducts={initialProducts}
         />

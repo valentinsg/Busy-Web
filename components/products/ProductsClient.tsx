@@ -186,11 +186,21 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
     }
   }, [searchQuery, filters, hydrated])
 
+  // Track if user has interacted with filters (to distinguish from initial hydration)
+  const [userInteracted, setUserInteracted] = React.useState(false)
+
   const updateFilter = <K extends keyof FilterOptions>(key: K, value: FilterOptions[K] | undefined) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
   }
 
+  // Wrap updateFilter to track user interaction
+  const handleFilterChange = <K extends keyof FilterOptions>(key: K, value: FilterOptions[K] | undefined) => {
+    setUserInteracted(true)
+    updateFilter(key, value)
+  }
+
   const clearFilters = () => {
+    setUserInteracted(true)
     setFilters({})
     setSearchQuery('')
   }
@@ -199,8 +209,8 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
   React.useEffect(() => {
     if (!router || !pathname || !hydrated) return
     if (isEditingPrice) return
-    // Prevent initial fallback to /products while hydrating a category path
-    if (!filters.category && /^\/products\/category\//.test(pathname)) return
+    // Prevent initial fallback to /products while hydrating a category path (only if user hasn't interacted)
+    if (!userInteracted && !filters.category && /^\/products\/category\//.test(pathname)) return
     const otherParams = new URLSearchParams()
     if (filters.color) otherParams.set('color', String(filters.color))
     if (filters.size) otherParams.set('size', String(filters.size))
@@ -224,7 +234,7 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
     }
     // Intentionally include only dependencies that change URL meaningfully
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated, isEditingPrice, filters.category, filters.color, filters.size, filters.minPrice, filters.maxPrice, filters.sortBy, searchQuery])
+  }, [hydrated, isEditingPrice, userInteracted, filters.category, filters.color, filters.size, filters.minPrice, filters.maxPrice, filters.sortBy, searchQuery])
 
   const applyPrice = () => {
     updateFilter('minPrice', minPriceInput ? Number(minPriceInput) : undefined)
@@ -264,7 +274,7 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
                 id={category}
                 checked={filters.category === category}
                 onCheckedChange={(checked) =>
-                  updateFilter('category', checked ? category : undefined)
+                  handleFilterChange('category', checked ? category : undefined)
                 }
               />
               <Label htmlFor={category} className="text-sm font-body">
@@ -287,7 +297,7 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
                     id={color}
                     checked={filters.color === color}
                     onCheckedChange={(checked) =>
-                      updateFilter('color', checked ? color : undefined)
+                      handleFilterChange('color', checked ? color : undefined)
                     }
                   />
                   <Label htmlFor={color} className="flex items-center gap-2 text-sm font-body cursor-pointer">
@@ -317,7 +327,7 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
                   <Checkbox
                     id={size}
                     checked={filters.size === size}
-                    onCheckedChange={(checked) => updateFilter('size', checked ? size : undefined)}
+                    onCheckedChange={(checked) => handleFilterChange('size', checked ? size : undefined)}
                   />
                   <Label htmlFor={size} className="text-sm font-body">{size}</Label>
                 </div>

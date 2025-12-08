@@ -3,7 +3,7 @@ import { Resend } from "resend"
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const EMAIL_FROM = process.env.EMAIL_FROM || "Busy Store <no-reply@busy.com.ar>"
-const CONTACT_EMAIL = "busy.streetwear@gmail.com"
+const CONTACT_EMAIL = "busystreetwear@gmail.com"
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const html = `
       <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333; border-bottom: 2px solid #000; padding-bottom: 10px;">Nuevo mensaje de contacto</h2>
-        
+
         <div style="margin: 20px 0;">
           <p style="margin: 10px 0;"><strong>Nombre:</strong> ${name}</p>
           <p style="margin: 10px 0;"><strong>Email:</strong> ${email}</p>

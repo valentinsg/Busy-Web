@@ -210,7 +210,7 @@ export default function TransferConfirmationPage() {
                 className="w-full h-auto py-4 flex flex-col items-center gap-2"
               >
                 <a
-                  href={`mailto:busy.streetwear@gmail.com?subject=Comprobante de transferencia - Orden ${orderId.slice(0, 8).toUpperCase()}&body=Hola! Adjunto el comprobante de transferencia para la orden ${orderId.slice(0, 8).toUpperCase()}.`}
+                  href={`mailto:busystreetwear@gmail.com?subject=Comprobante de transferencia - Orden ${orderId.slice(0, 8).toUpperCase()}&body=Hola! Adjunto el comprobante de transferencia para la orden ${orderId.slice(0, 8).toUpperCase()}.`}
                 >
                   <Mail className="h-5 w-5" />
                   <span className="text-sm font-medium">Email</span>

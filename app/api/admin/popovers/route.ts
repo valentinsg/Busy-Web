@@ -1,5 +1,6 @@
 import { syncPopoverCoupon } from "@/lib/repo/sync-popover-coupon"
 import { getServiceClient } from "@/lib/supabase/server"
+import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { assertAdmin } from "../_utils"
 
@@ -92,5 +93,10 @@ export async function POST(req: NextRequest) {
     `)
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Revalidate admin popovers page and public popover API
+  revalidatePath("/admin/popovers")
+  revalidatePath("/api/popovers/active")
+
   return NextResponse.json({ ok: true, item: data })
 }

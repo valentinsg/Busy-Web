@@ -147,7 +147,7 @@ export async function extractDominantColors(
   }
 }
 
-// Backwards-compatible helper used by Busy Archive upload route
+// Backwards-compatible helper used by Busy Files upload route
 export async function analyzeImageColors(buffer: Buffer): Promise<string[]> {
   return extractDominantColors(buffer, 5);
 }

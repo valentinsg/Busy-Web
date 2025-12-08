@@ -174,7 +174,7 @@ export default function HomeClient() {
                   <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-15 transition-opacity duration-500" />
                   <div
                     className="w-full h-full bg-cover object-contain"
-                    style={{ backgroundImage: "url('/docs/archive/ciro-gif.gif')" }}
+                    style={{ backgroundImage: "url('/docs/files/ciro-gif.gif')" }}
                   />
                 </div>
               </div>

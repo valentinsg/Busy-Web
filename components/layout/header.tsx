@@ -28,7 +28,7 @@ const navigation: NavItem[] = [
     href: '#',
     children: [
       { label: 'Nuestra historia', href: '/about' },
-      { label: 'Archive', href: '/archive' },
+      { label: 'Files', href: '/files' },
       { label: 'Playlists', href: '/playlists' },
     ],
   },

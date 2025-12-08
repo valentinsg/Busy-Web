@@ -1,5 +1,5 @@
-import type { Metadata } from "next"
 import { generateSEO } from "@/lib/seo"
+import type { Metadata } from "next"
 
 export const metadata: Metadata = generateSEO({
   title: "Términos y Condiciones - Busy",
@@ -48,7 +48,9 @@ export default function TermsPage() {
         <h2>Contacto</h2>
         <p>
           Para consultas sobre estos términos, escribinos a {" "}
-          <a href="mailto:legal@busy.com.ar">legal@busy.com.ar</a>.
+          <a href="mailto:busystreetwear@gmail.com" className="text-accent-brand hover:underline">busystreetwear@gmail.com</a>.
+          También podés consultar nuestras <a href="/faq" className="text-accent-brand hover:underline">preguntas frecuentes</a> o seguirnos en{" "}
+          <a href="https://instagram.com/busy.streetwear" target="_blank" rel="noopener noreferrer" className="text-accent-brand hover:underline">Instagram</a>.
         </p>
       </div>
     </div>

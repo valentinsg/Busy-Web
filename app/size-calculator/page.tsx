@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SizeCalculatorForm } from '@/components/size-calculator/size-calculator-form'
 import { SizeCalculatorResults } from '@/components/size-calculator/size-calculator-results'
-import type { UserMeasurements, CalculatorResult } from '@/types/size-calculator'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { calculateAllCategories } from '@/lib/size-calculator/calculator'
+import type { CalculatorResult, UserMeasurements } from '@/types/size-calculator'
+import { motion } from 'framer-motion'
 import { Ruler, Shirt, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
 
 export default function SizeCalculatorPage() {
   const [step, setStep] = useState<'intro' | 'form' | 'results'>('intro')
@@ -117,7 +117,7 @@ export default function SizeCalculatorPage() {
             <Card className="bg-muted/30">
               <CardContent className="pt-6">
                 <p className="font-body text-sm text-muted-foreground">
-                  <strong className="text-foreground">Nota:</strong> Esta calculadora es una guía orientativa. 
+                  <strong className="text-foreground">Nota:</strong> Esta calculadora es una guía orientativa.
                   Las medidas pueden variar según el modelo y la tela. Si tenés dudas, contactanos por WhatsApp.
                 </p>
               </CardContent>

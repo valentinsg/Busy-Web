@@ -1,5 +1,7 @@
 'use client'
 
+import { ChristmasTreeBackground } from '@/components/christmas'
+import { useChristmas } from '@/components/providers/christmas-provider'
 import { Button } from '@/components/ui/button'
 import { getImageConfig, normalizeImageUrl } from '@/lib/imageConfig'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -13,6 +15,7 @@ interface ProductGalleryProps {
 
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const [currentImage, setCurrentImage] = React.useState(0)
+  const { isChristmasMode } = useChristmas()
 
   const nextImage = () => {
     setCurrentImage((prev) => (prev + 1) % images.length)
@@ -24,15 +27,19 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
   if (images.length === 0) {
     return (
-      <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
-        <Image
-          src={'/backgrounds/product-bg.jpg'}
-          alt={'Busy Pattern white, diseñado por @agus.mxlina'}
-          fill
-          className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
-          sizes={getImageConfig('pattern').sizes}
-        />
-        <span className="text-muted-foreground">No image available</span>
+      <div className="aspect-square bg-muted rounded-lg flex items-center justify-center relative overflow-hidden">
+        {isChristmasMode ? (
+          <ChristmasTreeBackground />
+        ) : (
+          <Image
+            src={'/backgrounds/product-bg.jpg'}
+            alt={'Busy Pattern white, diseñado por @agus.mxlina'}
+            fill
+            className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+            sizes={getImageConfig('pattern').sizes}
+          />
+        )}
+        <span className="text-muted-foreground relative z-10">No image available</span>
       </div>
     )
   }
@@ -41,13 +48,17 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
     <div className="space-y-4">
       {/* Main Image */}
       <div className="relative aspect-square bg-muted rounded-lg overflow-hidden group">
-        <Image
-          src={'/backgrounds/product-bg.jpg'}
-          alt={'Busy Pattern white, diseñado por @agus.mxlina'}
-          fill
-          className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
-          sizes={getImageConfig('pattern').sizes}
-        />
+        {isChristmasMode ? (
+          <ChristmasTreeBackground />
+        ) : (
+          <Image
+            src={'/backgrounds/product-bg.jpg'}
+            alt={'Busy Pattern white, diseñado por @agus.mxlina'}
+            fill
+            className="object-cover absolute transition-transform duration-300 group-hover:scale-105"
+            sizes={getImageConfig('pattern').sizes}
+          />
+        )}
         <Image
           src={normalizeImageUrl(
             images[currentImage] ||
@@ -102,13 +113,25 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   : 'border-transparent hover:border-border'
               }`}
             >
+              {/* Background pattern - Christmas or regular */}
+              {isChristmasMode ? (
+                <ChristmasTreeBackground />
+              ) : (
+                <Image
+                  src={'/backgrounds/product-bg.jpg'}
+                  alt={'Busy Pattern'}
+                  fill
+                  className="object-cover absolute"
+                  sizes="100px"
+                />
+              )}
               <Image
                 src={normalizeImageUrl(
                   image || '/busy-streetwear.png'
                 )}
                 alt={`${productName} - Thumbnail ${index + 1}`}
                 fill
-                className="object-cover"
+                className="object-cover relative z-10"
                 sizes={getImageConfig('productThumbnail').sizes}
               />
             </button>

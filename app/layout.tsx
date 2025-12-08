@@ -186,7 +186,7 @@ const jsonLd = [
       '@type': 'ContactPoint',
       telephone: '+54 9 22 3668 0041',
       contactType: 'Customer Service',
-      email: 'busy.streetwear@gmail.com',
+      email: 'busystreetwear@gmail.com',
       areaServed: 'AR',
       availableLanguage: ['Spanish', 'English'],
     },

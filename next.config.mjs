@@ -71,6 +71,22 @@ const nextConfig = {
         destination: '/faq',
         permanent: true,
       },
+      // SEO landing pages -> real category pages
+      {
+        source: '/products/hoodies',
+        destination: '/products/category/buzos',
+        permanent: true,
+      },
+      {
+        source: '/products/tshirts',
+        destination: '/products/category/remeras',
+        permanent: true,
+      },
+      {
+        source: '/products/pants',
+        destination: '/products/category/pantalones',
+        permanent: true,
+      },
     ]
   },
   async headers() {

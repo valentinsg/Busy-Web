@@ -20,38 +20,36 @@ function getStaticRoutes() {
 
     // Main pages - High priority
     { url: `${SITE_URL}/products`, lastModified: now, changeFrequency: weekly, priority: 0.9, alternates: { languages: createLang('/products') } },
-    { url: `${SITE_URL}/playlists`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/playlists') } },
     { url: `${SITE_URL}/blog`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/blog') } },
     { url: `${SITE_URL}/about`, lastModified: now, changeFrequency: monthly, priority: 0.7, alternates: { languages: createLang('/about') } },
     { url: `${SITE_URL}/contact`, lastModified: now, changeFrequency: monthly, priority: 0.7, alternates: { languages: createLang('/contact') } },
 
-    // Product categories
-    { url: `${SITE_URL}/products/hoodies`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/products/hoodies') } },
-    { url: `${SITE_URL}/products/tshirts`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/products/tshirts') } },
-    { url: `${SITE_URL}/products/pants`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/products/pants') } },
-    { url: `${SITE_URL}/products/category/buzos`, lastModified: now, changeFrequency: weekly, priority: 0.7, alternates: { languages: createLang('/products/category/buzos') } },
-    { url: `${SITE_URL}/products/category/remeras`, lastModified: now, changeFrequency: weekly, priority: 0.7, alternates: { languages: createLang('/products/category/remeras') } },
-    { url: `${SITE_URL}/products/category/pantalones`, lastModified: now, changeFrequency: weekly, priority: 0.7, alternates: { languages: createLang('/products/category/pantalones') } },
+    // Product categories (real pages with products)
+    { url: `${SITE_URL}/products/category/buzos`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/products/category/buzos') } },
+    { url: `${SITE_URL}/products/category/remeras`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/products/category/remeras') } },
+    { url: `${SITE_URL}/products/category/pantalones`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/products/category/pantalones') } },
+    { url: `${SITE_URL}/products/category/camperas`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/products/category/camperas') } },
+    { url: `${SITE_URL}/products/category/accesorios`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/products/category/accesorios') } },
+    { url: `${SITE_URL}/products/ofertas`, lastModified: now, changeFrequency: daily, priority: 0.85, alternates: { languages: createLang('/products/ofertas') } },
 
     // Utility pages
-    { url: `${SITE_URL}/cart`, lastModified: now, changeFrequency: monthly, priority: 0.5, alternates: { languages: createLang('/cart') } },
-    { url: `${SITE_URL}/checkout`, lastModified: now, changeFrequency: monthly, priority: 0.4, alternates: { languages: createLang('/checkout') } },
-    { url: `${SITE_URL}/faq`, lastModified: now, changeFrequency: monthly, priority: 0.6, alternates: { languages: createLang('/faq') } },
+    { url: `${SITE_URL}/playlists`, lastModified: now, changeFrequency: weekly, priority: 0.6, alternates: { languages: createLang('/playlists') } },
+    { url: `${SITE_URL}/cart`, lastModified: now, changeFrequency: monthly, priority: 0.4, alternates: { languages: createLang('/cart') } },
+    { url: `${SITE_URL}/checkout`, lastModified: now, changeFrequency: monthly, priority: 0.3, alternates: { languages: createLang('/checkout') } },
+    { url: `${SITE_URL}/faq`, lastModified: now, changeFrequency: weekly, priority: 0.7, alternates: { languages: createLang('/faq') } },
     { url: `${SITE_URL}/size-calculator`, lastModified: now, changeFrequency: monthly, priority: 0.7, alternates: { languages: createLang('/size-calculator') } },
 
     // Legal pages
     { url: `${SITE_URL}/legal/cookies`, lastModified: now, changeFrequency: monthly, priority: 0.3, alternates: { languages: createLang('/legal/cookies') } },
     { url: `${SITE_URL}/legal/privacy`, lastModified: now, changeFrequency: monthly, priority: 0.3, alternates: { languages: createLang('/legal/privacy') } },
     { url: `${SITE_URL}/legal/terms`, lastModified: now, changeFrequency: monthly, priority: 0.3, alternates: { languages: createLang('/legal/terms') } },
-    { url: `${SITE_URL}/legal/returns`, lastModified: now, changeFrequency: monthly, priority: 0.3, alternates: { languages: createLang('/legal/returns') } },
+    { url: `${SITE_URL}/legal/returns`, lastModified: now, changeFrequency: monthly, priority: 0.5, alternates: { languages: createLang('/legal/returns') } },
 
     // Blacktop - Torneos de básquet
     { url: `${SITE_URL}/blacktop`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/blacktop') } },
 
-    // Archive - Galería de fotos
-    { url: `${SITE_URL}/archive`, lastModified: now, changeFrequency: weekly, priority: 0.7, alternates: { languages: createLang('/archive') } },
-    { url: `${SITE_URL}/archive/timeline`, lastModified: now, changeFrequency: weekly, priority: 0.6, alternates: { languages: createLang('/archive/timeline') } },
-
+    // Files - Galería de fotos
+    { url: `${SITE_URL}/files`, lastModified: now, changeFrequency: weekly, priority: 0.8, alternates: { languages: createLang('/files') } },
   ]
 }
 
@@ -156,7 +154,7 @@ async function getArchiveRoutes() {
     if (error || !data) return []
 
     return data.map((entry) => {
-      const url = `${SITE_URL}/archive/${entry.id}`
+      const url = `${SITE_URL}/files/${entry.id}`
       return {
         url,
         lastModified: entry.updated_at || now,

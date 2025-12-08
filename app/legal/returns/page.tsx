@@ -112,12 +112,17 @@ export default function ReturnsPolicy() {
                 </a>
               </Button>
               <Button asChild variant="outline" className="gap-2">
-                <a href="mailto:busy.streetwear@gmail.com" className="gap-2">
+                <a href="mailto:busystreetwear@gmail.com" className="gap-2">
                   <Mail className="h-4 w-4" />
                   Email
                 </a>
               </Button>
             </div>
+
+            <p className="mt-6 text-sm text-muted-foreground">
+              ¿Tenés más dudas? Consultá nuestras{" "}
+              <Link href="/faq" className="text-accent-brand hover:underline">preguntas frecuentes</Link>.
+            </p>
           </section>
         </div>
       </div>

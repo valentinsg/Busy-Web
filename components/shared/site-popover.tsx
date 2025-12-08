@@ -33,8 +33,9 @@ export default function SitePopover({ section }: { section?: string }) {
   const [submitting, setSubmitting] = React.useState(false)
   const [submitMessage, setSubmitMessage] = React.useState("")
   const [showConfetti, setShowConfetti] = React.useState(false)
-  const isInitializedRef = React.useRef(false)
   const [emailTouched, setEmailTouched] = React.useState(false)
+  // Track which popover ID we've already fetched to avoid duplicate fetches in StrictMode
+  const fetchedForRef = React.useRef<string | null>(null)
 
   const isValidEmail = (val: string) => {
     const v = val.trim()
@@ -44,9 +45,12 @@ export default function SitePopover({ section }: { section?: string }) {
   }
 
   React.useEffect(() => {
-    // Prevenir doble ejecución en StrictMode
-    if (isInitializedRef.current) {
-      console.log('[Popover] Already initialized, skipping')
+    // Build a unique key for this fetch context
+    const fetchKey = `${pathname}|${section || ''}`
+
+    // Skip if we already fetched for this exact context
+    if (fetchedForRef.current === fetchKey) {
+      console.log('[Popover] Already fetched for this context, skipping')
       return
     }
 
@@ -62,19 +66,27 @@ export default function SitePopover({ section }: { section?: string }) {
       try {
         // Obtener IDs de popovers ya cerrados del localStorage
         const dismissedIds: string[] = []
+        const dismissedKeys: string[] = []
         if (typeof window !== 'undefined') {
           for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i)
             if (key?.startsWith('dismiss_popover_')) {
               const id = key.replace('dismiss_popover_', '')
-              if (id) dismissedIds.push(id)
+              if (id) {
+                dismissedIds.push(id)
+                dismissedKeys.push(key)
+              }
             }
           }
         }
 
         console.log('[Popover] Fetching active popover... Dismissed IDs:', dismissedIds)
         const excludeParam = dismissedIds.length > 0 ? `&exclude=${encodeURIComponent(dismissedIds.join(','))}` : ''
-        const res = await fetch(`/api/popovers/active?path=${encodeURIComponent(pathname || '')}${section ? `&section=${encodeURIComponent(section)}` : ""}${excludeParam}`)
+        // Add cache buster to prevent browser caching stale popover data
+        const cacheBuster = `&_t=${Date.now()}`
+        const res = await fetch(`/api/popovers/active?path=${encodeURIComponent(pathname || '')}${section ? `&section=${encodeURIComponent(section)}` : ""}${excludeParam}${cacheBuster}`, {
+          cache: 'no-store'
+        })
 
         if (cancelled) return
 
@@ -86,7 +98,7 @@ export default function SitePopover({ section }: { section?: string }) {
         if (p && !cancelled) {
           // La API ya excluye los popovers cerrados, así que podemos mostrar directamente
           console.log('[Popover] Setting up popover data')
-          isInitializedRef.current = true
+          fetchedForRef.current = fetchKey
           const delayMs = (p.delay_seconds || 0) * 1000
 
           setData({
@@ -112,6 +124,10 @@ export default function SitePopover({ section }: { section?: string }) {
               setIsVisible(true)
             }
           }, delayMs)
+        } else if (!cancelled) {
+          // No popover found, but mark as fetched to avoid re-fetching
+          console.log('[Popover] No popover found for this context')
+          fetchedForRef.current = fetchKey
         }
       } catch (e: unknown) {
         if (!cancelled) {

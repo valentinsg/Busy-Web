@@ -103,8 +103,8 @@ export default function ContactPage() {
                   <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <div className="font-medium">Email</div>
-                    <a href="mailto:busy.streetwear@gmail.com" className="font-body text-sm text-accent-brand hover:underline">
-                      busy.streetwear@gmail.com
+                    <a href="mailto:busystreetwear@gmail.com" className="font-body text-sm text-accent-brand hover:underline">
+                      busystreetwear@gmail.com
                     </a>
                   </div>
                 </div>

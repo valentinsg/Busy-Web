@@ -28,6 +28,7 @@ import {
     FileText,
     Film,
     HandCoins,
+    HelpCircle,
     LayoutDashboard,
     List,
     Mail,
@@ -403,18 +404,18 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        isActive={isActive("/admin/archive") || isActive("/admin/archive/entries")}
+                        isActive={isActive("/admin/files") || isActive("/admin/files/entries")}
                         className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200"
                       >
                         <Camera className="h-4 w-4" />
-                        <span>Busy Archive</span>
+                        <span>Busy Files</span>
                         <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:slide-in-from-top-1">
                       <SidebarMenuSub className="gap-1 ml-3 mt-1.5 mb-1.5 border-l-2 border-white/10 pl-3">
                         <SidebarMenuSubItem>
-                          <Link href="/admin/archive" legacyBehavior>
+                          <Link href="/admin/files" legacyBehavior>
                             <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
                                 <Camera className="h-3.5 w-3.5" /> Uploader
@@ -423,10 +424,10 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                           </Link>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <Link href="/admin/archive/entries" legacyBehavior>
+                          <Link href="/admin/files/entries" legacyBehavior>
                             <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
-                                <List className="h-3.5 w-3.5" /> Ver archivo
+                                <List className="h-3.5 w-3.5" /> Ver files
                               </a>
                             </SidebarMenuSubButton>
                           </Link>
@@ -621,6 +622,26 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                     <SidebarMenuButton asChild isActive={isActive("/admin/expenses")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
                       <a className="flex items-center gap-2">
                         <Wallet className="h-4 w-4" /> Gastos
+                      </a>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <Link href="/admin/faqs" legacyBehavior>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/faqs")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
+                      <a className="flex items-center gap-2">
+                        <HelpCircle className="h-4 w-4" /> FAQs
+                      </a>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <Link href="/admin/settings" legacyBehavior>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/settings")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
+                      <a className="flex items-center gap-2">
+                        <Settings className="h-4 w-4" /> Configuración
                       </a>
                     </SidebarMenuButton>
                   </Link>

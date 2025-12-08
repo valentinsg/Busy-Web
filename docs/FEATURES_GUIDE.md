@@ -192,18 +192,17 @@ lib/blog.ts                     # Funciones del blog
 
 ---
 
-## 🖼️ Archive (Galería)
+## 🖼️ Files (Galería)
 
 ### Archivos clave
 
 ```
-app/archive/page.tsx            # Grid de fotos
-app/archive/[id]/page.tsx       # Detalle de foto
-app/archive/timeline/page.tsx   # Vista timeline
-components/archive/archive-grid.tsx
-components/archive/archive-masonry.tsx
-components/archive/archive-detail.tsx
-lib/repo/archive.ts
+app/files/page.tsx              # Grid de fotos
+app/files/[id]/page.tsx         # Detalle de foto
+components/files/files-grid.tsx
+components/files/files-masonry.tsx
+components/files/files-detail.tsx
+lib/supabase/files.ts
 ```
 
 ### Storage
@@ -220,7 +219,7 @@ Las imágenes se guardan en **Cloudflare R2** (más barato que Supabase Storage)
 
 ### Subir foto (Admin)
 
-1. Ir a `/admin/archive`
+1. Ir a `/admin/files`
 2. Drag & drop o seleccionar archivo
 3. Se procesa con Sharp (resize, optimización)
 4. Se sube a R2
@@ -392,7 +391,7 @@ components/admin/admin-sidebar-menu.tsx
 | `/admin/orders` | Gestión de órdenes |
 | `/admin/products` | Gestión de productos |
 | `/admin/blog` | Gestión del blog |
-| `/admin/archive` | Gestión de galería |
+| `/admin/files` | Gestión de galería |
 | `/admin/blacktop` | Gestión de torneos |
 | `/admin/promotions` | Promociones |
 | `/admin/coupons` | Cupones |

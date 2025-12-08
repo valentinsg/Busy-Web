@@ -182,7 +182,7 @@ export default async function Home() {
                 <div className="relative h-full w-full overflow-hidden rounded-[16px] bg-muted opacity-80 ring-1 ring-white/10 shadow-[0_8px_40px_rgba(25,25,25,0.2)]">
                   <div className="pointer-events-none absolute inset-0 rounded-[16px] bg-gradient-to-tr from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-15 transition-opacity duration-500" />
                   <Image
-                    src="/docs/archive/ciro-gif.gif"
+                    src="/docs/files/ciro-gif.gif"
                     alt="Busy Streetwear"
                     fill
                     sizes={getImageConfig('hero').sizes}

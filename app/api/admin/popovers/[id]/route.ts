@@ -1,5 +1,6 @@
 import { syncPopoverCoupon } from "@/lib/repo/sync-popover-coupon"
 import { getServiceClient } from "@/lib/supabase/server"
+import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { assertAdmin } from "../../_utils"
 
@@ -121,6 +122,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     `)
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Revalidate admin popovers page and public popover API
+  revalidatePath("/admin/popovers")
+  revalidatePath("/api/popovers/active")
+
   return NextResponse.json({ ok: true, item: data })
 }
 
@@ -131,5 +137,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const svc = getServiceClient()
   const { error } = await svc.from("popovers").delete().eq("id", id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Revalidate admin popovers page and public popover API
+  revalidatePath("/admin/popovers")
+  revalidatePath("/api/popovers/active")
+
   return NextResponse.json({ ok: true })
 }

@@ -78,7 +78,7 @@ export default function ContactLayout({ children }: { children: React.ReactNode 
           '@type': 'ContactPoint',
           telephone: '+54-9-223-682-5268',
           contactType: 'Customer Service',
-          email: 'busy.streetwear@gmail.com',
+          email: 'busystreetwear@gmail.com',
           availableLanguage: ['Spanish', 'English'],
           areaServed: 'AR',
         },

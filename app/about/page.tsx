@@ -760,6 +760,57 @@ function AboutContent() {
         </div>
       </section>
 
+      {/* Quick Links Section */}
+      <section className="py-12 md:py-16 w-full">
+        <div className="max-w-4xl mx-auto px-4">
+          <h3 className="font-heading text-xl md:text-2xl font-bold text-center mb-6">Explorá más de Busy</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Link
+              href="/products"
+              className="group p-4 rounded-xl border border-border hover:border-accent-brand/50 transition-colors text-center"
+            >
+              <span className="text-2xl mb-2 block">👕</span>
+              <span className="font-medium group-hover:text-accent-brand transition-colors">Tienda</span>
+            </Link>
+            <Link
+              href="/blog"
+              className="group p-4 rounded-xl border border-border hover:border-accent-brand/50 transition-colors text-center"
+            >
+              <span className="text-2xl mb-2 block">📝</span>
+              <span className="font-medium group-hover:text-accent-brand transition-colors">Blog</span>
+            </Link>
+            <Link
+              href="/playlists"
+              className="group p-4 rounded-xl border border-border hover:border-accent-brand/50 transition-colors text-center"
+            >
+              <span className="text-2xl mb-2 block">🎵</span>
+              <span className="font-medium group-hover:text-accent-brand transition-colors">Playlists</span>
+            </Link>
+            <Link
+              href="/faq"
+              className="group p-4 rounded-xl border border-border hover:border-accent-brand/50 transition-colors text-center"
+            >
+              <span className="text-2xl mb-2 block">❓</span>
+              <span className="font-medium group-hover:text-accent-brand transition-colors">FAQ</span>
+            </Link>
+          </div>
+          <div className="flex justify-center gap-4 mt-6">
+            <a
+              href="https://instagram.com/busy.streetwear"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-muted-foreground hover:text-accent-brand transition-colors"
+            >
+              @busy.streetwear
+            </a>
+            <span className="text-muted-foreground">·</span>
+            <Link href="/contact" className="text-sm text-muted-foreground hover:text-accent-brand transition-colors">
+              Contacto
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section ref={ctaRef} className="py-12 md:py-16 w-full overflow-hidden">
         {/* Newsletter Signup */}

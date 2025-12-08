@@ -3,8 +3,8 @@
  *
  * Run with: npx tsx --env-file=.env.local scripts/fix-r2-urls-proxy.ts
  *
- * This updates all archive entries to use the proxy URL format:
- *   /api/archive/image/entries/{id}/thumb.webp
+ * This updates all Busy Files entries to use the proxy URL format:
+ *   /api/files/image/entries/{id}/thumb.webp
  *
  * This bypasses R2 public access issues by using signed URLs
  */
@@ -33,7 +33,7 @@ function convertToProxyUrl(url: string | null): string | null {
   if (!match) return url; // Not an R2 URL, return as-is
 
   const path = match[1];
-  return `${siteUrl}/api/archive/image/${path}`;
+  return `${siteUrl}/api/files/image/${path}`;
 }
 
 async function fixUrls() {
