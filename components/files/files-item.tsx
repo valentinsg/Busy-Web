@@ -50,7 +50,9 @@ export function FilesItem({ entry, className }: FilesItemProps) {
     <div
       className={cn(
         'group relative block overflow-hidden rounded-xl',
-        'md:transition-all md:duration-300 md:hover:shadow-xl md:hover:shadow-black/20',
+        // Only apply hover effects on devices that support hover
+        '[@media(hover:hover)]:transition-all [@media(hover:hover)]:duration-300',
+        '[@media(hover:hover)]:hover:shadow-xl [@media(hover:hover)]:hover:shadow-black/20',
         className
       )}
     >
@@ -74,7 +76,8 @@ export function FilesItem({ entry, className }: FilesItemProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className={cn(
                 'w-full h-auto transition-all duration-500',
-                'md:group-hover:scale-105', // Only scale on desktop hover
+                // Only scale on devices that support hover (not touch)
+                'group-hover:[@media(hover:hover)]:scale-105',
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               )}
               onLoad={() => setImageLoaded(true)}
@@ -105,12 +108,14 @@ export function FilesItem({ entry, className }: FilesItemProps) {
             </div>
           )}
 
-          {/* Hover overlay - Pinterest style */}
+          {/* Hover overlay - Pinterest style (desktop only) */}
           <div
             className={cn(
               'absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent',
               'opacity-0 transition-opacity duration-300',
-              'md:group-hover:opacity-100', // Only show on hover for devices with hover capability
+              'pointer-events-none', // Prevent overlay from blocking clicks
+              // Use @media (hover: hover) via Tailwind - only show on devices that support hover
+              'group-hover:[@media(hover:hover)]:opacity-100',
               'flex flex-col justify-end p-3 md:p-4'
             )}
           >

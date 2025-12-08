@@ -32,13 +32,15 @@ export class FilesService {
   ): Promise<PaginatedResponse<ArchiveEntry>> {
     // Determine sort order - use created_at (the date assigned by user when uploading)
     // This allows sorting by the actual date of the photo, not when it was uploaded
+    // newest = descending (most recent first), oldest = ascending (oldest first)
     const ascending = filters.sort === 'oldest';
 
     let query = this.supabase
       .schema('archive')
       .from('entries')
       .select('*', { count: 'exact' })
-      .order('created_at', { ascending, nullsFirst: false });
+      .order('created_at', { ascending, nullsFirst: false })
+      .order('id', { ascending }); // Secondary sort for consistency
 
     // Only filter by is_public if not including private entries (admin mode)
     if (!includePrivate) {

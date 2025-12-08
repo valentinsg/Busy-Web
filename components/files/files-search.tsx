@@ -4,9 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { ArchiveFilters } from '@/types/files';
@@ -220,7 +220,6 @@ export function FilesSearch({ places, colors, showFilters = true, showBackButton
               </div>
             )}
 
-fdsafds
             {/* Colors - Dynamic from DB */}
             {colors.length > 0 && (
               <div className="space-y-2">

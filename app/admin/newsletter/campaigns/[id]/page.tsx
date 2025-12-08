@@ -97,7 +97,12 @@ export default function CampaignDetailPage() {
       })
       const json = await res.json()
 
-      if (!res.ok || !json.ok) throw new Error(json.error || "Error al enviar")
+      if (!res.ok || !json.ok) {
+        const errorMsg = typeof json.error === 'string'
+          ? json.error
+          : JSON.stringify(json.error) || "Error al enviar"
+        throw new Error(errorMsg)
+      }
 
       toast({
         title: "¡Campaña enviada!",
@@ -107,7 +112,8 @@ export default function CampaignDetailPage() {
       // Refresh data
       setCampaign(prev => prev ? { ...prev, status: json.status, sent_count: json.sent } : null)
     } catch (e) {
-      toast({ title: "Error", description: e instanceof Error ? e.message : "Error" })
+      const message = e instanceof Error ? e.message : typeof e === 'object' ? JSON.stringify(e) : String(e)
+      toast({ title: "Error", description: message })
     } finally {
       setSending(false)
     }
@@ -128,6 +134,7 @@ export default function CampaignDetailPage() {
 
       toast({ title: "Campaña eliminada" })
       router.push("/admin/newsletter/campaigns")
+      router.refresh() // Force refresh the server component list
     } catch (e) {
       toast({ title: "Error", description: e instanceof Error ? e.message : "Error" })
       setDeleting(false)

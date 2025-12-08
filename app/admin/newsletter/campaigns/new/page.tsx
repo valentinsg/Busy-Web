@@ -1,14 +1,17 @@
 "use client"
 
+import { NewsletterImageUpload } from "@/components/admin/newsletter/image-upload"
 import { Menu } from "@/components/ui/menu"
 import { TagPicker } from "@/components/ui/tag-picker"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
 import * as React from "react"
 
 export default function NewCampaignPage() {
   const { toast } = useToast()
+  const router = useRouter()
   const [name, setName] = React.useState("")
   const [subject, setSubject] = React.useState("")
   const [content, setContent] = React.useState("")
@@ -81,7 +84,10 @@ export default function NewCampaignPage() {
         body: JSON.stringify(body),
       })
       const json = await res.json()
-      if (!res.ok || !json.ok) throw new Error(json.error || "Error al crear campaña")
+      if (!res.ok || !json.ok) {
+        const errMsg = typeof json.error === 'string' ? json.error : JSON.stringify(json.error)
+        throw new Error(errMsg || "Error al crear campaña")
+      }
       // Guardar audiencia seleccionada
       const id = json.item?.id
       if (id && selected.length) {
@@ -91,12 +97,17 @@ export default function NewCampaignPage() {
           body: JSON.stringify({ emails: selected, status: ["subscribed"], tags }),
         })
         const j2 = await res2.json()
-        if (!res2.ok || !j2.ok) throw new Error(j2.error || "Error al guardar audiencia")
+        if (!res2.ok || !j2.ok) {
+          const errMsg2 = typeof j2.error === 'string' ? j2.error : JSON.stringify(j2.error)
+          throw new Error(errMsg2 || "Error al guardar audiencia")
+        }
         toast({ title: "Campaña creada", description: `Audiencia guardada (${j2.saved})` })
         setCampaignId(id)
+        router.refresh() // Refresh the campaigns list cache
       } else {
         toast({ title: "Campaña creada", description: json.item?.name || "" })
         setCampaignId(json.item?.id)
+        router.refresh() // Refresh the campaigns list cache
       }
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : typeof e === 'object' ? JSON.stringify(e) : String(e)
@@ -182,12 +193,19 @@ export default function NewCampaignPage() {
           </label>
           <div>
             <label className="block text-sm mb-1 font-body">Contenido (Markdown)</label>
-            <div className="flex flex-wrap gap-2 mb-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
               <button className="px-2 py-1 border rounded" onClick={()=>setContent(c=>c+"**negrita** ")}>B</button>
               <button className="px-2 py-1 border rounded" onClick={()=>setContent(c=>c+"*itálica* ")}><em>I</em></button>
               <button className="px-2 py-1 border rounded" onClick={()=>setContent(c=>c+"\n## Título\n\n")}>H2</button>
               <button className="px-2 py-1 border rounded" onClick={()=>setContent(c=>c+"\n- Elemento 1\n- Elemento 2\n")}>Lista</button>
               <button className="px-2 py-1 border rounded" onClick={()=>setContent(c=>c+"[enlace](https://)")}>Link</button>
+              <div className="border-l pl-2 ml-2">
+                <NewsletterImageUpload
+                  onImageUploaded={(_url: string, markdown: string) => {
+                    setContent(c => c + "\n" + markdown + "\n")
+                  }}
+                />
+              </div>
             </div>
             <textarea value={content} onChange={(e)=>setContent(e.target.value)} rows={10} className="w-full border rounded px-3 py-2 bg-transparent font-mono text-sm" placeholder={"## Hola\n\nTexto de la campaña..."} />
           </div>

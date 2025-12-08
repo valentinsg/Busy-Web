@@ -57,7 +57,8 @@ export function FilesMasonry({ filters }: FilesMasonryProps) {
       if (filters.place) params.set('place', filters.place);
       if (filters.person) params.set('person', filters.person);
       if (filters.search) params.set('search', filters.search);
-      if (filters.sort) params.set('sort', filters.sort);
+      // Always send sort parameter to ensure consistent ordering
+      params.set('sort', filters.sort || 'newest');
 
       const res = await fetch(`/api/files/list?${params.toString()}`);
       if (!res.ok) {

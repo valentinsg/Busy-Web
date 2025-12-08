@@ -1,5 +1,6 @@
 "use client"
 
+import { NewsletterImageUpload } from "@/components/admin/newsletter/image-upload"
 import { TagPicker } from "@/components/ui/tag-picker"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase/client"
@@ -21,6 +22,12 @@ export default function EditCampaignPage() {
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
   const [status, setStatus] = React.useState("draft")
+
+  // Audience
+  const [allSubscribers, setAllSubscribers] = React.useState<string[]>([])
+  const [selectedEmails, setSelectedEmails] = React.useState<string[]>([])
+  const [currentRecipients, setCurrentRecipients] = React.useState<string[]>([])
+  const [listQuery, setListQuery] = React.useState("")
 
   // Load campaign data
   React.useEffect(() => {
@@ -46,6 +53,32 @@ export default function EditCampaignPage() {
           // Convert to datetime-local format
           const date = new Date(c.scheduled_at)
           setScheduledAt(date.toISOString().slice(0, 16))
+        }
+
+        // Load current recipients
+        const res2 = await fetch(`/api/admin/newsletter/campaigns/${id}/recipients`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (res2.ok) {
+          const json2 = await res2.json()
+          if (json2.ok && json2.items) {
+            const emails = json2.items.map((r: { email: string }) => r.email)
+            setCurrentRecipients(emails)
+            setSelectedEmails(emails)
+          }
+        }
+
+        // Load all subscribers
+        const res3 = await fetch(`/api/admin/newsletter/validate-target`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ status: ["subscribed"], tags: [] })
+        })
+        if (res3.ok) {
+          const json3 = await res3.json()
+          if (json3.ok && json3.emails) {
+            setAllSubscribers(json3.emails)
+          }
         }
       } catch (e) {
         toast({ title: "Error", description: e instanceof Error ? e.message : "Error cargando campaña" })
@@ -86,10 +119,30 @@ export default function EditCampaignPage() {
       })
 
       const json = await res.json()
-      if (!res.ok || !json.ok) throw new Error(json.error || "Error al guardar")
+      if (!res.ok || !json.ok) {
+        const errMsg = typeof json.error === 'string' ? json.error : JSON.stringify(json.error)
+        throw new Error(errMsg || "Error al guardar")
+      }
 
-      toast({ title: "Campaña actualizada" })
+      // Save audience if changed
+      if (selectedEmails.length > 0) {
+        const res2 = await fetch(`/api/admin/newsletter/campaigns/${id}/save-audience`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ emails: selectedEmails })
+        })
+        const json2 = await res2.json()
+        if (!res2.ok || !json2.ok) {
+          const errMsg2 = typeof json2.error === 'string' ? json2.error : JSON.stringify(json2.error)
+          throw new Error(errMsg2 || "Error al guardar audiencia")
+        }
+        toast({ title: "Campaña actualizada", description: `Audiencia: ${json2.saved} destinatarios` })
+      } else {
+        toast({ title: "Campaña actualizada" })
+      }
+
       router.push(`/admin/newsletter/campaigns/${id}`)
+      router.refresh() // Refresh the campaigns list cache
     } catch (e) {
       toast({ title: "Error", description: e instanceof Error ? e.message : "Error" })
     } finally {
@@ -146,12 +199,20 @@ export default function EditCampaignPage() {
 
         <div>
           <label className="block text-sm mb-1 font-body">Contenido (Markdown)</label>
-          <div className="flex flex-wrap gap-2 mb-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
             <button className="px-2 py-1 border rounded disabled:opacity-50" disabled={!canEdit} onClick={() => setContent(c => c + "**negrita** ")}>B</button>
             <button className="px-2 py-1 border rounded disabled:opacity-50" disabled={!canEdit} onClick={() => setContent(c => c + "*itálica* ")}><em>I</em></button>
             <button className="px-2 py-1 border rounded disabled:opacity-50" disabled={!canEdit} onClick={() => setContent(c => c + "\n## Título\n\n")}>H2</button>
             <button className="px-2 py-1 border rounded disabled:opacity-50" disabled={!canEdit} onClick={() => setContent(c => c + "\n- Elemento 1\n- Elemento 2\n")}>Lista</button>
             <button className="px-2 py-1 border rounded disabled:opacity-50" disabled={!canEdit} onClick={() => setContent(c => c + "[enlace](https://)")}>Link</button>
+            <div className="border-l pl-2 ml-2">
+              <NewsletterImageUpload
+                disabled={!canEdit}
+                onImageUploaded={(_url: string, markdown: string) => {
+                  setContent(c => c + "\n" + markdown + "\n")
+                }}
+              />
+            </div>
           </div>
           <textarea
             value={content}
@@ -184,13 +245,86 @@ export default function EditCampaignPage() {
           </div>
         </div>
 
+        {/* Audience Selector */}
+        <div className="pt-4 border-t">
+          <div className="flex items-center justify-between mb-3">
+            <label className="block text-sm font-body font-medium">
+              Audiencia ({selectedEmails.length} seleccionados)
+            </label>
+            {canEdit && (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedEmails(allSubscribers)}
+                  className="text-xs px-2 py-1 border rounded hover:bg-muted"
+                >
+                  Seleccionar todos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedEmails([])}
+                  className="text-xs px-2 py-1 border rounded hover:bg-muted"
+                >
+                  Limpiar
+                </button>
+              </div>
+            )}
+          </div>
+
+          {canEdit && (
+            <input
+              type="text"
+              placeholder="Buscar email..."
+              value={listQuery}
+              onChange={(e) => setListQuery(e.target.value)}
+              className="w-full border rounded px-3 py-2 bg-transparent font-body text-sm mb-2"
+            />
+          )}
+
+          <div className="max-h-48 overflow-auto rounded border divide-y">
+            {allSubscribers.length === 0 ? (
+              <div className="p-3 text-sm text-muted-foreground">No hay suscriptores</div>
+            ) : (
+              allSubscribers
+                .filter(email => !listQuery || email.toLowerCase().includes(listQuery.toLowerCase()))
+                .slice(0, 100)
+                .map(email => (
+                  <label key={email} className="flex items-center gap-2 px-3 py-2 hover:bg-muted/50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedEmails.includes(email)}
+                      disabled={!canEdit}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedEmails(prev => [...prev, email])
+                        } else {
+                          setSelectedEmails(prev => prev.filter(x => x !== email))
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm font-body">{email}</span>
+                    {currentRecipients.includes(email) && (
+                      <span className="text-xs text-emerald-400 ml-auto">guardado</span>
+                    )}
+                  </label>
+                ))
+            )}
+          </div>
+          {allSubscribers.length > 100 && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Mostrando 100 de {allSubscribers.length}. Usa el buscador para filtrar.
+            </p>
+          )}
+        </div>
+
         <div className="flex gap-3 pt-4 border-t">
           <button
             onClick={handleSave}
             disabled={saving || !canEdit}
             className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50"
           >
-            {saving ? "Guardando..." : "Guardar cambios"}
+            {saving ? "Guardando..." : `Guardar (${selectedEmails.length} destinatarios)`}
           </button>
           <Link
             href={`/admin/newsletter/campaigns/${id}`}

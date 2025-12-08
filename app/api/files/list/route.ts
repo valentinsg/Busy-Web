@@ -42,8 +42,9 @@ export async function GET(request: Request) {
     const search = searchParams.get('search');
     if (search) filters.search = search;
 
-    const sort = searchParams.get('sort') as 'newest' | 'oldest' | null;
-    if (sort) filters.sort = sort;
+    // Always include sort in filters for consistent caching
+    const sort = (searchParams.get('sort') as 'newest' | 'oldest') || 'newest';
+    filters.sort = sort;
 
     // Admin mode: include private entries (no cache for admin)
     const includePrivate = searchParams.get('admin') === 'true';

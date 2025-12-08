@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import { assertAdmin } from "../../../../_utils"
 import { z } from "zod"
+import { assertAdmin } from "../../../../_utils"
 
 const schema = z.object({
-  emails: z.array(z.string().email()).optional(),
+  emails: z.array(z.string()).optional(),
   status: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
 })
@@ -14,42 +14,65 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const svc = admin.svc
   try {
     const body = await req.json()
-    const { emails = [], status = [], tags = [] } = schema.parse(body)
+    const parsed = schema.parse(body)
+    const emails = parsed.emails || []
 
-    // Build allowed set by filters (status/tags) and subscribed only
-    let q = svc.from("newsletter_subscribers").select("email,status,tags")
-    if (status && status.length) q = q.in("status", status)
-    if (tags && tags.length) q = q.contains("tags", tags)
-    const { data: filtered, error } = await q
-    if (error) throw error
-    const allowedByFilters = new Set<string>((filtered||[])
-      .filter((r: Record<string, unknown>) => r.status === 'subscribed')
-      .map((r: Record<string, unknown>) => String(r.email).toLowerCase()))
+    console.log('[save-audience] Campaign:', params.id, 'Emails received:', emails.length)
 
-    // If a list of emails is provided, validate against DB
-    let allowed: string[]
-    if (emails && emails.length) {
-      const norm = Array.from(new Set(emails.map(e=>e.trim().toLowerCase()).filter(Boolean)))
-      const { data: rows, error: e2 } = await svc
+    // If emails are provided directly, use those
+    if (emails.length > 0) {
+      const normalizedEmails = Array.from(new Set(
+        emails.map(e => e.trim().toLowerCase()).filter(Boolean)
+      ))
+
+      console.log('[save-audience] Normalized emails:', normalizedEmails.length)
+
+      // Verify these emails exist and are subscribed
+      const { data: validSubs, error: subErr } = await svc
         .from("newsletter_subscribers")
-        .select("email,status")
-        .in("email", norm)
-      if (e2) throw e2
-      const map = new Map((rows||[]).map((r: Record<string, unknown>) => [String(r.email).toLowerCase(), r.status]))
-      allowed = norm.filter(em => map.get(em)==='subscribed' && (allowedByFilters.size===0 || allowedByFilters.has(em)))
-    } else {
-      allowed = Array.from(allowedByFilters)
+        .select("email")
+        .in("email", normalizedEmails)
+        .eq("status", "subscribed")
+
+      if (subErr) {
+        console.error('[save-audience] Error fetching subscribers:', subErr)
+        throw subErr
+      }
+
+      const validEmails = (validSubs || []).map(s => s.email.toLowerCase())
+      console.log('[save-audience] Valid subscribed emails:', validEmails.length)
+
+      // Save recipients - delete old ones first, then insert new
+      if (validEmails.length > 0) {
+        // Delete existing recipients for this campaign
+        await svc
+          .from("newsletter_campaign_recipients")
+          .delete()
+          .eq("campaign_id", params.id)
+
+        // Insert new recipients
+        const rows = validEmails.map(email => ({
+          campaign_id: params.id,
+          email,
+          status: 'ready'
+        }))
+        const { error: insertErr } = await svc
+          .from("newsletter_campaign_recipients")
+          .insert(rows)
+
+        if (insertErr) {
+          console.error('[save-audience] Error inserting recipients:', insertErr)
+          throw insertErr
+        }
+      }
+
+      return NextResponse.json({ ok: true, saved: validEmails.length })
     }
 
-    // Persist recipients snapshot (upsert ready)
-    if (allowed.length) {
-      const rows = allowed.map(email => ({ campaign_id: params.id, email, status: 'ready' as const }))
-      const { error: upErr } = await svc.from("newsletter_campaign_recipients").upsert(rows)
-      if (upErr) throw upErr
-    }
-
-    return NextResponse.json({ ok: true, saved: allowed.length })
+    // No emails provided
+    return NextResponse.json({ ok: true, saved: 0 })
   } catch (e: unknown) {
+    console.error('[save-audience] Error:', e)
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 400 })
   }
 }
