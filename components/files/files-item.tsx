@@ -30,12 +30,23 @@ function getProxyUrl(url: string | undefined): string {
 }
 
 export function FilesItem({ entry, className }: FilesItemProps) {
-  const [imageError, setImageError] = useState(false);
+  const [currentUrlIndex, setCurrentUrlIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
   const dominantColor = entry.colors?.[0] || '#1a1a1a';
+
+  // Build fallback chain: thumb → medium → full
+  const imageUrls = [
+    entry.thumb_url,
+    entry.medium_url,
+    entry.full_url,
+  ].filter(Boolean) as string[];
+
+  const currentUrl = imageUrls[currentUrlIndex];
+  const hasMoreFallbacks = currentUrlIndex < imageUrls.length - 1;
+  const allFailed = currentUrlIndex >= imageUrls.length || imageUrls.length === 0;
 
   // Long press handlers for mobile
   const handleTouchStart = useCallback(() => {
@@ -83,37 +94,43 @@ export function FilesItem({ entry, className }: FilesItemProps) {
           style={{ backgroundColor: dominantColor }}
         >
           {/* Image with error handling and fallback chain */}
-          {!imageError ? (
+          {!allFailed && currentUrl ? (
             <Image
-              src={getProxyUrl(entry.thumb_url) || getProxyUrl(entry.medium_url) || getProxyUrl(entry.full_url)}
+              key={currentUrl} // Force remount on URL change
+              src={getProxyUrl(currentUrl)}
               alt={entry.microcopy || 'Imagen del archivo'}
               width={800}
               height={800}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className={cn(
                 'w-full h-auto transition-all duration-500',
-                'group-hover:scale-105',
+                'md:group-hover:scale-105', // Only scale on desktop hover
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               )}
               onLoad={() => setImageLoaded(true)}
               onError={() => {
-                console.error('Image load failed:', entry.thumb_url);
-                setImageError(true);
+                console.error('Image load failed:', currentUrl, '- trying next fallback');
+                if (hasMoreFallbacks) {
+                  setCurrentUrlIndex(prev => prev + 1);
+                  setImageLoaded(false);
+                } else {
+                  setCurrentUrlIndex(imageUrls.length); // Mark all as failed
+                }
               }}
               loading="lazy"
               unoptimized // Using proxy URLs, no need for Next.js optimization
             />
           ) : (
-            // Fallback for broken images - show URL for debugging
+            // Fallback for broken images - show placeholder
             <div
-              className="aspect-square flex flex-col items-center justify-center gap-2 p-2"
+              className="aspect-square flex flex-col items-center justify-center gap-2 p-4"
               style={{ backgroundColor: dominantColor }}
             >
-              <span className="font-body text-xs text-white/60 text-center">
-                Error cargando imagen
-              </span>
-              <span className="font-mono text-[8px] text-white/30 break-all text-center line-clamp-3">
-                {entry.thumb_url?.substring(0, 60)}...
+              <svg className="w-8 h-8 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="font-body text-xs text-white/50 text-center">
+                Imagen no disponible
               </span>
             </div>
           )}
@@ -122,7 +139,8 @@ export function FilesItem({ entry, className }: FilesItemProps) {
           <div
             className={cn(
               'absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent',
-              'opacity-0 group-hover:opacity-100 transition-opacity duration-300',
+              'opacity-0 transition-opacity duration-300',
+              'md:group-hover:opacity-100', // Only show on hover for devices with hover capability
               'flex flex-col justify-end p-3 md:p-4'
             )}
           >
@@ -140,7 +158,7 @@ export function FilesItem({ entry, className }: FilesItemProps) {
       <div
         className={cn(
           'absolute top-2 right-2 transition-opacity duration-200',
-          'opacity-0 group-hover:opacity-100',
+          'opacity-0 md:group-hover:opacity-100',
           showMenu && 'opacity-100'
         )}
       >
