@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { assertAdmin } from "../../../_utils"
 import { z } from "zod"
+import { assertAdmin } from "../../../_utils"
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const admin = await assertAdmin(req)
@@ -19,7 +19,13 @@ const patchSchema = z.object({
   status: z.enum(["draft", "scheduled", "sending", "sent", "failed"]).optional(),
   target_status: z.array(z.string()).optional(),
   target_tags: z.array(z.string()).optional(),
-  scheduled_at: z.string().datetime().optional(),
+  scheduled_at: z.string().optional().transform(val => {
+    if (!val) return undefined
+    if (val.includes('Z') || val.includes('+')) return val
+    return val.includes(':') && val.split(':').length === 2
+      ? `${val}:00Z`
+      : `${val}Z`
+  }),
 })
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {

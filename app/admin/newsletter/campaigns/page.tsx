@@ -1,7 +1,7 @@
-import Link from "next/link"
-import { getServiceClient } from "@/lib/supabase/server"
-import AdminSearchBar from "@/components/admin/search-bar"
 import AdminPagination from "@/components/admin/pagination"
+import AdminSearchBar from "@/components/admin/search-bar"
+import { getServiceClient } from "@/lib/supabase/server"
+import Link from "next/link"
 
 export const dynamic = "force-dynamic"
 
@@ -39,22 +39,33 @@ export default async function CampaignsPage({ searchParams }: { searchParams: { 
         {error && <div className="p-4 text-sm text-muted-foreground">Error: {error.message}</div>}
         {!error && campaigns.length === 0 && <div className="p-4 text-sm text-muted-foreground">No hay campañas aún.</div>}
         {campaigns.map((c) => (
-          <div key={c.id} className="p-4 flex items-center justify-between">
-            <div className="min-w-0">
+          <Link
+            key={c.id}
+            href={`/admin/newsletter/campaigns/${c.id}`}
+            className="p-4 flex items-center justify-between hover:bg-muted/20 transition-colors"
+          >
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <div className="font-heading font-medium truncate max-w-[48ch]" title={c.name}>{c.name}</div>
                 <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] border ${c.status === 'sent' ? 'bg-green-500/10 text-green-400 border-green-600/40' : c.status === 'scheduled' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-600/40' : c.status === 'sending' ? 'bg-blue-500/10 text-blue-400 border-blue-600/40' : c.status === 'failed' ? 'bg-red-500/10 text-red-400 border-red-600/40' : 'bg-zinc-500/10 text-zinc-300 border-zinc-600/40'}`}>
                   {c.status}
                 </span>
               </div>
-              <div className="text-xs text-muted-foreground truncate max-w-[80ch]">
-                {c.subject} {c.scheduled_at ? `· programa: ${new Date(c.scheduled_at as string).toLocaleString()}` : ''} · creado: {new Date(c.created_at as string).toLocaleString()} · enviados: {c.sent_count}
+              <div className="text-xs text-muted-foreground mt-1">
+                <span className="font-medium text-foreground/80">{c.subject}</span>
+              </div>
+              <div className="text-xs text-muted-foreground mt-1 flex items-center gap-3">
+                <span>📅 {new Date(c.created_at as string).toLocaleDateString()}</span>
+                {c.sent_count > 0 && <span className="text-emerald-400">✓ {c.sent_count} enviados</span>}
+                {c.scheduled_at && <span className="text-yellow-400">⏰ Programada</span>}
               </div>
             </div>
-            <Link href={`/admin/newsletter/campaigns/new`} className="text-xs rounded-md border px-2 py-1 hover:bg-accent hover:text-accent-foreground">
-              Duplicar
-            </Link>
-          </div>
+            <div className="text-muted-foreground">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </Link>
         ))}
       </div>
     </div>
