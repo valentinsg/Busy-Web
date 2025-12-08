@@ -1,12 +1,12 @@
 import {
-    ArchiveEntry,
-    ArchiveFilters,
-    ArchiveStats,
-    ArchiveUpdateOptions,
-    PaginatedResponse,
-    Playlist,
-    RecommendationScore,
-    TimelineGroup
+  ArchiveEntry,
+  ArchiveFilters,
+  ArchiveStats,
+  ArchiveUpdateOptions,
+  PaginatedResponse,
+  Playlist,
+  RecommendationScore,
+  TimelineGroup
 } from '@/types/files';
 import { createClient } from '@supabase/supabase-js';
 
@@ -30,14 +30,15 @@ export class FilesService {
     pageSize = 20,
     includePrivate = false
   ): Promise<PaginatedResponse<ArchiveEntry>> {
-    // Determine sort order
+    // Determine sort order - use updated_at so newly uploaded photos appear first
+    // regardless of their created_at (which can be backdated)
     const ascending = filters.sort === 'oldest';
 
     let query = this.supabase
       .schema('archive')
       .from('entries')
       .select('*', { count: 'exact' })
-      .order('created_at', { ascending });
+      .order('updated_at', { ascending, nullsFirst: false });
 
     // Only filter by is_public if not including private entries (admin mode)
     if (!includePrivate) {
@@ -49,9 +50,7 @@ export class FilesService {
       query = query.contains('colors', [filters.color]);
     }
 
-    if (filters.mood?.length) {
-      query = query.overlaps('mood', filters.mood);
-    }
+    // Note: mood filter removed per user request
 
     if (filters.tags?.length) {
       query = query.overlaps('tags', filters.tags);

@@ -55,6 +55,9 @@ export async function POST(request: Request) {
 
     // Insert entry into Supabase (archive schema, entries table)
     const supabase = getServiceClient();
+    // Always set updated_at to NOW (upload time) for sorting
+    // created_at can be backdated for historical photos
+    const now = new Date().toISOString();
     const { data: entry, error: dbError } = await supabase
       .schema('archive')
       .from('entries')
@@ -73,8 +76,8 @@ export async function POST(request: Request) {
         likes: 0,
         views: 0,
         is_public: true,
-        // Allow backdating entries with custom date
-        ...(customDate ? { created_at: new Date(customDate).toISOString() } : {}),
+        updated_at: now, // Always current time for "recently uploaded" sorting
+        created_at: customDate ? new Date(customDate).toISOString() : now,
       })
       .select()
       .single();

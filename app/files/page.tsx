@@ -76,9 +76,8 @@ export default async function FilesPage({
   };
 
   // Get unique values for filters (cached at page level)
-  const [uniquePlaces, uniqueMoods, uniqueColors] = await Promise.all([
+  const [uniquePlaces, uniqueColors] = await Promise.all([
     getUniquePlaces(),
-    getUniqueMoods(),
     getUniqueColors(),
   ]);
 
@@ -100,7 +99,6 @@ export default async function FilesPage({
           <div className="mb-6 md:mb-8">
             <FilesSearch
               places={uniquePlaces}
-              moods={uniqueMoods}
               colors={uniqueColors}
             />
           </div>
@@ -142,23 +140,6 @@ async function getUniquePlaces(): Promise<string[]> {
   });
 
   return Array.from(placesMap.values());
-}
-
-async function getUniqueMoods(): Promise<string[]> {
-  const supabase = getServiceClient();
-  const { data, error } = await supabase
-    .schema('archive')
-    .from('entries')
-    .select('mood');
-
-  if (error) {
-    console.error('Error fetching moods:', error);
-    return [];
-  }
-
-  const rows = (data ?? []) as { mood: string[] | null }[];
-  const allMoods = rows.flatMap((entry) => entry.mood || []);
-  return [...new Set(allMoods)].filter(Boolean) as string[];
 }
 
 async function getUniqueColors(): Promise<string[]> {

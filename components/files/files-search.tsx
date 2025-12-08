@@ -4,9 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { ArchiveFilters } from '@/types/files';
@@ -17,14 +17,13 @@ import { useCallback, useMemo, useState, useTransition } from 'react';
 
 interface FilesSearchProps {
   places: string[];
-  moods: string[];
   colors: string[];
   showFilters?: boolean;
   showBackButton?: boolean;
   backHref?: string;
 }
 
-export function FilesSearch({ places, moods, colors, showFilters = true, showBackButton = false, backHref = '/files' }: FilesSearchProps) {
+export function FilesSearch({ places, colors, showFilters = true, showBackButton = false, backHref = '/files' }: FilesSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -196,27 +195,6 @@ export function FilesSearch({ places, moods, colors, showFilters = true, showBac
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-72 p-4 space-y-4" align="end">
-            {/* Moods */}
-            {moods.length > 0 && (
-              <div className="space-y-2">
-                <p className="font-body text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Mood
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {moods.map((mood) => (
-                    <Badge
-                      key={mood}
-                      variant={currentFilters.mood.includes(mood) ? 'default' : 'outline'}
-                      className="cursor-pointer font-body text-xs"
-                      onClick={() => toggleMood(mood)}
-                    >
-                      {mood}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Places */}
             {places.length > 0 && (
               <div className="space-y-2">
