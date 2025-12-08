@@ -1,15 +1,15 @@
 'use client';
 
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { ArchiveEntry } from '@/types/files';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Download, ExternalLink, Heart, Info, Link2, Maximize2, MoreHorizontal, Pause, Play, Share2, Sparkles, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, ExternalLink, Eye, Heart, Info, Link2, Maximize2, MoreHorizontal, Pause, Play, Share2, Sparkles, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -449,10 +449,24 @@ export function FilesDetail({ entry }: FilesDetailProps) {
 
           {/* Info below image */}
           <div className="mt-4 space-y-3">
-            {/* Date */}
-            <p className="font-body text-xs text-muted-foreground">
-              {formattedDate}
-            </p>
+            {/* Date and Stats row */}
+            <div className="flex items-center justify-between">
+              <p className="font-body text-xs text-muted-foreground">
+                {formattedDate}
+              </p>
+
+              {/* Subtle stats */}
+              <div className="flex items-center gap-3 text-muted-foreground/60">
+                <span className="flex items-center gap-1 text-xs">
+                  <Eye className="h-3 w-3" />
+                  {entry.views ?? 0}
+                </span>
+                <span className="flex items-center gap-1 text-xs">
+                  <Heart className="h-3 w-3" />
+                  {likes}
+                </span>
+              </div>
+            </div>
 
             {/* Title */}
             <h1 className="font-heading text-lg font-semibold tracking-tight">

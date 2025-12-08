@@ -110,7 +110,7 @@ export function ChristmasPromoSection() {
 
           {/* Decorative ribbon/gift icon - floating animation */}
           <div className="flex justify-center mb-8">
-            <div className="relative w-20 h-20 animate-float">
+            <div className="relative w-32 h-32 md:w-40 md:h-40 animate-float">
               <Image
                 src="/regalito-liston-navidad.png"
                 alt="Regalo navideño"

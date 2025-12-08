@@ -39,41 +39,30 @@ export function RecommendationGrid({ entryId }: RecommendationGridProps) {
   });
 
   if (isLoading) {
-    // Masonry-style skeleton like /archive
+    // Masonry-style skeleton using CSS columns
     return (
-      <div
-        className="gap-3"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-          alignItems: 'start',
-        }}
-      >
-        {[0, 1, 2, 3].map((colIndex) => (
-          <div key={colIndex} className="space-y-3">
-            {SKELETON_ASPECTS.filter((_, i) => i % 4 === colIndex).map((aspect, i) => (
-              <div
-                key={i}
-                className={cn(
-                  aspect,
-                  'relative overflow-hidden rounded-xl bg-muted/50'
-                )}
-              >
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="columns-2 md:columns-3 lg:columns-4 gap-3">
+        {SKELETON_ASPECTS.map((aspect, i) => (
+          <div
+            key={i}
+            className={cn(
+              aspect,
+              'relative overflow-hidden rounded-xl bg-muted/50 mb-3 break-inside-avoid'
+            )}
+          >
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                {/* Fake content placeholders */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 space-y-2">
-                  <div className="h-2 w-3/4 rounded-full bg-white/5" />
-                  <div className="h-2 w-1/2 rounded-full bg-white/5" />
-                </div>
+            {/* Fake content placeholders */}
+            <div className="absolute bottom-0 left-0 right-0 p-3 space-y-2">
+              <div className="h-2 w-3/4 rounded-full bg-white/5" />
+              <div className="h-2 w-1/2 rounded-full bg-white/5" />
+            </div>
 
-                {/* Fake tag */}
-                <div className="absolute top-2 left-2">
-                  <div className="h-4 w-12 rounded-full bg-white/5" />
-                </div>
-              </div>
-            ))}
+            {/* Fake tag */}
+            <div className="absolute top-2 left-2">
+              <div className="h-4 w-12 rounded-full bg-white/5" />
+            </div>
           </div>
         ))}
       </div>
@@ -85,9 +74,11 @@ export function RecommendationGrid({ entryId }: RecommendationGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+    <div className="columns-2 md:columns-3 lg:columns-4 gap-3">
       {recommendations.map((rec) => (
-        <FilesItem key={rec.id} entry={rec} />
+        <div key={rec.id} className="mb-3 break-inside-avoid">
+          <FilesItem entry={rec} />
+        </div>
       ))}
     </div>
   );

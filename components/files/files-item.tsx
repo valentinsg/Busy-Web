@@ -7,21 +7,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useRef, useState } from 'react';
 
-// Pinterest-style aspect ratios for variety
-export type AspectRatioVariant = 'square' | 'tall' | 'wide' | 'portrait' | 'landscape';
-
-const ASPECT_RATIO_CLASSES: Record<AspectRatioVariant, string> = {
-  square: 'aspect-square',           // 1:1
-  tall: 'aspect-[3/4]',              // 3:4 - vertical
-  wide: 'aspect-[4/3]',              // 4:3 - horizontal
-  portrait: 'aspect-[2/3]',          // 2:3 - very tall
-  landscape: 'aspect-[16/10]',       // 16:10 - wide
-};
-
 interface FilesItemProps {
   entry: ArchiveEntry;
   className?: string;
-  aspectRatio?: AspectRatioVariant;
 }
 
 /**
@@ -41,7 +29,7 @@ function getProxyUrl(url: string | undefined): string {
   return url;
 }
 
-export function FilesItem({ entry, className, aspectRatio = 'square' }: FilesItemProps) {
+export function FilesItem({ entry, className }: FilesItemProps) {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showMenu, setShowMenu] = useState(false);

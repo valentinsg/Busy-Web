@@ -27,7 +27,8 @@ export class FilesService {
   async getEntries(
     filters: ArchiveFilters = {},
     page = 1,
-    pageSize = 20
+    pageSize = 20,
+    includePrivate = false
   ): Promise<PaginatedResponse<ArchiveEntry>> {
     // Determine sort order
     const ascending = filters.sort === 'oldest';
@@ -36,8 +37,12 @@ export class FilesService {
       .schema('archive')
       .from('entries')
       .select('*', { count: 'exact' })
-      .eq('is_public', true)
       .order('created_at', { ascending });
+
+    // Only filter by is_public if not including private entries (admin mode)
+    if (!includePrivate) {
+      query = query.eq('is_public', true);
+    }
 
     // Apply filters
     if (filters.color) {

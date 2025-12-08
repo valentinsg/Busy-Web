@@ -40,20 +40,26 @@ export async function GET(request: Request) {
     const sort = searchParams.get('sort') as 'newest' | 'oldest' | null;
     if (sort) filters.sort = sort;
 
-    // Create cache key from all params
-    const cacheKey = `${page}-${pageSize}-${JSON.stringify(filters)}`;
-    const cached = cache.get(cacheKey);
+    // Admin mode: include private entries (no cache for admin)
+    const includePrivate = searchParams.get('admin') === 'true';
 
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      return NextResponse.json(cached.data, {
-        headers: {
-          'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=300',
-          'X-Cache': 'HIT',
-        },
-      });
+    // Create cache key from all params
+    const cacheKey = `${page}-${pageSize}-${includePrivate}-${JSON.stringify(filters)}`;
+
+    // Skip cache for admin requests
+    if (!includePrivate) {
+      const cached = cache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        return NextResponse.json(cached.data, {
+          headers: {
+            'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=300',
+            'X-Cache': 'HIT',
+          },
+        });
+      }
     }
 
-    const result = await filesService.getEntries(filters, page, pageSize);
+    const result = await filesService.getEntries(filters, page, pageSize, includePrivate);
 
     // Store in cache
     cache.set(cacheKey, { data: result, timestamp: Date.now() });

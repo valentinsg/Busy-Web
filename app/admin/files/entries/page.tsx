@@ -70,6 +70,7 @@ function ArchiveEntriesList() {
       const params = new URLSearchParams({
         page: String(pageToLoad),
         pageSize: String(PAGE_SIZE),
+        admin: 'true', // Include private entries in admin view
       });
 
       const res = await fetch(`/api/files/list?${params.toString()}`, {

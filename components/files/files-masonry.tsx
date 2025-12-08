@@ -3,54 +3,28 @@
 import { cn } from '@/lib/utils';
 import { ArchiveEntry, ArchiveFilters } from '@/types/files';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { AspectRatioVariant, FilesItem } from './files-item';
+import { FilesItem } from './files-item';
 
 interface FilesMasonryProps {
   filters: ArchiveFilters;
 }
 
-const COLUMN_CONFIG = {
-  mobile: 2,
-  tablet: 3,
-  desktop: 4,
-};
-
-// Pinterest-style aspect ratio patterns for visual variety
-const ASPECT_PATTERNS: AspectRatioVariant[][] = [
-  ['portrait', 'square', 'tall', 'landscape'],
-  ['tall', 'portrait', 'square', 'wide'],
-  ['square', 'tall', 'portrait', 'square'],
-  ['landscape', 'square', 'portrait', 'tall'],
-];
-
-/**
- * Get a consistent aspect ratio for an entry based on its ID
- * This ensures the same entry always gets the same aspect ratio
- */
-function getAspectRatio(entryId: string, index: number): AspectRatioVariant {
-  // Use a simple hash of the ID to pick a pattern row
-  const hash = entryId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const patternRow = hash % ASPECT_PATTERNS.length;
-  const patternCol = index % ASPECT_PATTERNS[0].length;
-  return ASPECT_PATTERNS[patternRow][patternCol];
-}
-
 // Skeleton aspect ratios for loading state - varied like Pinterest
 const SKELETON_ASPECTS = [
-  'aspect-[3/4]',    // tall
-  'aspect-square',   // square
-  'aspect-[2/3]',    // portrait
-  'aspect-[4/3]',    // wide
-  'aspect-square',   // square
-  'aspect-[3/4]',    // tall
-  'aspect-[16/10]',  // landscape
-  'aspect-[2/3]',    // portrait
-  'aspect-square',   // square
-  'aspect-[3/4]',    // tall
-  'aspect-[4/3]',    // wide
-  'aspect-[2/3]',    // portrait
+  'aspect-[3/4]',
+  'aspect-square',
+  'aspect-[2/3]',
+  'aspect-[4/3]',
+  'aspect-square',
+  'aspect-[3/4]',
+  'aspect-[16/10]',
+  'aspect-[2/3]',
+  'aspect-square',
+  'aspect-[3/4]',
+  'aspect-[4/3]',
+  'aspect-[2/3]',
 ];
 
 export function FilesMasonry({ filters }: FilesMasonryProps) {
@@ -58,29 +32,6 @@ export function FilesMasonry({ filters }: FilesMasonryProps) {
     threshold: 0.1,
     triggerOnce: false,
   });
-
-  const [columns, setColumns] = useState(COLUMN_CONFIG.desktop);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Responsive column detection
-  useEffect(() => {
-    const handleResize = () => {
-      if (typeof window !== 'undefined') {
-        const width = window.innerWidth;
-        if (width < 768) {
-          setColumns(COLUMN_CONFIG.mobile);
-        } else if (width < 1024) {
-          setColumns(COLUMN_CONFIG.tablet);
-        } else {
-          setColumns(COLUMN_CONFIG.desktop);
-        }
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const {
     data,
@@ -132,46 +83,29 @@ export function FilesMasonry({ filters }: FilesMasonryProps) {
   }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   if (isLoading) {
-    // Distribute skeletons across columns like real masonry
-    const skeletonColumns: number[][] = Array.from({ length: columns }, () => []);
-    SKELETON_ASPECTS.forEach((_, i) => {
-      skeletonColumns[i % columns].push(i);
-    });
-
     return (
-      <div
-        className="gap-3 md:gap-4"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-          alignItems: 'start',
-        }}
-      >
-        {skeletonColumns.map((colItems, colIndex) => (
-          <div key={colIndex} className="space-y-3 md:space-y-4">
-            {colItems.map((itemIndex) => (
-              <div
-                key={itemIndex}
-                className={cn(
-                  SKELETON_ASPECTS[itemIndex],
-                  'relative overflow-hidden rounded-xl bg-muted/50'
-                )}
-              >
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="columns-2 md:columns-3 lg:columns-4 gap-3 md:gap-4">
+        {SKELETON_ASPECTS.map((aspect, i) => (
+          <div
+            key={i}
+            className={cn(
+              aspect,
+              'relative overflow-hidden rounded-xl bg-muted/50 mb-3 md:mb-4 break-inside-avoid'
+            )}
+          >
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                {/* Fake content placeholders */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 space-y-2">
-                  <div className="h-2 w-3/4 rounded-full bg-white/5" />
-                  <div className="h-2 w-1/2 rounded-full bg-white/5" />
-                </div>
+            {/* Fake content placeholders */}
+            <div className="absolute bottom-0 left-0 right-0 p-3 space-y-2">
+              <div className="h-2 w-3/4 rounded-full bg-white/5" />
+              <div className="h-2 w-1/2 rounded-full bg-white/5" />
+            </div>
 
-                {/* Fake tag */}
-                <div className="absolute top-2 left-2">
-                  <div className="h-4 w-12 rounded-full bg-white/5" />
-                </div>
-              </div>
-            ))}
+            {/* Fake tag */}
+            <div className="absolute top-2 left-2">
+              <div className="h-4 w-12 rounded-full bg-white/5" />
+            </div>
           </div>
         ))}
       </div>
@@ -201,42 +135,19 @@ export function FilesMasonry({ filters }: FilesMasonryProps) {
     );
   }
 
-  // Distribute entries across columns for masonry effect
-  // Track index per entry for consistent aspect ratio assignment
-  const columnArrays: { entry: ArchiveEntry; globalIndex: number }[][] = Array.from(
-    { length: columns },
-    () => []
-  );
-  entries.forEach((entry: ArchiveEntry, index: number) => {
-    columnArrays[index % columns].push({ entry, globalIndex: index });
-  });
-
   return (
     <div className="space-y-4">
-      <div
-        ref={containerRef}
-        className="gap-3 md:gap-4"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-          alignItems: 'start',
-        }}
-      >
-        {columnArrays.map((column, colIndex) => (
-          <div key={colIndex} className="space-y-3 md:space-y-4">
-            {column.map(({ entry, globalIndex }) => (
-              <FilesItem
-                key={entry.id}
-                entry={entry}
-                aspectRatio={getAspectRatio(entry.id, globalIndex)}
-              />
-            ))}
+      {/* True CSS columns masonry - items flow naturally without gaps */}
+      <div className="columns-2 md:columns-3 lg:columns-4 gap-3 md:gap-4">
+        {entries.map((entry: ArchiveEntry) => (
+          <div key={entry.id} className="mb-3 md:mb-4 break-inside-avoid">
+            <FilesItem entry={entry} />
           </div>
         ))}
       </div>
 
       {/* Loading indicator at the bottom */}
-      <div ref={ref} className="h-16 flex items-center justify-center col-span-full">
+      <div ref={ref} className="h-16 flex items-center justify-center">
         {isFetchingNextPage ? (
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-foreground" />
         ) : hasNextPage ? (
