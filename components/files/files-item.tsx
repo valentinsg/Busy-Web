@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { ArchiveEntry } from '@/types/files';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCallback, useRef, useState } from 'react';
+import { useState } from 'react';
 
 interface FilesItemProps {
   entry: ArchiveEntry;
@@ -32,8 +32,6 @@ function getProxyUrl(url: string | undefined): string {
 export function FilesItem({ entry, className }: FilesItemProps) {
   const [currentUrlIndex, setCurrentUrlIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
   const dominantColor = entry.colors?.[0] || '#1a1a1a';
 
@@ -48,41 +46,13 @@ export function FilesItem({ entry, className }: FilesItemProps) {
   const hasMoreFallbacks = currentUrlIndex < imageUrls.length - 1;
   const allFailed = currentUrlIndex >= imageUrls.length || imageUrls.length === 0;
 
-  // Long press handlers for mobile
-  const handleTouchStart = useCallback(() => {
-    longPressTimer.current = setTimeout(() => {
-      setShowMenu(true);
-    }, 500); // 500ms long press
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  }, []);
-
-  const handleTouchMove = useCallback(() => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  }, []);
-
   return (
     <div
       className={cn(
-        'group relative block overflow-hidden rounded-xl transition-all duration-300',
-        'hover:shadow-xl hover:shadow-black/20',
+        'group relative block overflow-hidden rounded-xl',
+        'md:transition-all md:duration-300 md:hover:shadow-xl md:hover:shadow-black/20',
         className
       )}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchMove={handleTouchMove}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        setShowMenu(true);
-      }}
     >
       <Link
         href={`/files/${entry.id}`}
@@ -154,13 +124,9 @@ export function FilesItem({ entry, className }: FilesItemProps) {
         </div>
       </Link>
 
-      {/* Menu button - visible on hover (desktop) or always visible on mobile when triggered */}
+      {/* Menu button - only visible on desktop hover */}
       <div
-        className={cn(
-          'absolute top-2 right-2 transition-opacity duration-200',
-          'opacity-0 md:group-hover:opacity-100',
-          showMenu && 'opacity-100'
-        )}
+        className="absolute top-2 right-2 transition-opacity duration-200 opacity-0 md:group-hover:opacity-100 hidden md:block"
       >
         <FilesItemMenu entry={entry} />
       </div>

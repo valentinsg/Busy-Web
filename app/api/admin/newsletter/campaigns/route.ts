@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { assertAdmin } from "../../_utils"
 import { z } from "zod"
+import { assertAdmin } from "../../_utils"
 
 export async function GET(req: NextRequest) {
   const admin = await assertAdmin(req)
@@ -25,7 +25,16 @@ const createSchema = z.object({
   content: z.string().min(1),
   target_status: z.array(z.string()).default(["subscribed"]),
   target_tags: z.array(z.string()).default([]),
-  scheduled_at: z.string().datetime().optional(),
+  scheduled_at: z.string().optional().transform(val => {
+    // Convert datetime-local format to ISO 8601
+    if (!val) return undefined
+    // If already has timezone, return as-is
+    if (val.includes('Z') || val.includes('+')) return val
+    // Add seconds and Z for UTC
+    return val.includes(':') && val.split(':').length === 2
+      ? `${val}:00Z`
+      : `${val}Z`
+  }),
 })
 
 export async function POST(req: NextRequest) {

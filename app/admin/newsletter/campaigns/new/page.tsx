@@ -1,11 +1,11 @@
 "use client"
 
-import * as React from "react"
-import { supabase } from "@/lib/supabase/client"
-import { useToast } from "@/hooks/use-toast"
 import { Menu } from "@/components/ui/menu"
 import { TagPicker } from "@/components/ui/tag-picker"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/lib/supabase/client"
+import * as React from "react"
 
 export default function NewCampaignPage() {
   const { toast } = useToast()
@@ -15,6 +15,8 @@ export default function NewCampaignPage() {
   const [tags, setTags] = React.useState<string[]>([])
   const [scheduledAt, setScheduledAt] = React.useState("")
   const [saving, setSaving] = React.useState(false)
+  const [sending, setSending] = React.useState(false)
+  const [campaignId, setCampaignId] = React.useState<string | null>(null)
   // Audience builder
   const [csvName, setCsvName] = React.useState<string>("")
   const [listLoading, setListLoading] = React.useState(false)
@@ -22,6 +24,42 @@ export default function NewCampaignPage() {
   const [selected, setSelected] = React.useState<string[]>([])
   const [listQuery, setListQuery] = React.useState("")
   const fileInputRef = React.useRef<HTMLInputElement | null>(null)
+
+  const sendCampaign = async () => {
+    if (!campaignId) {
+      toast({ title: "Error", description: "Primero guarda la campaña como borrador" })
+      return
+    }
+    if (selected.length === 0) {
+      toast({ title: "Error", description: "No hay suscriptores seleccionados" })
+      return
+    }
+
+    setSending(true)
+    try {
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      if (!token) throw new Error("No auth token")
+
+      const res = await fetch(`/api/admin/newsletter/campaigns/${campaignId}/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      })
+      const json = await res.json()
+
+      if (!res.ok || !json.ok) throw new Error(json.error || "Error al enviar campaña")
+
+      toast({
+        title: "¡Campaña enviada!",
+        description: `Enviados: ${json.sent} | Fallidos: ${json.failed} | Total: ${json.total}`
+      })
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : typeof e === 'object' ? JSON.stringify(e) : String(e)
+      toast({ title: "Error al enviar", description: message })
+    } finally {
+      setSending(false)
+    }
+  }
 
   const save = async () => {
     setSaving(true)
@@ -55,11 +93,14 @@ export default function NewCampaignPage() {
         const j2 = await res2.json()
         if (!res2.ok || !j2.ok) throw new Error(j2.error || "Error al guardar audiencia")
         toast({ title: "Campaña creada", description: `Audiencia guardada (${j2.saved})` })
+        setCampaignId(id)
       } else {
         toast({ title: "Campaña creada", description: json.item?.name || "" })
+        setCampaignId(json.item?.id)
       }
-    } catch (e:unknown) {
-      toast({ title: "Error", description: e?.toString() || String(e) })
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : typeof e === 'object' ? JSON.stringify(e) : String(e)
+      toast({ title: "Error", description: message })
     } finally {
       setSaving(false)
     }
@@ -88,8 +129,9 @@ export default function NewCampaignPage() {
         ...(json.result.allowed as string[]),
       ]))
       setSelected(merged)
-    } catch (e:unknown) {
-      toast({ title: "Error al procesar CSV", description: e?.toString() || String(e) })
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : typeof e === 'object' ? JSON.stringify(e) : String(e)
+      toast({ title: "Error al procesar CSV", description: message })
     }
   }
 
@@ -212,10 +254,19 @@ export default function NewCampaignPage() {
               )}
             </div>
           </div>
-          <div className="flex gap-2">
-            <button onClick={save} disabled={saving} className="border rounded px-4 py-2 bg-primary text-primary-foreground disabled:opacity-60">
-              {saving? "Guardando...":"Guardar borrador"}
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={save} disabled={saving || sending} className="border rounded px-4 py-2 bg-primary text-primary-foreground disabled:opacity-60">
+              {saving ? "Guardando..." : campaignId ? "Actualizar borrador" : "Guardar borrador"}
             </button>
+            {campaignId && (
+              <button
+                onClick={sendCampaign}
+                disabled={sending || saving}
+                className="border rounded px-4 py-2 bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
+              >
+                {sending ? "Enviando..." : `Enviar a ${selected.length} suscriptores`}
+              </button>
+            )}
             <a href="/admin/newsletter/campaigns" className="border rounded px-4 py-2">Volver</a>
           </div>
         </div>
