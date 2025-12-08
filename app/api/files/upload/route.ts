@@ -2,6 +2,7 @@ import { uploadToR2 } from '@/lib/r2';
 import { analyzeImageColors, generateThumbnails } from '@/lib/sharp-utils';
 import { getServiceClient } from '@/lib/supabase/server';
 import { randomUUID } from 'crypto';
+import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -86,6 +87,10 @@ export async function POST(request: Request) {
       console.error('Database error:', dbError);
       throw dbError;
     }
+
+    // Invalidate cache so new entries appear immediately
+    revalidatePath('/files');
+    revalidatePath('/admin/files/entries');
 
     return NextResponse.json(entry);
 

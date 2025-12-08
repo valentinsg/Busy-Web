@@ -1,5 +1,6 @@
 import { deleteFromR2 } from '@/lib/r2';
 import { getServiceClient } from '@/lib/supabase/server';
+import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -108,6 +109,13 @@ export async function DELETE(
 ) {
   try {
     const { id } = params;
+
+    if (!id) {
+      console.error('DELETE /api/files/[id]: No ID provided');
+      return NextResponse.json({ error: 'No ID provided' }, { status: 400 });
+    }
+
+    console.log('DELETE /api/files/[id]: Deleting entry', id);
     const supabase = getServiceClient();
 
     const { data: entry, error: fetchError } = await supabase
@@ -141,6 +149,12 @@ export async function DELETE(
       console.error('Error deleting files entry:', deleteError);
       return NextResponse.json({ error: 'Failed to delete entry' }, { status: 500 });
     }
+
+    console.log('DELETE /api/files/[id]: Successfully deleted entry', id);
+
+    // Invalidate cache so deleted entries disappear immediately
+    revalidatePath('/files');
+    revalidatePath('/admin/files/entries');
 
     return NextResponse.json({ ok: true });
   } catch (error) {

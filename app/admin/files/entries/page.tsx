@@ -129,8 +129,11 @@ function ArchiveEntriesList() {
 
       const data = await res.json().catch(() => ({}));
 
-      if (!res.ok || !data?.ok) {
-        throw new Error(data?.error || 'No se pudo eliminar la entrada.');
+      // Even if the entry was already deleted (404), remove it from the UI
+      if (!res.ok && res.status !== 404) {
+        if (!data?.ok) {
+          throw new Error(data?.error || 'No se pudo eliminar la entrada.');
+        }
       }
 
       setEntries((prev) => prev.filter((e) => e.id !== entryId));
@@ -149,6 +152,11 @@ function ArchiveEntriesList() {
         description: message,
         variant: 'destructive',
       });
+      // Still remove from UI if it's a "not found" type error
+      if (message.includes('not found') || message.includes('no existe')) {
+        setEntries((prev) => prev.filter((e) => e.id !== entryId));
+        setTotal((prev) => (prev > 0 ? prev - 1 : 0));
+      }
     } finally {
       setDeletingId(null);
     }

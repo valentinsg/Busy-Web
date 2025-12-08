@@ -8,7 +8,12 @@ export const revalidate = 120;
 
 // In-memory cache for list queries
 const cache = new Map<string, { data: unknown; timestamp: number }>();
-const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+const CACHE_TTL = 30 * 1000; // 30 seconds (reduced for faster updates)
+
+// Export function to clear cache (called after uploads/deletes)
+export function clearFilesCache() {
+  cache.clear();
+}
 
 export async function GET(request: Request) {
   try {

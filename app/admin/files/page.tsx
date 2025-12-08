@@ -22,6 +22,7 @@ type FilesItemForm = {
   place: string;
   person: string;
   customDate: string; // ISO date string for backdating
+  uploaded?: boolean; // Track if already uploaded (to prevent duplicates on retry)
 };
 
 const EMPTY_ITEM: FilesItemForm = {
@@ -120,16 +121,24 @@ function FilesUploader() {
     event.preventDefault();
     setError(null);
 
-    const toUpload = items.filter((item) => item.file);
+    // Only upload items that have a file AND haven't been uploaded yet
+    const toUpload = items.filter((item) => item.file && !item.uploaded);
 
     if (!toUpload.length) {
-      setError('Agregá al menos una imagen con sus datos para subir a Files.');
+      // Check if all items were already uploaded
+      const allUploaded = items.filter((item) => item.uploaded).length;
+      if (allUploaded > 0) {
+        setError('Todas las imágenes ya fueron subidas. Agregá nuevas imágenes o limpiá el formulario.');
+      } else {
+        setError('Agregá al menos una imagen con sus datos para subir a Files.');
+      }
       return;
     }
 
     try {
       setIsSubmitting(true);
       let uploadedCount = 0;
+      let failedItem: FilesItemForm | null = null;
 
       for (const item of toUpload) {
         const formData = new FormData();
@@ -148,22 +157,33 @@ function FilesUploader() {
         });
 
         if (!res.ok) {
+          failedItem = item;
           const data = await res.json().catch(() => ({}));
           throw new Error(data.error || 'No se pudo subir una de las entradas al archivo.');
         }
 
+        // Mark this item as uploaded to prevent re-uploading on retry
+        setItems((prev) =>
+          prev.map((i) => (i.id === item.id ? { ...i, uploaded: true } : i))
+        );
         uploadedCount += 1;
       }
 
       toast({
-        title: '&#10004; Subida completa',
+        title: '✓ Subida completa',
         description: `${uploadedCount} entr${uploadedCount === 1 ? 'ada' : 'adas'} a Busy Files.`,
       });
       setItems([{ ...EMPTY_ITEM, id: 1 }]);
       setExpandedItem(1);
     } catch (error: unknown) {
       console.error(error);
-      setError('Ocurrió un error al subir las imágenes. Por favor, intentá de nuevo.');
+      // Show how many were uploaded before the error
+      const alreadyUploaded = items.filter((i) => i.uploaded).length;
+      if (alreadyUploaded > 0) {
+        setError(`Se subieron ${alreadyUploaded} imagen(es) antes del error. Podés reintentar para subir las restantes.`);
+      } else {
+        setError('Ocurrió un error al subir las imágenes. Por favor, intentá de nuevo.');
+      }
     } finally {
       setIsSubmitting(false);
     }
