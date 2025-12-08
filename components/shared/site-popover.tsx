@@ -359,8 +359,6 @@ export default function SitePopover({ section }: { section?: string }) {
               <div className="pt-2">
                 <a
                   href={data.cta_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="font-body block w-full text-center px-4 py-3 sm:px-6 sm:py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 font-medium shadow-sm hover:shadow-md text-xs sm:text-sm leading-tight line-clamp-2 break-words"
                   onClick={onDismiss}
                 >
