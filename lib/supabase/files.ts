@@ -1,12 +1,12 @@
 import {
-  ArchiveEntry,
-  ArchiveFilters,
-  ArchiveStats,
-  ArchiveUpdateOptions,
-  PaginatedResponse,
-  Playlist,
-  RecommendationScore,
-  TimelineGroup
+    ArchiveEntry,
+    ArchiveFilters,
+    ArchiveStats,
+    ArchiveUpdateOptions,
+    PaginatedResponse,
+    Playlist,
+    RecommendationScore,
+    TimelineGroup
 } from '@/types/files';
 import { createClient } from '@supabase/supabase-js';
 
@@ -30,15 +30,15 @@ export class FilesService {
     pageSize = 20,
     includePrivate = false
   ): Promise<PaginatedResponse<ArchiveEntry>> {
-    // Determine sort order - use updated_at so newly uploaded photos appear first
-    // regardless of their created_at (which can be backdated)
+    // Determine sort order - use created_at (the date assigned by user when uploading)
+    // This allows sorting by the actual date of the photo, not when it was uploaded
     const ascending = filters.sort === 'oldest';
 
     let query = this.supabase
       .schema('archive')
       .from('entries')
       .select('*', { count: 'exact' })
-      .order('updated_at', { ascending, nullsFirst: false });
+      .order('created_at', { ascending, nullsFirst: false });
 
     // Only filter by is_public if not including private entries (admin mode)
     if (!includePrivate) {

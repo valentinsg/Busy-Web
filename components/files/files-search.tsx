@@ -220,6 +220,7 @@ export function FilesSearch({ places, colors, showFilters = true, showBackButton
               </div>
             )}
 
+
             {/* Colors - Dynamic from DB */}
             {colors.length > 0 && (
               <div className="space-y-2">
