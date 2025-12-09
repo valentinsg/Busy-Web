@@ -4,7 +4,7 @@ import { AudienceSelector } from "@/components/admin/newsletter/audience-selecto
 import { NewsletterImageUpload } from "@/components/admin/newsletter/image-upload"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase/client"
-import { ArrowLeft, Calendar, ExternalLink, Mail, Save, Send, Type } from "lucide-react"
+import { ArrowLeft, Calendar, ExternalLink, Eye, Mail, Save, Send, Type, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import * as React from "react"
@@ -26,6 +26,8 @@ export default function NewCampaignPage() {
   const [saving, setSaving] = React.useState(false)
   const [sending, setSending] = React.useState(false)
   const [campaignId, setCampaignId] = React.useState<string | null>(null)
+  const [previewHtml, setPreviewHtml] = React.useState<string | null>(null)
+  const [loadingPreview, setLoadingPreview] = React.useState(false)
 
   // Validation
   const [errors, setErrors] = React.useState<Record<string, string>>({})
@@ -74,6 +76,32 @@ export default function NewCampaignPage() {
       toast({ title: "Error al enviar", description: message })
     } finally {
       setSending(false)
+    }
+  }
+
+  const openPreview = async () => {
+    if (!content.trim()) {
+      toast({ title: "Error", description: "Escribe algo de contenido primero" })
+      return
+    }
+    setLoadingPreview(true)
+    try {
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      if (!token) throw new Error("No auth token")
+
+      const res = await fetch("/api/admin/newsletter/campaigns/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ subject, content, name, ctaText, ctaUrl }),
+      })
+      const json = await res.json()
+      if (!res.ok || !json.ok) throw new Error(json.error || "Error generando preview")
+      setPreviewHtml(json.html)
+    } catch (e) {
+      toast({ title: "Error", description: e instanceof Error ? e.message : "Error" })
+    } finally {
+      setLoadingPreview(false)
     }
   }
 
@@ -216,6 +244,16 @@ export default function NewCampaignPage() {
                   setContent(c => c + "\n" + markdown + "\n")
                 }}
               />
+              <div className="h-4 w-px bg-border mx-1" />
+              <button
+                type="button"
+                onClick={openPreview}
+                disabled={loadingPreview || !content.trim()}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs border rounded-md hover:bg-muted disabled:opacity-50"
+              >
+                <Eye className="h-3 w-3" />
+                {loadingPreview ? "..." : "Preview"}
+              </button>
             </div>
             <textarea
               value={content}
@@ -321,6 +359,30 @@ export default function NewCampaignPage() {
           </Link>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      {previewHtml && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="relative w-full max-w-2xl max-h-[90vh] bg-background rounded-lg overflow-hidden">
+            <div className="flex items-center justify-between p-3 border-b">
+              <span className="text-sm font-medium">Vista previa del email</span>
+              <button
+                onClick={() => setPreviewHtml(null)}
+                className="p-1 rounded hover:bg-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="overflow-auto max-h-[calc(90vh-60px)]">
+              <iframe
+                srcDoc={previewHtml}
+                className="w-full h-[600px] border-0"
+                title="Email Preview"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

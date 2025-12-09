@@ -9,10 +9,12 @@ import { assertAdmin } from "../../../../_utils"
  */
 function markdownToHtml(markdown: string): string {
   let html = markdown
-    // Escape HTML
+    // Escape HTML (but preserve URLs)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    // Images - must be before links! ![alt](url)
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; height: auto; border-radius: 8px; margin: 16px 0; display: block;">')
     // Headers
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -21,7 +23,7 @@ function markdownToHtml(markdown: string): string {
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color: #ffffff; text-decoration: underline;">$1</a>')
     // Unordered lists
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     // Line breaks to paragraphs
@@ -29,7 +31,7 @@ function markdownToHtml(markdown: string): string {
     .map(block => {
       block = block.trim()
       if (!block) return ''
-      if (block.startsWith('<h') || block.startsWith('<li>')) return block
+      if (block.startsWith('<h') || block.startsWith('<li>') || block.startsWith('<img')) return block
       if (block.includes('<li>')) return `<ul>${block}</ul>`
       return `<p>${block.replace(/\n/g, '<br>')}</p>`
     })
@@ -258,12 +260,12 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 // Base URL for assets
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://busy.com.ar'
 
-// Logo hosted publicly (use absolute URL for email clients)
-const LOGO_URL = `${BASE_URL}/brand/BUSY_LOGO%20TRANSPARENTE-3.png`
+// Logo hosted publicly - white logo on black background
+const LOGO_URL = `${BASE_URL}/BUSY_LOGO%20TRANSPARENTE-3.png`
 
 /**
  * Create campaign email HTML template
- * Optimized for deliverability and spam avoidance
+ * Minimalist design optimized for deliverability
  */
 function createCampaignEmailHtml(params: {
   subject: string
@@ -274,32 +276,26 @@ function createCampaignEmailHtml(params: {
   ctaUrl?: string
 }): string {
   const currentYear = new Date().getFullYear()
-  const christmasBanner = params.isChristmas ? `
-    <div style="background: linear-gradient(90deg, #c41e3a 0%, #228b22 50%, #c41e3a 100%); padding: 12px 24px; text-align: center;">
-      <span style="color: #ffffff; font-size: 14px; letter-spacing: 1px;">
-        ❄️ ¡Felices Fiestas de parte de todo el equipo Busy! ❄️
-      </span>
-    </div>
-  ` : ''
-
-  const christmasDecoration = params.isChristmas ? `
-    <div style="text-align: center; padding: 8px 0;">
-      <span style="font-size: 20px;">🎄 🎁 ⭐ 🎁 🎄</span>
-    </div>
-  ` : ''
 
   // CTA Button
   const ctaButton = (params.ctaText && params.ctaUrl) ? `
-    <div style="text-align: center; padding: 24px 0;">
-      <a href="${params.ctaUrl}" target="_blank" style="display: inline-block; background-color: #000000; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: 600; font-size: 16px;">
+    <div style="text-align: center; padding: 24px 0 8px 0;">
+      <a href="${params.ctaUrl}" target="_blank" style="display: inline-block; background-color: #ffffff; color: #000000; text-decoration: none; padding: 12px 28px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px;">
         ${params.ctaText}
       </a>
     </div>
   ` : ''
 
+  // Christmas message (subtle, at the bottom)
+  const christmasMessage = params.isChristmas ? `
+    <div style="text-align: center; padding: 16px 0; border-top: 1px solid #333333;">
+      <span style="color: #888888; font-size: 13px;">✨ Felices fiestas de parte del equipo Busy ✨</span>
+    </div>
+  ` : ''
+
   return `
 <!DOCTYPE html>
-<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -307,252 +303,102 @@ function createCampaignEmailHtml(params: {
   <meta name="x-apple-disable-message-reformatting">
   <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
   <title>${params.subject}</title>
-  <!--[if mso]>
-  <noscript>
-    <xml>
-      <o:OfficeDocumentSettings>
-        <o:PixelsPerInch>96</o:PixelsPerInch>
-      </o:OfficeDocumentSettings>
-    </xml>
-  </noscript>
-  <![endif]-->
   <style>
-    /* Reset styles */
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
-    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       line-height: 1.6;
-      color: #1a1a1a;
-      background-color: #f5f5f5;
+      color: #ffffff;
+      background-color: #000000;
       margin: 0;
       padding: 0;
-      width: 100% !important;
-      height: 100% !important;
     }
-
-    .email-wrapper {
-      width: 100%;
-      background-color: #f5f5f5;
-      padding: 20px 0;
-    }
-
-    .email-container {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: #ffffff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    .header {
-      background-color: #000000;
-      padding: 32px 24px;
-      text-align: center;
-    }
-
-    .header-logo {
-      max-height: 50px;
-      width: auto;
-    }
-
-    .content {
-      padding: 32px 24px;
-    }
-
-    .content h1, .content h2, .content h3 {
-      color: #000000;
-      margin-top: 24px;
-      margin-bottom: 12px;
-    }
-    .content h1 { font-size: 28px; }
-    .content h2 { font-size: 22px; }
-    .content h3 { font-size: 18px; }
-
-    .content p {
-      margin: 0 0 16px 0;
-      color: #333333;
-      font-size: 16px;
-    }
-
-    .content a {
-      color: #000000;
-      text-decoration: underline;
-    }
-
-    .content ul, .content ol {
-      margin: 0 0 16px 0;
-      padding-left: 24px;
-    }
-
-    .content li {
-      margin-bottom: 8px;
-    }
-
-    .content img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 4px;
-    }
-
-    /* Quick Links Section */
-    .quick-links {
-      background-color: #000000;
-      padding: 20px 24px;
-      text-align: center;
-    }
-
-    .quick-links a {
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-      margin: 0 12px;
-      display: inline-block;
-    }
-
-    .quick-links a:hover {
-      text-decoration: underline;
-    }
-
-    /* Social Links */
-    .social-links {
-      padding: 20px 24px;
-      text-align: center;
-      background-color: #fafafa;
-    }
-
-    .social-links a {
-      display: inline-block;
-      margin: 0 8px;
-    }
-
-    .social-icon {
-      width: 32px;
-      height: 32px;
-    }
-
-    /* Footer */
-    .footer {
-      background-color: #f5f5f5;
-      padding: 24px;
-      text-align: center;
-      font-size: 12px;
-      color: #666666;
-      border-top: 1px solid #e5e5e5;
-    }
-
-    .footer p {
-      margin: 8px 0;
-    }
-
-    .footer a {
-      color: #666666;
-      text-decoration: underline;
-    }
-
-    .footer-brand {
-      font-weight: 600;
-      color: #333333;
-    }
-
-    .unsubscribe {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #e5e5e5;
-    }
-
-    /* Responsive */
-    @media only screen and (max-width: 600px) {
-      .email-container {
-        width: 100% !important;
-        border-radius: 0;
-      }
-      .content {
-        padding: 24px 16px;
-      }
-      .quick-links a {
-        display: block;
-        margin: 8px 0;
-      }
-    }
+    img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    a { color: #ffffff; }
   </style>
 </head>
-<body>
-  <div class="email-wrapper">
-    <div class="email-container">
-      <!-- Christmas Banner (if enabled) -->
-      ${christmasBanner}
+<body style="background-color: #000000; margin: 0; padding: 0;">
+  <div style="width: 100%; background-color: #000000; padding: 0;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #000000;">
 
       <!-- Header with Logo -->
-      <div class="header">
+      <div style="padding: 32px 24px 24px 24px; text-align: center;">
         <a href="${BASE_URL}" target="_blank">
-          <img src="${LOGO_URL}" alt="Busy Streetwear" class="header-logo" style="max-height: 50px; width: auto;">
+          <img src="${LOGO_URL}" alt="BUSY" style="height: 40px; width: auto;">
         </a>
       </div>
 
       <!-- Main Content -->
-      <div class="content">
-        ${christmasDecoration}
+      <div style="padding: 0 24px 24px 24px; color: #ffffff; font-size: 15px; line-height: 1.7;">
         ${params.content}
         ${ctaButton}
       </div>
 
-      <!-- Quick Links -->
-      <div class="quick-links">
-        <a href="${BASE_URL}/products" target="_blank">TIENDA</a>
-        <a href="${BASE_URL}/blog" target="_blank">BLOG</a>
-        <a href="${BASE_URL}/playlists" target="_blank">PLAYLISTS</a>
-        <a href="${BASE_URL}/blacktop" target="_blank">BLACKTOP</a>
-        <a href="${BASE_URL}/about" target="_blank">NOSOTROS</a>
+      <!-- Divider -->
+      <div style="padding: 0 24px;">
+        <div style="border-top: 1px solid #222222;"></div>
       </div>
 
-      <!-- Social Links -->
-      <div class="social-links">
-        <a href="https://instagram.com/busy.streetwear" target="_blank" title="Instagram">
-          <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" class="social-icon" style="width: 28px; height: 28px;">
-        </a>
-        <a href="https://tiktok.com/@busy.streetwear" target="_blank" title="TikTok">
-          <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok" class="social-icon" style="width: 28px; height: 28px;">
-        </a>
-        <a href="https://youtube.com/@busystreetwear" target="_blank" title="YouTube">
-          <img src="https://cdn-icons-png.flaticon.com/512/174/174883.png" alt="YouTube" class="social-icon" style="width: 28px; height: 28px;">
-        </a>
-        <a href="https://open.spotify.com/user/agustinmancho" target="_blank" title="Spotify">
-          <img src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="Spotify" class="social-icon" style="width: 28px; height: 28px;">
-        </a>
-      </div>
+      <!-- Footer Section -->
+      <div style="padding: 24px; text-align: center;">
 
-      <!-- Footer -->
-      <div class="footer">
-        <p class="footer-brand">Busy Streetwear</p>
-        <p>Cultura urbana, moda y comunidad desde Mar del Plata, Argentina</p>
-        <p>📍 María Curie 5457, Mar del Plata, Buenos Aires</p>
-        <p>📧 <a href="mailto:hola@busy.com.ar">hola@busy.com.ar</a> | 🌐 <a href="${BASE_URL}">busy.com.ar</a></p>
-        <p style="margin-top: 12px;">© 2024-${currentYear} Busy Streetwear. Todos los derechos reservados.</p>
+        <!-- Brand Info -->
+        <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600; color: #ffffff; letter-spacing: 1px;">BUSY STREETWEAR</p>
+        <p style="margin: 0 0 16px 0; font-size: 12px; color: #666666;">Cultura urbana desde Mar del Plata, Argentina</p>
 
-        <div class="unsubscribe">
-          <p style="color: #999999; font-size: 11px;">
-            Recibiste este email porque estás suscrito a nuestra newsletter.
-          </p>
-          <p>
-            <a href="${BASE_URL}/newsletter/unsubscribe?email={{email}}" style="color: #999999;">Cancelar suscripción</a>
-            &nbsp;|&nbsp;
-            <a href="${BASE_URL}/newsletter/preferences?email={{email}}" style="color: #999999;">Preferencias</a>
-          </p>
+        ${christmasMessage}
+
+        <!-- Quick Links -->
+        <div style="padding: 16px 0;">
+          <a href="${BASE_URL}/products" style="color: #888888; text-decoration: none; font-size: 11px; margin: 0 8px;">TIENDA</a>
+          <a href="${BASE_URL}/blog" style="color: #888888; text-decoration: none; font-size: 11px; margin: 0 8px;">BLOG</a>
+          <a href="${BASE_URL}/playlists" style="color: #888888; text-decoration: none; font-size: 11px; margin: 0 8px;">PLAYLISTS</a>
+          <a href="${BASE_URL}/about" style="color: #888888; text-decoration: none; font-size: 11px; margin: 0 8px;">NOSOTROS</a>
         </div>
-      </div>
-    </div>
 
-    <!-- Anti-spam footer -->
-    <div style="text-align: center; padding: 16px; font-size: 11px; color: #999999;">
-      <p style="margin: 0;">Este mensaje fue enviado por Busy Streetwear, María Curie 5457, Mar del Plata (7600), Argentina.</p>
+        <!-- Social Icons -->
+        <div style="padding: 8px 0 16px 0;">
+          <a href="https://instagram.com/busy.streetwear" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">IG</a>
+          <span style="color: #333333;">·</span>
+          <a href="https://tiktok.com/@busy.streetwear" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">TK</a>
+          <span style="color: #333333;">·</span>
+          <a href="https://youtube.com/@busystreetwear" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">YT</a>
+          <span style="color: #333333;">·</span>
+          <a href="https://open.spotify.com/user/agustinmancho" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">SP</a>
+        </div>
+
+        <!-- Legal -->
+        <p style="margin: 0; font-size: 10px; color: #444444;">
+          © 2024-${currentYear} Busy Streetwear · María Curie 5457, Mar del Plata
+        </p>
+
+        <!-- Unsubscribe -->
+        <p style="margin: 12px 0 0 0; font-size: 10px; color: #444444;">
+          <a href="${BASE_URL}/newsletter/unsubscribe?email={{email}}" style="color: #555555; text-decoration: underline;">Cancelar suscripción</a>
+        </p>
+      </div>
+
     </div>
   </div>
 </body>
 </html>
 `
+}
+
+/**
+ * Generate preview HTML for a campaign (exported for preview endpoint)
+ */
+export function generatePreviewHtml(params: {
+  subject: string
+  content: string
+  campaignName: string
+  isChristmas?: boolean
+  ctaText?: string
+  ctaUrl?: string
+}): string {
+  const htmlContent = markdownToHtml(params.content)
+  return createCampaignEmailHtml({
+    ...params,
+    content: htmlContent,
+  })
 }
