@@ -302,24 +302,37 @@ function createCampaignEmailHtml(params: {
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="x-apple-disable-message-reformatting">
   <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+  <meta name="color-scheme" content="dark only">
+  <meta name="supported-color-schemes" content="dark only">
   <title>${params.subject}</title>
   <style>
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    :root { color-scheme: dark only; supported-color-schemes: dark only; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       line-height: 1.6;
-      color: #ffffff;
-      background-color: #000000;
+      color: #ffffff !important;
+      background-color: #000000 !important;
       margin: 0;
       padding: 0;
+    }
+    @media (prefers-color-scheme: light) {
+      body, .email-wrapper, .email-container { background-color: #000000 !important; }
+    }
+    @media (prefers-color-scheme: dark) {
+      body, .email-wrapper, .email-container { background-color: #000000 !important; }
     }
     img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
     a { color: #ffffff; }
   </style>
 </head>
-<body style="background-color: #000000; margin: 0; padding: 0;">
-  <div style="width: 100%; background-color: #000000; padding: 0;">
-    <div style="max-width: 600px; margin: 0 auto; background-color: #000000;">
+<body style="background-color: #000000 !important; margin: 0; padding: 0; -webkit-background-color: #000000; -moz-background-color: #000000;" bgcolor="#000000">
+  <div class="email-wrapper" style="width: 100%; background-color: #000000 !important; padding: 0;" bgcolor="#000000">
+    <!--[if mso]>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#000000;">
+    <tr><td>
+    <![endif]-->
+    <div class="email-container" style="max-width: 600px; margin: 0 auto; background-color: #000000 !important;" bgcolor="#000000">
 
       <!-- Header with Logo -->
       <div style="padding: 32px 24px 24px 24px; text-align: center;">
@@ -379,6 +392,10 @@ function createCampaignEmailHtml(params: {
       </div>
 
     </div>
+    <!--[if mso]>
+    </td></tr>
+    </table>
+    <![endif]-->
   </div>
 </body>
 </html>

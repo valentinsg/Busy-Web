@@ -1,24 +1,22 @@
 'use client';
 
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { ArchiveEntry } from '@/types/files';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Download, ExternalLink, Eye, Heart, Info, Link2, Maximize2, MoreHorizontal, Pause, Play, Share2, Sparkles, X } from 'lucide-react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { RecommendationGrid } from './recommendation-grid';
 
 interface FilesDetailProps {
   entry: ArchiveEntry;
-  recommendations?: ArchiveEntry[];
 }
 
 /**
@@ -50,7 +48,6 @@ const VIBES_FILTERS = [
 const LOCAL_STORAGE_KEY = 'busy-files-liked-ids';
 
 export function FilesDetail({ entry }: FilesDetailProps) {
-  const router = useRouter();
   // Track likes per entry ID to handle fullscreen navigation between different images
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
   const [likesMap, setLikesMap] = useState<Record<string, number>>({ [entry.id]: entry.likes ?? 0 });
@@ -82,7 +79,7 @@ export function FilesDetail({ entry }: FilesDetailProps) {
   const { data: recommendations = [] } = useQuery<ArchiveEntry[]>({
     queryKey: ['recommendations', entry.id],
     queryFn: async (): Promise<ArchiveEntry[]> => {
-      const res = await fetch(`/api/files/recommend?id=${entry.id}&limit=24`);
+      const res = await fetch(`/api/files/recommend?id=${entry.id}&limit=32`);
       if (!res.ok) return [];
       const data = await res.json();
       return Array.isArray(data) ? data : (data.recommendations || []);
@@ -100,19 +97,24 @@ export function FilesDetail({ entry }: FilesDetailProps) {
   const likes = likesMap[currentEntryId] ?? (currentFullscreenEntry?.likes ?? 0);
 
   // Initialize likes map when recommendations load
+  const recommendationsLength = recommendations.length;
   useEffect(() => {
-    if (recommendations.length > 0) {
-      setLikesMap(prev => {
-        const newMap = { ...prev };
-        recommendations.forEach((rec: ArchiveEntry) => {
-          if (!(rec.id in newMap)) {
-            newMap[rec.id] = rec.likes ?? 0;
-          }
-        });
-        return newMap;
+    if (recommendationsLength === 0) return;
+
+    setLikesMap(prev => {
+      // Check if we actually need to update
+      const needsUpdate = recommendations.some((rec: ArchiveEntry) => !(rec.id in prev));
+      if (!needsUpdate) return prev;
+
+      const newMap = { ...prev };
+      recommendations.forEach((rec: ArchiveEntry) => {
+        if (!(rec.id in newMap)) {
+          newMap[rec.id] = rec.likes ?? 0;
+        }
       });
-    }
-  }, [recommendations]);
+      return newMap;
+    });
+  }, [recommendationsLength]); // Only re-run when length changes
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -391,10 +393,10 @@ export function FilesDetail({ entry }: FilesDetailProps) {
 
   return (
     <>
-      {/* Pinterest-style layout */}
-      <div className="flex flex-col lg:flex-row gap-4">
-        {/* LEFT COLUMN: Image + Info below */}
-        <div className="w-full lg:w-[420px] xl:w-[480px] shrink-0">
+      {/* Pinterest-style layout - detail on left, recommendations on right and below */}
+      <div className="lg:flex lg:gap-6">
+        {/* Detail card */}
+        <div className="w-full lg:w-[380px] xl:w-[420px] lg:shrink-0">
           {/* Top bar with actions */}
           <div className="flex items-center justify-end mb-6">
             <div className="flex items-center gap-2">
@@ -596,9 +598,9 @@ export function FilesDetail({ entry }: FilesDetailProps) {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Recommendations Grid */}
-        <div className="flex-1 min-w-0">
-          <RecommendationGrid entryId={entry.id} />
+        {/* Recommendations - masonry grid */}
+        <div className="flex-1 min-w-0 mt-6 lg:mt-0">
+          <RecommendationGrid entryId={entry.id} showMore />
         </div>
       </div>
 

@@ -3,12 +3,34 @@
 import { cn } from '@/lib/utils';
 import { ArchiveEntry, ArchiveFilters } from '@/types/files';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { FilesItem } from './files-item';
 
 interface FilesMasonryProps {
   filters: ArchiveFilters;
+}
+
+// Batch preload URLs for visible images
+async function preloadImageUrls(entries: ArchiveEntry[]): Promise<void> {
+  const keys: string[] = [];
+
+  for (const entry of entries) {
+    const thumbMatch = entry.thumb_url?.match(/https:\/\/[^/]+\.r2\.dev\/(.+)/);
+    if (thumbMatch) keys.push(thumbMatch[1]);
+  }
+
+  if (keys.length === 0) return;
+
+  try {
+    await fetch('/api/files/batch-urls', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keys }),
+    });
+  } catch {
+    // Silently fail
+  }
 }
 
 // Skeleton aspect ratios for loading state - varied like Pinterest
@@ -77,11 +99,32 @@ export function FilesMasonry({ filters }: FilesMasonryProps) {
     refetchOnWindowFocus: false, // Don't refetch on tab focus
   });
 
+  // Track preloaded pages - must be before any conditional returns
+  const preloadedPages = useRef<Set<number>>(new Set());
+
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
+
+  // Derive data from query result
+  const pages = (data?.pages ?? []) as unknown as { data: ArchiveEntry[] }[];
+  const entries: ArchiveEntry[] = pages.flatMap((page) => page.data);
+  const pagesCount = pages.length;
+
+  // Preload URLs for new pages
+  useEffect(() => {
+    if (pagesCount === 0 || entries.length === 0) return;
+    if (preloadedPages.current.has(pagesCount)) return;
+
+    preloadedPages.current.add(pagesCount);
+    // Only preload last batch (new page)
+    const lastPageEntries = entries.slice(-16);
+    if (lastPageEntries.length > 0) {
+      preloadImageUrls(lastPageEntries);
+    }
+  }, [pagesCount, entries.length]); // Use .length to avoid re-running on same data
 
   if (isLoading) {
     return (
@@ -122,9 +165,6 @@ export function FilesMasonry({ filters }: FilesMasonryProps) {
       </div>
     );
   }
-
-  const pages = (data?.pages ?? []) as unknown as { data: ArchiveEntry[] }[];
-  const entries: ArchiveEntry[] = pages.flatMap((page) => page.data);
 
   if (entries.length === 0) {
     return (

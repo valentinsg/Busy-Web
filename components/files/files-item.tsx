@@ -5,27 +5,13 @@ import { cn } from '@/lib/utils';
 import { ArchiveEntry } from '@/types/files';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 interface FilesItemProps {
   entry: ArchiveEntry;
   className?: string;
 }
 
-// Generate a stable aspect ratio based on entry ID to prevent layout shift
-// This creates visual variety while keeping layout stable
-function getStableAspectRatio(id: string): string {
-  // Use first 4 chars of ID to generate a number
-  const hash = id.slice(0, 4).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const ratios = [
-    'aspect-[3/4]',    // tall portrait
-    'aspect-square',   // square
-    'aspect-[4/5]',    // portrait
-    'aspect-[5/6]',    // slight portrait
-    'aspect-[4/3]',    // landscape
-  ];
-  return ratios[hash % ratios.length];
-}
 
 /**
  * Convert R2 direct URLs to proxy URLs that use signed URLs
@@ -49,9 +35,6 @@ export function FilesItem({ entry, className }: FilesItemProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const dominantColor = entry.colors?.[0] || '#1a1a1a';
-
-  // Stable aspect ratio to prevent layout shift
-  const aspectRatio = useMemo(() => getStableAspectRatio(entry.id), [entry.id]);
 
   // Build fallback chain: thumb → medium → full
   const imageUrls = [
@@ -80,40 +63,37 @@ export function FilesItem({ entry, className }: FilesItemProps) {
         aria-label={`Ver ${entry.microcopy || 'entrada de files'}`}
       >
         <div
-          className={cn('relative overflow-hidden rounded-xl', aspectRatio)}
+          className="relative overflow-hidden rounded-xl"
           style={{ backgroundColor: dominantColor }}
         >
-          {/* Image with error handling and fallback chain */}
+          {/* Image with natural dimensions - no forced aspect ratio */}
           {!allFailed && currentUrl ? (
             <Image
-              key={currentUrl} // Force remount on URL change
+              key={currentUrl}
               src={getProxyUrl(currentUrl)}
               alt={entry.microcopy || 'Imagen del archivo'}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              width={400}
+              height={400}
               className={cn(
-                'object-cover transition-opacity duration-300',
-                // Only scale on devices that support hover (not touch)
-                'group-hover:[@media(hover:hover)]:scale-105 transition-transform duration-500',
+                'w-full h-auto transition-opacity duration-300',
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               )}
               onLoad={() => setImageLoaded(true)}
               onError={() => {
-                console.error('Image load failed:', currentUrl, '- trying next fallback');
                 if (hasMoreFallbacks) {
                   setCurrentUrlIndex(prev => prev + 1);
                   setImageLoaded(false);
                 } else {
-                  setCurrentUrlIndex(imageUrls.length); // Mark all as failed
+                  setCurrentUrlIndex(imageUrls.length);
                 }
               }}
               loading="lazy"
-              unoptimized // Using proxy URLs, no need for Next.js optimization
+              unoptimized
             />
           ) : (
-            // Fallback for broken images - show placeholder
+            // Fallback for broken images - show placeholder with fixed aspect
             <div
-              className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4"
+              className="aspect-square flex flex-col items-center justify-center gap-2 p-4"
               style={{ backgroundColor: dominantColor }}
             >
               <svg className="w-8 h-8 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
