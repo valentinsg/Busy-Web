@@ -123,7 +123,7 @@ export function FilesSearch({ places, colors, showFilters = true, showBackButton
       {/* Search Bar - Pinterest style */}
       <div className="relative flex items-center gap-2">
         {showBackButton && (
-          <div className="hidden md:flex items-center gap-1">
+          <div className="flex items-center gap-1">
             {/* Back button */}
             <button
               type="button"

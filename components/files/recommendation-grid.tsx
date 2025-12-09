@@ -19,10 +19,14 @@ const SKELETON_ASPECTS = [
   'aspect-[3/4]',    // tall
   'aspect-[16/10]',  // landscape
   'aspect-[2/3]',    // portrait
+  'aspect-[3/4]',    // tall
+  'aspect-square',   // square
+  'aspect-[2/3]',    // portrait
+  'aspect-[4/3]',    // wide
 ];
 
 async function fetchRecommendations(entryId: string): Promise<ArchiveEntry[]> {
-  const res = await fetch(`/api/files/recommend?id=${entryId}&limit=12`);
+  const res = await fetch(`/api/files/recommend?id=${entryId}&limit=24`);
   if (!res.ok) throw new Error('Failed to fetch recommendations');
   const data = await res.json();
   // API returns array directly or { recommendations: [] }

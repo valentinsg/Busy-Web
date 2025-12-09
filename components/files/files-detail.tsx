@@ -82,7 +82,7 @@ export function FilesDetail({ entry }: FilesDetailProps) {
   const { data: recommendations = [] } = useQuery<ArchiveEntry[]>({
     queryKey: ['recommendations', entry.id],
     queryFn: async (): Promise<ArchiveEntry[]> => {
-      const res = await fetch(`/api/files/recommend?id=${entry.id}&limit=12`);
+      const res = await fetch(`/api/files/recommend?id=${entry.id}&limit=24`);
       if (!res.ok) return [];
       const data = await res.json();
       return Array.isArray(data) ? data : (data.recommendations || []);
@@ -457,7 +457,7 @@ export function FilesDetail({ entry }: FilesDetailProps) {
 
           {/* Main Image */}
           <div
-            className="relative w-full overflow-hidden rounded-2xl"
+            className="relative w-full overflow-hidden rounded-2xl ring-2 ring-red-500/60 ring-offset-2 ring-offset-background"
             style={{ backgroundColor: dominantColor }}
           >
             {/* Use object-contain to show full image without cropping */}
