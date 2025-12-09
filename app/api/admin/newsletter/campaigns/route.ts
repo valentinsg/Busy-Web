@@ -35,6 +35,8 @@ const createSchema = z.object({
       ? `${val}:00Z`
       : `${val}Z`
   }),
+  cta_text: z.string().optional(),
+  cta_url: z.string().url().optional().or(z.literal('')),
 })
 
 export async function POST(req: NextRequest) {

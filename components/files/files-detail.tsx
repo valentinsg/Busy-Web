@@ -1,10 +1,10 @@
 'use client';
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { ArchiveEntry } from '@/types/files';
@@ -51,8 +51,9 @@ const LOCAL_STORAGE_KEY = 'busy-files-liked-ids';
 
 export function FilesDetail({ entry }: FilesDetailProps) {
   const router = useRouter();
-  const [liked, setLiked] = useState(false);
-  const [likes, setLikes] = useState(entry.likes ?? 0);
+  // Track likes per entry ID to handle fullscreen navigation between different images
+  const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
+  const [likesMap, setLikesMap] = useState<Record<string, number>>({ [entry.id]: entry.likes ?? 0 });
   const [vibesMode, setVibesMode] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
@@ -64,11 +65,23 @@ export function FilesDetail({ entry }: FilesDetailProps) {
   const [imageKey, setImageKey] = useState(0); // For slide transitions
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [imageError, setImageError] = useState(false);
+  const [currentUrlIndex, setCurrentUrlIndex] = useState(0);
+
+  // Build fallback chain for main image: full → medium → thumb
+  const imageUrls = [
+    entry.full_url,
+    entry.medium_url,
+    entry.thumb_url,
+  ].filter(Boolean) as string[];
+
+  const currentImageUrl = imageUrls[currentUrlIndex];
+  const hasMoreFallbacks = currentUrlIndex < imageUrls.length - 1;
 
   // Fetch recommendations for fullscreen navigation
-  const { data: recommendations = [] } = useQuery({
+  const { data: recommendations = [] } = useQuery<ArchiveEntry[]>({
     queryKey: ['recommendations', entry.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<ArchiveEntry[]> => {
       const res = await fetch(`/api/files/recommend?id=${entry.id}&limit=12`);
       if (!res.ok) return [];
       const data = await res.json();
@@ -81,12 +94,37 @@ export function FilesDetail({ entry }: FilesDetailProps) {
 
   const currentFullscreenEntry = fullscreenIndex === -1 ? entry : recommendations[fullscreenIndex];
 
+  // Get current entry's like state
+  const currentEntryId = currentFullscreenEntry?.id || entry.id;
+  const liked = likedMap[currentEntryId] ?? false;
+  const likes = likesMap[currentEntryId] ?? (currentFullscreenEntry?.likes ?? 0);
+
+  // Initialize likes map when recommendations load
+  useEffect(() => {
+    if (recommendations.length > 0) {
+      setLikesMap(prev => {
+        const newMap = { ...prev };
+        recommendations.forEach((rec: ArchiveEntry) => {
+          if (!(rec.id in newMap)) {
+            newMap[rec.id] = rec.likes ?? 0;
+          }
+        });
+        return newMap;
+      });
+    }
+  }, [recommendations]);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
     const ids = raw ? (JSON.parse(raw) as string[]) : [];
-    setLiked(ids.includes(entry.id));
-  }, [entry.id]);
+    // Initialize liked state for main entry and all recommendations
+    const newLikedMap: Record<string, boolean> = { [entry.id]: ids.includes(entry.id) };
+    recommendations.forEach((rec: ArchiveEntry) => {
+      newLikedMap[rec.id] = ids.includes(rec.id);
+    });
+    setLikedMap(newLikedMap);
+  }, [entry.id, recommendations]);
 
   // Keyboard navigation for fullscreen mode
   useEffect(() => {
@@ -174,19 +212,21 @@ export function FilesDetail({ entry }: FilesDetailProps) {
     }
   };
 
-  // Toggle like (for button click)
+  // Toggle like (for button click) - uses currentEntryId for fullscreen navigation
   const toggleLike = async () => {
+    const targetId = currentEntryId;
     const newLiked = !liked;
-    setLiked(newLiked);
-    setLikes((prev) => newLiked ? prev + 1 : Math.max(0, prev - 1));
+
+    setLikedMap(prev => ({ ...prev, [targetId]: newLiked }));
+    setLikesMap(prev => ({ ...prev, [targetId]: newLiked ? (prev[targetId] ?? 0) + 1 : Math.max(0, (prev[targetId] ?? 0) - 1) }));
 
     if (typeof window !== 'undefined') {
       const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
       const ids = raw ? (JSON.parse(raw) as string[]) : [];
-      if (newLiked && !ids.includes(entry.id)) {
-        window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([...ids, entry.id]));
+      if (newLiked && !ids.includes(targetId)) {
+        window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([...ids, targetId]));
       } else if (!newLiked) {
-        window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(ids.filter(id => id !== entry.id)));
+        window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(ids.filter(id => id !== targetId)));
       }
     }
 
@@ -194,7 +234,7 @@ export function FilesDetail({ entry }: FilesDetailProps) {
       await fetch('/api/files/like', {
         method: newLiked ? 'POST' : 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: entry.id }),
+        body: JSON.stringify({ id: targetId }),
       });
     } catch (error) {
       console.error('Error toggling like', error);
@@ -203,19 +243,22 @@ export function FilesDetail({ entry }: FilesDetailProps) {
 
   // Add like only (for double click - can't remove) + Instagram animation
   const handleLike = async () => {
+    const targetId = currentEntryId;
+
     // Always show animation on double tap
     setShowLikeAnimation(true);
     setTimeout(() => setShowLikeAnimation(false), 1000);
 
     if (liked) return; // Already liked, just show animation
-    setLiked(true);
-    setLikes((prev) => prev + 1);
+
+    setLikedMap(prev => ({ ...prev, [targetId]: true }));
+    setLikesMap(prev => ({ ...prev, [targetId]: (prev[targetId] ?? 0) + 1 }));
 
     if (typeof window !== 'undefined') {
       const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
       const ids = raw ? (JSON.parse(raw) as string[]) : [];
-      if (!ids.includes(entry.id)) {
-        window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([...ids, entry.id]));
+      if (!ids.includes(targetId)) {
+        window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([...ids, targetId]));
       }
     }
 
@@ -223,7 +266,7 @@ export function FilesDetail({ entry }: FilesDetailProps) {
       await fetch('/api/files/like', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: entry.id }),
+        body: JSON.stringify({ id: targetId }),
       });
     } catch (error) {
       console.error('Error liking entry', error);
@@ -419,31 +462,53 @@ export function FilesDetail({ entry }: FilesDetailProps) {
           >
             {/* Use object-contain to show full image without cropping */}
             <div className="relative w-full">
-              <Image
-                src={getProxyUrl(entry.full_url)}
-                alt={entry.title || entry.microcopy || 'Busy Files'}
-                width={800}
-                height={800}
-                className={cn(
-                  'w-full h-auto object-contain transition-all duration-500',
-                  filterClass
-                )}
-                sizes="(max-width: 768px) 100vw, 480px"
-                priority
-                unoptimized
-              />
+              {currentImageUrl && !imageError ? (
+                <Image
+                  key={currentImageUrl}
+                  src={getProxyUrl(currentImageUrl)}
+                  alt={entry.title || entry.microcopy || 'Busy Files'}
+                  width={800}
+                  height={800}
+                  className={cn(
+                    'w-full h-auto object-contain transition-all duration-500',
+                    filterClass
+                  )}
+                  sizes="(max-width: 768px) 100vw, 480px"
+                  priority
+                  unoptimized
+                  onError={() => {
+                    console.error('Image load failed:', currentImageUrl);
+                    if (hasMoreFallbacks) {
+                      setCurrentUrlIndex(prev => prev + 1);
+                    } else {
+                      setImageError(true);
+                    }
+                  }}
+                />
+              ) : (
+                <div className="aspect-square flex flex-col items-center justify-center gap-3 p-8">
+                  <svg className="w-16 h-16 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="font-body text-sm text-white/50 text-center">
+                    Imagen no disponible
+                  </span>
+                </div>
+              )}
 
-              {/* Fullscreen button */}
-              <button
-                type="button"
-                onClick={() => {
-                  setFullscreenIndex(-1);
-                  setFullscreen(true);
-                }}
-                className="absolute bottom-3 right-3 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all backdrop-blur-sm"
-              >
-                <Maximize2 className="h-4 w-4" />
-              </button>
+              {/* Fullscreen button - only show if image loaded */}
+              {currentImageUrl && !imageError && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFullscreenIndex(-1);
+                    setFullscreen(true);
+                  }}
+                  className="absolute bottom-3 right-3 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all backdrop-blur-sm"
+                >
+                  <Maximize2 className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
 

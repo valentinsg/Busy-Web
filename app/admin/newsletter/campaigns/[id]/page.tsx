@@ -27,9 +27,24 @@ interface Campaign {
   target_tags: string[]
   scheduled_at: string | null
   sent_count: number
+  delivered_count: number
+  opened_count: number
+  clicked_count: number
+  bounced_count: number
+  unsubscribed_count: number
+  cta_text: string | null
+  cta_url: string | null
   error: string | null
   created_at: string
   updated_at: string
+}
+
+interface CampaignEvent {
+  id: string
+  email: string
+  event_type: string
+  link_url: string | null
+  created_at: string
 }
 
 interface Recipient {
@@ -46,6 +61,7 @@ export default function CampaignDetailPage() {
 
   const [campaign, setCampaign] = React.useState<Campaign | null>(null)
   const [recipients, setRecipients] = React.useState<Recipient[]>([])
+  const [events, setEvents] = React.useState<CampaignEvent[]>([])
   const [loading, setLoading] = React.useState(true)
   const [sending, setSending] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
@@ -73,6 +89,15 @@ export default function CampaignDetailPage() {
         if (res2.ok) {
           const json2 = await res2.json()
           if (json2.ok) setRecipients(json2.items || [])
+        }
+
+        // Get events (analytics)
+        const res3 = await fetch(`/api/admin/newsletter/campaigns/${id}/events`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (res3.ok) {
+          const json3 = await res3.json()
+          if (json3.ok) setEvents(json3.items || [])
         }
       } catch (e) {
         toast({ title: "Error", description: e instanceof Error ? e.message : "Error cargando campaña" })
@@ -195,7 +220,7 @@ export default function CampaignDetailPage() {
           <div className="text-xs text-muted-foreground">Audiencia total</div>
         </div>
         <div className="rounded-lg border p-4 bg-muted/5">
-          <div className="text-2xl font-bold text-emerald-400">{campaign.sent_count}</div>
+          <div className="text-2xl font-bold text-emerald-400">{campaign.sent_count || sentRecipients}</div>
           <div className="text-xs text-muted-foreground">Enviados</div>
         </div>
         <div className="rounded-lg border p-4 bg-muted/5">
@@ -209,6 +234,98 @@ export default function CampaignDetailPage() {
           <div className="text-xs text-muted-foreground">Tasa de entrega</div>
         </div>
       </div>
+
+      {/* Analytics Section - Only show if campaign was sent */}
+      {campaign.status === 'sent' && (
+        <div className="rounded-lg border p-4 bg-muted/5 space-y-4">
+          <h3 className="font-heading font-medium">Analytics</h3>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="text-center p-3 rounded-lg bg-background/50">
+              <div className="text-xl font-bold text-emerald-400">
+                {campaign.delivered_count || events.filter(e => e.event_type === 'delivered').length}
+              </div>
+              <div className="text-xs text-muted-foreground">Entregados</div>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-background/50">
+              <div className="text-xl font-bold text-blue-400">
+                {campaign.opened_count || events.filter(e => e.event_type === 'opened').length}
+              </div>
+              <div className="text-xs text-muted-foreground">Abiertos</div>
+              {(campaign.sent_count || sentRecipients) > 0 && (
+                <div className="text-[10px] text-muted-foreground">
+                  {(((campaign.opened_count || events.filter(e => e.event_type === 'opened').length) / (campaign.sent_count || sentRecipients)) * 100).toFixed(1)}% open rate
+                </div>
+              )}
+            </div>
+            <div className="text-center p-3 rounded-lg bg-background/50">
+              <div className="text-xl font-bold text-purple-400">
+                {campaign.clicked_count || events.filter(e => e.event_type === 'clicked').length}
+              </div>
+              <div className="text-xs text-muted-foreground">Clicks</div>
+              {(campaign.opened_count || events.filter(e => e.event_type === 'opened').length) > 0 && (
+                <div className="text-[10px] text-muted-foreground">
+                  {(((campaign.clicked_count || events.filter(e => e.event_type === 'clicked').length) / (campaign.opened_count || events.filter(e => e.event_type === 'opened').length)) * 100).toFixed(1)}% CTR
+                </div>
+              )}
+            </div>
+            <div className="text-center p-3 rounded-lg bg-background/50">
+              <div className="text-xl font-bold text-red-400">
+                {campaign.bounced_count || events.filter(e => e.event_type === 'bounced').length}
+              </div>
+              <div className="text-xs text-muted-foreground">Rebotados</div>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-background/50">
+              <div className="text-xl font-bold text-yellow-400">
+                {campaign.unsubscribed_count || events.filter(e => e.event_type === 'unsubscribed').length}
+              </div>
+              <div className="text-xs text-muted-foreground">Desuscritos</div>
+            </div>
+          </div>
+
+          {/* Recent Events */}
+          {events.length > 0 && (
+            <div className="pt-4 border-t">
+              <h4 className="text-sm font-medium mb-2">Actividad reciente</h4>
+              <div className="max-h-48 overflow-auto rounded border divide-y text-xs">
+                {events.slice(0, 20).map((event) => (
+                  <div key={event.id} className="flex items-center justify-between px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${
+                        event.event_type === 'opened' ? 'bg-blue-400' :
+                        event.event_type === 'clicked' ? 'bg-purple-400' :
+                        event.event_type === 'delivered' ? 'bg-emerald-400' :
+                        event.event_type === 'bounced' ? 'bg-red-400' :
+                        'bg-zinc-400'
+                      }`} />
+                      <span className="text-muted-foreground">{event.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="capitalize">{event.event_type}</span>
+                      {event.link_url && (
+                        <span className="text-muted-foreground truncate max-w-[150px]" title={event.link_url}>
+                          {event.link_url}
+                        </span>
+                      )}
+                      <span className="text-muted-foreground">
+                        {new Date(event.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {events.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              Los datos de tracking aparecerán aquí cuando los destinatarios interactúen con el email.
+              <br />
+              <span className="text-xs">Nota: Requiere configurar el webhook de Resend.</span>
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Campaign Details */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

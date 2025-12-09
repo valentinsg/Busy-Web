@@ -1,9 +1,10 @@
 "use client"
 
+import { AudienceSelector } from "@/components/admin/newsletter/audience-selector"
 import { NewsletterImageUpload } from "@/components/admin/newsletter/image-upload"
-import { TagPicker } from "@/components/ui/tag-picker"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase/client"
+import { AlertTriangle, ArrowLeft, Calendar, Mail, Save, Type } from "lucide-react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import * as React from "react"
@@ -14,20 +15,30 @@ export default function EditCampaignPage() {
   const { toast } = useToast()
   const id = params?.id as string
 
+  // Form state
   const [name, setName] = React.useState("")
   const [subject, setSubject] = React.useState("")
   const [content, setContent] = React.useState("")
-  const [tags, setTags] = React.useState<string[]>([])
   const [scheduledAt, setScheduledAt] = React.useState("")
+  const [selectedEmails, setSelectedEmails] = React.useState<string[]>([])
+
+  // UI state
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
   const [status, setStatus] = React.useState("draft")
 
-  // Audience
-  const [allSubscribers, setAllSubscribers] = React.useState<string[]>([])
-  const [selectedEmails, setSelectedEmails] = React.useState<string[]>([])
-  const [currentRecipients, setCurrentRecipients] = React.useState<string[]>([])
-  const [listQuery, setListQuery] = React.useState("")
+  // Validation
+  const [errors, setErrors] = React.useState<Record<string, string>>({})
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {}
+    if (!name.trim()) newErrors.name = "El nombre es requerido"
+    if (!subject.trim()) newErrors.subject = "El asunto es requerido"
+    if (!content.trim()) newErrors.content = "El contenido es requerido"
+    if (selectedEmails.length === 0) newErrors.audience = "Selecciona al menos un destinatario"
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   // Load campaign data
   React.useEffect(() => {
@@ -47,10 +58,8 @@ export default function EditCampaignPage() {
         setName(c.name || "")
         setSubject(c.subject || "")
         setContent(c.content || "")
-        setTags(c.target_tags || [])
         setStatus(c.status || "draft")
         if (c.scheduled_at) {
-          // Convert to datetime-local format
           const date = new Date(c.scheduled_at)
           setScheduledAt(date.toISOString().slice(0, 16))
         }
@@ -63,21 +72,7 @@ export default function EditCampaignPage() {
           const json2 = await res2.json()
           if (json2.ok && json2.items) {
             const emails = json2.items.map((r: { email: string }) => r.email)
-            setCurrentRecipients(emails)
             setSelectedEmails(emails)
-          }
-        }
-
-        // Load all subscribers
-        const res3 = await fetch(`/api/admin/newsletter/validate-target`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ status: ["subscribed"], tags: [] })
-        })
-        if (res3.ok) {
-          const json3 = await res3.json()
-          if (json3.ok && json3.emails) {
-            setAllSubscribers(json3.emails)
           }
         }
       } catch (e) {
@@ -90,7 +85,7 @@ export default function EditCampaignPage() {
   }, [id, toast])
 
   const handleSave = async () => {
-    if (!name.trim() || !subject.trim() || !content.trim()) {
+    if (!validate()) {
       toast({ title: "Error", description: "Completa todos los campos requeridos" })
       return
     }
@@ -105,7 +100,7 @@ export default function EditCampaignPage() {
         name,
         subject,
         content,
-        target_tags: tags,
+        target_tags: [],
         scheduled_at: scheduledAt || undefined,
       }
 
@@ -124,7 +119,7 @@ export default function EditCampaignPage() {
         throw new Error(errMsg || "Error al guardar")
       }
 
-      // Save audience if changed
+      // Save audience
       if (selectedEmails.length > 0) {
         const res2 = await fetch(`/api/admin/newsletter/campaigns/${id}/save-audience`, {
           method: "POST",
@@ -136,13 +131,13 @@ export default function EditCampaignPage() {
           const errMsg2 = typeof json2.error === 'string' ? json2.error : JSON.stringify(json2.error)
           throw new Error(errMsg2 || "Error al guardar audiencia")
         }
-        toast({ title: "Campaña actualizada", description: `Audiencia: ${json2.saved} destinatarios` })
+        toast({ title: "Campaña actualizada", description: `${json2.saved} destinatarios guardados` })
       } else {
         toast({ title: "Campaña actualizada" })
       }
 
       router.push(`/admin/newsletter/campaigns/${id}`)
-      router.refresh() // Refresh the campaigns list cache
+      router.refresh()
     } catch (e) {
       toast({ title: "Error", description: e instanceof Error ? e.message : "Error" })
     } finally {
@@ -152,7 +147,7 @@ export default function EditCampaignPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         <div className="h-8 w-48 bg-muted animate-pulse rounded" />
         <div className="h-64 bg-muted animate-pulse rounded-lg" />
       </div>
@@ -162,50 +157,86 @@ export default function EditCampaignPage() {
   const canEdit = status === 'draft'
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Link href={`/admin/newsletter/campaigns/${id}`} className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block">
-          ← Volver a campaña
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Link
+          href={`/admin/newsletter/campaigns/${id}`}
+          className="p-2 rounded-md hover:bg-muted transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h2 className="font-heading text-2xl font-semibold">Editar campaña</h2>
+        <div>
+          <h1 className="text-2xl font-semibold">Editar campaña</h1>
+          <p className="text-sm text-muted-foreground">Modifica los detalles de la campaña</p>
+        </div>
       </div>
 
       {!canEdit && (
-        <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-sm">
-          ⚠️ Esta campaña ya fue enviada o está en proceso. No se puede editar.
+        <div className="flex items-center gap-3 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-400">
+          <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+          <p className="text-sm">Esta campaña ya fue enviada o está en proceso. No se puede editar.</p>
         </div>
       )}
 
-      <div className="rounded-lg border p-4 bg-muted/5 space-y-4">
-        <label className="block text-sm font-body">
-          Nombre de la campaña
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={!canEdit}
-            className="mt-1 w-full border rounded px-3 py-2 bg-transparent font-body disabled:opacity-50"
-          />
-        </label>
+      <div className="grid gap-6">
+        {/* Basic Info */}
+        <div className="rounded-lg border bg-card p-4 space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Type className="h-4 w-4" />
+            Información básica
+          </div>
 
-        <label className="block text-sm font-body">
-          Asunto del email
-          <input
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            disabled={!canEdit}
-            className="mt-1 w-full border rounded px-3 py-2 bg-transparent font-body disabled:opacity-50"
-          />
-        </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="text-sm font-medium">
+                Nombre de la campaña <span className="text-destructive">*</span>
+              </label>
+              <input
+                value={name}
+                onChange={(e) => { setName(e.target.value); setErrors(prev => ({ ...prev, name: "" })) }}
+                disabled={!canEdit}
+                placeholder="Ej: Newsletter Diciembre 2024"
+                className={`mt-1.5 w-full px-3 py-2 rounded-md border bg-background text-sm disabled:opacity-50 ${
+                  errors.name ? "border-destructive" : ""
+                }`}
+              />
+              {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
+            </div>
 
-        <div>
-          <label className="block text-sm mb-1 font-body">Contenido (Markdown)</label>
-          <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
-            <button className="px-2 py-1 border rounded disabled:opacity-50" disabled={!canEdit} onClick={() => setContent(c => c + "**negrita** ")}>B</button>
-            <button className="px-2 py-1 border rounded disabled:opacity-50" disabled={!canEdit} onClick={() => setContent(c => c + "*itálica* ")}><em>I</em></button>
-            <button className="px-2 py-1 border rounded disabled:opacity-50" disabled={!canEdit} onClick={() => setContent(c => c + "\n## Título\n\n")}>H2</button>
-            <button className="px-2 py-1 border rounded disabled:opacity-50" disabled={!canEdit} onClick={() => setContent(c => c + "\n- Elemento 1\n- Elemento 2\n")}>Lista</button>
-            <button className="px-2 py-1 border rounded disabled:opacity-50" disabled={!canEdit} onClick={() => setContent(c => c + "[enlace](https://)")}>Link</button>
-            <div className="border-l pl-2 ml-2">
+            <div>
+              <label className="text-sm font-medium">
+                Asunto del email <span className="text-destructive">*</span>
+              </label>
+              <input
+                value={subject}
+                onChange={(e) => { setSubject(e.target.value); setErrors(prev => ({ ...prev, subject: "" })) }}
+                disabled={!canEdit}
+                placeholder="Ej: 🔥 Nuevos drops esta semana"
+                className={`mt-1.5 w-full px-3 py-2 rounded-md border bg-background text-sm disabled:opacity-50 ${
+                  errors.subject ? "border-destructive" : ""
+                }`}
+              />
+              {errors.subject && <p className="text-xs text-destructive mt-1">{errors.subject}</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="rounded-lg border bg-card p-4 space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Mail className="h-4 w-4" />
+            Contenido del email
+          </div>
+
+          <div>
+            <div className="flex flex-wrap items-center gap-1.5 mb-2">
+              <button type="button" disabled={!canEdit} className="px-2.5 py-1 text-xs border rounded-md hover:bg-muted disabled:opacity-50" onClick={() => setContent(c => c + "**negrita** ")}>B</button>
+              <button type="button" disabled={!canEdit} className="px-2.5 py-1 text-xs border rounded-md hover:bg-muted italic disabled:opacity-50" onClick={() => setContent(c => c + "*itálica* ")}>I</button>
+              <button type="button" disabled={!canEdit} className="px-2.5 py-1 text-xs border rounded-md hover:bg-muted disabled:opacity-50" onClick={() => setContent(c => c + "\n## Título\n")}>H2</button>
+              <button type="button" disabled={!canEdit} className="px-2.5 py-1 text-xs border rounded-md hover:bg-muted disabled:opacity-50" onClick={() => setContent(c => c + "\n- Item\n")}>Lista</button>
+              <button type="button" disabled={!canEdit} className="px-2.5 py-1 text-xs border rounded-md hover:bg-muted disabled:opacity-50" onClick={() => setContent(c => c + "[texto](url)")}>Link</button>
+              <div className="h-4 w-px bg-border mx-1" />
               <NewsletterImageUpload
                 disabled={!canEdit}
                 onImageUploaded={(_url: string, markdown: string) => {
@@ -213,122 +244,65 @@ export default function EditCampaignPage() {
                 }}
               />
             </div>
+            <textarea
+              value={content}
+              onChange={(e) => { setContent(e.target.value); setErrors(prev => ({ ...prev, content: "" })) }}
+              disabled={!canEdit}
+              rows={8}
+              placeholder="Escribe el contenido en Markdown..."
+              className={`w-full px-3 py-2 rounded-md border bg-background font-mono text-sm resize-y disabled:opacity-50 ${
+                errors.content ? "border-destructive" : ""
+              }`}
+            />
+            {errors.content && <p className="text-xs text-destructive mt-1">{errors.content}</p>}
           </div>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            disabled={!canEdit}
-            rows={12}
-            className="w-full border rounded px-3 py-2 bg-transparent font-mono text-sm disabled:opacity-50"
-          />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="block text-sm font-body">
-            Programar envío (opcional)
+        {/* Schedule */}
+        <div className="rounded-lg border bg-card p-4 space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Calendar className="h-4 w-4" />
+            Programación (opcional)
+          </div>
+
+          <div className="max-w-xs">
             <input
               type="datetime-local"
               value={scheduledAt}
               onChange={(e) => setScheduledAt(e.target.value)}
               disabled={!canEdit}
-              className="mt-1 w-full border rounded px-3 py-2 bg-transparent font-body disabled:opacity-50"
+              className="w-full px-3 py-2 rounded-md border bg-background text-sm disabled:opacity-50"
             />
-          </label>
-
-          <div>
-            <label className="block text-sm font-body mb-1">Filtrar por tags</label>
-            {canEdit ? (
-              <TagPicker value={tags} onChange={setTags} />
-            ) : (
-              <div className="text-sm text-muted-foreground">{tags.length ? tags.join(', ') : 'Sin tags'}</div>
-            )}
-          </div>
-        </div>
-
-        {/* Audience Selector */}
-        <div className="pt-4 border-t">
-          <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-body font-medium">
-              Audiencia ({selectedEmails.length} seleccionados)
-            </label>
-            {canEdit && (
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedEmails(allSubscribers)}
-                  className="text-xs px-2 py-1 border rounded hover:bg-muted"
-                >
-                  Seleccionar todos
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedEmails([])}
-                  className="text-xs px-2 py-1 border rounded hover:bg-muted"
-                >
-                  Limpiar
-                </button>
-              </div>
-            )}
-          </div>
-
-          {canEdit && (
-            <input
-              type="text"
-              placeholder="Buscar email..."
-              value={listQuery}
-              onChange={(e) => setListQuery(e.target.value)}
-              className="w-full border rounded px-3 py-2 bg-transparent font-body text-sm mb-2"
-            />
-          )}
-
-          <div className="max-h-48 overflow-auto rounded border divide-y">
-            {allSubscribers.length === 0 ? (
-              <div className="p-3 text-sm text-muted-foreground">No hay suscriptores</div>
-            ) : (
-              allSubscribers
-                .filter(email => !listQuery || email.toLowerCase().includes(listQuery.toLowerCase()))
-                .slice(0, 100)
-                .map(email => (
-                  <label key={email} className="flex items-center gap-2 px-3 py-2 hover:bg-muted/50 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedEmails.includes(email)}
-                      disabled={!canEdit}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedEmails(prev => [...prev, email])
-                        } else {
-                          setSelectedEmails(prev => prev.filter(x => x !== email))
-                        }
-                      }}
-                      className="rounded"
-                    />
-                    <span className="text-sm font-body">{email}</span>
-                    {currentRecipients.includes(email) && (
-                      <span className="text-xs text-emerald-400 ml-auto">guardado</span>
-                    )}
-                  </label>
-                ))
-            )}
-          </div>
-          {allSubscribers.length > 100 && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Mostrando 100 de {allSubscribers.length}. Usa el buscador para filtrar.
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Deja vacío para enviar manualmente
             </p>
-          )}
+          </div>
         </div>
 
-        <div className="flex gap-3 pt-4 border-t">
+        {/* Audience */}
+        <div className="space-y-2">
+          <AudienceSelector
+            selected={selectedEmails}
+            onChange={(emails) => { setSelectedEmails(emails); setErrors(prev => ({ ...prev, audience: "" })) }}
+            disabled={!canEdit}
+          />
+          {errors.audience && <p className="text-xs text-destructive">{errors.audience}</p>}
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-3 pt-2">
           <button
             onClick={handleSave}
             disabled={saving || !canEdit}
-            className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 text-sm font-medium"
           >
-            {saving ? "Guardando..." : `Guardar (${selectedEmails.length} destinatarios)`}
+            <Save className="h-4 w-4" />
+            {saving ? "Guardando..." : `Guardar cambios`}
           </button>
+
           <Link
             href={`/admin/newsletter/campaigns/${id}`}
-            className="px-4 py-2 rounded-md border hover:bg-muted"
+            className="px-4 py-2 rounded-md border hover:bg-muted text-sm"
           >
             Cancelar
           </Link>

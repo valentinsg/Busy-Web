@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
  * Usage: /api/files/image/entries/{id}/thumb.webp
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: { path: string[] } }
 ) {
   try {
@@ -23,7 +23,32 @@ export async function GET(
     // Get a signed URL that's valid for 1 hour
     const signedUrl = await getSignedUrlForR2(key, 3600);
 
-    // Redirect to the signed URL
+    // Check if client prefers redirect (faster) or proxy (more compatible)
+    const userAgent = request.headers.get('user-agent') || '';
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
+    const isSafari = /Safari/i.test(userAgent) && !/Chrome/i.test(userAgent);
+
+    // For mobile Safari, proxy the image directly to avoid redirect issues
+    if (isMobile && isSafari) {
+      const imageResponse = await fetch(signedUrl);
+
+      if (!imageResponse.ok) {
+        return NextResponse.json({ error: 'Image not found' }, { status: 404 });
+      }
+
+      const imageBuffer = await imageResponse.arrayBuffer();
+      const contentType = imageResponse.headers.get('content-type') || 'image/webp';
+
+      return new NextResponse(imageBuffer, {
+        status: 200,
+        headers: {
+          'Content-Type': contentType,
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+      });
+    }
+
+    // For other browsers, redirect is faster
     return NextResponse.redirect(signedUrl, 302);
   } catch (error) {
     console.error('Error generating signed URL:', error);

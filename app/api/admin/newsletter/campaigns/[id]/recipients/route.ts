@@ -13,10 +13,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       .eq("campaign_id", params.id)
       .order("created_at", { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('[recipients] Error:', error)
+      throw error
+    }
 
     return NextResponse.json({ ok: true, items: data || [] })
   } catch (e: unknown) {
+    console.error('[recipients] Catch error:', e)
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 400 })
   }
 }

@@ -3,6 +3,12 @@
 // Layout base para todos los emails de Busy Streetwear
 // =====================================================
 
+// Base URL for assets
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://busy.com.ar'
+
+// Logo URL (white logo on transparent background)
+export const LOGO_URL = `${BASE_URL}/brand/BUSY_LOGO%20TRANSPARENTE-3.png`
+
 /**
  * Colores de la marca Busy
  */
@@ -191,11 +197,13 @@ export function createEmailLayout(params: {
 </head>
 <body>
   ${params.preheader ? `<div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">${params.preheader}</div>` : ''}
-  
+
   <div class="email-container">
     <!-- Header -->
     <div class="email-header">
-      <a href="https://busy.com.ar" class="email-logo">BUSY</a>
+      <a href="${BASE_URL}" style="display: inline-block;">
+        <img src="${LOGO_URL}" alt="Busy Streetwear" style="max-height: 50px; width: auto;">
+      </a>
     </div>
 
     <!-- Body -->
@@ -203,17 +211,41 @@ export function createEmailLayout(params: {
       ${params.content}
     </div>
 
+    <!-- Quick Links -->
+    <div style="background-color: ${BUSY_COLORS.primary}; padding: 16px 24px; text-align: center;">
+      <a href="${BASE_URL}/products" style="color: #ffffff; text-decoration: none; font-size: 12px; margin: 0 10px;">TIENDA</a>
+      <a href="${BASE_URL}/blog" style="color: #ffffff; text-decoration: none; font-size: 12px; margin: 0 10px;">BLOG</a>
+      <a href="${BASE_URL}/playlists" style="color: #ffffff; text-decoration: none; font-size: 12px; margin: 0 10px;">PLAYLISTS</a>
+      <a href="${BASE_URL}/about" style="color: #ffffff; text-decoration: none; font-size: 12px; margin: 0 10px;">NOSOTROS</a>
+    </div>
+
+    <!-- Social Links -->
+    <div style="padding: 16px 24px; text-align: center; background-color: #fafafa;">
+      <a href="https://instagram.com/busy.streetwear" style="display: inline-block; margin: 0 6px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" style="width: 24px; height: 24px;">
+      </a>
+      <a href="https://tiktok.com/@busy.streetwear" style="display: inline-block; margin: 0 6px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok" style="width: 24px; height: 24px;">
+      </a>
+      <a href="https://youtube.com/@busystreetwear" style="display: inline-block; margin: 0 6px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/174/174883.png" alt="YouTube" style="width: 24px; height: 24px;">
+      </a>
+    </div>
+
     <!-- Footer -->
     <div class="email-footer">
       <p class="email-footer-text">
         <strong>Busy Streetwear</strong><br>
-        Tu marca de streetwear urbano
+        Cultura urbana, moda y comunidad desde Mar del Plata
       </p>
       <p class="email-footer-text">
-        📧 hola@busy.com.ar | 🌐 <a href="https://busy.com.ar" style="color: ${BUSY_COLORS.accent};">busy.com.ar</a>
+        📍 María Curie 5457, Mar del Plata, Buenos Aires
       </p>
       <p class="email-footer-text">
-        © ${new Date().getFullYear()} Busy Streetwear. Todos los derechos reservados.
+        📧 <a href="mailto:hola@busy.com.ar" style="color: ${BUSY_COLORS.textMuted};">hola@busy.com.ar</a> | 🌐 <a href="${BASE_URL}" style="color: ${BUSY_COLORS.accent};">busy.com.ar</a>
+      </p>
+      <p class="email-footer-text" style="margin-top: 12px;">
+        © 2024-${new Date().getFullYear()} Busy Streetwear. Todos los derechos reservados.
       </p>
     </div>
   </div>
