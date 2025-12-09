@@ -326,77 +326,90 @@ function createCampaignEmailHtml(params: {
     a { color: #ffffff; }
   </style>
 </head>
-<body style="background-color: #000000 !important; margin: 0; padding: 0; -webkit-background-color: #000000; -moz-background-color: #000000;" bgcolor="#000000">
-  <div class="email-wrapper" style="width: 100%; background-color: #000000 !important; padding: 0;" bgcolor="#000000">
-    <!--[if mso]>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#000000;">
-    <tr><td>
-    <![endif]-->
-    <div class="email-container" style="max-width: 600px; margin: 0 auto; background-color: #000000 !important;" bgcolor="#000000">
+<body style="background-color: #000000 !important; margin: 0; padding: 0;" bgcolor="#000000">
+  <!-- Wrapper table for full-width black background -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #000000 !important;" bgcolor="#000000">
+    <tr>
+      <td align="center" style="background-color: #000000 !important;" bgcolor="#000000">
+        <!-- Content table -->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background-color: #000000 !important;" bgcolor="#000000">
 
-      <!-- Header with Logo -->
-      <div style="padding: 32px 24px 24px 24px; text-align: center;">
-        <a href="${BASE_URL}" target="_blank">
-          <img src="${LOGO_URL}" alt="BUSY" style="height: 40px; width: auto;">
-        </a>
-      </div>
+          <!-- Header with Logo -->
+          <tr>
+            <td align="center" style="padding: 32px 24px 24px 24px; background-color: #000000;" bgcolor="#000000">
+              <a href="${BASE_URL}" target="_blank">
+                <img src="${LOGO_URL}" alt="BUSY" style="height: 40px; width: auto; display: block;">
+              </a>
+            </td>
+          </tr>
 
-      <!-- Main Content -->
-      <div style="padding: 0 24px 24px 24px; color: #ffffff; font-size: 15px; line-height: 1.7;">
-        ${params.content}
-        ${ctaButton}
-      </div>
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 0 24px 24px 24px; color: #ffffff; font-size: 15px; line-height: 1.7; background-color: #000000;" bgcolor="#000000">
+              ${params.content}
+              ${ctaButton}
+            </td>
+          </tr>
 
-      <!-- Divider -->
-      <div style="padding: 0 24px;">
-        <div style="border-top: 1px solid #222222;"></div>
-      </div>
+          <!-- Divider -->
+          <tr>
+            <td style="padding: 0 24px; background-color: #000000;" bgcolor="#000000">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="border-top: 1px solid #222222;"></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-      <!-- Footer Section -->
-      <div style="padding: 24px; text-align: center;">
+          <!-- Footer Section -->
+          <tr>
+            <td align="center" style="padding: 24px; background-color: #000000;" bgcolor="#000000">
+              <!-- Brand Info -->
+              <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600; color: #ffffff; letter-spacing: 1px;">BUSY STREETWEAR</p>
+              <p style="margin: 0 0 16px 0; font-size: 12px; color: #666666;">Cultura urbana desde Mar del Plata, Argentina</p>
 
-        <!-- Brand Info -->
-        <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600; color: #ffffff; letter-spacing: 1px;">BUSY STREETWEAR</p>
-        <p style="margin: 0 0 16px 0; font-size: 12px; color: #666666;">Cultura urbana desde Mar del Plata, Argentina</p>
+              ${christmasMessage}
 
-        ${christmasMessage}
+              <!-- Quick Links -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 16px 0;">
+                <tr>
+                  <td style="padding: 0 8px;"><a href="${BASE_URL}/products" style="color: #888888; text-decoration: none; font-size: 11px;">TIENDA</a></td>
+                  <td style="padding: 0 8px;"><a href="${BASE_URL}/blog" style="color: #888888; text-decoration: none; font-size: 11px;">BLOG</a></td>
+                  <td style="padding: 0 8px;"><a href="${BASE_URL}/playlists" style="color: #888888; text-decoration: none; font-size: 11px;">PLAYLISTS</a></td>
+                  <td style="padding: 0 8px;"><a href="${BASE_URL}/about" style="color: #888888; text-decoration: none; font-size: 11px;">NOSOTROS</a></td>
+                </tr>
+              </table>
 
-        <!-- Quick Links -->
-        <div style="padding: 16px 0;">
-          <a href="${BASE_URL}/products" style="color: #888888; text-decoration: none; font-size: 11px; margin: 0 8px;">TIENDA</a>
-          <a href="${BASE_URL}/blog" style="color: #888888; text-decoration: none; font-size: 11px; margin: 0 8px;">BLOG</a>
-          <a href="${BASE_URL}/playlists" style="color: #888888; text-decoration: none; font-size: 11px; margin: 0 8px;">PLAYLISTS</a>
-          <a href="${BASE_URL}/about" style="color: #888888; text-decoration: none; font-size: 11px; margin: 0 8px;">NOSOTROS</a>
-        </div>
+              <!-- Social Icons -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 8px 0 16px 0;">
+                <tr>
+                  <td style="padding: 0 6px;"><a href="https://instagram.com/busy.streetwear" target="_blank" style="text-decoration: none; color: #666666; font-size: 12px;">IG</a></td>
+                  <td style="color: #333333;">·</td>
+                  <td style="padding: 0 6px;"><a href="https://tiktok.com/@busy.streetwear" target="_blank" style="text-decoration: none; color: #666666; font-size: 12px;">TK</a></td>
+                  <td style="color: #333333;">·</td>
+                  <td style="padding: 0 6px;"><a href="https://youtube.com/@busystreetwear" target="_blank" style="text-decoration: none; color: #666666; font-size: 12px;">YT</a></td>
+                  <td style="color: #333333;">·</td>
+                  <td style="padding: 0 6px;"><a href="https://open.spotify.com/user/agustinmancho" target="_blank" style="text-decoration: none; color: #666666; font-size: 12px;">SP</a></td>
+                </tr>
+              </table>
 
-        <!-- Social Icons -->
-        <div style="padding: 8px 0 16px 0;">
-          <a href="https://instagram.com/busy.streetwear" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">IG</a>
-          <span style="color: #333333;">·</span>
-          <a href="https://tiktok.com/@busy.streetwear" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">TK</a>
-          <span style="color: #333333;">·</span>
-          <a href="https://youtube.com/@busystreetwear" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">YT</a>
-          <span style="color: #333333;">·</span>
-          <a href="https://open.spotify.com/user/agustinmancho" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">SP</a>
-        </div>
+              <!-- Legal -->
+              <p style="margin: 0; font-size: 10px; color: #444444;">
+                © 2024-${currentYear} Busy Streetwear · María Curie 5457, Mar del Plata
+              </p>
 
-        <!-- Legal -->
-        <p style="margin: 0; font-size: 10px; color: #444444;">
-          © 2024-${currentYear} Busy Streetwear · María Curie 5457, Mar del Plata
-        </p>
+              <!-- Unsubscribe -->
+              <p style="margin: 12px 0 0 0; font-size: 10px; color: #444444;">
+                <a href="${BASE_URL}/newsletter/unsubscribe?email={{email}}" style="color: #555555; text-decoration: underline;">Cancelar suscripción</a>
+              </p>
+            </td>
+          </tr>
 
-        <!-- Unsubscribe -->
-        <p style="margin: 12px 0 0 0; font-size: 10px; color: #444444;">
-          <a href="${BASE_URL}/newsletter/unsubscribe?email={{email}}" style="color: #555555; text-decoration: underline;">Cancelar suscripción</a>
-        </p>
-      </div>
-
-    </div>
-    <!--[if mso]>
-    </td></tr>
-    </table>
-    <![endif]-->
-  </div>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
 `
