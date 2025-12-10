@@ -2,6 +2,7 @@ import { validateCouponPercent } from "@/lib/checkout/coupons"
 import { logError, logInfo } from "@/lib/checkout/logger"
 import { calcOrderTotals } from "@/lib/checkout/totals"
 import { getPreferenceClient } from "@/lib/mp/client"
+import { getFinalPrice } from "@/lib/pricing"
 import { getSettingsServer } from "@/lib/repo/settings"
 import getServiceClient from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
@@ -52,19 +53,26 @@ export async function POST(req: NextRequest) {
     const productIds = [...new Set(body.items.map((i) => i.product_id))]
     const { data: products, error: prodErr } = await supabase
       .from("products")
-      .select("id, name, price, images")
+      .select("id, name, price, discount_percentage, discount_active, images")
       .in("id", productIds)
     if (prodErr) throw prodErr
     if (!products || products.length !== productIds.length) return badRequest("Some products not found")
 
     const itemsDetailed = body.items.map((it) => {
       const p = products.find((pp) => pp.id === it.product_id)!
-      const unit_price = Number(p.price)
+      // Usar getFinalPrice para aplicar descuentos de producto
+      const productForPricing = {
+        price: Number(p.price),
+        discountPercentage: p.discount_percentage ?? undefined,
+        discountActive: Boolean(p.discount_active),
+      }
+      const unit_price = getFinalPrice(productForPricing)
       return {
         product_id: it.product_id,
         title: p.name as string,
         quantity: it.quantity,
         unit_price,
+        original_price: Number(p.price),
         picture_url: Array.isArray(p.images) && p.images.length > 0 ? (p.images[0] as string) : undefined,
         variant_size: it.variant_size ?? null,
       }

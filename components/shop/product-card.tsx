@@ -13,6 +13,7 @@ import {
 import { useCart } from '@/hooks/use-cart'
 import { formatPrice, formatRating } from '@/lib/format'
 import { getImageConfig, normalizeImageUrl } from '@/lib/imageConfig'
+import { getDiscountPercentage, getFinalPrice, isDiscounted } from '@/lib/pricing'
 import type { Product } from '@/types'
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import Image from 'next/image'
@@ -548,14 +549,14 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
 
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-0.5">
-                {product.discountActive && product.discountPercentage && product.discountPercentage > 0 ? (
+                {isDiscounted(product) ? (
                   <>
                     <div className="flex items-center gap-2">
                       <span className="font-heading font-semibold text-sm sm:text-base">
-                        {formatPrice(product.price * (1 - product.discountPercentage / 100), product.currency)}
+                        {formatPrice(getFinalPrice(product), product.currency)}
                       </span>
                       <span className="text-[10px] sm:text-xs font-body font-semibold bg-muted text-foreground px-1.5 py-0.5 rounded">
-                        -{product.discountPercentage}%
+                        -{getDiscountPercentage(product)}%
                       </span>
                     </div>
                     <span className="font-heading text-[10px] sm:text-xs text-muted-foreground line-through">

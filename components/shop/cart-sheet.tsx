@@ -2,15 +2,15 @@
 
 import { useI18n } from "@/components/providers/i18n-provider"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -19,6 +19,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useCart } from "@/hooks/use-cart"
 import { computeShipping, computeTax } from "@/lib/checkout/totals"
 import { capitalize, formatPrice } from "@/lib/format"
+import { getFinalPrice, isDiscounted } from "@/lib/pricing"
 import { getSettingsClient } from "@/lib/repo/settings"
 import { Minus, Plus, ShoppingBag, X } from "lucide-react"
 import Image from "next/image"
@@ -151,7 +152,14 @@ export function CartSheet({ children }: CartSheetProps) {
                         <span>{item.selectedSize}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">{formatPrice(item.product.price)}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{formatPrice(getFinalPrice(item.product))}</span>
+                          {isDiscounted(item.product) && (
+                            <span className="text-xs text-muted-foreground line-through">
+                              {formatPrice(item.product.price)}
+                            </span>
+                          )}
+                        </div>
 
                         {/* Quantity Controls */}
                         <div className="flex items-center space-x-1">

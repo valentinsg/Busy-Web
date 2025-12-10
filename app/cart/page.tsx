@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/hooks/use-cart"
 import { computeShipping, computeTax } from "@/lib/checkout/totals"
 import { capitalize, formatPrice } from "@/lib/format"
+import { getFinalPrice, getItemTotal, isDiscounted } from "@/lib/pricing"
 import { ArrowLeft, Minus, Plus, ShoppingBag, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -209,8 +210,15 @@ export default function CartPage() {
                         </div>
 
                         <div className="text-right">
-                          <div className="font-semibold">{formatPrice(item.product.price * item.quantity)}</div>
-                          <div className="font-body text-sm text-muted-foreground">{formatPrice(item.product.price)}</div>
+                          <div className="font-semibold">{formatPrice(getItemTotal(item.product, item.quantity))}</div>
+                          <div className="flex items-center gap-2 justify-end">
+                            <span className="font-body text-sm text-muted-foreground">{formatPrice(getFinalPrice(item.product))}</span>
+                            {isDiscounted(item.product) && (
+                              <span className="font-body text-xs text-muted-foreground line-through">
+                                {formatPrice(item.product.price)}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

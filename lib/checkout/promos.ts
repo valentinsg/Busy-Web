@@ -1,3 +1,4 @@
+import { getFinalPrice } from "@/lib/pricing";
 import type { CartItem } from "@/types";
 
 /**
@@ -107,8 +108,8 @@ export function calculatePromoDiscount(items: CartItem[]): {
 
     if (completeSets === 0) continue
 
-    // Ordenar items por precio (del más barato al más caro)
-    const sortedItems = [...groupItems].sort((a, b) => a.product.price - b.product.price)
+    // Ordenar items por precio final (del más barato al más caro)
+    const sortedItems = [...groupItems].sort((a, b) => getFinalPrice(a.product) - getFinalPrice(b.product))
 
     // Calcular descuento: por cada set completo, regalamos (buy - pay) items
     const freeItemsPerSet = promo.buy - promo.pay
@@ -122,7 +123,7 @@ export function calculatePromoDiscount(items: CartItem[]): {
       if (remainingFreeItems === 0) break
 
       const itemsToDiscount = Math.min(item.quantity, remainingFreeItems)
-      setDiscount += item.product.price * itemsToDiscount
+      setDiscount += getFinalPrice(item.product) * itemsToDiscount
       remainingFreeItems -= itemsToDiscount
     }
 
@@ -155,7 +156,7 @@ export function calculateCartTotals(items: CartItem[]): {
     discountAmount: number
   }>
 } {
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+  const subtotal = items.reduce((sum, item) => sum + getFinalPrice(item.product) * item.quantity, 0)
   const { discount, appliedPromos } = calculatePromoDiscount(items)
 
   return {

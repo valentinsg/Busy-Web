@@ -1,3 +1,4 @@
+import { getFinalPrice } from "@/lib/pricing"
 import type { AppliedPromo, BundleConfig, CartItem, ComboConfig, FixedAmountConfig, NthUnitDiscountConfig, NxMConfig, PercentageOffConfig, Promotion } from "@/types"
 
 /**
@@ -44,8 +45,8 @@ function calculateNxMDiscount(items: CartItem[], config: NxMConfig): number {
   const freeItemsPerSet = buy - pay
   const totalFreeItems = completeSets * freeItemsPerSet
 
-  // Ordenar items por precio (más barato primero)
-  const sortedItems = [...items].sort((a, b) => a.product.price - b.product.price)
+  // Ordenar items por precio final (más barato primero)
+  const sortedItems = [...items].sort((a, b) => getFinalPrice(a.product) - getFinalPrice(b.product))
 
   // Aplicar descuento sobre los más baratos
   let remainingFreeItems = totalFreeItems
@@ -55,7 +56,7 @@ function calculateNxMDiscount(items: CartItem[], config: NxMConfig): number {
     if (remainingFreeItems === 0) break
 
     const itemsToDiscount = Math.min(item.quantity, remainingFreeItems)
-    discount += item.product.price * itemsToDiscount
+    discount += getFinalPrice(item.product) * itemsToDiscount
     remainingFreeItems -= itemsToDiscount
   }
 
@@ -66,7 +67,7 @@ function calculateNxMDiscount(items: CartItem[], config: NxMConfig): number {
  * Calcula descuento para promoción de porcentaje
  */
 function calculatePercentageDiscount(items: CartItem[], config: PercentageOffConfig): number {
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+  const subtotal = items.reduce((sum, item) => sum + getFinalPrice(item.product) * item.quantity, 0)
   return (subtotal * config.discount_percent) / 100
 }
 
@@ -74,7 +75,7 @@ function calculatePercentageDiscount(items: CartItem[], config: PercentageOffCon
  * Calcula descuento de monto fijo
  */
 function calculateFixedDiscount(items: CartItem[], config: FixedAmountConfig): number {
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+  const subtotal = items.reduce((sum, item) => sum + getFinalPrice(item.product) * item.quantity, 0)
   return Math.min(config.discount_amount, subtotal)
 }
 
@@ -106,7 +107,7 @@ function calculateComboDiscount(items: CartItem[], config: ComboConfig, promotio
     })
   )
 
-  const comboSubtotal = comboItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+  const comboSubtotal = comboItems.reduce((sum, item) => sum + getFinalPrice(item.product) * item.quantity, 0)
 
   if (discount_percent) {
     return (comboSubtotal * discount_percent) / 100
@@ -137,7 +138,7 @@ function calculateBundleDiscount(items: CartItem[], config: BundleConfig): numbe
     sku_groups.some(group => group.includes(item.product.sku))
   )
 
-  const bundleSubtotal = bundleItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+  const bundleSubtotal = bundleItems.reduce((sum, item) => sum + getFinalPrice(item.product) * item.quantity, 0)
 
   if (discount_percent) {
     return (bundleSubtotal * discount_percent) / 100
@@ -174,8 +175,8 @@ function calculateNthUnitDiscount(items: CartItem[], config: NthUnitDiscountConf
     // Calcular cuántas unidades con descuento hay
     const discountedUnits = Math.floor(totalQty / nth_unit)
 
-    // Ordenar por precio (más barato primero para maximizar ahorro del cliente)
-    const sortedItems = [...skuItems].sort((a, b) => a.product.price - b.product.price)
+    // Ordenar por precio final (más barato primero para maximizar ahorro del cliente)
+    const sortedItems = [...skuItems].sort((a, b) => getFinalPrice(a.product) - getFinalPrice(b.product))
 
     // Aplicar descuento
     let remainingDiscountedUnits = discountedUnits
@@ -183,7 +184,7 @@ function calculateNthUnitDiscount(items: CartItem[], config: NthUnitDiscountConf
       if (remainingDiscountedUnits === 0) break
 
       const unitsToDiscount = Math.min(item.quantity, remainingDiscountedUnits)
-      const discountPerUnit = (item.product.price * discount_percent) / 100
+      const discountPerUnit = (getFinalPrice(item.product) * discount_percent) / 100
       totalDiscount += discountPerUnit * unitsToDiscount
       remainingDiscountedUnits -= unitsToDiscount
     }

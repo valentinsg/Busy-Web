@@ -2,6 +2,7 @@
 
 import { calculateAllPromotions } from "@/lib/checkout/promo-engine"
 import { validateCoupon, type Coupon } from "@/lib/coupons"
+import { getFinalPrice } from "@/lib/pricing"
 import type { AppliedPromo, CartItem, Product, Promotion } from "@/types"
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
@@ -161,11 +162,13 @@ export const useCart = create<CartStore>()(
 
       getTotalPrice: () => {
         // Backward compatibility, same as getSubtotal
-        return get().items.reduce((total, item) => total + item.product.price * item.quantity, 0)
+        // Usa getFinalPrice para considerar descuentos de producto
+        return get().items.reduce((total, item) => total + getFinalPrice(item.product) * item.quantity, 0)
       },
 
       getSubtotal: () => {
-        return get().items.reduce((total, item) => total + item.product.price * item.quantity, 0)
+        // Usa getFinalPrice para considerar descuentos de producto
+        return get().items.reduce((total, item) => total + getFinalPrice(item.product) * item.quantity, 0)
       },
 
       getPromoDiscount: () => {

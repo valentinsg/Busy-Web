@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/hooks/use-translations"
 import { formatPrice, formatRating } from "@/lib/format"
+import { getDiscountPercentage, getFinalPrice, isDiscounted } from "@/lib/pricing"
 import { getSettingsClient } from "@/lib/repo/settings"
 import { addReview, averageRating, getReviews, type Review } from "@/lib/reviews"
 import type { Product } from "@/types"
@@ -74,13 +75,13 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           event: "view_item",
           ecommerce: {
             currency: product.currency || "ARS",
-            value: Number((product.price).toFixed(2)),
+            value: Number((getFinalPrice(product)).toFixed(2)),
             items: [
               {
                 item_id: product.id,
                 item_name: product.name,
                 item_category: product.category,
-                price: product.price,
+                price: getFinalPrice(product),
                 quantity: 1,
               },
             ],
@@ -181,14 +182,14 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               </div>
             </div>
             <div className="mb-6">
-              {product.discountActive && product.discountPercentage && product.discountPercentage > 0 ? (
+              {isDiscounted(product) ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-bold font-heading text-red-500">
-                      {formatPrice(product.price * (1 - product.discountPercentage / 100), product.currency)}
+                      {formatPrice(getFinalPrice(product), product.currency)}
                     </span>
                     <Badge variant="destructive" className="text-sm font-semibold px-2 py-1">
-                      -{product.discountPercentage}% OFF
+                      -{getDiscountPercentage(product)}% OFF
                     </Badge>
                   </div>
                   <div className="text-xl font-heading text-muted-foreground line-through">

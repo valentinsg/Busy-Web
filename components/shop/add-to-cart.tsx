@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCart } from "@/hooks/use-cart"
 import { useTranslations } from "@/hooks/use-translations"
 import { capitalize } from "@/lib/format"
+import { getFinalPrice } from "@/lib/pricing"
 import type { Product } from "@/types"
 import { Minus, Plus, ShoppingCart } from "lucide-react"
 import * as React from "react"
@@ -39,13 +40,13 @@ export function AddToCart({ product, className = "", sizeLabel }: AddToCartProps
           event: "add_to_cart",
           ecommerce: {
             currency: product.currency || "ARS",
-            value: Number((product.price * quantity).toFixed(2)),
+            value: Number((getFinalPrice(product) * quantity).toFixed(2)),
             items: [
               {
                 item_id: product.id,
                 item_name: product.name,
                 item_category: product.category,
-                price: product.price,
+                price: getFinalPrice(product),
                 quantity,
                 item_variant: `${selectedSize}|${selectedColor}`,
               },

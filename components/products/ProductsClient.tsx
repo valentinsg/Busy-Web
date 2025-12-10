@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/sheet'
 import { getColorDisplayName, getColorHex, normalizeColors, type StandardColor } from '@/lib/color-utils'
 import { capitalize } from '@/lib/format'
+import { isOnSale, sortByDiscount } from '@/lib/pricing'
 import { getProductsAsync, searchProductsAsync, type SortBy } from '@/lib/repo/products'
 import type { FilterOptions, Product } from '@/types'
 import { Filter, Search, SlidersHorizontal } from 'lucide-react'
@@ -35,15 +36,7 @@ type ProductsClientProps = {
   initialProducts?: Product[]
 }
 
-type ProductWithDiscount = Product & {
-  discountActive?: boolean
-  discountPercentage?: number
-}
-
-function hasActiveDiscount(product: ProductWithDiscount | Product): boolean {
-  const p = product as ProductWithDiscount
-  return Boolean(p.discountActive && p.discountPercentage && p.discountPercentage > 0)
-}
+// Usa isOnSale de lib/pricing para verificar descuentos
 
 export default function ProductsClient({ initialCategory, initialProducts = [] }: ProductsClientProps) {
   const { t } = useI18n()
@@ -144,7 +137,7 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
           const filtered = list.filter((p) => {
             if (filters.category === 'ofertas') {
               // Filter only products with active discount
-              if (!hasActiveDiscount(p)) return false
+              if (!isOnSale(p)) return false
             } else if (filters.category && p.category !== filters.category) {
               return false
             }
@@ -165,9 +158,9 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
           const afterColor = filters.color
             ? list.filter((p) => normalizeColors(p.colors).includes(filters.color as StandardColor))
             : list
-          // Filter for "ofertas" category
+          // Filter for "ofertas" category and sort by discount
           const finalList = filters.category === 'ofertas'
-            ? afterColor.filter((p) => hasActiveDiscount(p))
+            ? sortByDiscount(afterColor.filter((p) => isOnSale(p)))
             : afterColor
           if (!cancelled) setAsyncProducts(finalList)
         }

@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast"
 import { trackBeginCheckout } from "@/lib/analytics/ecommerce"
 import { computeShipping, computeTax } from "@/lib/checkout/totals"
 import { capitalize, formatPrice } from "@/lib/format"
+import { getItemTotal, isDiscounted } from "@/lib/pricing"
 import { getSettingsClient } from "@/lib/repo/settings"
 import { getProvinceFromPostalCode, isMarDelPlataPostalCode, isPostalCodeValidForProvince } from "@/lib/shipping/postal-codes"
 import { AlertTriangle, ArrowLeft, CreditCard, Gift, Loader2, Mail, Package, Truck } from "lucide-react"
@@ -528,7 +529,14 @@ export default function CheckoutPage() {
                         <div className="text-xs text-muted-foreground">
                           {capitalize(item.selectedColor)} • {item.selectedSize} • Cant: {item.quantity}
                         </div>
-                        <div className="font-medium text-sm">{formatPrice(item.product.price * item.quantity)}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{formatPrice(getItemTotal(item.product, item.quantity))}</span>
+                          {isDiscounted(item.product) && (
+                            <span className="text-xs text-muted-foreground line-through">
+                              {formatPrice(item.product.price * item.quantity)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

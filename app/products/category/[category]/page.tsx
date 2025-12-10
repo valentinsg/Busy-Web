@@ -124,12 +124,9 @@ export default function ProductsByCategoryPage({ params }: { params: { category:
         }}
       />
       <div className="max-w-7xl mx-auto">
-        {/* SEO Header with description */}
+        {/* SEO Header - descripción solo en metadata, no visible */}
         <header className="mb-8">
           <h1 className="font-heading text-2xl md:text-3xl font-bold mb-3">{label}</h1>
-          {content?.description && (
-            <p className="text-muted-foreground font-body max-w-2xl">{content.description}</p>
-          )}
           {/* Category quick links */}
           <div className="flex flex-wrap gap-2 mt-4">
             {Object.entries(categoryLabels)

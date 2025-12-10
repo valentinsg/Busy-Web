@@ -15,10 +15,10 @@ interface FilesItemProps {
 
 /**
  * Convert R2 direct URLs to proxy URLs that use signed URLs
- * This bypasses 401 errors when R2 public access isn't configured correctly
+ * Returns null if URL is invalid to prevent rendering broken images
  */
-function getProxyUrl(url: string | undefined): string {
-  if (!url) return '';
+function getProxyUrl(url: string | undefined | null): string | null {
+  if (!url || typeof url !== 'string' || url.trim() === '') return null;
 
   // Check if it's an R2 URL
   const r2Match = url.match(/https:\/\/[^/]+\.r2\.dev\/(.+)/);
@@ -30,20 +30,30 @@ function getProxyUrl(url: string | undefined): string {
   return url;
 }
 
+/**
+ * Build fallback chain for an entry
+ * Returns array of valid proxy URLs in order of preference
+ */
+function buildFallbackChain(entry: ArchiveEntry | null | undefined): string[] {
+  if (!entry) return [];
+
+  // For grid items, prefer thumb first (smaller, faster)
+  const urls = [entry.thumb_url, entry.medium_url, entry.full_url];
+  return urls
+    .map(url => getProxyUrl(url))
+    .filter((url): url is string => url !== null);
+}
+
 export function FilesItem({ entry, className }: FilesItemProps) {
   const [currentUrlIndex, setCurrentUrlIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const dominantColor = entry.colors?.[0] || '#1a1a1a';
 
-  // Build fallback chain: thumb → medium → full
-  const imageUrls = [
-    entry.thumb_url,
-    entry.medium_url,
-    entry.full_url,
-  ].filter(Boolean) as string[];
+  // Build fallback chain: thumb → medium → full (already proxied)
+  const imageUrls = buildFallbackChain(entry);
 
-  const currentUrl = imageUrls[currentUrlIndex];
+  const currentUrl = imageUrls[currentUrlIndex] ?? null;
   const hasMoreFallbacks = currentUrlIndex < imageUrls.length - 1;
   const allFailed = currentUrlIndex >= imageUrls.length || imageUrls.length === 0;
 
@@ -70,7 +80,7 @@ export function FilesItem({ entry, className }: FilesItemProps) {
           {!allFailed && currentUrl ? (
             <Image
               key={currentUrl}
-              src={getProxyUrl(currentUrl)}
+              src={currentUrl}
               alt={entry.microcopy || 'Imagen del archivo'}
               width={400}
               height={400}

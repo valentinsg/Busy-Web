@@ -21,14 +21,44 @@ interface FilesDetailProps {
 
 /**
  * Convert R2 direct URLs to proxy URLs that use signed URLs
+ * Returns null if URL is invalid to prevent rendering broken images
  */
-function getProxyUrl(url: string | undefined): string {
-  if (!url) return '';
+function getProxyUrl(url: string | undefined | null): string | null {
+  if (!url || typeof url !== 'string' || url.trim() === '') return null;
   const r2Match = url.match(/https:\/\/[^/]+\.r2\.dev\/(.+)/);
   if (r2Match) {
     return `/api/files/image/${r2Match[1]}`;
   }
   return url;
+}
+
+/**
+ * Get a safe image URL from an entry, with fallback chain
+ * Returns the first valid URL from: full_url -> medium_url -> thumb_url
+ */
+function getSafeImageUrl(entry: ArchiveEntry | null | undefined): string | null {
+  if (!entry) return null;
+
+  // Try full_url first, then medium, then thumb
+  const candidates = [entry.full_url, entry.medium_url, entry.thumb_url];
+  for (const url of candidates) {
+    const proxyUrl = getProxyUrl(url);
+    if (proxyUrl) return proxyUrl;
+  }
+  return null;
+}
+
+/**
+ * Build fallback chain for an entry
+ * Returns array of valid proxy URLs in order of preference
+ */
+function buildFallbackChain(entry: ArchiveEntry | null | undefined): string[] {
+  if (!entry) return [];
+
+  const urls = [entry.full_url, entry.medium_url, entry.thumb_url];
+  return urls
+    .map(url => getProxyUrl(url))
+    .filter((url): url is string => url !== null);
 }
 
 // Vibes mode filter options
@@ -65,14 +95,15 @@ export function FilesDetail({ entry }: FilesDetailProps) {
   const [imageError, setImageError] = useState(false);
   const [currentUrlIndex, setCurrentUrlIndex] = useState(0);
 
-  // Build fallback chain for main image: full → medium → thumb
-  const imageUrls = [
-    entry.full_url,
-    entry.medium_url,
-    entry.thumb_url,
-  ].filter(Boolean) as string[];
+  // Fullscreen-specific loading states
+  const [fullscreenLoading, setFullscreenLoading] = useState(true);
+  const [fullscreenError, setFullscreenError] = useState(false);
+  const [fullscreenUrlIndex, setFullscreenUrlIndex] = useState(0);
 
-  const currentImageUrl = imageUrls[currentUrlIndex];
+  // Build fallback chain for main image: full → medium → thumb
+  const imageUrls = buildFallbackChain(entry);
+
+  const currentImageUrl = imageUrls[currentUrlIndex] ?? null;
   const hasMoreFallbacks = currentUrlIndex < imageUrls.length - 1;
 
   // Fetch recommendations for fullscreen navigation
@@ -89,7 +120,23 @@ export function FilesDetail({ entry }: FilesDetailProps) {
     refetchOnWindowFocus: false,
   });
 
-  const currentFullscreenEntry = fullscreenIndex === -1 ? entry : recommendations[fullscreenIndex];
+  // Safely get current fullscreen entry - validate index bounds
+  const currentFullscreenEntry = useMemo(() => {
+    if (fullscreenIndex === -1) return entry;
+    if (fullscreenIndex >= 0 && fullscreenIndex < recommendations.length) {
+      return recommendations[fullscreenIndex];
+    }
+    // Invalid index - fallback to main entry
+    return entry;
+  }, [fullscreenIndex, entry, recommendations]);
+
+  // Build fallback chain for fullscreen entry (must be after currentFullscreenEntry)
+  const fullscreenUrls = useMemo(() =>
+    buildFallbackChain(currentFullscreenEntry),
+    [currentFullscreenEntry]
+  );
+  const currentFullscreenUrl = fullscreenUrls[fullscreenUrlIndex] ?? null;
+  const hasMoreFullscreenFallbacks = fullscreenUrlIndex < fullscreenUrls.length - 1;
 
   // Get current entry's like state
   const currentEntryId = currentFullscreenEntry?.id || entry.id;
@@ -174,6 +221,11 @@ export function FilesDetail({ entry }: FilesDetailProps) {
   }, [fullscreen]);
 
   const goToNext = () => {
+    // Reset fullscreen loading state for new image
+    setFullscreenLoading(true);
+    setFullscreenError(false);
+    setFullscreenUrlIndex(0);
+
     setFullscreenIndex((prev) => {
       const next = prev + 1;
       return next >= recommendations.length ? -1 : next;
@@ -182,6 +234,11 @@ export function FilesDetail({ entry }: FilesDetailProps) {
   };
 
   const goToPrev = () => {
+    // Reset fullscreen loading state for new image
+    setFullscreenLoading(true);
+    setFullscreenError(false);
+    setFullscreenUrlIndex(0);
+
     setFullscreenIndex((prev) => {
       const next = prev - 1;
       return next < -1 ? recommendations.length - 1 : next;
@@ -441,7 +498,10 @@ export function FilesDetail({ entry }: FilesDetailProps) {
                     Copiar link
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => handleDownload(getProxyUrl(entry.full_url), entry.id)}
+                    onClick={() => {
+                      const url = getProxyUrl(entry.full_url);
+                      if (url) handleDownload(url, entry.id);
+                    }}
                   >
                     <Download className="mr-2 h-4 w-4" />
                     {vibesMode && selectedFilter ? `Descargar (${VIBES_FILTERS.find(f => f.id === selectedFilter)?.label})` : 'Descargar'}
@@ -467,7 +527,7 @@ export function FilesDetail({ entry }: FilesDetailProps) {
               {currentImageUrl && !imageError ? (
                 <Image
                   key={currentImageUrl}
-                  src={getProxyUrl(currentImageUrl)}
+                  src={currentImageUrl}
                   alt={entry.title || entry.microcopy || 'Busy Files'}
                   width={800}
                   height={800}
@@ -605,7 +665,8 @@ export function FilesDetail({ entry }: FilesDetailProps) {
       </div>
 
       {/* Fullscreen mode - rendered via portal to cover everything */}
-      {fullscreen && currentFullscreenEntry && typeof document !== 'undefined' && createPortal(
+      {/* Only render if we have a valid entry AND a valid image URL */}
+      {fullscreen && currentFullscreenEntry && currentFullscreenUrl && typeof document !== 'undefined' && createPortal(
         <div
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black touch-pan-y"
           onClick={(e) => {
@@ -687,15 +748,60 @@ export function FilesDetail({ entry }: FilesDetailProps) {
               handleLike();
             }}
           >
-            <Image
-              src={getProxyUrl(currentFullscreenEntry.full_url)}
-              alt={currentFullscreenEntry.title || currentFullscreenEntry.microcopy || 'Busy Files'}
-              fill
-              className={cn('object-contain transition-all duration-500', filterClass)}
-              sizes="100vw"
-              priority
-              unoptimized
-            />
+            {/* Loading skeleton */}
+            {fullscreenLoading && !fullscreenError && (
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-12 h-12 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  <span className="font-body text-sm text-white/50">Cargando...</span>
+                </div>
+              </div>
+            )}
+
+            {/* Error state */}
+            {fullscreenError && (
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <div className="flex flex-col items-center gap-4 p-8">
+                  <svg className="w-16 h-16 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="font-body text-sm text-white/50 text-center">
+                    No se pudo cargar la imagen
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Actual image - only render if we have a valid URL */}
+            {!fullscreenError && (
+              <Image
+                src={currentFullscreenUrl}
+                alt={currentFullscreenEntry.title || currentFullscreenEntry.microcopy || 'Busy Files'}
+                fill
+                className={cn(
+                  'object-contain transition-all duration-500',
+                  filterClass,
+                  fullscreenLoading ? 'opacity-0' : 'opacity-100'
+                )}
+                sizes="100vw"
+                priority
+                unoptimized
+                onLoad={() => {
+                  setFullscreenLoading(false);
+                }}
+                onError={() => {
+                  console.error('Fullscreen image load failed:', currentFullscreenUrl);
+                  if (hasMoreFullscreenFallbacks) {
+                    // Try next URL in fallback chain
+                    setFullscreenUrlIndex(prev => prev + 1);
+                  } else {
+                    // No more fallbacks, show error
+                    setFullscreenLoading(false);
+                    setFullscreenError(true);
+                  }
+                }}
+              />
+            )}
           </div>
 
           {/* Info panel - title and description */}
@@ -774,7 +880,10 @@ export function FilesDetail({ entry }: FilesDetailProps) {
                       Copiar link
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => handleDownload(getProxyUrl(currentFullscreenEntry.full_url), currentFullscreenEntry.id)}
+                      onClick={() => {
+                      const url = getProxyUrl(currentFullscreenEntry.full_url);
+                      if (url) handleDownload(url, currentFullscreenEntry.id);
+                    }}
                       className="gap-2 cursor-pointer"
                     >
                       <Download className="h-4 w-4" />
