@@ -125,7 +125,9 @@ export default function ProductsClient({ initialCategory, initialProducts = [] }
       setError(null)
       try {
         const params = {
-          category: filters.category,
+          // Para la categoría "ofertas" NO filtramos por category en Supabase,
+          // así podemos traer todas las categorías y luego filtrar por descuento
+          category: filters.category === 'ofertas' ? undefined : filters.category,
           color: filters.color,
           size: filters.size,
           minPrice: filters.minPrice,
