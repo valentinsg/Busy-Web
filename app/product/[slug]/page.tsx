@@ -1,6 +1,5 @@
 import { ProductDetail } from "@/components/shop/product-detail"
 import { getFinalPrice } from "@/lib/pricing"
-import { getProductById } from "@/lib/products"
 import { getProductByIdAsync, getProductsAsync } from "@/lib/repo/products"
 import type { Product } from "@/types"
 import type { Metadata } from "next"
@@ -13,14 +12,8 @@ interface ProductPageProps {
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  // Prefer Supabase data (includes measurementsBySize), fallback to local JSON
-  let product: Product | undefined
-  try {
-    product = await getProductByIdAsync(params.slug)
-  } catch {}
-  if (!product) {
-    product = getProductById(params.slug)
-  }
+  // Use Supabase as single source of truth
+  const product = await getProductByIdAsync(params.slug)
 
   if (!product) {
     return {

@@ -1,13 +1,13 @@
 "use client"
 export const dynamic = "force-dynamic"
 
-import React, { useEffect, useMemo, useState } from "react"
-import Link from "next/link"
+import { AnalyticsSkeleton } from "@/components/admin/analytics-skeleton"
+import { BalanceKPIs } from "@/components/admin/balance-kpis"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
-import { BalanceKPIs } from "@/components/admin/balance-kpis"
-import { CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell } from "recharts"
-import { AnalyticsSkeleton } from "@/components/admin/analytics-skeleton"
+import Link from "next/link"
+import { useEffect, useMemo, useState } from "react"
+import { Area, AreaChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 // Helper para generar todos los días entre dos fechas
 function getAllDatesInRange(from: string, to: string): string[] {
@@ -232,23 +232,23 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-semibold">Inteligencia comercial</h1>
+          <h1 className="font-heading text-xl sm:text-2xl font-semibold">Inteligencia comercial</h1>
           <p className="text-sm text-muted-foreground">KPIs, series temporales y distribución por canales.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           {analyticsUrl && (
             <a
               href={analyticsUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-sm rounded border px-3 py-1 hover:bg-muted"
+              className="text-sm rounded border px-3 py-2 hover:bg-muted text-center"
             >
               Ver Web Analytics
             </a>
           )}
-          <Link href="/admin" className="text-sm text-primary underline-offset-2 hover:underline">Volver al panel</Link>
+          <Link href="/admin" className="text-sm text-primary underline-offset-2 hover:underline text-center py-2">Volver al panel</Link>
         </div>
       </div>
 
@@ -261,11 +261,11 @@ export default function AnalyticsPage() {
       </section>
 
       {/* Controles minimal */}
-      <section className="flex flex-wrap items-center gap-2">
+      <section className="flex flex-wrap gap-2">
         <button
           onClick={() => handlePreset('7d')}
           className={cn(
-            "px-4 py-2 text-sm font-medium rounded-lg transition-all",
+            "px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all",
             activePreset === '7d'
               ? "bg-primary text-primary-foreground shadow-sm"
               : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -276,7 +276,7 @@ export default function AnalyticsPage() {
         <button
           onClick={() => handlePreset('30d')}
           className={cn(
-            "px-4 py-2 text-sm font-medium rounded-lg transition-all",
+            "px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all",
             activePreset === '30d'
               ? "bg-primary text-primary-foreground shadow-sm"
               : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -287,7 +287,7 @@ export default function AnalyticsPage() {
         <button
           onClick={() => handlePreset('ytd')}
           className={cn(
-            "px-4 py-2 text-sm font-medium rounded-lg transition-all",
+            "px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all",
             activePreset === 'ytd'
               ? "bg-primary text-primary-foreground shadow-sm"
               : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -298,7 +298,7 @@ export default function AnalyticsPage() {
         <button
           onClick={() => handlePreset('all')}
           className={cn(
-            "px-4 py-2 text-sm font-medium rounded-lg transition-all",
+            "px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all",
             activePreset === 'all'
               ? "bg-primary text-primary-foreground shadow-sm"
               : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -306,20 +306,22 @@ export default function AnalyticsPage() {
         >
           Todo el tiempo
         </button>
-        <div className="ml-auto flex items-center gap-2">
-          <input
-            type="date"
-            value={from}
-            onChange={(e) => { setFrom(e.target.value); setActivePreset('') }}
-            className="px-3 py-2 text-sm border rounded-lg bg-background"
-          />
-          <span className="text-muted-foreground">→</span>
-          <input
-            type="date"
-            value={to}
-            onChange={(e) => { setTo(e.target.value); setActivePreset('') }}
-            className="px-3 py-2 text-sm border rounded-lg bg-background"
-          />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <input
+              type="date"
+              value={from}
+              onChange={(e) => { setFrom(e.target.value); setActivePreset('') }}
+              className="px-2 py-2 text-xs sm:text-sm border rounded-lg bg-background flex-1 sm:flex-none"
+            />
+            <span className="text-muted-foreground">→</span>
+            <input
+              type="date"
+              value={to}
+              onChange={(e) => { setTo(e.target.value); setActivePreset('') }}
+              className="px-2 py-2 text-xs sm:text-sm border rounded-lg bg-background flex-1 sm:flex-none"
+            />
+          </div>
         </div>
       </section>
 
@@ -338,9 +340,9 @@ export default function AnalyticsPage() {
           </section>
 
           {/* Time series chart */}
-          <section className="rounded-lg border bg-card p-6 shadow-sm space-y-4">
+          <section className="rounded-lg border bg-card p-4 sm:p-6 shadow-sm space-y-4">
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
                   <div className="font-semibold text-lg">Evolución de ingresos</div>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -348,12 +350,12 @@ export default function AnalyticsPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap gap-1 sm:gap-2">
                 <span className="text-xs text-muted-foreground">Filtrar ingresos:</span>
                 <button
                   onClick={() => setCategoryFilter('all')}
                   className={cn(
-                    "px-3 py-1 text-xs rounded-md transition-colors",
+                    "px-2 py-1 text-xs rounded-md transition-colors",
                     categoryFilter === 'all'
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted hover:bg-muted/80"
@@ -364,7 +366,7 @@ export default function AnalyticsPage() {
                 <button
                   onClick={() => setCategoryFilter('remera')}
                   className={cn(
-                    "px-3 py-1 text-xs rounded-md transition-colors",
+                    "px-2 py-1 text-xs rounded-md transition-colors",
                     categoryFilter === 'remera'
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted hover:bg-muted/80"
@@ -375,7 +377,7 @@ export default function AnalyticsPage() {
                 <button
                   onClick={() => setCategoryFilter('buzo')}
                   className={cn(
-                    "px-3 py-1 text-xs rounded-md transition-colors",
+                    "px-2 py-1 text-xs rounded-md transition-colors",
                     categoryFilter === 'buzo'
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted hover:bg-muted/80"
@@ -386,7 +388,7 @@ export default function AnalyticsPage() {
                 <button
                   onClick={() => setCategoryFilter('pantalon')}
                   className={cn(
-                    "px-3 py-1 text-xs rounded-md transition-colors",
+                    "px-2 py-1 text-xs rounded-md transition-colors",
                     categoryFilter === 'pantalon'
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted hover:bg-muted/80"
@@ -397,7 +399,7 @@ export default function AnalyticsPage() {
                 <button
                   onClick={() => setCategoryFilter('accesorio')}
                   className={cn(
-                    "px-3 py-1 text-xs rounded-md transition-colors",
+                    "px-2 py-1 text-xs rounded-md transition-colors",
                     categoryFilter === 'accesorio'
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted hover:bg-muted/80"
@@ -407,7 +409,7 @@ export default function AnalyticsPage() {
                 </button>
               </div>
             </div>
-            <div className="w-full h-[320px]">
+            <div className="w-full h-[280px] sm:h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
                   <defs>
@@ -449,9 +451,9 @@ export default function AnalyticsPage() {
           </section>
 
           {/* Revenue by channel - Donut Chart */}
-          <section className="rounded-lg border bg-card p-6 shadow-sm space-y-4">
+          <section className="rounded-lg border bg-card p-4 sm:p-6 shadow-sm space-y-4">
             <div className="font-semibold text-lg">Distribución por canal</div>
-            <div className="w-full h-[280px]">
+            <div className="w-full h-[240px] sm:h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -482,7 +484,7 @@ export default function AnalyticsPage() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
               {summary.revenueByChannel.map((channel, idx) => (
                 <div key={channel.channel} className="flex items-center gap-2">
                   <div
@@ -497,11 +499,11 @@ export default function AnalyticsPage() {
           </section>
 
           {/* Grid: Top Clientes + Productos Populares */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {/* Top 3 Clientes */}
             <section className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="font-heading text-xl font-semibold">Top 3 Clientes</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <h2 className="font-heading text-lg sm:text-xl font-semibold">Top 3 Clientes</h2>
               </div>
               <div className="space-y-3">
                 {topCustomers.length === 0 ? (
@@ -514,18 +516,18 @@ export default function AnalyticsPage() {
                       key={customer.id}
                       className="rounded-lg border bg-card p-4 shadow-sm hover:shadow-md transition-shadow"
                     >
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-bold text-lg">
                             {index + 1}
                           </div>
                           <div>
-                            <div className="font-semibold text-base">{customer.name}</div>
-                            <div className="text-xs text-muted-foreground">{customer.email}</div>
+                            <div className="font-semibold text-sm sm:text-base truncate">{customer.name}</div>
+                            <div className="text-xs text-muted-foreground truncate">{customer.email}</div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-xl font-bold text-green-600">
+                          <div className="text-lg sm:text-xl font-bold text-green-600">
                             ${customer.total_spent.toLocaleString()}
                           </div>
                           <div className="text-xs text-muted-foreground">
@@ -541,11 +543,11 @@ export default function AnalyticsPage() {
 
             {/* Productos populares */}
             <section className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="font-heading text-xl font-semibold">Productos populares</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <h2 className="font-heading text-lg sm:text-xl font-semibold">Productos populares</h2>
                 <button
                   onClick={loadPopular}
-                  className="rounded-md bg-muted hover:bg-muted/80 px-4 py-2 text-sm font-medium transition-colors"
+                  className="rounded-md bg-muted hover:bg-muted/80 px-3 py-2 text-sm font-medium transition-colors"
                 >
                   Actualizar
                 </button>

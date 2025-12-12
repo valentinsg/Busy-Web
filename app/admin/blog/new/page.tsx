@@ -437,9 +437,9 @@ Recomendación final basada en diferentes perfiles de usuario.
   return (
     <div className="space-y-6">
       {/* Header */}
-      <section className="flex items-center justify-between">
+      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="font-heading text-2xl font-bold mb-1">Nuevo artículo</h2>
+          <h2 className="font-heading text-xl sm:text-2xl font-bold mb-1">Nuevo artículo</h2>
           <p className="font-body text-sm text-muted-foreground">Completa los campos y guarda el archivo MDX.</p>
         </div>
         <Link href="/admin/blog" className="text-sm text-muted-foreground hover:underline">← Volver</Link>
@@ -505,10 +505,10 @@ Recomendación final basada en diferentes perfiles de usuario.
             setSaving(false)
           }
         }}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        className="grid grid-cols-1 xl:grid-cols-3 gap-6"
       >
         {/* MAIN CONTENT - 2 columnas */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="xl:col-span-2 space-y-6">
           {/* Card: Información básica */}
           <Card>
             <CardHeader>
@@ -543,29 +543,29 @@ Recomendación final basada en diferentes perfiles de usuario.
               <CardDescription>Escribe el contenido del artículo en Markdown</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1 sm:gap-2">
                 {/* Template selector */}
                 <Popover open={templateOpen} onOpenChange={setTemplateOpen}>
                   <PopoverTrigger asChild>
-                    <Button type="button" variant="default" size="sm" className="font-semibold">📄 Templates</Button>
+                    <Button type="button" variant="default" size="sm" className="font-semibold text-xs sm:text-sm">📄 Templates</Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-80">
+                  <PopoverContent className="w-72 sm:w-80">
                     <div className="grid gap-2">
                       <h4 className="font-semibold text-sm mb-2">Selecciona un template</h4>
-                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("tutorial")} className="justify-start">📚 Tutorial / How-to</Button>
-                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("review")} className="justify-start">⭐ Review de Producto</Button>
-                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("guia")} className="justify-start">📖 Guía Completa</Button>
-                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("noticia")} className="justify-start">📰 Noticia / Anuncio</Button>
-                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("lista")} className="justify-start">📝 Lista / Top X</Button>
-                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("comparacion")} className="justify-start">⚖️ Comparación</Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("tutorial")} className="justify-start text-xs sm:text-sm">📚 Tutorial / How-to</Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("review")} className="justify-start text-xs sm:text-sm">⭐ Review de Producto</Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("guia")} className="justify-start text-xs sm:text-sm">📖 Guía Completa</Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("noticia")} className="justify-start text-xs sm:text-sm">📰 Noticia / Anuncio</Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("lista")} className="justify-start text-xs sm:text-sm">📝 Lista / Top X</Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("comparacion")} className="justify-start text-xs sm:text-sm">⚖️ Comparación</Button>
                     </div>
                   </PopoverContent>
                 </Popover>
 
                 {/* Format buttons */}
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("**", "**") }}>Bold</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("*", "*") }}>Italic</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("<u>", "</u>") }}>Underline</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("**", "**") }} className="text-xs sm:text-sm">Bold</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("*", "*") }} className="text-xs sm:text-sm">Italic</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("<u>", "</u>") }} className="text-xs sm:text-sm">Underline</Button>
 
                 {/* Link button */}
                 <Popover open={linkOpen} onOpenChange={setLinkOpen}>
@@ -579,24 +579,24 @@ Recomendación final basada en diferentes perfiles de usuario.
                       <label className="text-xs text-muted-foreground">URL</label>
                       <Input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="https://ejemplo.com" />
                       <div className="flex justify-end gap-2">
-                        <Button type="button" variant="ghost" size="sm" onClick={() => { setLinkText(""); setLinkUrl(""); setLinkOpen(false) }}>Cancelar</Button>
-                        <Button type="button" size="sm" onClick={(e) => { e.preventDefault(); const insert = `[${linkText || "enlace"}](${linkUrl || "#"})`; applyFormat(insert, ""); setLinkText(""); setLinkUrl(""); setLinkOpen(false) }}>Insertar</Button>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => { setLinkText(""); setLinkUrl(""); setLinkOpen(false) }} className="text-xs sm:text-sm">Cancelar</Button>
+                        <Button type="button" size="sm" onClick={(e) => { e.preventDefault(); const insert = `[${linkText || "enlace"}](${linkUrl || "#"})`; applyFormat(insert, ""); setLinkText(""); setLinkUrl(""); setLinkOpen(false) }} className="text-xs sm:text-sm">Insertar</Button>
                       </div>
                     </div>
                   </PopoverContent>
                 </Popover>
 
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("# ") }}>H1</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("## ") }}>H2</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("### ") }}>H3</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("<br/>\n") }}>Line Break</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n\n") }}>Espacio</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n- Item 1\n- Item 2\n- Item 3\n\n") }}>Lista</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n1. Paso uno\n2. Paso dos\n3. Paso tres\n\n") }}>Lista numerada</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n> Cita de ejemplo\n> segunda línea opcional\n\n") }}>Cita</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n> **Tip:** escribe aquí tu consejo destacado.\n\n") }}>Caja destacada</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n| Columna A | Columna B | Columna C |\n|-----------|-----------|-----------|\n| A1        | B1        | C1        |\n| A2        | B2        | C2        |\n\n") }}>Tabla</Button>
-                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n**FAQ**\n\n**Pregunta:** …\n\n**Respuesta:** …\n\n") }}>FAQ</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("# ") }} className="text-xs sm:text-sm">H1</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("## ") }} className="text-xs sm:text-sm">H2</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("### ") }} className="text-xs sm:text-sm">H3</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("<br/>\n") }} className="text-xs sm:text-sm">Line Break</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n\n") }} className="text-xs sm:text-sm">Espacio</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n- Item 1\n- Item 2\n- Item 3\n\n") }} className="text-xs sm:text-sm">Lista</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n1. Paso uno\n2. Paso dos\n3. Paso tres\n\n") }} className="text-xs sm:text-sm">Lista num</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n> Cita de ejemplo\n> segunda línea opcional\n\n") }} className="text-xs sm:text-sm">Cita</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n> **Tip:** escribe aquí tu consejo destacado.\n\n") }} className="text-xs sm:text-sm">Tip</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n| Columna A | Columna B | Columna C |\n|-----------|-----------|-----------|\n| A1        | B1        | C1        |\n| A2        | B2        | C2        |\n\n") }} className="text-xs sm:text-sm">Tabla</Button>
+                <Button type="button" variant="outline" size="sm" onClick={(e) => { e.preventDefault(); applyFormat("\n**FAQ**\n\n**Pregunta:** …\n\n**Respuesta:** …\n\n") }} className="text-xs sm:text-sm">FAQ</Button>
 
                 <Popover open={imageOpen} onOpenChange={setImageOpen}>
                   <PopoverTrigger asChild>
@@ -621,7 +621,7 @@ Recomendación final basada en diferentes perfiles de usuario.
                             if (imageInputRef.current) imageInputRef.current.value = ""
                           }
                         }} />
-                        <Button type="button" size="sm" className="font-heading" onClick={() => imageInputRef.current?.click()} disabled={imageUploading}>
+                        <Button type="button" size="sm" className="font-heading text-xs sm:text-sm" onClick={() => imageInputRef.current?.click()} disabled={imageUploading}>
                           {imageUploading ? "Subiendo…" : "Subir archivo"}
                         </Button>
                       </div>
@@ -637,8 +637,8 @@ Recomendación final basada en diferentes perfiles de usuario.
                       <label className="text-xs text-muted-foreground">Texto alternativo</label>
                       <Input value={imageAlt} onChange={(e) => setImageAlt(e.target.value)} placeholder="Descripción" />
                       <div className="flex justify-end gap-2">
-                        <Button type="button" variant="ghost" size="sm" onClick={() => { setImageUrl(""); setImageAlt(""); setImageOpen(false) }}>Cancelar</Button>
-                        <Button type="button" size="sm" className="font-heading" onClick={(e) => { e.preventDefault(); const insert = `![${imageAlt || "imagen"}](${imageUrl || "/busy-streetwear.png"})\n`; applyFormat(insert, ""); setImageUrl(""); setImageAlt(""); setImageOpen(false) }}>Insertar</Button>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => { setImageUrl(""); setImageAlt(""); setImageOpen(false) }} className="text-xs sm:text-sm">Cancelar</Button>
+                        <Button type="button" size="sm" className="font-heading text-xs sm:text-sm" onClick={(e) => { e.preventDefault(); const insert = `![${imageAlt || "imagen"}](${imageUrl || "/busy-streetwear.png"})\n`; applyFormat(insert, ""); setImageUrl(""); setImageAlt(""); setImageOpen(false) }}>Insertar</Button>
                       </div>
                     </div>
                   </PopoverContent>
@@ -650,7 +650,7 @@ Recomendación final basada en diferentes perfiles de usuario.
                 <label className="text-sm font-medium">Contenido del artículo</label>
                 <Textarea
                   ref={textareaRef}
-                  className="font-mono text-sm min-h-[500px]"
+                  className="font-mono text-xs sm:text-sm min-h-[400px] sm:min-h-[500px]"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="Escribe tu contenido aquí... Usa **negrita**, *cursiva*, # títulos, etc."
@@ -711,7 +711,7 @@ Recomendación final basada en diferentes perfiles de usuario.
         </div>
 
         {/* SIDEBAR - 1 columna */}
-        <div className="lg:col-span-1 space-y-6">
+        <div className="xl:col-span-1 space-y-6">
           {/* Card: Portada */}
           <Card>
             <CardHeader>
@@ -737,7 +737,7 @@ Recomendación final basada en diferentes perfiles de usuario.
                     if (coverInputRef.current) coverInputRef.current.value = ""
                   }
                 }} />
-                <Button type="button" size="sm" className="font-heading w-full" onClick={() => coverInputRef.current?.click()} disabled={coverUploading}>
+                <Button type="button" size="sm" className="font-heading w-full text-xs sm:text-sm" onClick={() => coverInputRef.current?.click()} disabled={coverUploading}>
                   {coverUploading ? "Subiendo…" : "Subir imagen"}
                 </Button>
               </div>
@@ -796,7 +796,7 @@ Recomendación final basada en diferentes perfiles de usuario.
           </Card>
 
           {/* Card: Vista previa */}
-          <Card className="sticky top-6">
+          <Card className="sticky top-4 sm:top-6">
             <CardHeader>
               <CardTitle className="text-lg">Vista previa</CardTitle>
             </CardHeader>
@@ -826,10 +826,10 @@ Recomendación final basada en diferentes perfiles de usuario.
         </div>
 
         {/* Footer con botones */}
-        <div className="lg:col-span-3 flex items-center justify-end border-t pt-6">
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancelar</Button>
-            <Button type="submit" disabled={saving} className="font-body">
+        <div className="xl:col-span-3 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4 border-t pt-6">
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button type="button" variant="outline" onClick={() => window.history.back()} className="flex-1 sm:flex-none text-xs sm:text-sm">Cancelar</Button>
+            <Button type="submit" disabled={saving} className="font-body flex-1 sm:flex-none text-xs sm:text-sm">
               {saving ? "Guardando..." : "Guardar artículo"}
             </Button>
           </div>

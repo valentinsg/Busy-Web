@@ -5,6 +5,7 @@ import NewsletterSignup from "@/components/blog/newsletter-signup"
 import SocialLinksInline from "@/components/blog/social-links-inline"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getFinalPrice } from "@/lib/pricing"
 import type { Product } from "@/types"
 import type { BlogPost } from "@/types/blog"
 import { ArrowRight, ShoppingBag } from "lucide-react"
@@ -66,7 +67,7 @@ export function MarketingSidebar({ latestPost, featuredProducts = [] }: Marketin
               <img src={p.images?.[0] || "/backgrounds/product-bg.jpg"} alt={p.name} className="h-10 w-10 rounded object-cover border" />
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium truncate group-hover:text-accent-brand">{p.name}</div>
-                <div className="text-xs text-muted-foreground">Desde ${p.price.toLocaleString()}</div>
+                <div className="text-xs text-muted-foreground">Desde ${getFinalPrice(p).toLocaleString()}</div>
               </div>
             </Link>
           ))}
