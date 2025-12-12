@@ -11,18 +11,18 @@ import { Textarea } from '@/components/ui/textarea'
 import type { Product } from '@/types'
 import type { BodyType, FitPreference, UserMeasurements } from '@/types/size-calculator'
 import {
-    AlertCircle,
-    ArrowLeft,
-    ArrowRight,
-    CheckCircle2,
-    MessageSquare,
-    Package,
-    RefreshCw,
-    Ruler,
-    Shirt,
-    ShoppingBag,
-    Sparkles,
-    TrendingUp
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  MessageSquare,
+  Package,
+  RefreshCw,
+  Ruler,
+  Shirt,
+  ShoppingBag,
+  Sparkles,
+  TrendingUp
 } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -50,6 +50,18 @@ interface WizardState {
   feedbackSent: boolean
 }
 
+// Detectar si un producto es pantalón
+function isPantsProduct(product: Product | null): boolean {
+  if (!product) return false
+  const cat = product.category?.toLowerCase() || ''
+  const name = product.name?.toLowerCase() || ''
+  const tags = product.tags?.map(t => t.toLowerCase()) || []
+
+  const pantsKeywords = ['pantalon', 'pantalones', 'pants', 'jean', 'jeans', 'jogger', 'joggers', 'cargo', 'short', 'shorts']
+
+  return pantsKeywords.some(kw => cat.includes(kw) || name.includes(kw) || tags.includes(kw))
+}
+
 // Algoritmo mejorado de cálculo de talle
 function calculateSizeFromMeasurements(
   user: UserMeasurements,
@@ -59,25 +71,52 @@ function calculateSizeFromMeasurements(
   const heightM = user.height / 100
   const bmi = user.weight / (heightM * heightM)
 
+  // Detectar si es pantalón
+  const isPants = isPantsProduct(product)
+
   // Estimar perímetro de pecho del usuario
   let estimatedChest = (user.height * 0.45) + (user.weight * 0.35)
 
+  // Estimar perímetro de cintura del usuario (para pantalones)
+  // Fórmula basada en altura, peso y BMI
+  let estimatedWaist = (user.weight * 0.8) + (user.height * 0.1)
+
   // Ajustes por BMI
-  if (bmi < 18.5) estimatedChest -= 6
-  else if (bmi < 22) estimatedChest -= 2
-  else if (bmi >= 25 && bmi < 27) estimatedChest += 4
-  else if (bmi >= 27 && bmi < 30) estimatedChest += 8
-  else if (bmi >= 30) estimatedChest += 14
+  if (bmi < 18.5) {
+    estimatedChest -= 6
+    estimatedWaist -= 8
+  } else if (bmi < 22) {
+    estimatedChest -= 2
+    estimatedWaist -= 4
+  } else if (bmi >= 25 && bmi < 27) {
+    estimatedChest += 4
+    estimatedWaist += 6
+  } else if (bmi >= 27 && bmi < 30) {
+    estimatedChest += 8
+    estimatedWaist += 12
+  } else if (bmi >= 30) {
+    estimatedChest += 14
+    estimatedWaist += 18
+  }
 
   // Ajustes por tipo de cuerpo
-  if (user.bodyType === 'slim') estimatedChest -= 5
-  else if (user.bodyType === 'athletic') estimatedChest += 3
-  else if (user.bodyType === 'muscular') estimatedChest += 7
-  else if (user.bodyType === 'plus') estimatedChest += 10
+  if (user.bodyType === 'slim') {
+    estimatedChest -= 5
+    estimatedWaist -= 6
+  } else if (user.bodyType === 'athletic') {
+    estimatedChest += 3
+    estimatedWaist -= 2 // Atlético suele tener cintura más angosta
+  } else if (user.bodyType === 'muscular') {
+    estimatedChest += 7
+    estimatedWaist += 2
+  } else if (user.bodyType === 'plus') {
+    estimatedChest += 10
+    estimatedWaist += 12
+  }
 
   // Si hay producto con medidas, usar esas
   let productMeasurements: SizeAnalysis['productMeasurements'] = undefined
-  let availableSizes = ['S', 'M', 'L', 'XL']
+  let availableSizes = isPants ? ['28', '30', '32', '34', '36', '38'] : ['S', 'M', 'L', 'XL']
   let stockBySize: Record<string, number> = {}
 
   if (product) {
@@ -92,14 +131,14 @@ function calculateSizeFromMeasurements(
         productMeasurements = {
           chest: m.chest,
           length: m.length,
-          shoulders: m.shoulders,
+          shoulders: typeof m.shoulders === 'number' ? m.shoulders : undefined,
         }
       }
     }
   }
 
-  // Tabla de medidas estándar (perímetro de pecho de la prenda)
-  const standardMeasurements: Record<string, number> = {
+  // Tabla de medidas estándar para TOPS (perímetro de pecho de la prenda)
+  const standardChestMeasurements: Record<string, number> = {
     'XS': 96,
     'S': 102,
     'M': 108,
@@ -108,21 +147,43 @@ function calculateSizeFromMeasurements(
     'XXL': 126,
   }
 
-  // Holgura mínima necesaria según preferencia de fit
-  const comfortGap: Record<FitPreference, number> = {
-    tight: 4,
-    regular: 10,
-    loose: 16,
-    oversized: 24,
+  // Tabla de medidas estándar para PANTALONES (perímetro de cintura en cm)
+  // Los talles numéricos son en pulgadas, convertimos a cm de cintura
+  const standardWaistMeasurements: Record<string, number> = {
+    '28': 71,  // 28 pulgadas = ~71cm
+    '30': 76,  // 30 pulgadas = ~76cm
+    '32': 81,  // 32 pulgadas = ~81cm
+    '34': 86,  // 34 pulgadas = ~86cm
+    '36': 91,  // 36 pulgadas = ~91cm
+    '38': 96,  // 38 pulgadas = ~96cm
+    '40': 101, // 40 pulgadas = ~101cm
+    '42': 106, // 42 pulgadas = ~106cm
+    // Talles con letras para pantalones
+    'S': 76,
+    'M': 81,
+    'L': 86,
+    'XL': 91,
+    'XXL': 96,
   }
 
-  const targetChest = estimatedChest + comfortGap[user.fitPreference]
+  // Holgura mínima necesaria según preferencia de fit
+  const comfortGap: Record<FitPreference, number> = {
+    tight: isPants ? 2 : 4,
+    regular: isPants ? 6 : 10,
+    loose: isPants ? 10 : 16,
+    oversized: isPants ? 14 : 24,
+  }
+
+  // Usar medidas según tipo de prenda
+  const userMeasurement = isPants ? estimatedWaist : estimatedChest
+  const targetMeasurement = userMeasurement + comfortGap[user.fitPreference]
+  const measurementsTable = isPants ? standardWaistMeasurements : standardChestMeasurements
 
   // Encontrar el talle que mejor se ajusta
-  let recommendedSize = 'M'
+  let recommendedSize = isPants ? '32' : 'M'
   for (const size of availableSizes) {
-    const sizeChest = standardMeasurements[size] || 108
-    if (sizeChest >= targetChest) {
+    const sizeMeasurement = measurementsTable[size] || (isPants ? 81 : 108)
+    if (sizeMeasurement >= targetMeasurement) {
       recommendedSize = size
       break
     }
@@ -130,13 +191,20 @@ function calculateSizeFromMeasurements(
   }
 
   // Determinar tipo de fit resultante
-  const finalChest = standardMeasurements[recommendedSize] || 108
-  const actualGap = finalChest - estimatedChest
+  const finalMeasurement = measurementsTable[recommendedSize] || (isPants ? 81 : 108)
+  const actualGap = finalMeasurement - userMeasurement
   let fitType: SizeAnalysis['fitType'] = 'regular'
-  if (actualGap < 6) fitType = 'ajustado'
-  else if (actualGap < 12) fitType = 'regular'
-  else if (actualGap < 20) fitType = 'holgado'
-  else fitType = 'oversized'
+  if (isPants) {
+    if (actualGap < 4) fitType = 'ajustado'
+    else if (actualGap < 8) fitType = 'regular'
+    else if (actualGap < 12) fitType = 'holgado'
+    else fitType = 'oversized'
+  } else {
+    if (actualGap < 6) fitType = 'ajustado'
+    else if (actualGap < 12) fitType = 'regular'
+    else if (actualGap < 20) fitType = 'holgado'
+    else fitType = 'oversized'
+  }
 
   // Calcular confianza
   let confidence: SizeAnalysis['confidence'] = 'high'
@@ -146,8 +214,13 @@ function calculateSizeFromMeasurements(
 
   // Generar razones
   const reasons: string[] = []
-  reasons.push(`Tu perímetro de pecho estimado es ~${Math.round(estimatedChest)}cm`)
-  reasons.push(`El talle ${recommendedSize} tiene ${finalChest}cm de perímetro`)
+  if (isPants) {
+    reasons.push(`Tu perímetro de cintura estimado es ~${Math.round(estimatedWaist)}cm`)
+    reasons.push(`El talle ${recommendedSize} tiene ${finalMeasurement}cm de cintura`)
+  } else {
+    reasons.push(`Tu perímetro de pecho estimado es ~${Math.round(estimatedChest)}cm`)
+    reasons.push(`El talle ${recommendedSize} tiene ${finalMeasurement}cm de perímetro`)
+  }
 
   if (user.fitPreference === 'oversized') {
     reasons.push('Agregamos holgura extra para el fit oversized que preferís')
@@ -156,7 +229,10 @@ function calculateSizeFromMeasurements(
   }
 
   if (user.bodyType === 'muscular' || user.bodyType === 'athletic') {
-    reasons.push('Consideramos espacio extra para hombros y pecho desarrollados')
+    reasons.push(isPants
+      ? 'Consideramos tu contextura atlética para la cintura'
+      : 'Consideramos espacio extra para hombros y pecho desarrollados'
+    )
   }
 
   // Talles alternativos
@@ -209,7 +285,7 @@ export function SizeCalculatorWizard() {
     async function loadProducts() {
       setProductsLoading(true)
       try {
-        const res = await fetch('/api/products?limit=20')
+        const res = await fetch('/api/products?limit=30&forSizeCalculator=true')
         if (res.ok) {
           const data = await res.json()
           setProducts(data.products || data || [])
