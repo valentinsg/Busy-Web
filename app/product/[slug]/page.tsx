@@ -5,6 +5,9 @@ import type { Product } from "@/types"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
+// Revalidar cada 60 segundos para que los cambios de precio/descuento se reflejen rápido
+export const revalidate = 60
+
 interface ProductPageProps {
   params: {
     slug: string

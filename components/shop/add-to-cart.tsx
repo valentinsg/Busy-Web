@@ -17,9 +17,27 @@ interface AddToCartProps {
   sizeLabel?: string
 }
 
+// Helper para encontrar el primer talle con stock disponible
+function getFirstAvailableSize(product: Product): string {
+  if (!product.sizes || product.sizes.length === 0) return ''
+
+  // Si hay stockBySize, buscar el primer talle con stock > 0
+  if (product.stockBySize && Object.keys(product.stockBySize).length > 0) {
+    for (const size of product.sizes) {
+      if ((product.stockBySize[size] ?? 0) > 0) {
+        return size
+      }
+    }
+  }
+
+  // Si no hay stockBySize o todos están en 0, devolver el primero
+  return product.sizes[0]
+}
+
 export function AddToCart({ product, className = "", sizeLabel }: AddToCartProps) {
   const t = useTranslations('product')
-  const [selectedSize, setSelectedSize] = React.useState(product.sizes[0])
+  // Seleccionar por defecto el primer talle CON STOCK disponible
+  const [selectedSize, setSelectedSize] = React.useState(() => getFirstAvailableSize(product))
   const [selectedColor, setSelectedColor] = React.useState(product.colors[0])
   const [quantity, setQuantity] = React.useState(1)
 
