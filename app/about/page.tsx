@@ -796,12 +796,12 @@ function AboutContent() {
           </div>
           <div className="flex justify-center gap-4 mt-6">
             <a
-              href="https://instagram.com/busy.streetwear"
+              href="https://instagram.com/busy_streetwear"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-muted-foreground hover:text-accent-brand transition-colors"
             >
-              @busy.streetwear
+              @busy_streetwear
             </a>
             <span className="text-muted-foreground">·</span>
             <Link href="/contact" className="text-sm text-muted-foreground hover:text-accent-brand transition-colors">

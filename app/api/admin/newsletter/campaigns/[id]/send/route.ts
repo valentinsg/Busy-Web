@@ -384,9 +384,9 @@ function createCampaignEmailHtml(params: {
               <!-- Social Icons -->
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 8px 0 16px 0;">
                 <tr>
-                  <td style="padding: 0 6px;"><a href="https://instagram.com/busy.streetwear" target="_blank" style="text-decoration: none; color: #666666; font-size: 12px;">IG</a></td>
+                  <td style="padding: 0 6px;"><a href="https://instagram.com/busy_streetwear" target="_blank" style="text-decoration: none; color: #666666; font-size: 12px;">IG</a></td>
                   <td style="color: #333333;">·</td>
-                  <td style="padding: 0 6px;"><a href="https://tiktok.com/@busy.streetwear" target="_blank" style="text-decoration: none; color: #666666; font-size: 12px;">TK</a></td>
+                  <td style="padding: 0 6px;"><a href="https://tiktok.com/@busy_streetwear" target="_blank" style="text-decoration: none; color: #666666; font-size: 12px;">TK</a></td>
                   <td style="color: #333333;">·</td>
                   <td style="padding: 0 6px;"><a href="https://youtube.com/@busystreetwear" target="_blank" style="text-decoration: none; color: #666666; font-size: 12px;">YT</a></td>
                   <td style="color: #333333;">·</td>

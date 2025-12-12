@@ -50,7 +50,7 @@ export default function TermsPage() {
           Para consultas sobre estos términos, escribinos a {" "}
           <a href="mailto:busystreetwear@gmail.com" className="text-accent-brand hover:underline">busystreetwear@gmail.com</a>.
           También podés consultar nuestras <a href="/faq" className="text-accent-brand hover:underline">preguntas frecuentes</a> o seguirnos en{" "}
-          <a href="https://instagram.com/busy.streetwear" target="_blank" rel="noopener noreferrer" className="text-accent-brand hover:underline">Instagram</a>.
+          <a href="https://instagram.com/busy_streetwear" target="_blank" rel="noopener noreferrer" className="text-accent-brand hover:underline">Instagram</a>.
         </p>
       </div>
     </div>

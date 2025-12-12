@@ -132,9 +132,9 @@ export async function POST(req: NextRequest) {
 
         <!-- Social Icons -->
         <div style="padding: 8px 0 16px 0;">
-          <a href="https://instagram.com/busy.streetwear" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">IG</a>
+          <a href="https://instagram.com/busy_streetwear" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">IG</a>
           <span style="color: #333333;">·</span>
-          <a href="https://tiktok.com/@busy.streetwear" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">TK</a>
+          <a href="https://tiktok.com/@busy_streetwear" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">TK</a>
           <span style="color: #333333;">·</span>
           <a href="https://youtube.com/@busystreetwear" target="_blank" style="margin: 0 6px; text-decoration: none; color: #666666; font-size: 12px;">YT</a>
           <span style="color: #333333;">·</span>

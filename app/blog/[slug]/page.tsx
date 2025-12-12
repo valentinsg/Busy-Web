@@ -264,9 +264,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         url: `${base}/logo-busy-black.png`,
       },
       sameAs: [
-        'https://instagram.com/busy.streetwear',
+        'https://instagram.com/busy_streetwear',
         'https://www.facebook.com/profile.php?id=61581696441351',
-        'https://www.tiktok.com/@busy.streetwear',
+        'https://www.tiktok.com/@busy_streetwear',
       ],
     },
   }

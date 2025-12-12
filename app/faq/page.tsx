@@ -129,8 +129,8 @@ export default async function FAQPage() {
           areaServed: 'AR',
         },
         sameAs: [
-          'https://instagram.com/busy.streetwear',
-          'https://tiktok.com/@busy.streetwear',
+          'https://instagram.com/busy_streetwear',
+          'https://tiktok.com/@busy_streetwear',
           'https://youtube.com/@busystreetwear',
         ],
       },

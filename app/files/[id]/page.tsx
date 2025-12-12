@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: FilesEntryPageProps): Promise
       title: `${title} | Busy Files`,
       description,
       images: [ogImage],
-      site: '@busy.streetwear',
+      site: '@busy_streetwear',
     },
     alternates: {
       canonical: `https://busy.com.ar/files/${entry.id}`,

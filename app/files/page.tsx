@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Busy Files | Galería del universo de Busy',
     description: 'Explorá momentos y cultura streetwear de Mar del Plata',
-    site: '@busy.streetwear',
+    site: '@busy_streetwear',
     images: ['https://busy.com.ar/busy-parche.png'],
   },
   alternates: {

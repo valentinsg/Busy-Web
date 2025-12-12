@@ -24,7 +24,7 @@ export default function TransferConfirmationPage() {
     bank: "Mercado Pago",
     accountType: "CVU",
     cvu: "0000003100070879506983",
-    alias: "busy.streetwear",
+    alias: "busy_streetwear",
     holder: "Valentin Sanchez Guevara",
     cuil: "20-42454711-6",
   }

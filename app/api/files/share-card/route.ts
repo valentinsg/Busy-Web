@@ -177,7 +177,7 @@ export async function GET(request: Request) {
         React.createElement(
           'div',
           { style: { fontSize: 18, fontWeight: 500 } },
-          'busy.streetwear',
+          'busy_streetwear',
         ),
       ),
       React.createElement(

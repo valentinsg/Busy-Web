@@ -57,7 +57,7 @@ export function TournamentEmptyState({ tournament }: TournamentEmptyStateProps) 
             No olvides seguir los pasos que dejamos en {""}
             <span className="inline-flex items-center gap-1 font-semibold text-white mt-2">
               <Instagram className="h-4 w-4" style={{ color: tournament.accent_color }} />
-              @busy.streetwear
+              @busy_streetwear
             </span>
           </p>
         </div>
@@ -83,7 +83,7 @@ export function TournamentEmptyState({ tournament }: TournamentEmptyStateProps) 
         <Button
           variant="outline"
           size="lg"
-          onClick={() => window.open('https://instagram.com/busy.streetwear', '_blank', 'noopener,noreferrer')}
+          onClick={() => window.open('https://instagram.com/busy_streetwear', '_blank', 'noopener,noreferrer')}
           className="text-lg px-8 py-6 font-bold bg-white/10 border-white/20 hover:bg-white/20"
         >
           Seguir en Instagram

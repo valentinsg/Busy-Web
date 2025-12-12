@@ -156,8 +156,8 @@ const jsonLd = [
       },
     ],
     sameAs: [
-      'https://www.instagram.com/busy.streetwear',
-      'https://www.tiktok.com/@busy.streetwear',
+      'https://www.instagram.com/busy_streetwear',
+      'https://www.tiktok.com/@busy_streetwear',
       'https://www.facebook.com/profile.php?id=61581696441351',
       'https://open.spotify.com/user/agustinmancho',
       'https://www.youtube.com/@busystreetwear',
@@ -176,8 +176,8 @@ const jsonLd = [
     image: `${SITE_URL}/busy-og-image.png`,
     foundingDate: '2024',
     sameAs: [
-      'https://www.instagram.com/busy.streetwear',
-      'https://www.tiktok.com/@busy.streetwear',
+      'https://www.instagram.com/busy_streetwear',
+      'https://www.tiktok.com/@busy_streetwear',
       'https://www.facebook.com/profile.php?id=61581696441351',
       'https://open.spotify.com/user/agustinmancho',
       'https://www.youtube.com/@busystreetwear',

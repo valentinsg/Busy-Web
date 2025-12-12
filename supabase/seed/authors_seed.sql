@@ -12,7 +12,7 @@ values
     'Equipo Busy',
     '',
     '/busy-gothic.png',
-    'https://www.instagram.com/busy.streetwear/',
+    'https://www.instagram.com/busy_streetwear/',
     null,
     null,
     null,

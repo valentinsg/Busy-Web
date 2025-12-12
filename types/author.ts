@@ -13,7 +13,7 @@
  *   name: 'Valentín SG',
  *   email: 'valentin@busy.com.ar',
  *   avatar: '/authors/valentin-sg.jpg',
- *   instagram: '@busy.streetwear',
+ *   instagram: '@busy_streetwear',
  *   bio: 'Co-fundador de Busy'
  * }
  * ```

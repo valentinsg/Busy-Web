@@ -44,8 +44,8 @@ const footerSections = (t: (k: string) => string) => ({
   social: {
     title: t("footer.sections.social.title"),
     links: [
-      { nameKey: "footer.sections.social.links.instagram", href: "https://instagram.com/busy.streetwear" },
-      { nameKey: "footer.sections.social.links.tiktok", href: "https://tiktok.com/@busy.streetwear" },
+      { nameKey: "footer.sections.social.links.instagram", href: "https://instagram.com/busy_streetwear" },
+      { nameKey: "footer.sections.social.links.tiktok", href: "https://tiktok.com/@busy_streetwear" },
       { nameKey: "footer.sections.social.links.facebook", href: "https://facebook.com/61581696441351" },
       { nameKey: "YouTube", href: "https://youtube.com/@busystreetwear" },
     ],

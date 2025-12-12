@@ -221,10 +221,10 @@ export function createEmailLayout(params: {
 
     <!-- Social Links -->
     <div style="padding: 16px 24px; text-align: center; background-color: #fafafa;">
-      <a href="https://instagram.com/busy.streetwear" style="display: inline-block; margin: 0 6px;">
+      <a href="https://instagram.com/busy_streetwear" style="display: inline-block; margin: 0 6px;">
         <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" style="width: 24px; height: 24px;">
       </a>
-      <a href="https://tiktok.com/@busy.streetwear" style="display: inline-block; margin: 0 6px;">
+      <a href="https://tiktok.com/@busy_streetwear" style="display: inline-block; margin: 0 6px;">
         <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok" style="width: 24px; height: 24px;">
       </a>
       <a href="https://youtube.com/@busystreetwear" style="display: inline-block; margin: 0 6px;">
