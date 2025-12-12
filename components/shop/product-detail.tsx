@@ -185,10 +185,10 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               {isDiscounted(product) ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl font-bold font-heading text-red-500">
+                    <span className="text-3xl font-bold font-heading text-green-500">
                       {formatPrice(getFinalPrice(product), product.currency)}
                     </span>
-                    <Badge variant="destructive" className="text-sm font-semibold px-2 py-1">
+                    <Badge variant="success" className="text-sm font-semibold px-2 py-1">
                       -{getDiscountPercentage(product)}% OFF
                     </Badge>
                   </div>

@@ -1,5 +1,6 @@
 import { ProductDetail } from "@/components/shop/product-detail"
-import { getProductById, getProductsByCategory } from "@/lib/products"
+import { getFinalPrice } from "@/lib/pricing"
+import { getProductById } from "@/lib/products"
 import { getProductByIdAsync, getProductsAsync } from "@/lib/repo/products"
 import type { Product } from "@/types"
 import type { Metadata } from "next"
@@ -56,14 +57,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  // Prefer Supabase data, fallback to local JSON
-  let product: Product | undefined
-  try {
-    product = await getProductByIdAsync(params.slug)
-  } catch {}
-  if (!product) {
-    product = getProductById(params.slug)
-  }
+  // Use Supabase as single source of truth for product pricing/discounts
+  const product = await getProductByIdAsync(params.slug)
 
   if (!product) {
     notFound()
@@ -72,9 +67,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   // After notFound(), assert product is defined for TypeScript
   const currentProduct = product as Product
 
-  let relatedProducts: Product[] = getProductsByCategory(currentProduct.category)
-    .filter((p) => p.id !== currentProduct.id)
-    .slice(0, 4)
+  let relatedProducts: Product[] = []
 
   try {
     const sameCategory = await getProductsAsync({ category: currentProduct.category })
@@ -109,7 +102,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             offers: {
               "@type": "Offer",
               priceCurrency: "ARS",
-              price: currentProduct.price,
+              price: getFinalPrice(currentProduct),
               availability: "https://schema.org/InStock",
               url: `${process.env.SITE_URL || "https://busy.com.ar"}/product/${currentProduct.id}`,
             },
