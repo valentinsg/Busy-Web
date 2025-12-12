@@ -555,7 +555,7 @@ export function ProductCard({ product, adminEditHref, priority = false }: Produc
                       <span className="font-heading font-semibold text-sm sm:text-base">
                         {formatPrice(getFinalPrice(product), product.currency)}
                       </span>
-                      <span className="text-[10px] sm:text-xs font-body font-semibold bg-muted text-foreground px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] sm:text-xs font-body font-semibold bg-green-500 text-white px-1.5 py-0.5 rounded">
                         -{getDiscountPercentage(product)}%
                       </span>
                     </div>

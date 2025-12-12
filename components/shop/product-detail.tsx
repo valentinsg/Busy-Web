@@ -188,7 +188,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                     <span className="text-3xl font-bold font-heading text-green-500">
                       {formatPrice(getFinalPrice(product), product.currency)}
                     </span>
-                    <Badge variant="success" className="text-sm font-semibold px-2 py-1 bg-green-500 text-white">
+                    <Badge variant="success" className="text-sm font-semibold px-2 py-1">
                       -{getDiscountPercentage(product)}% OFF
                     </Badge>
                   </div>
