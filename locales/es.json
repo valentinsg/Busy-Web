@@ -261,7 +261,39 @@
     "out_of_stock": "Sin stock",
     "in_cart": "en el carrito",
     "free_shipping": "Envío gratis",
-    "free_shipping_from": "A partir de {amount}"
+    "free_shipping_from": "A partir de {amount}",
+    "virtual_try_on": "Probador Virtual",
+    "virtual_try_on_ai": "AI"
+  },
+  "virtual_try_on": {
+    "title": "Probador Virtual",
+    "subtitle": "Probá cómo te queda {product} con IA",
+    "upload_title": "Subí tu foto",
+    "upload_desc": "Arrastrá una imagen o hacé click para seleccionar",
+    "gallery": "Galería",
+    "camera": "Cámara",
+    "tips_title": "Tips para mejores resultados:",
+    "tips": [
+      "Usá una foto de cuerpo completo o medio cuerpo",
+      "Buena iluminación y fondo simple",
+      "Postura de frente mirando a cámara",
+      "Ropa ajustada o similar al producto"
+    ],
+    "consent": "Acepto que mi imagen sea procesada por inteligencia artificial para generar una visualización del producto. La imagen no será almacenada ni compartida.",
+    "generate": "Generar Prueba Virtual",
+    "processing": "Generando tu prueba virtual...",
+    "processing_wait": "Esto puede tomar unos segundos",
+    "generated_badge": "Generado con IA",
+    "retry": "Probar otra foto",
+    "download": "Descargar",
+    "share": "Compartir",
+    "like_result": "¿Te gustó cómo te queda?",
+    "add_to_cart": "Agregar al carrito",
+    "error_no_person": "Se requiere una imagen de la persona",
+    "error_no_product": "Se requiere una imagen del producto",
+    "error_format": "Formato no soportado. Usa: JPEG, PNG o WebP",
+    "error_size": "La imagen es muy grande. Máximo 10MB",
+    "error_unavailable": "El probador virtual no está disponible en este momento"
   },
   "checkout": {
     "header.back": "Volver al carrito",
