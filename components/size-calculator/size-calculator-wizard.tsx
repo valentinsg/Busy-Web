@@ -194,6 +194,7 @@ export function SizeCalculatorWizard() {
   })
 
   const [products, setProducts] = useState<Product[]>([])
+  const [productsLoading, setProductsLoading] = useState(true)
   const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([])
   const [feedbackText, setFeedbackText] = useState('')
   const [mounted, setMounted] = useState(false)
@@ -206,6 +207,7 @@ export function SizeCalculatorWizard() {
   // Cargar productos para selección y recomendaciones
   useEffect(() => {
     async function loadProducts() {
+      setProductsLoading(true)
       try {
         const res = await fetch('/api/products?limit=20')
         if (res.ok) {
@@ -213,11 +215,15 @@ export function SizeCalculatorWizard() {
           setProducts(data.products || data || [])
         }
       } catch {
-        // Silently fail
+        // Silently fail - productos opcionales
+      } finally {
+        setProductsLoading(false)
       }
     }
-    loadProducts()
-  }, [])
+    if (mounted) {
+      loadProducts()
+    }
+  }, [mounted])
 
   // Cargar productos recomendados cuando llegamos a resultados
   useEffect(() => {
@@ -670,7 +676,17 @@ export function SizeCalculatorWizard() {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              {products.length > 0 ? (
+              {productsLoading ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <div className="relative w-16 h-16 mx-auto mb-4">
+                    <Package className="w-16 h-16 opacity-30 animate-pulse" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  </div>
+                  <p className="font-body animate-pulse">Cargando productos...</p>
+                </div>
+              ) : products.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto">
                   {products.slice(0, 12).map((product) => (
                     <div
@@ -706,7 +722,8 @@ export function SizeCalculatorWizard() {
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p className="font-body">Cargando productos...</p>
+                  <p className="font-body">No hay productos disponibles</p>
+                  <p className="font-body text-sm mt-2">Podés continuar sin seleccionar uno</p>
                 </div>
               )}
 
@@ -964,6 +981,60 @@ export function SizeCalculatorWizard() {
                 </Link>
               </Button>
             </div>
+
+            {/* Internal Links */}
+            <Card className="bg-muted/20">
+              <CardContent className="pt-6">
+                <p className="font-heading font-semibold mb-4 text-center">Explorá más de Busy</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Link
+                    href="/products/ofertas"
+                    className="flex flex-col items-center p-4 rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-all text-center"
+                  >
+                    <span className="text-2xl mb-2">🔥</span>
+                    <span className="font-body text-sm font-medium">Ofertas</span>
+                  </Link>
+                  <Link
+                    href="/products/category/remeras"
+                    className="flex flex-col items-center p-4 rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-all text-center"
+                  >
+                    <span className="text-2xl mb-2">👕</span>
+                    <span className="font-body text-sm font-medium">Remeras</span>
+                  </Link>
+                  <Link
+                    href="/products/category/buzos"
+                    className="flex flex-col items-center p-4 rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-all text-center"
+                  >
+                    <span className="text-2xl mb-2">🧥</span>
+                    <span className="font-body text-sm font-medium">Buzos</span>
+                  </Link>
+                  <Link
+                    href="/products/category/pantalones"
+                    className="flex flex-col items-center p-4 rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-all text-center"
+                  >
+                    <span className="text-2xl mb-2">👖</span>
+                    <span className="font-body text-sm font-medium">Pantalones</span>
+                  </Link>
+                </div>
+                <div className="flex flex-wrap justify-center gap-4 mt-6 text-sm">
+                  <Link href="/faq" className="text-muted-foreground hover:text-primary transition-colors">
+                    Preguntas Frecuentes
+                  </Link>
+                  <span className="text-muted-foreground">·</span>
+                  <Link href="/legal/returns" className="text-muted-foreground hover:text-primary transition-colors">
+                    Cambios y Devoluciones
+                  </Link>
+                  <span className="text-muted-foreground">·</span>
+                  <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
+                    Contacto
+                  </Link>
+                  <span className="text-muted-foreground">·</span>
+                  <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
+                    Sobre Busy
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
