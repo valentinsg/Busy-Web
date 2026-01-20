@@ -6,7 +6,6 @@ import { getFinalPrice } from "@/lib/pricing"
 import { getSettingsServer } from "@/lib/repo/settings"
 import getServiceClient from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
-import crypto from "node:crypto"
 
 const BASE_URL = process.env.BASE_URL || process.env.SITE_URL
 const CURRENCY = "ARS"
@@ -95,45 +94,142 @@ export async function POST(req: NextRequest) {
       discount_percent: discount_percent ?? null,
     })
 
-    // We DO NOT create the order yet. We'll create it only if payment is approved (webhook).
-    // Create a session id to correlate the flow
-    const session_id = crypto.randomUUID()
+    // ---------------------------------------------------------
+    // 1. Resolve Customer (Create or Update)
+    // ---------------------------------------------------------
+    let customer_id: string | null = null
+    const customerData = body.customer
+    if (customerData?.email) {
+      const { data: existing } = await supabase.from("customers").select("id").eq("email", customerData.email).maybeSingle()
+      if (existing?.id) {
+        customer_id = existing.id
+        // Update customer info (best effort)
+        await supabase.from("customers").update({
+          full_name: `${customerData.first_name ?? ""} ${customerData.last_name ?? ""}`.trim() || null,
+          phone: customerData.phone ?? null,
+          last_seen_at: new Date().toISOString(),
+        }).eq("id", customer_id)
+      } else {
+        const { data: created, error: custErr } = await supabase
+          .from("customers")
+          .insert({
+            email: customerData.email,
+            full_name: `${customerData.first_name ?? ""} ${customerData.last_name ?? ""}`.trim(),
+            phone: customerData.phone ?? null,
+            last_seen_at: new Date().toISOString()
+          })
+          .select("id")
+          .single()
+        if (!custErr && created?.id) customer_id = created.id
+      }
+    }
 
-    // Create Mercado Pago preference
+    // ---------------------------------------------------------
+    // 2. Prepare Shipping Address & Notes
+    // ---------------------------------------------------------
+    const shippingAddress = customerData ? {
+      name: `${customerData.first_name ?? ""} ${customerData.last_name ?? ""}`.trim(),
+      street: customerData.address ?? "",
+      city: customerData.city ?? "",
+      state: customerData.state ?? "",
+      postal_code: customerData.zip ?? "",
+      country: "AR",
+      phone: customerData.phone ?? null,
+      dni: customerData.dni ?? null,
+      notes: null,
+    } : null
+
+    const orderNotes = customerData?.email
+      ? `Pago online (Mercado Pago). Cliente: ${customerData.first_name ?? ""} ${customerData.last_name ?? ""}. Email: ${customerData.email}.`
+      : "Pago online sin datos de cliente completos."
+
+
+    // ---------------------------------------------------------
+    // 3. Create Order (PENDING)
+    // ---------------------------------------------------------
+    const { data: order, error: orderErr } = await supabase
+      .from("orders")
+      .insert({
+        customer_id,
+        channel: "web",
+        status: "pending", // Initially pending, waiting for MP webhook
+        currency: "ARS",
+        subtotal: totals.items_total,
+        discount: totals.discount,
+        shipping: totals.shipping_cost,
+        tax: totals.tax,
+        total: totals.order_total,
+        notes: orderNotes,
+        placed_at: new Date().toISOString(),
+        payment_method: "mercadopago",
+        shipping_address: shippingAddress,
+        shipping_status: "pending",
+      })
+      .select("id")
+      .single()
+
+    if (orderErr || !order?.id) {
+      throw new Error(`Failed to create order: ${orderErr?.message}`)
+    }
+
+    const order_id = order.id
+
+    // ---------------------------------------------------------
+    // 4. Create Order Items
+    // ---------------------------------------------------------
+    const itemsPayload = itemsDetailed.map((i) => ({
+      order_id,
+      product_id: i.product_id,
+      product_name: i.title,
+      variant_color: null,
+      variant_size: i.variant_size,
+      quantity: i.quantity,
+      unit_price: i.unit_price,
+      total: Number((i.unit_price * i.quantity).toFixed(2)),
+    }))
+
+    const { error: itemsErr } = await supabase.from("order_items").insert(itemsPayload)
+    if (itemsErr) {
+      // If items fail, we should probably delete the order or log critical error
+      logError("Failed to insert order items", { order_id, error: itemsErr.message })
+      // Delete order to avoid ghost orders? Or just throw.
+      await supabase.from("orders").delete().eq("id", order_id)
+      throw new Error("Failed to create order items")
+    }
+
+    // ---------------------------------------------------------
+    // 5. Handle Newsletter Opt-in
+    // ---------------------------------------------------------
+    if (body.newsletter_opt_in && customerData?.email) {
+      await supabase
+        .from("newsletter_subscribers")
+        .upsert({ email: customerData.email, status: "subscribed" }, { onConflict: "email", ignoreDuplicates: true })
+    }
+
+    // ---------------------------------------------------------
+    // 6. Create Mercado Pago Preference
+    // ---------------------------------------------------------
     const pref = getPreferenceClient()
-    // Build payer from provided customer data to improve risk assessment
-    const customer = body.customer ?? null
-    const payer = customer
+
+    // Build payer from provided customer data
+    const payer = customerData
       ? {
-          email: customer.email ?? undefined,
-          name: customer.first_name ?? undefined,
-          surname: customer.last_name ?? undefined,
-          phone: customer.phone
-            ? {
-                area_code: undefined,
-                number: customer.phone,
-              }
-            : undefined,
-          identification: customer.dni
-            ? {
-                type: "DNI",
-                number: customer.dni,
-              }
-            : undefined,
-          address:
-            customer.address || customer.city || customer.state || customer.zip
-              ? {
-                  street_name: customer.address ?? undefined,
-                  zip_code: customer.zip ?? undefined,
-                  city: customer.city ?? undefined,
-                  state: customer.state ?? undefined,
-                }
-              : undefined,
-        }
+        email: customerData.email ?? undefined,
+        name: customerData.first_name ?? undefined,
+        surname: customerData.last_name ?? undefined,
+        phone: customerData.phone ? { area_code: undefined, number: customerData.phone } : undefined,
+        identification: customerData.dni ? { type: "DNI", number: customerData.dni } : undefined,
+        address: (customerData.address || customerData.city || customerData.state || customerData.zip)
+          ? {
+            street_name: customerData.address ?? undefined,
+            zip_code: customerData.zip ?? undefined,
+            city: customerData.city ?? undefined,
+            state: customerData.state ?? undefined,
+          }
+          : undefined,
+      }
       : undefined
 
-    // In production, force binary_mode = false (let payments go to review instead of auto-reject)
-    // In dev, allow configuring via MP_BINARY_MODE (default true)
     const binaryMode = IS_PROD ? false : String(process.env.MP_BINARY_MODE ?? "true").toLowerCase() !== "false"
 
     const mpPayload = {
@@ -156,45 +252,45 @@ export async function POST(req: NextRequest) {
       ],
       binary_mode: binaryMode,
       auto_return: "approved" as const,
-      external_reference: session_id,
+      external_reference: order_id, // LINKING ID HERE!
       back_urls: {
-        success: `${BASE_URL}/order?session_id=${session_id}`,
-        failure: `${BASE_URL}/order?session_id=${session_id}`,
-        pending: `${BASE_URL}/order?session_id=${session_id}`,
+        success: `${BASE_URL}/order?session_id=${order_id}`, // Keep param name compatible with frontend check
+        failure: `${BASE_URL}/order?session_id=${order_id}`,
+        pending: `${BASE_URL}/order?session_id=${order_id}`,
       },
       notification_url: `${BASE_URL}/api/mp/webhook?token=${encodeURIComponent(process.env.MP_WEBHOOK_SECRET_TOKEN || "")}`,
       payer,
       metadata: {
-        session_id,
+        order_id, // Redundant but good for debugging
+        session_id: order_id, // Keep for backward compat
         items: itemsDetailed.map((i) => ({ product_id: i.product_id, quantity: i.quantity, variant_size: i.variant_size })),
         coupon_code: body.coupon_code ?? null,
         shipping_cost: totals.shipping_cost,
         totals,
         customer: body.customer ?? null,
-        newsletter_opt_in: !!body.newsletter_opt_in,
       },
     }
 
-    logInfo("Creating MP preference", {
-      session_id,
+    logInfo("Creating MP preference for Order", {
+      order_id,
       items: mpPayload.items,
-      shipping_cost: totals.shipping_cost,
-      tax: totals.tax,
-      totals,
+      total: totals.order_total,
     })
 
     const preference = await pref.create({
       body: mpPayload,
     })
 
-    // Only use production init_point; avoid sandbox fallback
     const init_point = (preference as unknown as { init_point: string })?.init_point || (preference as unknown as { body: { init_point: string } })?.body?.init_point
     const preference_id = (preference as unknown as { id: string })?.id || (preference as unknown as { body: { id: string } })?.body?.id
+
     if (!init_point || !preference_id) throw new Error("Failed to create preference")
 
-    logInfo("Preference created", { session_id, preference_id })
+    // Update order with preference_id if you have a column for it (optional, skipped for now to keep schema unchanged)
 
-    return NextResponse.json({ init_point, order_id: session_id })
+    logInfo("Preference created", { order_id, preference_id })
+
+    return NextResponse.json({ init_point, order_id })
   } catch (err: unknown) {
     logError("create-preference failed", { error: String(err?.toString() || err) })
     return NextResponse.json({ error: "Internal error" }, { status: 500 })

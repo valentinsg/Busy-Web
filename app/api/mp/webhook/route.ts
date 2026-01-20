@@ -1,9 +1,6 @@
-import { validateCouponPercent } from "@/lib/checkout/coupons"
 import { logError, logInfo } from "@/lib/checkout/logger"
-import { computeShipping, computeTax } from "@/lib/checkout/totals"
 import { sendInvoiceEmail } from "@/lib/email/resend"
 import { getPaymentClient } from "@/lib/mp/client"
-import { getSettingsServer } from "@/lib/repo/settings"
 import { generateAutoLabel, isAutoLabelEnabled } from "@/lib/shipping"
 import getServiceClient from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
@@ -107,7 +104,7 @@ export async function POST(req: NextRequest) {
       toStr(getPath(p, ['body', 'order', 'id'])) ||
       toStr(getPath(p, ['response', 'order', 'id']))
 
-    let mapped: "approved" | "rejected" | "in_process" | "pending"
+    let mapped: "approved" | "rejected" | "in_process" | "pending" | "cancelled"
     if (status === "approved") mapped = "approved"
     else if (status === "rejected" || status === "cancelled") mapped = "rejected"
     else if (status === "in_process" || status === "in_mediation" || status === "authorized") mapped = "in_process"
@@ -118,12 +115,12 @@ export async function POST(req: NextRequest) {
       return ok()
     }
 
-    const session_id = external_reference
+    const order_id = external_reference // This is now the DB Order ID
 
-    // Snapshot into orders_tmp for order-status endpoint
+    // Snapshot into orders_tmp for order-status endpoint (optional but kept for debugging)
     try {
       await supabase.from("orders_tmp").insert({
-        session_id,
+        session_id: order_id,
         payment_id: String(paymentId),
         status,
         status_detail: status_detail ?? null,
@@ -132,296 +129,112 @@ export async function POST(req: NextRequest) {
         raw: (getPath(p, ['body']) ?? p ?? null) as unknown,
       })
     } catch (e: unknown) {
-      logError("orders_tmp insert error", { error: String((e as Error)?.message || String(e)), session_id, paymentId })
+      logError("orders_tmp insert error", { error: String((e as Error)?.message || String(e)), order_id, paymentId })
     }
 
-    if (mapped === "approved") {
-      // Build order on-the-fly from metadata
-      const metaObj = (metadata && typeof metadata === 'object') ? (metadata as Record<string, unknown>) : undefined
-      const itemsMeta: Array<{ product_id: string; quantity: number; variant_size?: string | null }> = Array.isArray(metaObj?.items)
-        ? (metaObj!.items as Array<{ product_id: string; quantity: number; variant_size?: string | null }>)
-        : []
+    // Status Handling
+    if (status === "approved") {
+      logInfo("Processing approved payment for order", { order_id, paymentId })
 
-      // Fetch products to compute trusted totals and titles
-      const productIds = [...new Set(itemsMeta.map((i) => i.product_id))]
-      const { data: products, error: prodErr } = await supabase
-        .from("products")
-        .select("id, name, price, images")
-        .in("id", productIds)
-      if (prodErr || !products || products.length !== productIds.length) {
-        logError("Products not found for approved payment", { paymentId, productIds })
-        return ok()
-      }
-
-      const detailed = itemsMeta.map((it) => {
-        const pinfo = products.find((pp) => pp.id === it.product_id)!
-        return {
-          product_id: it.product_id,
-          title: pinfo.name as string,
-          quantity: it.quantity,
-          unit_price: Number(pinfo.price),
-          picture_url: Array.isArray(pinfo.images) && pinfo.images.length > 0 ? (pinfo.images[0] as string) : undefined,
-          variant_size: it.variant_size ?? null,
-        }
-      })
-
-      // Prefer totals coming from metadata (created at preference time) to keep
-      // consistency with checkout and Mercado Pago, but fall back to server
-      // computation if missing.
-      const metaTotals = (metaObj?.totals && typeof metaObj.totals === 'object'
-        ? (metaObj.totals as { items_total?: number; shipping_cost?: number; discount?: number; tax?: number; order_total?: number })
-        : undefined)
-
-      let items_total = detailed.reduce((acc, i) => acc + i.unit_price * i.quantity, 0)
-      let shipping_cost = typeof metaTotals?.shipping_cost === 'number' ? Number(metaTotals.shipping_cost) : 0
-      let discount = typeof metaTotals?.discount === 'number' ? Number(metaTotals.discount) : 0
-      let tax = typeof metaTotals?.tax === 'number' ? Number(metaTotals.tax) : 0
-      let order_total = typeof metaTotals?.order_total === 'number' ? Number(metaTotals.order_total) : 0
-
-      if (!metaTotals || !items_total || order_total <= 0) {
-        const settings = await getSettingsServer().catch(() => ({ shipping_flat_rate: 25000, shipping_free_threshold: 100000, christmas_mode: false }))
-        items_total = detailed.reduce((acc, i) => acc + i.unit_price * i.quantity, 0)
-        const customerCity = toStr(getPath(metadata, ['customer', 'city'])) || ''
-        const isMarDelPlata = customerCity.trim().toLowerCase().includes('mar del plata')
-        shipping_cost = computeShipping(items_total, {
-          flat_rate: isMarDelPlata ? 10000 : Number(settings.shipping_flat_rate ?? 25000),
-          free_threshold: Number(settings.shipping_free_threshold ?? 100000),
-        })
-        const coupon_code = (metaObj?.coupon_code ?? null) as string | null
-        const discount_percent = await validateCouponPercent(coupon_code)
-        discount = discount_percent ? Number(((items_total * discount_percent) / 100).toFixed(2)) : 0
-        const pre_tax_total = Number((items_total - discount + shipping_cost).toFixed(2))
-        tax = computeTax(pre_tax_total)
-        order_total = Number((pre_tax_total + tax).toFixed(2))
-      }
-
-      // Resolve customer if email provided
-      let customer_id: string | null = null
-      const customer = (metaObj?.customer ?? {}) as {
-        email?: string | null
-        first_name?: string | null
-        last_name?: string | null
-        phone?: string | null
-        dni?: string | null
-        address?: string | null
-        city?: string | null
-        state?: string | null
-        zip?: string | null
-      }
-      if (customer?.email) {
-        const { data: existing } = await supabase.from("customers").select("id").eq("email", customer.email).maybeSingle()
-        if (existing?.id) {
-          customer_id = existing.id
-          // Update customer info with latest data
-          await supabase.from("customers").update({
-            full_name: `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim() || null,
-            phone: customer.phone ?? null,
-            last_seen_at: new Date().toISOString(),
-          }).eq("id", customer_id)
-        } else {
-          const { data: created, error: custErr } = await supabase
-            .from("customers")
-            .insert({
-              email: customer.email,
-              full_name: `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim(),
-              phone: customer.phone ?? null,
-              last_seen_at: new Date().toISOString()
-            })
-            .select("id")
-            .single()
-          if (!custErr && created?.id) customer_id = created.id
-        }
-      }
-
-      // Build shipping address object from customer metadata
-      const shippingAddress = customer ? {
-        name: `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim(),
-        street: customer.address ?? "",
-        city: customer.city ?? "",
-        state: customer.state ?? "",
-        postal_code: customer.zip ?? "",
-        country: "AR",
-        phone: customer.phone ?? null,
-        dni: customer.dni ?? null,
-        notes: null,
-      } : null
-
-      // Idempotency: if an order with this payment_id already exists, do not create another
-      const { data: existingOrder } = await supabase
+      // 1. Fetch Order
+      const { data: order, error: orderFetchErr } = await supabase
         .from("orders")
         .select("id, status")
-        .eq("payment_id", String(paymentId))
-        .maybeSingle()
-
-      if (existingOrder?.id) {
-        logInfo("Order already exists for payment_id, skipping creation", { order_id: existingOrder.id, paymentId, session_id })
-        return ok()
-      }
-
-      // Build notes with customer info for legacy compatibility
-      const orderNotes = customer?.email
-        ? `Pago por Mercado Pago. Cliente: ${customer.first_name ?? ""} ${customer.last_name ?? ""}. Email: ${customer.email}. Tel: ${customer.phone ?? "N/A"}. DNI: ${customer.dni ?? "N/A"}. Dirección: ${customer.address ?? ""}, ${customer.city ?? ""}, ${customer.state ?? ""}, CP: ${customer.zip ?? ""}`
-        : null
-
-      // Create order (status created) and items, then mark paid via RPC (which also decrements stock)
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert({
-          customer_id,
-          channel: "web",
-          status: "created",
-          currency: "ARS",
-          subtotal: items_total,
-          discount,
-          shipping: shipping_cost,
-          tax,
-          total: order_total,
-          notes: orderNotes,
-          placed_at: new Date().toISOString(),
-          payment_id: String(paymentId),
-          payment_method: "mercadopago",
-          shipping_address: shippingAddress,
-          shipping_status: "pending",
-        })
-        .select("*")
+        .eq("id", order_id)
         .single()
-      if (orderErr || !order?.id) {
-        logError("Failed to create order on approved webhook", { paymentId, error: orderErr?.message })
+
+      if (orderFetchErr || !order) {
+        logError("Order not found or access error", { order_id, error: orderFetchErr?.message })
         return ok()
       }
 
-      logInfo("Order created with shipping address", {
-        order_id: order.id,
-        paymentId,
-        customer_id,
-        has_shipping_address: !!shippingAddress,
-        shipping_city: shippingAddress?.city,
-      })
-
-      const itemsPayload = detailed.map((i) => ({
-        order_id: order.id,
-        product_id: i.product_id,
-        product_name: i.title,
-        variant_color: null,
-        variant_size: i.variant_size,
-        quantity: i.quantity,
-        unit_price: i.unit_price,
-        total: Number((i.unit_price * i.quantity).toFixed(2)),
-      }))
-      const { error: itemsErr } = await supabase.from("order_items").insert(itemsPayload)
-      if (itemsErr) {
-        logError("Failed to insert order_items on approved webhook", { order_id: order.id, paymentId, error: itemsErr.message })
+      // 2. Idempotency Check
+      if (order.status === "paid") {
+        logInfo("Order already paid, skipping", { order_id })
         return ok()
       }
 
-      logInfo("Order and items inserted, calling process_order_paid", {
-        order_id: order.id,
-        paymentId,
-        session_id,
-        totals: { items_total, shipping_cost, discount, tax, order_total },
-      })
-
+      // 3. Trigger Paid RPC (Updates status + Decrements Stock)
       const { error: rpcErr } = await supabase.rpc("process_order_paid", { p_order_id: order.id, p_payment_id: String(paymentId) })
+
       if (rpcErr) {
-        logError("process_order_paid failed, using fallback", { order_id: order.id, paymentId, error: rpcErr.message })
+        logError("process_order_paid failed, attempting fallback", { order_id: order.id, error: rpcErr.message })
 
-        // Fallback: manually decrement stock and update order status
-        for (const item of detailed) {
-          // Try RPC first
-          const { error: stockRpcErr } = await supabase.rpc("decrement_product_stock", {
-            p_product_id: item.product_id,
-            p_size: item.variant_size ?? null,
-            p_qty: item.quantity,
-          })
-
-          if (stockRpcErr) {
-            // Direct update fallback
-            const { data: product } = await supabase
-              .from("products")
-              .select("stock")
-              .eq("id", item.product_id)
-              .single()
-
-            if (product) {
-              const newStock = Math.max(0, (product.stock || 0) - item.quantity)
-              await supabase
-                .from("products")
-                .update({ stock: newStock })
-                .eq("id", item.product_id)
-              logInfo(`Stock decremented (fallback) for ${item.product_id}: ${product.stock} -> ${newStock}`)
+        // Fallback: manually decrements stock
+        const { data: items } = await supabase.from("order_items").select("*").eq("order_id", order.id)
+        if (items && items.length > 0) {
+          for (const item of items) {
+            const { error: stockRpcErr } = await supabase.rpc("decrement_product_stock", {
+              p_product_id: item.product_id,
+              p_size: item.variant_size ?? null,
+              p_qty: item.quantity,
+            })
+            if (stockRpcErr) {
+              // Last resort: update table directly (not atomic but better than nothing)
+              const { data: p } = await supabase.from("products").select("stock").eq("id", item.product_id).single()
+              if (p) {
+                await supabase.from("products").update({ stock: Math.max(0, (p.stock || 0) - item.quantity) }).eq("id", item.product_id)
+              }
             }
-          } else {
-            logInfo(`Stock decremented via RPC for ${item.product_id}, qty: ${item.quantity}`)
           }
         }
 
-        // Update order status to paid
+        // Update Order Status
         await supabase
           .from("orders")
-          .update({ status: "paid", payment_id: String(paymentId), paid_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+          .update({
+            status: "paid",
+            payment_id: String(paymentId),
+            paid_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
           .eq("id", order.id)
 
-        logInfo("Order marked paid via fallback", { order_id: order.id, paymentId })
+        logInfo("Order manually marked as paid (fallback)", { order_id: order.id })
+      } else {
+        logInfo("Order processed successfully via RPC", { order_id: order.id })
       }
 
-      if (!rpcErr) {
-        logInfo("Order created and marked paid", { order_id: order.id, paymentId, session_id })
-      }
+      // 4. Send Invoice Email (fire and forget)
+      // Refetch full order with items for email
+      const { data: fullOrder } = await supabase
+        .from("orders")
+        .select("*, order_items(*), customers(email)")
+        .eq("id", order_id)
+        .single()
 
-      // Send invoice email (both for RPC success and fallback)
-      try {
-        const emailTo = (metaObj?.customer && typeof metaObj.customer === 'object'
-          ? (metaObj.customer as { email?: string | null }).email ?? null
-          : null) as string | null
-        if (emailTo) {
-          await sendInvoiceEmail({
-            to: emailTo,
-            order,
-            items: itemsPayload,
-            paymentId: String(paymentId),
-            tax,
-            shipping: shipping_cost,
-            discount,
-          })
-        }
-      } catch (e: unknown) {
-        logError("sendInvoiceEmail failed", { error: String((e as Error)?.message || String(e)), order_id: order.id })
-      }
-
-      // Newsletter opt-in (idempotent by PK: email)
-      if ((metaObj?.newsletter_opt_in as boolean | undefined) && customer?.email) {
-        await supabase
-          .from("newsletter_subscribers")
-          .upsert({ email: customer.email, status: "subscribed" }, { onConflict: "email", ignoreDuplicates: true })
-      }
-
-      // Auto-generate shipping label if Envia is configured
-      if (isAutoLabelEnabled()) {
+      if (fullOrder && fullOrder.customers?.email) {
         try {
-          const labelResult = await generateAutoLabel(order.id)
-          if (labelResult.success) {
-            logInfo("Auto-label generated for order", {
-              order_id: order.id,
-              tracking_number: labelResult.tracking_number,
-              carrier: labelResult.carrier,
-            })
-          } else {
-            logInfo("Auto-label skipped or failed", {
-              order_id: order.id,
-              error: labelResult.error,
-            })
-          }
-        } catch (labelErr) {
-          logError("Auto-label generation error", {
-            order_id: order.id,
-            error: String((labelErr as Error)?.message || labelErr),
+          await sendInvoiceEmail({
+            to: fullOrder.customers.email,
+            order: fullOrder,
+            items: fullOrder.order_items,
+            paymentId: String(paymentId),
+            tax: fullOrder.tax,
+            shipping: fullOrder.shipping,
+            discount: fullOrder.discount,
           })
+        } catch (emailErr) {
+          logError("Failed to send email", { order_id, error: String(emailErr) })
         }
       }
-    } else if (mapped === "rejected" || mapped === "pending" || mapped === "in_process") {
-      // Do nothing: we only create order/customer on approved as requested
-      logInfo("Non-approved payment received", { session_id, paymentId, status: mapped, status_detail, payment_method_id, payment_type_id })
+
+      // 5. Generate Auto Label (if enabled)
+      if (isAutoLabelEnabled()) {
+        generateAutoLabel(order_id).catch((e) => logError("Auto label failed", { error: String(e) }))
+      }
+
+    } else if (status === "cancelled" || status === "rejected") {
+      // Mark as failed/canceled if currently pending
+      await supabase
+        .from("orders")
+        .update({ status: "canceled", updated_at: new Date().toISOString() })
+        .eq("id", order_id)
+        .in("status", ["pending", "created"]) // Only cancel if it wasn't paid yet
+
+      logInfo("Order marked as canceled/rejected", { order_id, status })
     }
+
   } catch (err: unknown) {
     logError("webhook processing error", { error: String((err as Error)?.message || String(err)) })
   }

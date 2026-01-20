@@ -2,48 +2,48 @@
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
-    SidebarContent,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarGroupLabel,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    SidebarMenuSub,
-    SidebarMenuSubButton,
-    SidebarMenuSubItem,
-    useSidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
-    BadgePercent,
-    BarChart2,
-    Bell,
-    Boxes,
-    Camera,
-    ChevronRight,
-    Clock,
-    DollarSign,
-    Factory,
-    FileText,
-    Film,
-    HandCoins,
-    HelpCircle,
-    LayoutDashboard,
-    List,
-    Mail,
-    Megaphone,
-    MessageCircle,
-    Music2,
-    Package,
-    Plus,
-    Settings,
-    ShoppingBag,
-    ShoppingCart,
-    Tag,
-    Trophy,
-    Users,
-    Wallet
+  BadgePercent,
+  BarChart2,
+  Bell,
+  Boxes,
+  Camera,
+  ChevronRight,
+  Clock,
+  DollarSign,
+  Factory,
+  FileText,
+  Film,
+  HandCoins,
+  HelpCircle,
+  LayoutDashboard,
+  List,
+  Mail,
+  Megaphone,
+  MessageCircle,
+  Music2,
+  Package,
+  Plus,
+  Settings,
+  ShoppingBag,
+  ShoppingCart,
+  Tag,
+  Trophy,
+  Users,
+  Wallet
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -370,7 +370,41 @@ export default function AdminSidebarMenu({ allSectionsOpen }: { allSectionsOpen:
                           <Link href="/admin/newsletter/campaigns" legacyBehavior>
                             <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
                               <a className="flex items-center gap-2">
-                                <Plus className="h-3.5 w-3.5" /> Campañas
+                                <Plus className="h-3.5 w-3.5" /> Campañas Email
+                              </a>
+                            </SidebarMenuSubButton>
+                          </Link>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+
+                <Collapsible>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton isActive={isActive("/admin/marketing/campaigns") || isActive("/admin/marketing/content")} className="font-body hover:bg-white/5 hover:text-white rounded-lg transition-all duration-200">
+                        <Megaphone className="h-4 w-4" />
+                        <span>Marketing</span>
+                        <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pb-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:slide-in-from-top-1">
+                      <SidebarMenuSub className="gap-1 ml-3 mt-1.5 mb-1.5 border-l-2 border-white/10 pl-3">
+                        <SidebarMenuSubItem>
+                          <Link href="/admin/marketing/campaigns" legacyBehavior>
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
+                              <a className="flex items-center gap-2">
+                                <Megaphone className="h-3.5 w-3.5" /> Campañas
+                              </a>
+                            </SidebarMenuSubButton>
+                          </Link>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <Link href="/admin/marketing/content" legacyBehavior>
+                            <SidebarMenuSubButton asChild className="font-body hover:bg-white/5 hover:text-white rounded-md transition-all duration-200 text-white/70">
+                              <a className="flex items-center gap-2">
+                                <FileText className="h-3.5 w-3.5" /> Contenido
                               </a>
                             </SidebarMenuSubButton>
                           </Link>

@@ -3,15 +3,16 @@
 import { AdminHeader } from "@/components/admin/admin-header"
 import AdminLayoutGuard from "@/components/admin/admin-layout-guard"
 import AdminSidebarMenu from "@/components/admin/admin-sidebar-menu"
+import { QueryProvider } from "@/components/providers/query-provider"
 import {
-    Sidebar,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarInset,
-    SidebarProvider,
-    SidebarRail,
-    SidebarTrigger,
-    useSidebar
+  Sidebar,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarInset,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+  useSidebar
 } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { ChevronsUpDown } from "lucide-react"
@@ -141,11 +142,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <AdminLayoutGuard>
-      <SidebarProvider defaultOpen={sidebarDefaultOpen}>
-        <AdminLayoutContent>{children}</AdminLayoutContent>
-      </SidebarProvider>
-    </AdminLayoutGuard>
+    <QueryProvider>
+      <AdminLayoutGuard>
+        <SidebarProvider defaultOpen={sidebarDefaultOpen}>
+          <AdminLayoutContent>{children}</AdminLayoutContent>
+        </SidebarProvider>
+      </AdminLayoutGuard>
+    </QueryProvider>
   )
 }
 
