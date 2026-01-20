@@ -23,14 +23,28 @@ import type {
 import Airtable from 'airtable'
 
 // Configuración de bases
-const MARKETING_BASE_ID = process.env.AIRTABLE_BASE_MARKETING!
-const COLLABORATIONS_BASE_ID = process.env.AIRTABLE_BASE_COLLABORATIONS!
-const EVENTS_BASE_ID = process.env.AIRTABLE_BASE_EVENTS!
+// Configuración de bases
+function getBase(baseId: string | undefined, name: string) {
+  if (!process.env.AIRTABLE_API_KEY) {
+    throw new Error('AIRTABLE_API_KEY is not defined')
+  }
+  if (!baseId) {
+    throw new Error(`Airtable Base ID for ${name} is not defined`)
+  }
+  return new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(baseId)
+}
 
-// Clientes de Airtable por base
-const marketingBase = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(MARKETING_BASE_ID)
-const collaborationsBase = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(COLLABORATIONS_BASE_ID)
-const eventsBase = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(EVENTS_BASE_ID)
+function getMarketingBase() {
+  return getBase(process.env.AIRTABLE_BASE_MARKETING, 'MARKETING')
+}
+
+function getCollaborationsBase() {
+  return getBase(process.env.AIRTABLE_BASE_COLLABORATIONS, 'COLLABORATIONS')
+}
+
+function getEventsBase() {
+  return getBase(process.env.AIRTABLE_BASE_EVENTS, 'EVENTS')
+}
 
 // ============================================================================
 // Helpers de transformación
@@ -62,7 +76,7 @@ function transformSingleLink(link: string[]): string | null {
 
 export async function listCampaigns(filters?: CampaignFilters, pageSize = 100): Promise<Campaign[]> {
   try {
-    const records = await marketingBase('Campañas')
+    const records = await getMarketingBase()('Campañas')
       .select({
         maxRecords: pageSize,
         sort: [{ field: 'Creado', direction: 'desc' }],
@@ -100,7 +114,7 @@ export async function listCampaigns(filters?: CampaignFilters, pageSize = 100): 
 
 export async function getCampaign(id: string): Promise<Campaign | null> {
   try {
-    const record = await marketingBase('Campañas').find(id)
+    const record = await getMarketingBase()('Campañas').find(id)
     return transformRecord(record, (fields) => ({
       id: record.id,
       name: fields['Nombre'] || '',
@@ -130,7 +144,7 @@ export async function getCampaign(id: string): Promise<Campaign | null> {
 
 export async function updateCampaignStatus(id: string, status: Campaign['status']): Promise<Campaign> {
   try {
-    const record = await marketingBase('Campañas').update(id, {
+    const record = await getMarketingBase()('Campañas').update(id, {
       'Estado': status,
     })
     return transformRecord(record, (fields) => ({
@@ -161,7 +175,7 @@ export async function updateCampaignStatus(id: string, status: Campaign['status'
 
 export async function listContentPieces(filters?: ContentPieceFilters, pageSize = 100): Promise<ContentPiece[]> {
   try {
-    const records = await marketingBase('Piezas de Contenido')
+    const records = await getMarketingBase()('Piezas de Contenido')
       .select({
         maxRecords: pageSize,
         sort: [{ field: 'Creado', direction: 'desc' }],
@@ -200,7 +214,7 @@ export async function listContentPieces(filters?: ContentPieceFilters, pageSize 
 
 export async function updateContentPieceStatus(id: string, status: ContentPiece['status']): Promise<ContentPiece> {
   try {
-    const record = await marketingBase('Piezas de Contenido').update(id, {
+    const record = await getMarketingBase()('Piezas de Contenido').update(id, {
       'Estado': status,
     })
     return transformRecord(record, (fields) => ({
@@ -232,7 +246,7 @@ export async function updateContentPieceStatus(id: string, status: ContentPiece[
 
 export async function listChannels(): Promise<Channel[]> {
   try {
-    const records = await marketingBase('Canales')
+    const records = await getMarketingBase()('Canales')
       .select({
         sort: [{ field: 'Nombre', direction: 'asc' }],
       })
@@ -263,7 +277,7 @@ export async function listChannels(): Promise<Channel[]> {
 
 export async function listTalents(): Promise<Talent[]> {
   try {
-    const records = await collaborationsBase('Modelos/Talentos')
+    const records = await getCollaborationsBase()('Modelos/Talentos')
       .select({
         sort: [{ field: 'Nombre', direction: 'asc' }],
       })
@@ -295,7 +309,7 @@ export async function listTalents(): Promise<Talent[]> {
 
 export async function listInfluencers(): Promise<Influencer[]> {
   try {
-    const records = await collaborationsBase('Influencers')
+    const records = await getCollaborationsBase()('Influencers')
       .select({
         sort: [{ field: 'Nombre', direction: 'asc' }],
       })
@@ -332,7 +346,7 @@ export async function listInfluencers(): Promise<Influencer[]> {
 
 export async function listSponsors(): Promise<Sponsor[]> {
   try {
-    const records = await collaborationsBase('Sponsors')
+    const records = await getCollaborationsBase()('Sponsors')
       .select({
         sort: [{ field: 'Nombre', direction: 'asc' }],
       })
@@ -363,7 +377,7 @@ export async function listSponsors(): Promise<Sponsor[]> {
 
 export async function listAgreements(): Promise<Agreement[]> {
   try {
-    const records = await collaborationsBase('Acuerdos')
+    const records = await getCollaborationsBase()('Acuerdos')
       .select({
         sort: [{ field: 'Creado', direction: 'desc' }],
       })
@@ -404,7 +418,7 @@ export async function listAgreements(): Promise<Agreement[]> {
 
 export async function listEvents(filters?: EventFilters, pageSize = 100): Promise<Event[]> {
   try {
-    const records = await eventsBase('Eventos')
+    const records = await getEventsBase()('Eventos')
       .select({
         maxRecords: pageSize,
         sort: [{ field: 'Fecha Inicio', direction: 'desc' }],
@@ -446,7 +460,7 @@ export async function listEvents(filters?: EventFilters, pageSize = 100): Promis
 
 export async function getEvent(id: string): Promise<Event | null> {
   try {
-    const record = await eventsBase('Eventos').find(id)
+    const record = await getEventsBase()('Eventos').find(id)
     return transformRecord(record, (fields) => ({
       id: record.id,
       name: fields['Nombre'] || '',
@@ -480,7 +494,7 @@ export async function getEvent(id: string): Promise<Event | null> {
 
 export async function listTasks(eventId?: string): Promise<Task[]> {
   try {
-    const records = await eventsBase('Tareas')
+    const records = await getEventsBase()('Tareas')
       .select({
         sort: [{ field: 'Fecha Límite', direction: 'asc' }],
         filterByFormula: eventId ? `{Evento} = "${eventId}"` : undefined,
@@ -511,7 +525,7 @@ export async function listTasks(eventId?: string): Promise<Task[]> {
 
 export async function getPostEventMetrics(id: string): Promise<PostEventMetrics | null> {
   try {
-    const record = await eventsBase('Métricas Post-Evento').find(id)
+    const record = await getEventsBase()('Métricas Post-Evento').find(id)
     return transformRecord(record, (fields) => ({
       id: record.id,
       eventId: transformSingleLink(fields['Evento'] || []) || '',
