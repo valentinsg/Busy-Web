@@ -13,50 +13,26 @@ import type { BlogPost } from '@/types/blog'
 import { format } from 'date-fns'
 import { enUS, es } from 'date-fns/locale'
 import {
-    ArrowUpRight,
-    Calendar,
-    ChevronDown,
-    Clock,
+  ArrowUpRight,
+  Calendar,
+  ChevronDown,
+  Clock,
 } from 'lucide-react'
 import type { Metadata } from 'next'
-import NextDynamic from 'next/dynamic'
 import { cookies } from 'next/headers'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 // Client helpers
-const CopyLinkButton = NextDynamic(
-  () => import('@/components/blog/copy-link-button'),
-  { ssr: false }
-)
-
-const ShareButton = NextDynamic(
-  () => import('@/components/blog/share-button'),
-  { ssr: false }
-)
-
-// Table of contents (client)
-const TableOfContents = NextDynamic(
-  () =>
-    import('@/components/blog/table-of-contents').catch(() => ({
-      default: () => null,
-    })),
-  { ssr: false }
-)
-
-const NewsletterSignup = NextDynamic(
-  () => import('@/components/blog/newsletter-signup'),
-  { ssr: false }
-)
-
-const RatingStars = NextDynamic(() => import('@/components/blog/rating-stars'), {
-  ssr: false,
-})
-
-const CommentsForm = NextDynamic(() => import('@/components/blog/comments-form'), {
-  ssr: false,
-})
+import {
+  CommentsForm,
+  CopyLinkButton,
+  NewsletterSignup,
+  RatingStars,
+  ShareButton,
+  TableOfContents
+} from '@/components/blog/blog-client-components'
 
 export const revalidate = 3600 // Revalidar cada hora
 export const dynamic = 'force-static' // Generar estáticamente en build
@@ -74,15 +50,16 @@ export async function generateStaticParams() {
 // Note: This page is a server component. Avoid client hooks here.
 
 interface BlogPostPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export async function generateMetadata({
   params,
 }: BlogPostPageProps): Promise<Metadata> {
-  const post = await getPostBySlugAsync(params.slug)
+  const { slug } = await params
+  const post = await getPostBySlugAsync(slug)
 
   if (!post) {
     return {
@@ -123,7 +100,8 @@ export async function generateMetadata({
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = await getPostBySlugAsync(params.slug)
+  const { slug } = await params
+  const post = await getPostBySlugAsync(slug)
 
   if (!post) {
     notFound()
@@ -135,7 +113,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const nextPost =
     currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null
 
-  const localeCookie = cookies().get('busy_locale')?.value
+  const cookieStore = await cookies()
+  const localeCookie = cookieStore.get('busy_locale')?.value
   const dfnsLocale = localeCookie === 'es' ? es : enUS
   const authorName = post.authorName || post.author || ''
 
@@ -157,7 +136,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         social.bio = (data as unknown as Author).bio || undefined
       }
     }
-  } catch {}
+  } catch { }
 
   // Fallback: explicit X/Twitter link for Valentín Sánchez Guevara
   if (!social.x && authorName.toLowerCase().includes('valent')) {
@@ -183,7 +162,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         social.medium = social.medium || (data as unknown as Author).medium || undefined
         social.bio = social.bio || (data as unknown as Author).bio || undefined
       }
-    } catch {}
+    } catch { }
   }
 
   // Final fallback bio for Valentín if still missing
@@ -279,7 +258,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <div className="container py-6 sm:py-8 pt-24 sm:pt-28 tracking-wide font-body backdrop-blur-sm px-3 sm:px-4">
-        <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* JSON-LD consolidado (Article + Breadcrumb + FAQ) */}
         <script
           type="application/ld+json"
@@ -535,7 +514,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <RatingStars />
           <CommentsForm />
         </div>
-        </div>
+      </div>
     </div>
   )
 }

@@ -1,10 +1,9 @@
-import Link from "next/link"
-import dynamic from "next/dynamic"
-import TopProducts from "@/components/admin/top-products"
-import LatestBlogCard from "@/components/admin/latest-blog"
 import { BalanceKPIs } from "@/components/admin/balance-kpis"
+import LatestBlogCard from "@/components/admin/latest-blog"
+import TopProducts from "@/components/admin/top-products"
+import Link from "next/link"
 
-const DashboardCards = dynamic(() => import("@/components/admin/dashboard-cards"), { ssr: false })
+import DashboardCards from "./dashboard-cards-wrapper"
 
 export default function AdminHomePage() {
   return (

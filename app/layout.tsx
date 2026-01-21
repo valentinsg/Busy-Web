@@ -13,7 +13,6 @@ import { ReducedMotionProvider } from '@/motion/providers/ReducedMotionProvider'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
-import dynamic from 'next/dynamic'
 import { Abel, DM_Sans, Plus_Jakarta_Sans, Poppins, Space_Grotesk } from 'next/font/google'
 import { cookies } from 'next/headers'
 import Script from 'next/script'
@@ -30,9 +29,7 @@ const IS_PROD = process.env.NODE_ENV === 'production'
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
-const AdminQuickFAB = dynamic(() => import('@/components/admin/admin-quick-fab'), {
-  ssr: false,
-})
+import { AdminQuickFAB } from '@/components/admin/admin-quick-fab-wrapper'
 
 // Fuentes de Google (temporal hasta descargar locales)
 const spaceGrotesk = Space_Grotesk({
@@ -340,12 +337,12 @@ const jsonLd = [
   },
 ]
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const cookieLocale = cookieStore.get('busy_locale')?.value
   const htmlLang = cookieLocale === 'es' || cookieLocale === 'en' ? cookieLocale : 'es'
   return (
