@@ -5,6 +5,7 @@ import { useI18n } from "@/components/providers/i18n-provider"
 import { BusyLogo } from "@/components/shared/busy-logo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import Image from "next/image"
 import Link from "next/link"
 import * as React from "react"
 
@@ -113,8 +114,8 @@ export function Footer() {
             <div className="space-y-2">
               <h4 className="font-heading font-medium">{tt("footer.newsletter.title", "Mantenete al día")}</h4>
               <div className="flex items-center gap-2 flex-nowrap">
-                <Input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder={tt("footer.newsletter.placeholder", "Ingresa tu email")} className="max-w-[200px] text-sm font-heading" />
-                <Button size="sm" disabled={submitting} onClick={async ()=>{
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={tt("footer.newsletter.placeholder", "Ingresa tu email")} className="max-w-[200px] text-sm font-heading" />
+                <Button size="sm" disabled={submitting} onClick={async () => {
                   setSubmitting(true); setMessage(null)
                   try {
                     const res = await fetch("/api/newsletter/subscribe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) })
@@ -147,16 +148,17 @@ export function Footer() {
                   const humanFallback = link.nameKey?.split(".").pop()?.replaceAll("_", " ")
                   const finalLabel = label === link.nameKey ? formatFallback(humanFallback || link.nameKey) : label
                   return (
-                  <li key={link.nameKey}>
-                    <Link
-                      href={link.href}
-                      prefetch={false}
-                      className="font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {finalLabel}
-                    </Link>
-                  </li>
-                )})}
+                    <li key={link.nameKey}>
+                      <Link
+                        href={link.href}
+                        prefetch={false}
+                        className="font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {finalLabel}
+                      </Link>
+                    </li>
+                  )
+                })}
                 {/* Agregar WhatsApp solo en Redes y solo en mobile */}
                 {key === 'social' && (
                   <li className="sm:hidden">
@@ -192,6 +194,16 @@ export function Footer() {
             <Link href="https://wa.me/5492236825268" target="_blank" prefetch={false} className="hidden sm:inline font-body hover:text-foreground transition-colors">
               Soporte por WhatsApp
             </Link>
+          </div>
+
+          <div className="absolute bottom-4 right-4 opacity-50 hover:opacity-100 transition-opacity hidden lg:block">
+            <Image
+              src="/marca-de-agua-valen.png"
+              alt="Valentín Sánchez Guevara"
+              width={100}
+              height={30}
+              className="w-auto h-6 object-contain"
+            />
           </div>
         </div>
       </div>
